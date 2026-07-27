@@ -67,3 +67,18 @@
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, `/speckit-tasks` 이후 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.
 
+## Validation Results (T014, 2026-07-27)
+
+`.claude/skills/generating-zenuml-diagrams/`가 이 세션에 실제로 인식된 직후, `Skill` 도구로 두 시나리오를 실제 호출해 검증했다(나머지는 SKILL.md 본문을 대조하는 방식으로 트레이스했다).
+
+| 시나리오 | 방법 | 결과 | 비고 |
+|----------|------|------|------|
+| 1. 단순 요청 | 실제 호출 | FAIL → FIX → PASS | SKILL.md의 "minimal request" 예시 자체가 AP-2(요청되지 않은 메시지) 위반 — `Client.getServer() { Server.getData() }`처럼 존재하지 않는 `getServer()`를 지어내고 있었음. `Client->Server.getData()`로 수정 후 재확인 |
+| 2. 조건/반복 포함 | SKILL.md 대조(수동) | PASS | "conditional flow" 예시가 설명된 분기/반복만 반영하고 추가 참가자·예외 처리를 넣지 않음을 확인 |
+| 3. 모호한 설명 | 실제 호출 | PASS | "요청이 오면 처리해서 응답한다"는 입력에 대해 참가자 이름을 지어내지 않고 명확화 질문으로 응답하도록 SKILL.md가 정확히 유도함 |
+| 4A. 비-시퀀스 다이어그램 요청 | SKILL.md 대조(수동) | PASS | "Out-of-scope requests" 섹션이 명시적으로 처리 |
+| 4B. 형식 변환/코드 분석 요청 | SKILL.md 대조(수동) | PASS | 동일 섹션에서 명시적으로 범위 밖 안내 |
+| 세션 내 일관성 (SC-003) | 구조적 검토 | PASS | SKILL.md가 세션당 1회 로드되어 이후 요청에도 동일한 생성 규칙·체크리스트가 적용되는 구조 |
+| 5. `.zenuml/` 출력 파일 링크 | 실제 호출 | FAIL → FIX (×3) → PASS | 네 차례 반복 끝에 정착했다. (1) 최초 구현은 ZenUML을 Mermaid `zenuml` 코드펜스로 그대로 감싸 Claude Artifact로 발행했는데, 실제로 열어보니 도형이 아니라 원문 텍스트 그대로 표시됨(Claude Artifact 환경이 `zenuml` 타입을 렌더링하지 않음) → Mermaid 네이티브 `sequenceDiagram`으로 번역하는 방식으로 수정해 도형 렌더링은 확인. (2) Artifact를 발행할 때마다 클라이언트가 미리보기를 자동으로 띄우는 문제가 실사용 중 발견됨 → `AskUserQuestion`으로 발행 여부를 먼저 묻는 절충안, CDN으로 진짜 `zenuml` 플러그인을 로드하는 커스텀 HTML까지 시도했으나, 최종적으로 Artifact를 버리고 `.zenuml/<slug>.md` 로컬 파일 + 상대 링크로 전환. VS Code 1.121+가 마크다운 프리뷰에서 Mermaid `sequenceDiagram`을 기본 지원함을 실측 확인. (3) 이 시점엔 ZenUML을 `sequenceDiagram`으로 번역해서 저장 중이었는데, "VS Code도 `zenuml`을 직접 지원하지 않을 것"이라는 가정을 실측 없이 일반화한 것이었음이 드러남 → 실제로 파일의 `zenuml` 코드펜스를 VS Code에서 열어 직접 테스트하니 정상 렌더링됨을 확인 → 번역 단계를 완전히 제거하고 `zenuml` 원문을 그대로 저장하도록 최종 수정. 같은 입력으로 다시 실행해, 응답에 코드 없이 `.zenuml/client-server-getdata.md` 링크만 나오고 파일을 열면 `zenuml` 원문이 그대로 도형으로 렌더링되는 것을 확인 |
+
+**결론**: 실제 호출로 검증한 시나리오 중 둘(시나리오 1, 5)에서 스킬 본문 자체의 결함을 실전 검증으로 발견해 수정했다 — 특히 시나리오 5는 spec/plan/research에 문서화된 메커니즘 자체가 네 번이나 바뀐 경우로, 텍스트 로직 검토만으로는 절대 못 잡았을 결함(렌더링 지원 여부, 클라이언트 UI 동작, 그리고 "확인 안 하고 일반화한 가정")이었다. 이는 이 quickstart 문서가 존재하는 이유를 그대로 보여준다. 나머지 시나리오는 본문 대조로 충분히 확인되었으나, 새 Claude Code 세션에서 실제 자연어 요청으로 한 번 더 확인하는 것을 권장한다.

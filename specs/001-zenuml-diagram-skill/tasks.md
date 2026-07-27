@@ -27,7 +27,7 @@
 
 **Purpose**: skill 디렉터리 뼈대 준비
 
-- [ ] T001 `.claude/skills/generating-zenuml-diagrams/` 및 `.claude/skills/generating-zenuml-diagrams/references/` 디렉터리 생성
+- [X] T001 `.claude/skills/generating-zenuml-diagrams/` 및 `.claude/skills/generating-zenuml-diagrams/references/` 디렉터리 생성
 
 ---
 
@@ -37,8 +37,8 @@
 
 **⚠️ CRITICAL**: 이 단계가 끝나기 전에는 어떤 User Story 작업도 시작할 수 없음
 
-- [ ] T002 [P] `mermaid-js/zenuml-core`의 `docs/DSL_SYNTAX.md`를 재구성해 `.claude/skills/generating-zenuml-diagrams/references/syntax.md` 작성 — 상단에 MIT 출처 고지(원본 저장소 링크 포함)와 100줄 이상 대비 목차를 포함하고, 참가자 선언·동기/비동기 메시지·반환값·조건문/반복문·예외 처리·주석·스타일링 섹션을 담는다 (research.md Decision: 참조 파일 구조, 라이선스 고지; data-model.md Syntax Reference; spec.md FR-003, FR-004, FR-009)
-- [ ] T003 [P] `.claude/skills/generating-zenuml-diagrams/SKILL.md` 뼈대 작성 — YAML frontmatter(`name: generating-zenuml-diagrams`, ZenUML/시퀀스 다이어그램 요청 트리거와 "정확하고 군더더기 없는 생성"을 3인칭으로 명시하는 `description`)와 섹션 헤딩만 우선 채운다 (research.md Decision: Skill 이름; contracts/skill-interface.md Trigger)
+- [X] T002 [P] `mermaid-js/zenuml-core`의 `docs/DSL_SYNTAX.md`를 재구성해 `.claude/skills/generating-zenuml-diagrams/references/syntax.md` 작성 — 상단에 MIT 출처 고지(원본 저장소 링크 포함)와 100줄 이상 대비 목차를 포함하고, 참가자 선언·동기/비동기 메시지·반환값·조건문/반복문·예외 처리·주석·스타일링 섹션을 담는다 (research.md Decision: 참조 파일 구조, 라이선스 고지; data-model.md Syntax Reference; spec.md FR-003, FR-004, FR-009)
+- [X] T003 [P] `.claude/skills/generating-zenuml-diagrams/SKILL.md` 뼈대 작성 — YAML frontmatter(`name: generating-zenuml-diagrams`, ZenUML/시퀀스 다이어그램 요청 트리거와 "정확하고 군더더기 없는 생성"을 3인칭으로 명시하는 `description`)와 섹션 헤딩만 우선 채운다 (research.md Decision: Skill 이름; contracts/skill-interface.md Trigger)
 
 **Checkpoint**: 이 지점부터 User Story별 작업을 시작할 수 있음
 
@@ -52,9 +52,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] `SKILL.md`에 "생성 규칙" 섹션 작성 — `references/syntax.md`를 1단계 깊이로 링크하고, 설명에 명시되었거나 명확히 함의된 참가자·메시지·제어 흐름만 사용하도록 지시 (spec.md FR-001, FR-002, FR-003)
-- [ ] T005 [US1] `SKILL.md`에 단순 요청 예시(입력/출력 쌍) 추가 — quickstart.md 시나리오 1("Client가 Server.getData()를 호출")을 기준으로 최소 다이어그램 생성 예시 수록
-- [ ] T006 [US1] `SKILL.md`에 조건/반복이 포함된 요청 예시(입력/출력 쌍) 추가 — quickstart.md 시나리오 2를 기준으로, 설명에 없는 예외 처리나 참가자를 추가하지 않는 예시 수록
+- [X] T004 [US1] `SKILL.md`에 "생성 규칙" 섹션 작성 — `references/syntax.md`를 1단계 깊이로 링크하고, 설명에 명시되었거나 명확히 함의된 참가자·메시지·제어 흐름만 사용하도록 지시 (spec.md FR-001, FR-002, FR-003)
+- [X] T005 [US1] `SKILL.md`에 단순 요청 예시(입력/출력 쌍) 추가 — quickstart.md 시나리오 1("Client가 Server.getData()를 호출")을 기준으로 최소 다이어그램 생성 예시 수록
+- [X] T006 [US1] `SKILL.md`에 조건/반복이 포함된 요청 예시(입력/출력 쌍) 추가 — quickstart.md 시나리오 2를 기준으로, 설명에 없는 예외 처리나 참가자를 추가하지 않는 예시 수록
 
 **Checkpoint**: User Story 1이 독립적으로 완전히 동작하고 테스트 가능해야 함
 
@@ -68,8 +68,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T007 [US2] `SKILL.md`에 Anti-Pattern 체크리스트(AP-1~AP-5: 요청되지 않은 참가자/메시지/분기 없음, 근거 없는 예외 처리·반환값 없음, 가장 얕은 중첩 사용) 를 복사-붙여넣기용 진행 체크리스트 형태로 추가 (data-model.md Anti-Pattern Checklist; research.md Decision: 안티패턴 체크리스트 항목)
-- [ ] T008 [US2] `SKILL.md`에 "생성 → 체크리스트 대조 → 수정" 자기검증 워크플로 섹션 작성 — T007의 체크리스트를 사용해 초안(Draft)이 전 항목을 통과(Checked)한 뒤에만 사용자에게 제시(Presented)하도록 명시 (data-model.md 상태 전이; spec.md FR-005, FR-006; research.md Decision: 자기검증 워크플로 패턴)
+- [X] T007 [US2] `SKILL.md`에 Anti-Pattern 체크리스트(AP-1~AP-5: 요청되지 않은 참가자/메시지/분기 없음, 근거 없는 예외 처리·반환값 없음, 가장 얕은 중첩 사용) 를 복사-붙여넣기용 진행 체크리스트 형태로 추가 (data-model.md Anti-Pattern Checklist; research.md Decision: 안티패턴 체크리스트 항목)
+- [X] T008 [US2] `SKILL.md`에 "생성 → 체크리스트 대조 → 수정" 자기검증 워크플로 섹션 작성 — T007의 체크리스트를 사용해 초안(Draft)이 전 항목을 통과(Checked)한 뒤에만 사용자에게 제시(Presented)하도록 명시 (data-model.md 상태 전이; spec.md FR-005, FR-006; research.md Decision: 자기검증 워크플로 패턴)
 
 **Checkpoint**: User Story 1과 2가 함께 독립적으로 동작해야 함 — 결과물이 이제 자기검증을 거침
 
@@ -83,8 +83,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T009 [US3] `SKILL.md`에 "명확화 판단 기준" 섹션 작성 — 호출 주체/대상 불명확, 분기 조건 불명확 등 다이어그램 정확성에 직접 영향을 주는 모호함을 식별하는 기준과, 그런 경우 구체적 질문을 하고 다이어그램을 생성하지 않는 규칙을 명시 (spec.md FR-007; research.md Decision: 모호한 입력 처리)
-- [ ] T010 [US3] `SKILL.md`에 "범위 밖 요청 안내" 섹션 작성 — 시퀀스 다이어그램 외 유형 요청(FR-008), 기존 다이어그램/코드 변환 요청, 렌더링된 이미지 요청(FR-010)에 대해 각각 어떻게 안내할지 명시 (contracts/skill-interface.md 범위 밖 요청; spec.md Edge Cases)
+- [X] T009 [US3] `SKILL.md`에 "명확화 판단 기준" 섹션 작성 — 호출 주체/대상 불명확, 분기 조건 불명확 등 다이어그램 정확성에 직접 영향을 주는 모호함을 식별하는 기준과, 그런 경우 구체적 질문을 하고 다이어그램을 생성하지 않는 규칙을 명시 (spec.md FR-007; research.md Decision: 모호한 입력 처리)
+- [X] T010 [US3] `SKILL.md`에 "범위 밖 요청 안내" 섹션 작성 — 시퀀스 다이어그램 외 유형 요청(FR-008), 기존 다이어그램/코드 변환 요청, 렌더링된 이미지 요청(FR-010)에 대해 각각 어떻게 안내할지 명시 (contracts/skill-interface.md 범위 밖 요청; spec.md Edge Cases)
 
 **Checkpoint**: 모든 User Story가 독립적으로 동작해야 함
 
@@ -94,10 +94,10 @@
 
 **Purpose**: 전체 skill의 품질 확인
 
-- [ ] T011 [P] `SKILL.md` 본문 길이가 Anthropic 권장 기준(~500줄) 이내인지 확인하고, 초과 시 세부 내용을 `references/syntax.md`로 이동
-- [ ] T012 [P] `references/syntax.md` 상단의 MIT 출처 고지가 원본(mermaid-js/zenuml-core) 링크와 함께 정확히 남아 있는지 확인 (spec.md FR-009)
-- [ ] T013 [P] `SKILL.md`의 YAML `description` 필드가 3인칭 서술이며 트리거 조건(ZenUML/시퀀스 다이어그램)과 핵심 가치(정확성·군더더기 없음)를 모두 포함하는지 검토
-- [ ] T014 `quickstart.md`의 시나리오 1~4와 세션 내 일관성 확인 절차를 완성된 skill에 대해 실행하고, 통과/실패를 기록
+- [X] T011 [P] `SKILL.md` 본문 길이가 Anthropic 권장 기준(~500줄) 이내인지 확인하고, 초과 시 세부 내용을 `references/syntax.md`로 이동
+- [X] T012 [P] `references/syntax.md` 상단의 MIT 출처 고지가 원본(mermaid-js/zenuml-core) 링크와 함께 정확히 남아 있는지 확인 (spec.md FR-009)
+- [X] T013 [P] `SKILL.md`의 YAML `description` 필드가 3인칭 서술이며 트리거 조건(ZenUML/시퀀스 다이어그램)과 핵심 가치(정확성·군더더기 없음)를 모두 포함하는지 검토
+- [X] T014 `quickstart.md`의 시나리오 1~5와 세션 내 일관성 확인 절차를 완성된 skill에 대해 실행하고, 통과/실패를 기록 (SC-001~SC-005 커버)
 
 ---
 
@@ -172,13 +172,13 @@ Task: "SKILL.md 뼈대(frontmatter + 섹션 헤딩) 작성"
 
 ---
 
-## Phase 7: Output File Link
+## Phase 7: Convergence
 
-**Goal**: 자기검증을 통과한 다이어그램을 채팅 응답에 코드로 노출하지 않고, `.zenuml/` 아래 파일로 저장한 뒤 그 파일을 가리키는 링크만 응답에 남긴다.
+- [X] T015 `.claude/skills/generating-zenuml-diagrams/SKILL.md`에 참가자 수가 매우 많거나 프로세스가 지나치게 복잡한 설명이 주어졌을 때 결과가 읽기 어려워질 수 있음을 사용자에게 알리는 안내를 추가 per spec.md Edge Case: 참가자 수/복잡도 (missing)
 
-**Independent Test**: 단순 요청(quickstart.md 시나리오 1)에 대해 다이어그램을 생성한 뒤, 응답에 코드 없이 `.zenuml/` 파일 링크만 나오고 그 파일을 열면 `zenuml` 코드펜스가 실제로 도형으로 렌더링되는지 확인한다 (quickstart.md 시나리오 5).
+---
 
-- [ ] T015 `.claude/skills/generating-zenuml-diagrams/SKILL.md`에 "Output file" 섹션 추가 — 자기검증(AP-1~AP-5)을 통과한 다이어그램을 채팅 응답에 코드로 노출하지 않고, ZenUML 원문을 Mermaid `zenuml` 코드펜스에 담아 `.zenuml/<slug>.md` 파일에 저장한 뒤 그 파일을 가리키는 상대 경로 링크만 응답에 남기는 규칙을 명시한다(번역 불필요 — VS Code 마크다운 프리뷰가 `zenuml` 타입을 네이티브로 렌더링함이 실측으로 확인됨; Claude Artifact는 발행 시 자동 팝업을 억제할 수 없고 `zenuml` 타입도 렌더링되지 않아 사용하지 않는다). 파일 저장이 불가능한 환경에서는 채팅 응답에 ZenUML DSL 텍스트를 직접 제공하는 규칙도 포함한다 (spec.md FR-011)
-- [ ] T016 `.gitignore`에 `.zenuml/` 항목 추가 (research.md Decision: 출력 파일 위치와 이름)
+## Phase 8: Output File Link
 
-**Checkpoint**: 자기검증을 통과한 모든 다이어그램에 대해, 코드 없이 실제로 렌더링되는 출력 파일 링크가 제공되어야 함
+- [X] T016 `.claude/skills/generating-zenuml-diagrams/SKILL.md`에 "Output file" 섹션 추가 — 자기검증(AP-1~AP-5)을 통과한 다이어그램을 채팅 응답에 코드로 노출하지 않고, ZenUML 원문을 Mermaid `zenuml` 코드펜스에 담아 `.zenuml/<slug>.md` 파일에 저장한 뒤 그 파일을 가리키는 상대 경로 링크만 응답에 남기는 규칙을 명시한다(번역 불필요 — VS Code 마크다운 프리뷰가 `zenuml` 타입을 네이티브로 렌더링함이 실측으로 확인됨; Claude Artifact는 발행 시 자동 팝업을 억제할 수 없고 `zenuml` 타입도 렌더링되지 않아 사용하지 않는다). 파일 저장이 불가능한 환경에서는 채팅 응답에 ZenUML DSL 텍스트를 직접 제공하는 규칙도 포함한다 per spec.md FR-011
+- [X] T017 `.gitignore`에 `.zenuml/` 항목 추가 per research.md Decision: 출력 파일 위치와 이름
