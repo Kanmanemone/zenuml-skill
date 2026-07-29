@@ -15,7 +15,7 @@ A Claude Code project containing `generating-zenuml-diagrams`, a skill that turn
 
 - **SKILL.md** — Generation rules, examples, anti-fluff self-check, ambiguity handling
 - **references/syntax.md** — ZenUML DSL grammar reference, adapted from mermaid-js/zenuml-core (MIT)
-- **`.zenuml/`** — created in your project root the first time you generate a diagram; that's where the output goes.
+- **`.zenuml/`** — created in your project root the first time you generate a diagram; that's where the output goes. Asking to change a diagram you just got updates that same file in place (no new file); the full history of what changed and why is kept in `.zenuml/log/`.
 
 ## How to use
 
@@ -33,12 +33,54 @@ A Claude Code project containing `generating-zenuml-diagrams`, a skill that turn
 
 **Skill not showing up when you type `/`?** Restart/reload Claude Code — in VS Code, open the Command Palette (`Ctrl+Shift+P`, or `Cmd+Shift+P` on Mac), type "Reload Window", and press Enter. Skills under `.claude/skills/` are scanned at session start, so one added mid-session won't appear until the next reload.
 
-## How it was built
+## How it works
 
-This skill went through the [Spec Kit](https://github.com/github/spec-kit) assess → specify → plan → tasks → implement → converge pipeline. The full trail is preserved:
+The skill's own request-to-output flow, as a ZenUML diagram:
 
-- `.specify/assessments/zenuml-skill/` — intake, research, problem definition, concept, and the go/no-go decision that justified building this skill
-- `specs/001-zenuml-diagram-skill/` — spec, implementation plan, research decisions, data model, interface contract, quickstart validation, and the task breakdown
+```mermaid
+zenuml
+User->Agent.request(description)
+Agent->Agent.requestClassification() {
+  if (requestTypeAmbiguous) {
+    Agent->User.askRegenerateOrNew()
+  } else if (diagramStructureUnclear) {
+    Agent->User.askTargetedQuestion()
+  } else {
+    Agent->Agent.generateDraft()
+    loop (antiPatternCheckFails) {
+      Agent->Agent.reviseDraft()
+    }
+    if (isRegeneration) {
+      Agent->FileSystem.overwriteDiagramFile()
+      Agent->FileSystem.appendLogRound()
+    } else {
+      Agent->FileSystem.writeDiagramFile()
+      Agent->FileSystem.createLogFile()
+    }
+    Agent->User.presentLink()
+  }
+}
+```
+
+### Function ↔ SKILL.md label mapping
+
+| Function | SKILL.md section / quote |
+| --- | --- |
+| `requestClassification()` | "Request classification (do this first)" |
+| `askRegenerateOrNew()` | "Request classification" case 4, "Still ambiguous" |
+| `askTargetedQuestion()` | "When the description is ambiguous" |
+| `generateDraft()` / `reviseDraft()` | "Self-check before presenting a diagram" |
+| `overwriteDiagramFile()` / `appendLogRound()` / `writeDiagramFile()` / `createLogFile()` | "Output file" (incl. "Diagram feedback log") |
+| `presentLink()` | "Output file" — "the entire chat response is just a relative link to it" |
+
+Source: [`.claude/skills/generating-zenuml-diagrams/SKILL.md`](.claude/skills/generating-zenuml-diagrams/SKILL.md)
+
+## Development history
+
+Built through the [Spec Kit](https://github.com/github/spec-kit) spec-driven development pipeline. The list below is in build order. Each feature's full spec/plan/tasks trail lives under `specs/`:
+
+1. [`specs/001-zenuml-diagram-skill/`](specs/001-zenuml-diagram-skill/) — the core skill described above
+2. [`specs/002-diagram-feedback-log/`](specs/002-diagram-feedback-log/) — regenerate a diagram in place and keep a log of what changed and why
 
 ## Requirements
 
