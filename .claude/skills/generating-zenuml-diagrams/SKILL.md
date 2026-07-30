@@ -29,6 +29,7 @@ Only proceed past this point once the request is classified as (1), (2), or (3).
 - Prefer the shallowest nesting that still represents the described logic correctly.
 - The ZenUML DSL text is the primary output, but don't paste it into the chat response — save it to a file and link to it (see "Output file" below).
 - If the description implies a very large number of participants or an unusually complex flow, still generate it faithfully — don't silently drop or simplify described content — but tell the user the result may be hard to read, and suggest splitting it into multiple diagrams if that would help.
+- Match the user's language for anything you invent — participant/method names that merely describe an actor's behavior (no real code backs them), plus all surrounding prose (comments, table text, log `Request`/`Response` write-ups). Proper nouns copied from real source (actual class/function names, exact identifiers a codebase uses) are exempt — keep those exactly as given, regardless of language. `zenuml-core`'s `ID` token accepts Unicode letters (`\p{L}`), so non-Latin identifiers are valid ZenUML, e.g. `A.데이터_가져오기()`. In a script with no letter case (Korean, Japanese, Chinese, ...), use `snake_case` for multi-word invented names instead of camelCase, since camelCase relies on a case distinction that script doesn't have.
 
 ### Example: minimal request
 
