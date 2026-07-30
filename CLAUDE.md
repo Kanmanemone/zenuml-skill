@@ -16,6 +16,22 @@ Project-specific instructions for Claude Code in this repository.
   커밋, 히스토리 재작성 커밋 모두 이 형식을 따르되, 아래 Spec Kit 사후 실행
   정책이 적용되는 경우는 예외로 한다.)
 
+- When picking a conventional-commit type for changes under `.claude/` (skills,
+  commands, agent configs, etc.), remember these `.md`/config files are this
+  repository's actual product, not incidental documentation about code.
+  Classify by the effect on skill behavior — `feat` for new capability, `fix`
+  for correcting broken or incomplete behavior, `refactor` for no-behavior-
+  change restructuring — not by file extension. Reserve `docs` for changes
+  that don't affect what a skill actually does (e.g. editing this file, or a
+  README).
+
+  (Korean: `.claude/` 아래(스킬, 커맨드, 에이전트 설정 등)의 변경에 conventional-commit
+  타입을 고를 때는, 이 `.md`/설정 파일들이 이 저장소의 실제 산출물이지 코드에
+  대한 부수적인 문서가 아님을 기억한다. 파일 확장자가 아니라 스킬 동작에
+  미치는 효과로 분류한다 — 새 기능이면 `feat`, 깨지거나 불완전한 동작을
+  고친 것이면 `fix`, 동작 변화 없는 재구성이면 `refactor`. `docs`는 스킬의
+  실제 동작에 영향을 주지 않는 변경(이 파일 자체 편집, README 등)에만 쓴다.)
+
 - After every successfully completed Spec Kit skill, inspect the actual diff and
   create exactly one commit for the repository changes produced by that skill
   before reporting completion. Do not commit when the skill was cancelled,
