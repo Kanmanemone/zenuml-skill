@@ -17,6 +17,7 @@ CLAUDE.local.md
 .claude/*
 !.claude/skills/
 .claude/skills/*
+!.claude/skills/generating-zenuml-diagrams/
 .specify/
 
 # Node.js dependencies (exporting-markdown-diagrams skill scripts)
