@@ -33,48 +33,6 @@
 
 **`/`를 입력해도 스킬이 목록에 안 보이나요?** Claude Code를 재시작/리로드하세요 — VS Code에서는 명령 팔레트(`Ctrl+Shift+P`, Mac은 `Cmd+Shift+P`)를 연 뒤 "Reload Window"를 입력하고 Enter를 누르면 됩니다. `.claude/skills/`의 스킬은 세션 시작 시점에 스캔되므로, 세션 도중 추가한 스킬은 다음 리로드 전까지 안 보입니다.
 
-## 작동 방식
-
-이 스킬 자체의 요청→출력 흐름을 ZenUML 다이어그램으로 표현하면 다음과 같습니다:
-
-```mermaid
-zenuml
-User->Agent.request(description)
-Agent->Agent.requestClassification() {
-  if (requestTypeAmbiguous) {
-    Agent->User.askRegenerateOrNew()
-  } else if (diagramStructureUnclear) {
-    Agent->User.askTargetedQuestion()
-  } else {
-    Agent->Agent.generateDraft()
-    loop (antiPatternCheckFails) {
-      Agent->Agent.reviseDraft()
-    }
-    if (isRegeneration) {
-      Agent->FileSystem.overwriteDiagramFile()
-      Agent->FileSystem.appendLogRound()
-    } else {
-      Agent->FileSystem.writeDiagramFile()
-      Agent->FileSystem.createLogFile()
-    }
-    Agent->User.presentLink()
-  }
-}
-```
-
-### 함수 ↔ SKILL.md 라벨 매핑
-
-| 함수 | SKILL.md 섹션 / 인용 |
-| --- | --- |
-| `requestClassification()` | "Request classification (do this first)" |
-| `askRegenerateOrNew()` | "Request classification" case 4, "Still ambiguous" |
-| `askTargetedQuestion()` | "When the description is ambiguous" |
-| `generateDraft()` / `reviseDraft()` | "Self-check before presenting a diagram" |
-| `overwriteDiagramFile()` / `appendLogRound()` / `writeDiagramFile()` / `createLogFile()` | "Output file" (incl. "Diagram feedback log") |
-| `presentLink()` | "Output file" — "the entire chat response is just a relative link to it" |
-
-출처: [`.claude/skills/generating-zenuml-diagrams/SKILL.md`](.claude/skills/generating-zenuml-diagrams/SKILL.md)
-
 ## 개발 히스토리
 
 [Spec Kit](https://github.com/github/spec-kit) 스펙 기반 개발 파이프라인을 거쳐 만들어졌습니다. 아래는 개발한 순서대로입니다. 각 기능의 전체 스펙/계획/태스크 기록은 `specs/` 아래에 있습니다:

@@ -33,48 +33,6 @@ A Claude Code project containing `generating-zenuml-diagrams`, a skill that turn
 
 **Skill not showing up when you type `/`?** Restart/reload Claude Code — in VS Code, open the Command Palette (`Ctrl+Shift+P`, or `Cmd+Shift+P` on Mac), type "Reload Window", and press Enter. Skills under `.claude/skills/` are scanned at session start, so one added mid-session won't appear until the next reload.
 
-## How it works
-
-The skill's own request-to-output flow, as a ZenUML diagram:
-
-```mermaid
-zenuml
-User->Agent.request(description)
-Agent->Agent.requestClassification() {
-  if (requestTypeAmbiguous) {
-    Agent->User.askRegenerateOrNew()
-  } else if (diagramStructureUnclear) {
-    Agent->User.askTargetedQuestion()
-  } else {
-    Agent->Agent.generateDraft()
-    loop (antiPatternCheckFails) {
-      Agent->Agent.reviseDraft()
-    }
-    if (isRegeneration) {
-      Agent->FileSystem.overwriteDiagramFile()
-      Agent->FileSystem.appendLogRound()
-    } else {
-      Agent->FileSystem.writeDiagramFile()
-      Agent->FileSystem.createLogFile()
-    }
-    Agent->User.presentLink()
-  }
-}
-```
-
-### Function ↔ SKILL.md label mapping
-
-| Function | SKILL.md section / quote |
-| --- | --- |
-| `requestClassification()` | "Request classification (do this first)" |
-| `askRegenerateOrNew()` | "Request classification" case 4, "Still ambiguous" |
-| `askTargetedQuestion()` | "When the description is ambiguous" |
-| `generateDraft()` / `reviseDraft()` | "Self-check before presenting a diagram" |
-| `overwriteDiagramFile()` / `appendLogRound()` / `writeDiagramFile()` / `createLogFile()` | "Output file" (incl. "Diagram feedback log") |
-| `presentLink()` | "Output file" — "the entire chat response is just a relative link to it" |
-
-Source: [`.claude/skills/generating-zenuml-diagrams/SKILL.md`](.claude/skills/generating-zenuml-diagrams/SKILL.md)
-
 ## Development history
 
 Built through the [Spec Kit](https://github.com/github/spec-kit) spec-driven development pipeline. The list below is in build order. Each feature's full spec/plan/tasks trail lives under `specs/`:
