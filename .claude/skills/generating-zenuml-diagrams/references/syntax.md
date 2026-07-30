@@ -96,7 +96,7 @@ Only use `try/catch`, `par`, or `critical` when the source description actually 
 
 ## Organization
 
-- **Sections**: `section(Label) { ... }` or an anonymous `{ ... }` block to group related statements
+- **Sections**: `section(Label) { ... }` or an anonymous `{ ... }` block to group related statements. `Label` must be a single token: a bare identifier (`section(Checkout)`) or, for a multi-word human-readable label, a quoted string (`section("Checkout Flow")`). Never place multiple unquoted words directly inside the parentheses (e.g. `section(Checkout Flow)`) — the parser splits on whitespace and misparses each word as a separate statement. Even quoted correctly, `Label` is **not rendered anywhere** — verified against `zenuml-core`'s `src/parser/FrameBuilder.ts`, where `enterSection`/`enterAlt`/`enterOpt` all discard everything but the frame type (`{ type, left, right, children }`, no `label`/`title` field). The section box always shows a generic "Section" tab, regardless of what `Label` is. Don't rely on `Label` for a human-readable caption — use a `// comment` on the line above the section instead (comments do render as a diagram note).
 - **Groups**: `group "Name" { participant1 participant2 }` visually clusters participant lifelines
 - **Cross-diagram reference**: `ref(DiagramName)` links to another diagram instead of inlining it
 - **Dividers**: `== Phase Label ==` draws a horizontal separator between logical sections
