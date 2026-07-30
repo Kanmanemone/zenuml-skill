@@ -111,6 +111,8 @@ If the current environment has no filesystem access to write to, skip the file a
 
 Alongside `.zenuml/<slug>.md`, every successfully generated or regenerated diagram gets a feedback log at `.zenuml/log/<slug>.md` — same slug, `log/` subdirectory. This is already covered by the `.zenuml/` `.gitignore` entry above, so it needs no gitignore entry of its own.
 
+Any markdown heading added to `.zenuml/<slug>.md` itself (e.g. a supplementary table title) must be `###` or deeper — never `##` or shallower. This is a property of the primary file, not a log-only rule: each round's `**Response**:` field here echoes `.zenuml/<slug>.md`'s content verbatim underneath that round's own `## Round N — <ISO date>` heading, so keeping the primary file's own headings at `###`+ from the start means they always nest correctly once copied in, with no separate transformation needed at log time.
+
 **What goes in the `**Request**:` field**: not just the single message that immediately triggered this round. Gather every turn since the previous round (or, for Round 1, since the conversation about this diagram started) that actually contributed to what got built — including a clarifying question you asked and the user's answer to it, if that's how this round's content was pinned down. Drop anything unrelated to constructing the diagram (small talk, tangents), and lightly edit the rest into one coherent entry rather than pasting a raw transcript. This costs no extra input tokens — those turns are already in context — and keeps the field short, so it doesn't waste output tokens either.
 
 **On initial generation** (or a new request with a colliding slug), create the log fresh:
