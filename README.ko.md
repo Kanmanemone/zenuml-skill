@@ -33,12 +33,15 @@
 
 **`/`를 입력해도 스킬이 목록에 안 보이나요?** Claude Code를 재시작/리로드하세요 — VS Code에서는 명령 팔레트(`Ctrl+Shift+P`, Mac은 `Cmd+Shift+P`)를 연 뒤 "Reload Window"를 입력하고 Enter를 누르면 됩니다. `.claude/skills/`의 스킬은 세션 시작 시점에 스캔되므로, 세션 도중 추가한 스킬은 다음 리로드 전까지 안 보입니다.
 
+*추가 기능:* 구조 뷰도 필요하다면 [`.claude/skills/generating-architecture-views/`](.claude/skills/generating-architecture-views/) 폴더도 함께 `.claude/skills/`에 복사하세요.
+
 ## 개발 히스토리
 
 [Spec Kit](https://github.com/github/spec-kit) 스펙 기반 개발 파이프라인을 거쳐 만들어졌습니다. 아래는 개발한 순서대로입니다. 각 기능의 전체 스펙/계획/태스크 기록은 `specs/` 아래에 있습니다:
 
 1. [`specs/001-zenuml-diagram-skill/`](specs/001-zenuml-diagram-skill/) — 위에서 설명한 핵심 스킬
 2. [`specs/002-diagram-feedback-log/`](specs/002-diagram-feedback-log/) — 다이어그램을 그 자리에서 재생성하고 무엇을 왜 고쳤는지 로그로 남김
+3. [`specs/003-architecture-view-skill/`](specs/003-architecture-view-skill/) — 구조 뷰(컴포넌트·그룹·의존관계)를 추가하고 위 시퀀스 다이어그램 스킬로 이어질 수 있는 동반 스킬 `generating-architecture-views`
 
 ## 요구 사항
 

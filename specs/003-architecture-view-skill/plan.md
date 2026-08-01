@@ -1,4 +1,4 @@
-# Implementation Plan: Architecture View Skill
+﻿# Implementation Plan: Architecture View Skill
 
 **Branch**: `003-architecture-view-skill` | **Date**: 2026-07-31 | **Spec**: [spec.md](spec.md)
 
@@ -8,7 +8,7 @@
 
 ## Summary
 
-자연어 프로세스 설명으로부터, 목적(온보딩/특정 문제 진단/기타)을 먼저 확인한 뒤 **Context+Dependency**(전체 컴포넌트·근거 있는 그룹·의존관계를 하나로 통합) 섹션과 **Responsibility**(같은 그룹 내 컴포넌트를 전부 이항대립 비교 — n개면 n×(n-1)/2개 항목) 섹션으로 구성된 구조 뷰를 생성하는 별도의 새 Claude Code Skill(`generating-architecture-views`)을 만든다. 이 스킬은 `generating-zenuml-diagrams`에 의존한다 — 구조 뷰가 완성되면 시퀀스 다이어그램까지 만들지 사용자에게 확인하고, 동의할 때만 구조 뷰 내용을 컨텍스트로 담아 그 스킬을 실행한다. 기술적 접근: 실행 코드가 아니라 `.claude/skills/generating-architecture-views/`에 번들링되는 지침 문서로 구현하며, 산출물은 같은 프로세스의 `.zenuml/<slug>.md`(시퀀스 다이어그램, 존재한다면)와 슬러그를 공유하는 별도 파일에 저장한다.
+자연어 프로세스 설명으로부터, 목적(온보딩/특정 문제 진단/기타)을 먼저 확인한 뒤 **Components & Dependencies**(전체 컴포넌트·근거 있는 그룹·의존관계를 하나로 통합) 섹션과 **Responsibility**(같은 그룹 내 컴포넌트를 전부 이항대립 비교 — n개면 n×(n-1)/2개 항목) 섹션으로 구성된 구조 뷰를 생성하는 별도의 새 Claude Code Skill(`generating-architecture-views`)을 만든다. 이 스킬은 `generating-zenuml-diagrams`에 의존한다 — 구조 뷰가 완성되면 시퀀스 다이어그램까지 만들지 사용자에게 확인하고, 동의할 때만 구조 뷰 내용을 컨텍스트로 담아 그 스킬을 실행한다. 기술적 접근: 실행 코드가 아니라 `.claude/skills/generating-architecture-views/`에 번들링되는 지침 문서로 구현하며, 산출물은 같은 프로세스의 `.zenuml/<slug>.md`(시퀀스 다이어그램, 존재한다면)와 슬러그를 공유하는 별도 파일에 저장한다.
 
 ## Technical Context
 
@@ -28,7 +28,7 @@
 
 **Constraints**:
 - 목적(Purpose)을 먼저 확인하지 않고는 구조 뷰를 생성해서는 안 된다(spec.md FR-001~003).
-- Context와 Dependency는 하나의 섹션(Context+Dependency)으로 병합해야 한다(FR-005~007).
+- Context와 Dependency는 하나의 섹션(Components & Dependencies)으로 병합해야 한다(FR-005~007).
 - Responsibility 섹션은 그룹 내 컴포넌트를 전부, 의존관계 유무와 무관하게, 순서 없는 쌍으로 비교해야 한다 — n개면 정확히 n×(n-1)/2개(FR-008~010, FR-019).
 - 근거 없는 컴포넌트·그룹·비교 차이를 지어내서는 안 되고, 근거 없이 그룹/컴포넌트를 세분화해 비교 항목 수를 늘려서도 안 된다(FR-004, FR-006, FR-011).
 - "헷갈리는 개념 비교" 같은 일반적 개념 비교 섹션은 만들지 않는다 — 비교는 오직 실제 식별된 컴포넌트 간에만(FR-013).
@@ -67,9 +67,9 @@ specs/003-architecture-view-skill/
 
 ```text
 .claude/skills/generating-architecture-views/
-├── SKILL.md              # 워크플로: 목적 확인 → Context+Dependency 생성(자동 그룹핑) → Responsibility 생성(그룹 내 전체 쌍 이항대립 비교, n×(n-1)/2개) → 안티패턴 자기검증 → .zenuml/<slug>.architecture.md 저장 → 시퀀스 다이어그램까지 만들지 확인 → (동의 시) generating-zenuml-diagrams 실행
+├── SKILL.md              # 워크플로: 목적 확인 → Components & Dependencies 생성(자동 그룹핑) → Responsibility 생성(그룹 내 전체 쌍 이항대립 비교, n×(n-1)/2개) → 안티패턴 자기검증 → .zenuml/<slug>.architecture.md 저장 → 시퀀스 다이어그램까지 만들지 확인 → (동의 시) generating-zenuml-diagrams 실행
 └── references/
-    ├── templates.md      # Context+Dependency, Responsibility 섹션의 Mermaid/표 템플릿과 표기 규칙
+    ├── templates.md      # Components & Dependencies, Responsibility 섹션의 Mermaid/표 템플릿과 표기 규칙
     └── examples.md       # 완성된 구조 뷰 예시 2~3개(온보딩·특정 문제 진단 목적 각각 최소 1개, 위임 동의/거부 각각 1개)
 ```
 

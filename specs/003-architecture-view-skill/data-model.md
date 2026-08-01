@@ -1,4 +1,4 @@
-# Data Model: Architecture View Skill
+﻿# Data Model: Architecture View Skill
 
 이 기능은 데이터베이스나 영속 저장소를 갖지 않는다. 아래 "엔티티"는 skill 실행 중 다뤄지는 개념적 대상과 그 속성을 정리한 것이며, spec.md의 Key Entities를 구체화한다.
 
@@ -30,7 +30,7 @@
 
 ## Automatic Grouping Rule (판단 로직)
 
-Context+Dependency 섹션에서 컴포넌트를 `subgraph`로 묶을지 결정하는 규칙.
+Components & Dependencies 섹션에서 컴포넌트를 `subgraph`로 묶을지 결정하는 규칙.
 
 | 속성 | 설명 |
 |------|------|
@@ -39,7 +39,7 @@ Context+Dependency 섹션에서 컴포넌트를 `subgraph`로 묶을지 결정�
 
 **검증 규칙**: `signal_present`가 거짓이면 다이어그램에 `subgraph`를 그려서는 안 된다 — 근거 없이 그룹을 만들어서는 안 된다(spec.md FR-006). 단, Responsibility 섹션의 비교 범위 계산에서는 전체 컴포넌트 집합을 그룹 1개로 취급한다(spec.md FR-008).
 
-## Context+Dependency Section (구조 뷰의 첫 부분)
+## Components & Dependencies Section (구조 뷰의 첫 부분)
 
 | 속성 | 설명 |
 |------|------|
@@ -63,14 +63,27 @@ Context+Dependency 섹션에서 컴포넌트를 `subgraph`로 묶을지 결정�
 **검증 규칙(개수)**: 그룹 내 컴포넌트가 n개면, 그 그룹에 대해 정확히 n×(n-1)/2개의 항목이 존재해야 한다 — 서로 다른 그룹에 속한 컴포넌트 사이에는 항목을 만들지 않는다(spec.md FR-008). 의존관계 유무는 이 개수나 대상 선정에 영향을 주지 않는다(그룹 내 모든 쌍을 비교, spec.md Clarifications).
 **검증 규칙(내용)**: `responsibility_a`나 `responsibility_b`가 "명시되지 않음"이면 `difference`를 추측해서 채워서는 안 된다(spec.md FR-009, FR-010).
 
+## Group Comparison Item (그룹 비교 항목)
+
+서로 다른 두 그룹을 대조한, 순서 없는 항목. 컴포넌트 대신 그룹 자체가 비교 대상이라는 점만 다르고 나머지 구조는 Responsibility Comparison Item과 같다.
+
+| 속성 | 설명 |
+|------|------|
+| group_a, group_b | 비교 대상 두 그룹의 이름/레이블 (순서는 항목 식별에 의미가 없음) |
+| label_a, label_b | 설명이 실제로 부여한 각 그룹의 이름/레이블 그 자체 (그룹 이름이 곧 이 필드의 근거) |
+| difference | 두 레이블을 대조한 차이 서술. 레이블을 넘어서는 그룹의 역할·목적을 추측해서 채워서는 안 됨 |
+
+**검증 규칙(개수)**: 그룹이 m개면 정확히 m×(m-1)/2개의 항목이 존재해야 한다. 그룹이 1개 이하(그룹이 없거나 하나뿐)면 이 항목 자체가 하나도 없어야 한다(spec.md FR-025).
+**검증 규칙(내용)**: `difference`는 `label_a`/`label_b`(그룹에 실제로 부여된 이름)만 근거로 삼아야 하며, 그 이상을 추측해서는 안 된다(spec.md FR-026).
+
 ## Architecture View (출력물)
 
-Context+Dependency 섹션과 Responsibility 섹션으로 구성된 문서.
+Components & Dependencies 섹션과 Responsibility 섹션으로 구성된 문서.
 
 | 상태 | 설명 | 전이 조건 |
 |------|------|-----------|
-| Draft | `Purpose`가 확정된 뒤, Context+Dependency와 Responsibility가 1차 생성된 문서 | `Purpose.value`가 확정되고 대상 컴포넌트가 식별되었을 때 생성 |
-| Checked | Anti-Pattern Checklist(AP-1~AP-7) 전체 항목을 통과(또는 위반 수정 완료)한 상태 | Draft에 대해 AP-1~AP-7 전부 "예" |
+| Draft | `Purpose`가 확정된 뒤, Components & Dependencies와 Responsibility가 1차 생성된 문서 | `Purpose.value`가 확정되고 대상 컴포넌트가 식별되었을 때 생성 |
+| Checked | Anti-Pattern Checklist(AP-1~AP-9) 전체 항목을 통과(또는 위반 수정 완료)한 상태 | Draft에 대해 AP-1~AP-9 전부 "예" |
 | Presented | 사용자에게 최종적으로 제시된 결과 — 채팅 응답에는 Output File 링크만 포함(코드 미노출) | Draft가 Checked 상태에 도달한 후에만 전이 가능 |
 
 **불변 조건**: `Presented` 상태의 구조 뷰는 항상 `Checked`를 거쳐야 한다(spec.md FR-019, FR-020).
@@ -83,7 +96,7 @@ Context+Dependency 섹션과 Responsibility 섹션으로 구성된 문서.
 |------|------|
 | offered | 확인 질문을 했는지 (구조 뷰가 `Presented`에 도달하면 항상 `true`) |
 | user_response | `agreed` / `declined` / `no_response` |
-| enriched_description | 원래 `Process Description.raw_text` + Context+Dependency의 컴포넌트·그룹·의존관계 + Responsibility의 책임 정보를 반영해 재구성한, 더 풍부한 자연어 프로세스 설명 — `user_response == agreed`일 때만 생성되어 `generating-zenuml-diagrams`의 입력이 됨 |
+| enriched_description | 원래 `Process Description.raw_text` + Components & Dependencies의 컴포넌트·그룹·의존관계 + Responsibility의 책임 정보를 반영해 재구성한, 더 풍부한 자연어 프로세스 설명 — `user_response == agreed`일 때만 생성되어 `generating-zenuml-diagrams`의 입력이 됨 |
 
 **검증 규칙**: `user_response`가 `agreed`일 때만 `generating-zenuml-diagrams`를 실행한다. `declined`나 `no_response`면 실행하지 않으며, 재차 확인 질문을 하지 않는다(spec.md FR-015, FR-016). `offered`가 `false`인 경우(구조 뷰 생성이 완료되지 않은 경우)는 이 엔티티 자체가 생성되지 않는다(spec.md FR-017).
 
@@ -96,10 +109,12 @@ Context+Dependency 섹션과 Responsibility 섹션으로 구성된 문서.
 | AP-1 | 설명에 없는 컴포넌트가 추가되지 않았는가 |
 | AP-2 | 설명에 없는 의존관계가 추가되지 않았는가 |
 | AP-3 | 신호 없이 만들어진 그룹(subgraph)이 없는가 |
-| AP-4 | 각 그룹의 비교 항목 수가 정확히 n×(n-1)/2인가(순서 있는 쌍으로 중복 생성되지 않았는가) |
-| AP-5 | 책임이 명시되지 않은 컴포넌트에 대해 책임·차이를 추측해서 채우지 않았는가 |
-| AP-6 | 일반적 개념 비교나 Runtime Flow(시퀀스) 다이어그램을 만들지 않았는가 |
-| AP-7 | 시퀀스 다이어그램 생성 여부를 확인했는가, 동의 없이 `generating-zenuml-diagrams`를 실행하지 않았는가 |
+| AP-4 | 각 그룹 내부의 비교 항목 수가 정확히 n×(n-1)/2인가(순서 있는 쌍으로 중복 생성되지 않았는가) |
+| AP-5 | 그룹이 2개 이상이면 그룹 간 비교 항목 수가 정확히 m×(m-1)/2인가(그룹이 1개 이하면 이 비교 자체가 없는가), 그리고 그 내용이 그룹 레이블만 근거로 하는가 |
+| AP-6 | 책임이 명시되지 않은 컴포넌트에 대해 책임·차이를 추측해서 채우지 않았는가 |
+| AP-7 | 시스템에 등장하지 않는 일반적 개념을 비교하는 섹션을 만들지 않았는가 (FR-013) |
+| AP-8 | Runtime Flow(시퀀스) 다이어그램을 스스로 그리지 않았는가 (위임 대상 영역 침범 금지) |
+| AP-9 | 시퀀스 다이어그램 생성 여부를 확인했는가, 동의 없이 `generating-zenuml-diagrams`를 실행하지 않았는가 |
 
 **검증 규칙**: 하나라도 위반(위반=해당 항목에 대해 "아니오")이면, 사용자에게 결과를 제시하기 전에 초안을 수정해야 한다(spec.md FR-019, FR-020).
 
@@ -107,7 +122,7 @@ Context+Dependency 섹션과 Responsibility 섹션으로 구성된 문서.
 
 | 속성 | 설명 |
 |------|------|
-| architecture_file_path | `.zenuml/<slug>.architecture.md` — 구조 뷰(Context+Dependency, Responsibility)를 담는 파일. 항상 생성됨(구조 뷰가 완성된 경우) |
+| architecture_file_path | `.zenuml/<slug>.architecture.md` — 구조 뷰(Components & Dependencies, Responsibility)를 담는 파일. 항상 생성됨(구조 뷰가 완성된 경우) |
 | sequence_file_path | `.zenuml/<slug>.md` — `generating-zenuml-diagrams`가 생성하는 시퀀스 다이어그램 파일. `Delegation Handoff.user_response == agreed`일 때만 존재 |
 | available | 파일 저장(파일시스템 접근) 가능 여부 — `false`면 파일 대신 채팅 응답에 텍스트를 직접 제공 |
 

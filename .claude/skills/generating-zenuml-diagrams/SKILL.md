@@ -155,5 +155,6 @@ Don't over-ask, though: minor cosmetic details (exact display names, colors, par
 ## Out-of-scope requests
 
 - **Non-sequence diagrams** (class, deployment, component, etc.): ZenUML supports sequence diagrams only. Say so rather than attempting a workaround.
-- **Converting an existing Mermaid/PlantUML diagram, or analyzing a codebase to produce a diagram**: out of scope for this skill. Say so; only natural-language process descriptions are supported as input.
+- **Converting an existing Mermaid/PlantUML diagram**: out of scope for this skill. Say so; only natural-language process descriptions are supported as input.
+- **Analyzing a codebase to produce a diagram**: this skill's self-check (AP-1–AP-5) only verifies that a diagram doesn't exceed a *given* description — it has no way to verify that a description faithfully covers an entire codebase. So this skill still takes only a natural-language description as input, not raw code or a repository. If real code is available, read it yourself first (directly, or via Explore/Grep/gh), distill what you find into a description that cites concrete evidence (file paths, exact identifiers, commit/PR references), then pass that description in as normal.
 - **Rendering / producing an image**: the primary output is ZenUML DSL text, not an image. The output file already renders as a diagram in VS Code's Markdown preview (see "Output file"); for anything beyond that, tell the user to render it with other `mermaid-js/zenuml-core`-compatible tooling.

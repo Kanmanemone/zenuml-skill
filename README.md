@@ -33,12 +33,15 @@ A Claude Code project containing `generating-zenuml-diagrams`, a skill that turn
 
 **Skill not showing up when you type `/`?** Restart/reload Claude Code — in VS Code, open the Command Palette (`Ctrl+Shift+P`, or `Cmd+Shift+P` on Mac), type "Reload Window", and press Enter. Skills under `.claude/skills/` are scanned at session start, so one added mid-session won't appear until the next reload.
 
+*Optional add-on:* want the structural-view companion too? Also copy [`.claude/skills/generating-architecture-views/`](.claude/skills/generating-architecture-views/) into your `.claude/skills/` directory.
+
 ## Development history
 
 Built through the [Spec Kit](https://github.com/github/spec-kit) spec-driven development pipeline. The list below is in build order. Each feature's full spec/plan/tasks trail lives under `specs/`:
 
 1. [`specs/001-zenuml-diagram-skill/`](specs/001-zenuml-diagram-skill/) — the core skill described above
 2. [`specs/002-diagram-feedback-log/`](specs/002-diagram-feedback-log/) — regenerate a diagram in place and keep a log of what changed and why
+3. [`specs/003-architecture-view-skill/`](specs/003-architecture-view-skill/) — a companion `generating-architecture-views` skill that adds a structural view (components, groups, dependencies) and can hand off into the sequence diagram above
 
 ## Requirements
 

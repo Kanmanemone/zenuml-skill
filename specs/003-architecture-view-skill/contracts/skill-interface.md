@@ -1,4 +1,4 @@
-# Contract: `generating-architecture-views` Skill Interface
+﻿# Contract: `generating-architecture-views` Skill Interface
 
 이 skill은 API나 CLI가 아니라 Claude Code Skill이므로, "계약"은 SKILL.md가 Claude에게 보장해야 하는 **입력→동작→출력 규약**으로 정의한다. 이 스킬은 `generating-zenuml-diagrams`에 의존하므로, 그 스킬의 계약(001의 `contracts/skill-interface.md`)도 함께 참고해야 한다.
 
@@ -27,7 +27,7 @@
 ```
 
 - 채팅 응답에는 구조 뷰 코드를 직접 노출하지 않는다 — Checked 상태에 도달한 구조 뷰(data-model.md 참조)를 `.zenuml/<slug>.architecture.md`에 저장하고, 그 파일을 가리키는 상대 경로 링크와 위임 확인 질문을 함께 응답에 남긴다(spec.md FR-021, FR-014).
-- 파일에는 Context+Dependency 섹션 다음 Responsibility 섹션이 이 순서로 온다(spec.md FR-005).
+- 파일에는 Components & Dependencies 섹션 다음 Responsibility 섹션이 이 순서로 온다(spec.md FR-005).
 - 설명에 없는 컴포넌트·의존관계·그룹·책임 차이를 포함해서는 안 된다(spec.md FR-004, FR-006, FR-009, FR-010).
 
 ### 위임 확인 질문에 사용자가 동의한 경우
@@ -46,7 +46,7 @@
 ### 성공 시 (파일 저장 불가능한 환경)
 
 ```text
-<구조 뷰 텍스트 — Context+Dependency, Responsibility 섹션>
+<구조 뷰 텍스트 — Components & Dependencies, Responsibility 섹션>
 
 시퀀스 다이어그램까지 만들까요? [예/아니오]
 ```
