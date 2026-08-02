@@ -11,7 +11,7 @@ This skill depends on `generating-zenuml-diagrams` and is not a replacement for 
 
 ## Workflow overview
 
-1. Confirm the purpose (if not already stated).
+1. Determine the purpose (from what's stated/implied; ask only if genuinely unclear).
 2. Generate the Components & Dependencies section.
 3. Generate the Responsibility section.
 4. Self-check (AP-1–AP-7, AP-10, AP-11, AP-12) and fix before presenting.
@@ -21,7 +21,7 @@ This skill depends on `generating-zenuml-diagrams` and is not a replacement for 
 
 ## Step 1 — Confirm the purpose
 
-Before generating anything, check whether the user has already stated why they want this view (e.g., "새로 합류한 팀원에게 보여주려고" clearly means onboarding). If not, ask before doing anything else:
+Before generating anything, judge whether the purpose is already clear — either stated outright or clearly implied by context (e.g., "새로 합류한 팀원에게 보여주려고" implies onboarding; "OrderService 쪽에서 이상한 게 있어서 봐야 해" implies troubleshooting). If so, use that purpose and don't ask — the same "only stop for ambiguity that actually matters" judgment `generating-zenuml-diagrams` applies to structural gaps. Only when the purpose is genuinely unclear — you can't reasonably tell which of the three it is — ask before doing anything else:
 
 ```text
 이 구조 뷰를 어떤 목적으로 보시나요?
@@ -32,7 +32,7 @@ Before generating anything, check whether the user has already stated why they w
 
 - A clear answer to 1/2/3 sets the purpose. For "기타" (3), ask one more question — "어떤 정보가 필요하신지 한 문장으로 알려주세요" — and wait for that answer before continuing.
 - An ambiguous answer or no answer at all (the user asks something unrelated instead) is **not** treated as agreement to guess — default to **온보딩** and say so explicitly in your response (e.g., "목적을 명확히 하지 않으셔서 온보딩 기준으로 진행합니다").
-- In the current scope, the confirmed purpose does not change which sections get produced — Components & Dependencies and Responsibility are always both generated (see Steps 2–3). Confirming the purpose is still mandatory: skipping this question is a violation even though today it doesn't branch the output.
+- In the current scope, the confirmed purpose does not change which sections get produced — Components & Dependencies and Responsibility are always both generated (see Steps 2–3) regardless of purpose. That's exactly why this question isn't worth forcing on every request: don't ask it just to have asked it — only when you genuinely can't tell which purpose applies.
 - If the description doesn't identify any components at all, don't ask about purpose — ask what process/system to diagram instead, the same way `generating-zenuml-diagrams` does when it can't identify participants.
 
 ## Step 2 — Generate Components & Dependencies

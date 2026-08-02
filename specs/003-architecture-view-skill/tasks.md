@@ -287,3 +287,21 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 **Purpose**: `/speckit-converge`가 신규 SC-009(구조 뷰 피드백 로그)에 대응하는 검증 시나리오가 `quickstart.md`에 하나도 없음을 발견해 바로잡는다.
 
 - [X] T052 `quickstart.md`에 "시나리오 12 — 구조 뷰 피드백 로그 (SC-009)"를 추가 — (a) 시나리오 2와 동일한 최초 생성 요청 후 `.zenuml/log/order-payment.architecture.md`가 `## Round 1 — <ISO date>`로 최초 요청+응답을 담아 함께 만들어지는지, (b) 이어서 같은 구조 뷰에 변경을 요청(예: 컴포넌트 하나 추가)했을 때 산출물(`.zenuml/order-payment.architecture.md`)은 새 내용으로 완전히 교체되고 로그에는 Round 1이 지워지지 않은 채 `## Round 2`가 새로 추가되는지 검증하는 절차를 시나리오 1~11과 동일한 형식(입력 예시/기대 결과/검증)으로 작성 per SC-009, FR-028, FR-029 (missing)
+
+---
+
+## Phase 18: Convergence
+
+**Purpose**: `/speckit-converge`가 2026-08-02 세션에서 개정된 FR-001~003(목적 확인을 "무조건 강제"에서 "실제로 불분명할 때만 판단해서 질문"으로 변경) 대 `SKILL.md`/`quickstart.md`/`data-model.md`의 실제 문구를 대조해 발견한 불일치를 바로잡는다.
+
+- [X] T053 `SKILL.md`의 Step 1("Confirm the purpose")을 개정된 FR-001에 맞춰 재작성 — "If not, ask before doing anything else"를 "명시적으로 밝히지 않았더라도 설명·맥락에서 목적이 명확히 추론되면(예: 신규 합류자 온보딩 언급) 되묻지 않고 그 목적을 그대로 쓴다. 목적을 스스로 판단하기 어려울 만큼 실제로 불분명할 때만 질문한다"로 바꾸고, "Confirming the purpose is still mandatory: skipping this question is a violation even though today it doesn't branch the output" 문장을 삭제(또는 "목적이 실제로 불분명한데도 질문 없이 추측하는 것이 위반"이라는 취지로 수정) per FR-001 (contradicts)
+- [X] T054 `quickstart.md`에 "시나리오 13 — 목적이 맥락상 명확해 되묻지 않음 (SC-001)"을 추가 — 목적을 직접 명시하지 않아도 맥락상 명확한 입력(예: "새로 합류한 팀원한테 이 시스템 구조를 보여주려고 하는데, OrderService가 PaymentService를 호출해") 에 대해 목적 확인 질문 없이 바로 구조 뷰 생성으로 진행하는지 검증하는 절차를 시나리오 1~12와 동일한 형식으로 작성 per SC-001 (missing)
+- [X] T055 `data-model.md`의 Purpose 엔티티(`source` 속성, 19-29행), Responsibility Comparison Item과 Group Comparison Item(52-77행), Architecture View 상태 전이표(83-89행)를 현재 스펙/구현에 맞춰 갱신 — (a) `source`에 "맥락에서 추론됨" 값 추가(FR-001), (b) 두 비교 항목의 "그룹 내 모든 쌍을 비교"·무조건 m(m-1)/2 서술과 `difference` 필드를 제거하고 의존관계 게이팅 + 볼드/방향 서식(FR-008, FR-009, FR-010, FR-025, FR-027)으로 교체, (c) "AP-1~AP-9"를 "AP-1~AP-12"로 정정 per FR-001, FR-008, FR-009, FR-010, FR-025, FR-027 (contradicts)
+
+---
+
+## Phase 19: Convergence
+
+**Purpose**: `/speckit-converge`가 2차 재점검에서, T053이 `SKILL.md`를 개정된 FR-001에 맞춰 고친 뒤에도 `contracts/skill-interface.md`(Phase 1 설계 산출물)가 여전히 옛 "purpose 없으면 반드시 먼저 묻는다" 문구를 그대로 갖고 있음을 발견해 바로잡는다.
+
+- [X] T056 `contracts/skill-interface.md`의 Input Contract 표(15행), 전제조건 문단(17행), "목적 확인이 필요할 때 (purpose 미확정)" 절(56-58행)을 개정된 FR-001에 맞춰 재작성 — "purpose가 없으면... 반드시 목적 확인 질문을 먼저 한다"를 "purpose가 명시되지 않았어도 설명·맥락에서 명확히 추론되면 그대로 사용하고, 스스로 판단하기 어려울 만큼 실제로 불분명할 때만 3지선다 질문을 한다"로 수정 per FR-001 (contradicts)
