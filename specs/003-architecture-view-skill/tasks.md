@@ -305,3 +305,70 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 **Purpose**: `/speckit-converge`가 2차 재점검에서, T053이 `SKILL.md`를 개정된 FR-001에 맞춰 고친 뒤에도 `contracts/skill-interface.md`(Phase 1 설계 산출물)가 여전히 옛 "purpose 없으면 반드시 먼저 묻는다" 문구를 그대로 갖고 있음을 발견해 바로잡는다.
 
 - [X] T056 `contracts/skill-interface.md`의 Input Contract 표(15행), 전제조건 문단(17행), "목적 확인이 필요할 때 (purpose 미확정)" 절(56-58행)을 개정된 FR-001에 맞춰 재작성 — "purpose가 없으면... 반드시 목적 확인 질문을 먼저 한다"를 "purpose가 명시되지 않았어도 설명·맥락에서 명확히 추론되면 그대로 사용하고, 스스로 판단하기 어려울 만큼 실제로 불분명할 때만 3지선다 질문을 한다"로 수정 per FR-001 (contradicts)
+
+---
+
+## Phase 20: Convergence
+
+**Purpose**: `/speckit-converge`가 2026-08-02 두 번째 세션(v10 참조 형식 반영)에서 대폭 개정된 spec.md(Dependency/Responsibility/Collaboration 3섹션, 다이어그램 스타일링, 하이퍼링크) 대 실제 구현(`SKILL.md`, `references/*.md`, `data-model.md`, `contracts/skill-interface.md`, `quickstart.md`)의 실제 문구를 대조해 발견한, 사실상 전면 재작성이 필요한 대규모 불일치를 바로잡는다.
+
+- [X] T057 `SKILL.md` Step 2(Dependency 생성)를 재작성 — Mermaid `graph TD`를 `flowchart LR`로 바꾸고, 각 `subgraph`에 `direction TB`를 추가하며, 커브(`curve: basis`)·노드 간격(45)·랭크 간격(70)·cluster-label 폰트(20px, weight 700)를 지정하는 고정 `%%{init}%%` 스타일 블록을 도입 per FR-007 (missing)
+- [X] T058 `SKILL.md` Step 2에 관계 성격 레이블링 규칙 추가 — 각 의존 화살표에 설명에서 확인 가능한 관계 성격(호출/타입 참조/선언 참조 등)을 `-->|레이블|`로 표시하고, 성격이 명시되지 않았으면 기본값 "호출"을 쓰며 더 구체적인 성격을 추측하지 않는 규칙 per FR-008 (missing)
+- [X] T059 `SKILL.md` Step 2에 노드/엣지 색상 클래스 규칙 추가 — 각 노드에 `classDef`+`class`로 고유 색상(테두리)을 부여하고(다이어그램 내에서 개별 구분이 필요 없는 형제 노드는 공유 가능), 그 노드에서 뻗어나가는 모든 화살표는 `linkStyle`로 같은 색을 쓰도록 하는 규칙과 `references/templates.md`에 정의될 고정 팔레트를 참조하는 링크 추가 per FR-008b (missing)
+- [X] T060 `SKILL.md`에 하이퍼링크 결정 규칙 추가 — 그룹·요소 이름과 Dependency 다이어그램의 각 노드에 대해, 분석 대상이 로컬 루트 프로젝트면 상대 파일 경로로, 웹 레포지토리(URL 제공)면 그 파일 URL로, 어느 쪽도 알 수 없으면 링크 없음으로 결정하는 규칙을 추가하고, 로컬 경로 `click`을 하나 이상 쓴 경우 다이어그램 바로 아래에 VS Code Mermaid 렌더러의 로컬 클릭 이동 제약 안내(대신 Responsibility/Collaboration 링크 이용)를 덧붙이는 규칙 추가 per FR-027c, FR-027d (missing)
+- [X] T061 `SKILL.md` Step 3(Responsibility 생성)을 재작성 — 그룹 내 컴포넌트 이항대립 비교(옛 메커니즘)를 완전히 제거하고, 각 그룹·각 요소마다 책임(추상)(한 문장) + 역할(구체)(설명이 실제로 언급한 이름·동작 인용) 두 필드를 서술하는 방식으로 교체. 어느 한쪽이 설명에 없으면 "설명에 명시되지 않음"으로 표시 per FR-009, FR-010 (contradicts)
+- [X] T062 `SKILL.md`에 새 Step(Collaboration 생성) 추가 — 그룹 레벨(그룹 간 실제 의존관계가 있는 쌍만)과 요소 레벨(요소 간 실제 의존관계가 있는 쌍만, 같은 그룹이든 다른 그룹이든 무관하게 생성되며 그룹 레벨 항목과 배타적이지 않음) 각각에 대해 항목을 만들고, 각 항목은 책임의 경계·분리 이유&합리성 평가·내가 할 수 있는 질문 세 하위 항목을 모두 포함하며, 방향은 볼드 이름과 함께 실제 방향(또는 양방향이면 상호 의존)으로 서술하는 규칙 per FR-025, FR-025b, FR-026, FR-027 (missing) — FR-025b(요소 레벨 항목이 그룹 경계와 무관하게 생성된다는 점의 명시화)는 이 태스크가 만든 동작 자체를 그대로 재확인한 것뿐이라 별도 구현 변경은 없었음; `references/templates.md`(161행), `data-model.md`(116행), quickstart.md 시나리오 5가 이 동작을 각각 명시·검증한다
+- [X] T063 T062의 Collaboration Step에 다수 대상 통합 규칙 추가 — 하나의 소스가 같은 그룹·같은 관계 성격을 공유하고 서로 개별적으로 구분되지 않는 대상 3개 이상에 의존하면 각각을 나열하는 대신 그 대상들을 아우르는 서술적 표현으로 묶은 항목 하나로 압축하고, 대상이 2개 이하이거나 그룹/성격이 다르면 이름을 그대로 나열하는 규칙 per FR-027b (missing)
+- [X] T064 T060의 하이퍼링크 결정 규칙이 Responsibility/Collaboration 섹션의 그룹·요소 이름 마크다운 링크에도 동일하게 적용되도록 `SKILL.md`에 명시(다이어그램 `click`과 같은 근거·같은 3분기 규칙을 재사용) per FR-027c (missing)
+- [X] T065 `SKILL.md`의 Workflow overview와 섹션 헤딩 전체를 "Components & Dependencies"/"Responsibility"(2섹션)에서 "Dependency"/"Responsibility"/"Collaboration"(3섹션, 이 순서)으로 갱신 per FR-005 (contradicts)
+- [X] T066 `SKILL.md`의 Self-check 체크리스트(AP-1~AP-12)를 재작성 — 관계 성격 레이블이 설명에 근거하는지, 색상 클래스·`linkStyle`이 규칙대로 적용됐는지, Collaboration 항목이 실제 의존관계와 정확히 일치하는지, 다수 대상 통합이 조건에 맞게 적용됐는지, 하이퍼링크가 3분기 규칙대로 붙었는지를 점검하는 항목 추가(기존 AP 중 옛 이항대립 관련 항목은 제거) per FR-019 (missing)
+- [X] T067 `SKILL.md`의 "Output file" 섹션을 갱신 — 파일 내용 순서를 Dependency → Responsibility → Collaboration으로 수정(재생성 분류·피드백 로그 메커니즘 자체는 변경 없음을 명시) per FR-005, FR-021 (contradicts)
+- [X] T068 `SKILL.md`의 인라인 worked example(현재 "Example: minimal request", "request with a group", "request with 3+ groups")을 새 3섹션 형식(관계 레이블, 색상, 하이퍼링크, Collaboration 포함)에 맞춰 재작성 per FR-007~FR-027d (contradicts)
+- [X] T069 `references/templates.md`를 전면 재작성 — Dependency용 `%%{init}%%`+`flowchart LR`+`direction TB` 템플릿과 고정 색상 팔레트(Tailwind 500번대 순서), Responsibility용 책임(추상)/역할(구체) 템플릿, Collaboration용 3필드+다수 대상 통합 템플릿, 하이퍼링크 3분기 템플릿(로컬 경로/URL/링크 없음)을 담는다 per FR-007~FR-027d (contradicts)
+- [X] T070 `references/examples.md`를 전면 재작성 — 그룹 없는 예시, 다수 대상 통합이 적용되는 예시(3개 이상 동일 그룹·동일 관계), 통합되지 않는 예시(2개 이하 또는 이종 그룹), 그룹 간 Collaboration이 있는 예시, 하이퍼링크 3가지 모드(로컬 경로/URL/링크 없음) 예시를 포함해 새 3섹션 형식으로 재작성 per FR-007~FR-027d (contradicts)
+- [X] T071 `data-model.md`의 Responsibility Comparison Item·Group Comparison Item 엔티티를 제거하고, Dependency Edge(`source`/`target`/`nature`/`color`), Node 색상 클래스, 책임 서술(그룹/요소 공통 — 책임(추상)/역할(구체)), Collaboration Item(`source`/`target`/`direction`/`boundary`/`separation_rationale`/`questions`), 다수 대상 통합 규칙, 하이퍼링크 대상(`local_path`/`url`/`none`) 엔티티로 교체 per Key Entities (contradicts)
+- [X] T072 `contracts/skill-interface.md`의 Output Contract를 갱신 — 성공 시 산출물 설명을 Dependency/Responsibility/Collaboration 3섹션 순서로 수정 per FR-005 (contradicts)
+- [X] T073 `quickstart.md`의 시나리오를 재작성 — 관계 성격 레이블(SC-003), 노드/엣지 색상(SC-003), Collaboration 게이팅(SC-005), 다수 대상 통합(SC-005), 하이퍼링크 3가지 모드(SC-006)를 커버하는 시나리오로 옛 이항대립 개수 검증 시나리오(옛 시나리오 2~4)를 교체하고, 목적 확인·위임·로그 시나리오는 SC 번호만 새 번호(SC-001, SC-007~SC-011)로 갱신 per SC-001~SC-011 (contradicts)
+
+---
+
+## Phase 21: Convergence
+
+**Purpose**: `/speckit-converge`가 실제 스킬 호출 결과물을 `specs/003-architecture-view-skill/reference-example.md`(참조 형식의 근거 원본, spec.md Session 2026-08-02 두 번째 Clarifications가 전체 3섹션 재구성의 근거로 명시한 파일)와 대조해 발견한, 서식 세부사항이 참조 형식과 다른 세 가지 불일치를 바로잡는다.
+
+- [X] T074 `SKILL.md`(Step 3, Step 4 서식 규칙, self-check AP-6·AP-10, worked example)와 `references/templates.md`(Responsibility·Collaboration 템플릿, Direction 규칙)와 `references/examples.md`(Example 1~3)에서 이름·필드 레이블(책임 (추상)/역할 (구체)/책임의 경계/분리 이유 & 합리성 평가/내가 할 수 있는 질문)에 쓰인 마크다운 `**...**` 볼드를 전부 `<strong>...</strong>` HTML 태그로 교체하고 이 규칙을 명시적으로 문서화한다 per FR-009, FR-010, FR-027 (contradicts) — `reference-example.md`는 이름·레이블 모두 `<strong>` 태그를 쓰는데 현재 문서는 마크다운 `**`를 규정·예시하고 실제 산출물도 그렇게 나옴
+- [X] T075 `SKILL.md` Step 4 Format 규칙·self-check AP-10·worked example과 `references/templates.md`의 Collaboration 템플릿·Direction 규칙, `references/examples.md`의 Example 1~3에서 Collaboration 항목의 책임의 경계/분리 이유 & 합리성 평가/내가 할 수 있는 질문 세 하위 항목을 "레이블: 문장1. 문장2." 인라인 서술에서 각각 `<strong>` 헤딩 뒤에 중첩 불릿 리스트(2~4개 항목)를 붙이는 형식으로 재작성한다 per FR-027 (contradicts) — `reference-example.md`의 모든 Collaboration 항목이 이 중첩 리스트 형식을 씀
+- [X] T076 `SKILL.md` Step 3(역할 (구체) 규칙)과 Step 4(Collaboration 하위 항목 서술 규칙), `references/templates.md`의 Responsibility·Collaboration 템플릿, `references/examples.md`의 Example 1~3에 "역할(구체)과 Collaboration 하위 항목에서 설명이 실제로 언급한 이름·동작을 인용할 때는 그 코드 수준 식별자(클래스/함수/프로퍼티/이넘 이름 등)를 백틱(`` ` ``)으로 감싸야 하며, 이미 `<strong>[이름](경로)</strong>`로 헤딩에 링크된 그룹·요소를 본문에서 다시 언급할 때는 재-볼드·재-링크하지 않고 백틱만 쓴다"는 규칙을 추가하고 예시에 반영한다 per FR-009, FR-010 (missing) — `reference-example.md`는 역할(구체)·Collaboration 본문 전체에서 코드 식별자를 백틱으로 감싸는데 현재 문서에는 이 관례가 전혀 명시·예시되지 않음
+
+---
+
+## Phase 22: Convergence
+
+**Purpose**: `/speckit-converge`가 실제 스킬 실행 결과물(Now in Android 프로젝트에 스킬을 설치해 생성한 `nia-navigation.architecture.md`)에서 Collaboration `#### 요소 간 비교`의 모든 항목이 하이퍼링크 없이 생성된 결함을 발견해 바로잡는다. 그룹 레벨 비교는 링크가 정상적으로 붙었는데 요소 레벨만 전부 누락된 것으로 보아, `SKILL.md` Step 4가 Step 3처럼 하이퍼링크 규칙을 명시적으로 재확인하지 않고 "이미 링크된 이름은 본문에서 재링크하지 않는다"는 인접 문구(중첩 불릿 전용 규칙)의 적용 범위가 모호해 opening line까지 오적용될 소지가 있었던 것이 원인으로 파악된다(FR-027c는 스펙상 명확했고 태스크 T060/T064로 이미 커버되어 있었음 — 이번 갭은 신규 요구사항이 아니라 구현 문서의 강조 비대칭·self-check 커버리지 공백).
+
+- [X] T077 `SKILL.md` Step 4 Format 규칙(90-92행 부근)에 "opening line의 각 이름(`<strong>A</strong>는 <strong>B</strong>에 의존한다`)도 Responsibility 헤딩과 동일하게 'Hyperlink resolution' 규칙에 따라 링크한다"는 문장을 Step 3(78행, "hyperlinked per 'Hyperlink resolution' above")과 대칭되는 명시적 문구로 추가 per FR-027c (partial)
+- [X] T078 `SKILL.md`:104와 `references/templates.md`:167의 "referred to here with plain backticks, not re-bolded or re-linked" 문구를, 이 규칙이 오직 **중첩 불릿**(책임의 경계/분리 이유 & 합리성 평가/내가 할 수 있는 질문 내부) 안에서 이름을 다시 언급할 때만 적용되고 entry의 opening line(볼드+링크 이름)에는 적용되지 않음을 두 파일 모두에서 명시적으로 재확인하도록 재작성 per FR-027c (contradicts)
+- [X] T079 `SKILL.md`의 self-check AP-13(132행)을 확장 — 기존 "존재하는 링크가 해석 규칙에 맞는가" 검증에 더해 "Responsibility 헤딩에서 링크된 모든 그룹/요소가 Collaboration의 모든 등장 자리(그룹 레벨·요소 레벨 opening line 둘 다)에서도 동일한 대상으로 일관되게 링크되어 있는가"를 검증 항목으로 추가 per FR-027c, FR-019 (partial)
+
+---
+
+## Phase 23: Convergence
+
+**Purpose**: `/speckit-clarify`로 완화된 FR-027b(Collaboration 다수 대상 통합의 "다른 곳에서 개별적으로 구분되지 않음" 조건을 "병렬적 구조적 역할을 수행함" 조건으로 대체 — 개별 엣지·개별 Responsibility 서술이 있어도 통합을 막지 않되, 종류가 다른 역할을 가진 대상은 제외)와 신설 FR-009b(Responsibility에도 동일한 조건의 병렬 형제 요소 통합을 추가) 대 `SKILL.md`/`references/templates.md`/`references/examples.md`/`quickstart.md`의 실제 규칙·예시·검증 시나리오 문구를 대조해 발견한, 스펙-구현 간 불일치를 바로잡는다.
+
+- [X] T080 `SKILL.md` Step 4의 "Multi-target consolidation" 절(108-112행 부근)과 Self-check AP-9(128행)을 개정된 FR-027b에 맞춰 재작성 — "aren't individually distinguished anywhere else in the diagram (no edges of their own, no separate Responsibility nuance...)" 조건을 "play a parallel structural role relative to that source" 조건으로 바꾸고, 어느 한 대상이 종류가 다른 역할을 실제로 가지면 통합에서 제외하고 개별 항목으로 나열해야 한다는 규칙을 추가 per FR-027b (contradicts)
+- [X] T081 `SKILL.md` Step 3(71-82행 부근)에 "Parallel-sibling consolidation" 절을 신설하고 Self-check에 AP-6b를 추가 — 신규 FR-009b(같은 그룹에 속하고 병렬적 구조적 역할을 수행하는 요소 3개 이상, 그중 종류가 다른 역할을 가진 요소는 없음 → "A, B, C" 형태로 이름을 모두 나열한 하나의 통합 항목, 책임(추상)은 공유 문장, 역할(구체)은 요소별 근거를 빠짐없이 인용)을 구현하고, Step 4의 다수 대상 통합과 동일한 3개 이상 임계값·판단 기준을 재사용한다는 점을 명시(별도 메커니즘 신설 금지) per FR-009b (missing)
+- [X] T082 `references/templates.md`를 갱신 — "Multi-target consolidation" 절(181-185행)을 개정된 FR-027b에 맞춰 재작성하고, "Responsibility template" 절(100-123행)에 병렬 형제 통합 항목의 모양(통합 헤딩 예시, 공유 책임(추상)/요소별 역할(구체))과 규칙을 추가하며, 목차에 새 절 링크를 추가 per FR-009b, FR-027b (contradicts, missing)
+- [X] T083 `references/examples.md`의 Example 2(121-186행)를 갱신 — Responsibility 절의 "omitted here for brevity" 대신 EmailSender/SmsSender/PushSender를 실제 통합 항목(서로 다른 함수 이름 `sendEmail()`/`sendSms()`/`sendPush()`을 가져도 통합됨을 보여줌)으로 서술하고, Collaboration 설명 문장(184행, "aren't individually distinguished elsewhere")을 개정된 조건으로 정정하며, 종류가 다른 역할을 가진 대상(예: 재시도 정책을 추가로 관리하는 대상)은 통합에서 제외된다는 설명을 덧붙인다 per FR-009b, FR-027b (missing, contradicts)
+- [X] T084 `quickstart.md`에 "시나리오 19 — 다수 대상 통합: 개별 차이가 있어도 통합됨", "시나리오 20 — 종류가 다른 대상은 통합에서 제외됨", "시나리오 21 — Responsibility 병렬 형제 통합"을 시나리오 1~18과 동일한 형식(입력 예시/기대 결과/검증)으로 추가 per SC-002, SC-005, FR-009b, FR-027b (missing)
+
+---
+
+## Phase 24: Convergence
+
+**Purpose**: `/speckit-converge`가 Phase 23 완료 직후 재점검에서 발견한 두 가지 잔여 불일치를 바로잡는다: (1) FR-027b 개정 문구 자체에 실수로 삽입된, 기존 압축 표현 방식(개별 이름을 나열하지 않는 집합적 표현)과 모순되는 조건, (2) `data-model.md`(Phase 1 설계 산출물)가 여전히 옛 "개별적으로 구분되지 않음" 조건을 현재 규칙인 것처럼 서술하고 신설 FR-009b에 대응하는 서술이 아예 없던 문제.
+
+- [X] T085 `spec.md` FR-027b 끝의 "압축된 서술적 표현 안에도 각 대상의 실제 이름이 식별 가능하게 포함돼야 한다"는 문구를 제거 — 이 문구는 FR-027b를 다듬는 과정에서 실수로 추가된 것으로, 실제 산출물·`SKILL.md`·`references/templates.md`·`references/examples.md`가 항상 써온 "채널 발신 요소들" 같은 순수 집합적 표현(개별 이름 미포함) 방식과 모순됨. "압축된 서술적 표현 자체는 기존과 동일하게 개별 이름을 나열하지 않는 집합적 표현이며, 이는 이번 완화로 바뀌지 않는다"는 명확화 문구로 대체 per FR-027b (contradicts)
+- [X] T086 `data-model.md`의 "Multi-target Consolidation Rule" 절(구 119-128행)을 "Multi-target (Parallel-Sibling) Consolidation Rule"로 재작성 — 조건 열을 "다이어그램의 다른 곳에서 개별적으로 구분되지 않음"에서 "병렬적 구조적 역할을 공유하며 종류가 다른 역할을 가진 대상 없음"으로 바꾸고, Collaboration Item과 Responsibility Entry 양쪽 결과를 모두 담는 표로 확장 per FR-009b, FR-027b (contradicts, missing)
+- [X] T087 `data-model.md`의 "Responsibility Entry" 절(구 90-100행)에 `target`이 병렬 형제 집합일 수 있다는 서술과 그 경우의 `responsibility_abstract`(공유 문장)/`responsibility_concrete`(요소별 근거 전부 인용) 규칙을 추가 per FR-009b (missing)
+- [X] T088 `data-model.md`의 Anti-Pattern Checklist 표(구 154-176행)에 AP-6b 행을 추가하고 AP-9 설명을 개정된 조건에 맞춰 갱신 per FR-009b, FR-027b (missing, contradicts)
