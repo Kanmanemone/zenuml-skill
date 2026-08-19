@@ -17,6 +17,7 @@ CLAUDE.local.md
 .claude/*
 !.claude/skills/
 .claude/skills/*
+!.claude/skills/generating-architecture-views/
 !.claude/skills/generating-zenuml-diagrams/
 .specify/
 
