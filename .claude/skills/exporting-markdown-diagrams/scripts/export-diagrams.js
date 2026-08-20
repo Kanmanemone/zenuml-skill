@@ -9,6 +9,11 @@ import { runMmdc } from "./lib/run-mmdc.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 
 const SUPPORTED_FORMATS = ["svg", "png", "pdf"];
+// Puppeteer deviceScaleFactor for PNG capture (~288 DPI-equivalent at the standard
+// 96 CSS px/in baseline). mmdc resizes the viewport to the diagram's own bounding
+// box before screenshotting (see research.md "PNG 해상도"), so this scale — not an
+// explicit width/height — is what keeps PNGs sharp regardless of diagram size.
+const PNG_SCALE = 3;
 
 function fail(message, code = 1) {
   console.error(message);
@@ -46,7 +51,11 @@ function main() {
     );
   const outputFile = `${outputBase}.${format}`;
 
-  const { status, combinedOutput, spawnError } = runMmdc(["-i", targetFile, "-o", outputFile]);
+  const mmdcArgs = ["-i", targetFile, "-o", outputFile];
+  if (format === "png") {
+    mmdcArgs.push("-s", String(PNG_SCALE));
+  }
+  const { status, combinedOutput, spawnError } = runMmdc(mmdcArgs);
 
   if (spawnError) {
     fail(`Failed to run mermaid-cli: ${spawnError.message}`);
