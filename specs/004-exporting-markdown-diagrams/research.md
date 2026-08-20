@@ -64,6 +64,11 @@
 
 ## Decision: 문서 전체 PDF의 글꼴
 
-- **Decision**: `export-document-pdf.js`의 HTML 템플릿에서 `font-family: sans-serif`/`monospace` 같은 제네릭 키워드 대신, 한글·영문·코드 각각을 잘 지원하는 구체적인 글꼴 이름을 나열한 스택으로 명시한다(본문: `"Segoe UI", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Helvetica, Arial, sans-serif` / 코드: `"Cascadia Mono", Consolas, "D2Coding", "Noto Sans Mono CJK KR", Menlo, Monaco, monospace`), 제네릭 키워드는 항상 마지막 폴백으로만 남긴다.
-- **Rationale**: 실제 산출물(이 환경의 Windows용 헤드리스 Chromium)에서 `sans-serif`/`monospace` 제네릭 키워드가 가독성이 떨어지는 대체 글꼴로 렌더링되는 것을 육안으로 확인했다(FR-016). 구체적인 글꼴 이름을 나열하면 Chromium이 그중 실제로 설치된 첫 글꼴을 쓰므로, 운영체제가 달라져도(Windows/macOS/Linux) 합리적인 글꼴을 고를 가능성이 크게 높아진다.
-- **Alternatives considered**: 웹폰트를 파일로 번들해 `@font-face`로 삽입 — 기각(오버엔지니어링) — 라이선스 파일 관리와 번들 크기가 늘어나는데, 대부분의 개발 머신에 이미 깔려 있는 시스템 글꼴 이름을 나열하는 것만으로 문제(제네릭 키워드의 저품질 대체)가 해결된다.
+- **Decision**: `export-document-pdf.js`의 HTML 템플릿에서 본문·코드 `font-family`(및 `font-size`/`line-height`)를 손으로 고른 스택이 아니라, VS Code 자신의 Markdown 미리보기 스타일시트(`<VS Code 설치 경로>/resources/app/extensions/markdown-language-features/media/markdown.css`)의 `html, body`/`code` 규칙에서 **그대로 가져온다**:
+  - 본문: `font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, "Ubuntu", "Droid Sans", sans-serif; font-size: 14px; line-height: 22px;`
+  - 코드: `font-family: "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace; font-size: 1em; line-height: 1.357em;`
+  이 값은 각각 `var(--markdown-font-family, <위 목록>)` / `var(--vscode-editor-font-family, <위 목록>)`의 폴백 부분이다 — VS Code는 그 CSS 변수에 `markdown.preview.fontFamily`/`editor.fontFamily` 설정의 실제 값을 주입하는데, 이 저장소 사용자의 `settings.json`에는 그 두 설정이 커스터마이즈돼 있지 않으므로 VS Code가 실제로 쓰는 값은 정확히 이 폴백 목록과 같다(`markdown.preview.fontFamily`의 스키마 기본값과 대조해 문자 그대로 일치함을 확인). Windows에서 `editor.fontFamily`의 기본값이 `Consolas, 'Courier New', monospace`인데, 코드 폴백 목록의 4번째 항목이 이미 `Consolas`라 같은 결과를 낸다.
+- **Rationale**: FR-016은 "임의로 고른 글꼴"이 아니라 "VS Code Markdown 미리보기가 실제로 쓰는 글꼴과 일치"를 요구한다 — 헤드리스 Chromium에는 VS Code의 `--markdown-font-family`/`--vscode-editor-font-family` CSS 변수가 존재하지 않으므로, 그 변수들이 정의됐을 때와 똑같은 폴백 목록을 직접 지정하는 것이 "VS Code가 그 값을 주입하지 않았을 때와 동일하게 렌더링"을 보장하는 유일한 방법이다. 한글은 폴백 목록에 한글 전용 글꼴이 없어도, VS Code 자신의 UI가 "Segoe UI"만으로 한글을 정상 표시하는 것과 같은 OS 폰트 링킹(Windows가 Segoe UI에 없는 한글 글리프를 Malgun Gothic으로 자동 대체) 경로를 헤드리스 Chromium도 그대로 타므로 별도로 한글 글꼴을 나열할 필요가 없음을 실제 렌더링 결과로 확인했다.
+- **Alternatives considered**:
+  - 한글·영문·코드용 글꼴을 프로젝트가 직접 골라 나열(이전 버전의 접근) — 기각 — "VS Code에서 보이는 모습 그대로"라는 요구를 만족하려면 VS Code 자신이 실제로 쓰는 값과 일치해야 하는데, 직접 고른 글꼴은 근거 없이 비슷해 보이는 값일 뿐 VS Code의 실제 렌더링과 다를 수 있다.
+  - 웹폰트를 파일로 번들해 `@font-face`로 삽입 — 기각(오버엔지니어링) — VS Code 자신도 시스템 글꼴에 의존할 뿐 폰트 파일을 번들하지 않으므로, "VS Code와 일치"라는 목표에 오히려 불필요한 장치다.
