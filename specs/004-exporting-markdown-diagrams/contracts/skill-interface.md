@@ -15,6 +15,7 @@
 | targetFile | 필수 | 변환 대상 마크다운 파일 경로 또는 그것을 특정할 수 있는 설명 |
 | format | 선택 | `svg` \| `png` \| `pdf` — 요청에 명시돼 있지 않으면 `AskUserQuestion`으로 확인(FR-001) |
 | scope | 선택 | `diagram`(다이어그램만) \| `document`(문서 전체) — 요청에 명시돼 있지 않으면 `AskUserQuestion`으로 확인(FR-002) |
+| pdfLayout | 선택, `scope = document`일 때만 의미 있음 | `single`(1페이지 단일) \| `paginated`(표준 인쇄 규격) — `scope`가 `document`로 확정됐는데 명시돼 있지 않으면 `AskUserQuestion`으로 확인(FR-014) |
 
 **전제조건**: `targetFile`을 특정할 수 없으면(파일이 존재하지 않거나 마크다운이 아니면) 변환을 시작하지 않고 그 사실을 안내한다(spec.md Edge Cases).
 
@@ -30,6 +31,8 @@
   - 둘 다 이미 명시돼 있으면 질문 없이 바로 진행한다.
 
 형식 질문의 선택지는 `SVG` / `PNG` / `PDF` 세 가지다. 범위 질문의 선택지는 `다이어그램만` / `문서 전체` 두 가지다. 이미 명시된 값이 있는 항목에 대해서는 절대로 다시 묻지 않는다(spec.md SC-001).
+
+**`pdfLayout` 후속 질문**(FR-014): 위 규칙으로 `scope`가 `document`로 확정된 뒤, `pdfLayout`이 요청에 명시돼 있지 않으면 형식/범위 질문과는 별도의 후속 `AskUserQuestion` 한 번으로 페이지 구성을 확인한다 — 선택지 순서는 `1페이지 단일` 먼저, `표준 인쇄 규격` 다음이다. `scope`가 `diagram`이면 이 질문 자체를 하지 않는다.
 
 ## Rendering Contract
 

@@ -179,3 +179,8 @@ Task: "scripts/lib/inline-svg.js 작성"
 - [X] T027 `plan.md`의 Project Structure 소스 트리와 `README.md`/`README.ko.md`의 스킬 소개에 `exports/` 산출물 디렉토리 동작을 반영한다 per plan.md Project Structure, README "Optional add-ons"
 - [X] T028 [US1] `export-diagrams.js`가 `mmdc`를 호출할 때, `format === "png"`이면 고정 배율 상수(`PNG_SCALE = 3`, research.md "PNG 해상도" Decision)를 `-s`/`--scale` 인자로 함께 전달하도록 고친다 — svg/pdf 형식에는 영향 없음(spec.md FR-013)
 - [X] T029 `quickstart.md` 시나리오 11을 실제로 실행해 검증한다 — 큰 다이어그램을 PNG로 변환해 픽셀 크기가 `SVG 뷰박스 × 3`과 일치하는지, 텍스트가 실제 크기에서 선명한지 확인하고, svg/pdf 변환에 회귀가 없는지 확인한다(spec.md SC-009)
+- [X] T030 [US2] `export-document-pdf.js`에 `--layout single|paginated`(기본값 `paginated`) 인자를 추가한다 — `paginated`는 기존 `page.pdf({ format: "A4", ... })`를 그대로 쓰고, `single`은 뷰포트를 본문 `max-width`보다 넉넉히 넓게 고정한 뒤 `document.documentElement.scrollWidth`/`scrollHeight`를 측정해 그 값을 `page.pdf()`의 `width`/`height`로 전달하고 `pageRanges: "1-1"`을 함께 준다(spec.md FR-014~015, research.md "문서 전체 PDF의 페이지 구성" Decision)
+- [X] T031 [US2] `SKILL.md`에 `pdfLayout` 확인 질문 로직을 추가한다 — `scope`가 `document`로 확정됐는데 페이지 구성이 명시돼 있지 않으면, 옵션 순서 "1페이지 단일" → "표준 인쇄 규격"으로 별도의 단일 질문 `AskUserQuestion`을 제시한 뒤 그 답을 `--layout`으로 스크립트에 전달한다. 범위가 `diagram`이면 이 질문을 하지 않는다(spec.md FR-014, contracts/skill-interface.md Clarification Contract)
+- [X] T032 `quickstart.md` 시나리오 12를 실제로 실행해 검증한다 — 페이지 구성 미명시 시 확인 질문이 뜨는지, "1페이지 단일"/"표준 인쇄 규격" 각각의 결과 페이지 수(PyMuPDF로 확인)가 기대와 일치하는지 확인한다(spec.md SC-010)
+- [X] T033 [US2] `export-document-pdf.js`의 HTML 템플릿에서 `font-family: sans-serif`/`monospace` 제네릭 키워드를 한글·영문·코드를 지원하는 구체적 글꼴 스택으로 교체한다(spec.md FR-016, research.md "문서 전체 PDF의 글꼴" Decision)
+- [X] T034 `quickstart.md` 시나리오 13을 실제로 실행해 검증한다 — 변환된 PDF를 이미지로 렌더링해 한글·영문·코드 텍스트가 선명한지 육안으로 확인한다(spec.md SC-011)

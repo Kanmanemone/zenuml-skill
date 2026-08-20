@@ -2,7 +2,7 @@
 // scope=document, format=pdf: convert a whole Markdown file to PDF, with any embedded
 // diagrams inserted as vector SVG (so their text stays selectable/copyable) rather than
 // as raster images. Deterministic — never reasons about the document/diagram content.
-// Usage: node export-document-pdf.js <targetFile.md> [outputFile.pdf]
+// Usage: node export-document-pdf.js <targetFile.md> [outputFile.pdf] [--layout single|paginated]
 //
 // Pipeline (see research.md, "User Story 2 파이프라인" Decision):
 //   1. mermaid-cli extracts each diagram to its own SVG file and rewrites the Markdown's
@@ -21,6 +21,22 @@ import { runMmdc } from "./lib/run-mmdc.js";
 import { inlineSvgImages } from "./lib/inline-svg.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 
+// Headless Chromium falls back to generic/bitmap-ish substitutes for the bare
+// "sans-serif"/"monospace" CSS keywords depending on what fonts are actually
+// registered on the host OS. Naming real fonts explicitly (with Windows/macOS/
+// Linux + Korean-CJK coverage, generic keyword last) keeps rendering legible
+// across environments instead of relying on whatever substitute Chromium picks.
+const BODY_FONT_STACK =
+  '"Segoe UI", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Helvetica, Arial, sans-serif';
+const CODE_FONT_STACK =
+  '"Cascadia Mono", Consolas, "D2Coding", "Noto Sans Mono CJK KR", Menlo, Monaco, monospace';
+
+const SUPPORTED_LAYOUTS = ["single", "paginated"];
+// Wider than the body's own 900px max-width (plus its 2rem/32px side margins) so that
+// max-width is always fully reached before we measure content size for "single" layout —
+// otherwise a narrower default viewport would cap the measured width below 900px.
+const SINGLE_PAGE_VIEWPORT_WIDTH = 1000;
+
 function fail(message, code = 1) {
   console.error(message);
   process.exit(code);
@@ -31,10 +47,20 @@ function toFileUrl(filePath) {
 }
 
 async function main() {
-  const [, , targetFile, outputFileArg] = process.argv;
+  const args = process.argv.slice(2);
+  const layoutFlagIndex = args.indexOf("--layout");
+  let layout = "paginated";
+  if (layoutFlagIndex !== -1) {
+    layout = args[layoutFlagIndex + 1];
+    args.splice(layoutFlagIndex, 2);
+  }
+  const [targetFile, outputFileArg] = args;
 
   if (!targetFile) {
-    fail("Usage: node export-document-pdf.js <targetFile.md> [outputFile.pdf]", 2);
+    fail("Usage: node export-document-pdf.js <targetFile.md> [outputFile.pdf] [--layout single|paginated]", 2);
+  }
+  if (!SUPPORTED_LAYOUTS.includes(layout)) {
+    fail(`Unsupported --layout "${layout}" — must be one of: ${SUPPORTED_LAYOUTS.join(", ")}.`, 2);
   }
   if (!fs.existsSync(targetFile)) {
     fail(`Target file not found: ${targetFile}`);
@@ -78,10 +104,11 @@ async function main() {
 <head>
 <meta charset="utf-8">
 <style>
-  body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; line-height: 1.5; }
+  body { font-family: ${BODY_FONT_STACK}; max-width: 900px; margin: 2rem auto; line-height: 1.5; }
   svg { max-width: 100%; height: auto; }
   pre { background: #f5f5f5; padding: 0.75rem; overflow-x: auto; }
-  code { font-family: monospace; }
+  code { font-family: ${CODE_FONT_STACK}; background: #f0f0f0; padding: 0.15em 0.35em; border-radius: 3px; }
+  pre code { background: none; padding: 0; border-radius: 0; }
 </style>
 </head>
 <body>
@@ -96,13 +123,33 @@ ${bodyHtml}
     const browser = await puppeteer.launch({ headless: "shell" });
     try {
       const page = await browser.newPage();
-      await page.goto(toFileUrl(stageHtmlFile), { waitUntil: "networkidle0" });
-      await page.pdf({
-        path: outputFile,
-        format: "A4",
-        printBackground: true,
-        margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" },
-      });
+      if (layout === "single") {
+        // Match mmdc's own --pdfFit approach: measure the actually-rendered content size
+        // and hand that straight to page.pdf() as the page's own width/height, rather than
+        // fitting content into a fixed paper size. pageRanges pins it to one page in case
+        // sub-pixel rounding would otherwise spill a sliver onto a second page.
+        await page.setViewport({ width: SINGLE_PAGE_VIEWPORT_WIDTH, height: 800 });
+        await page.goto(toFileUrl(stageHtmlFile), { waitUntil: "networkidle0" });
+        const { width, height } = await page.evaluate(() => ({
+          width: document.documentElement.scrollWidth,
+          height: document.documentElement.scrollHeight,
+        }));
+        await page.pdf({
+          path: outputFile,
+          printBackground: true,
+          width: `${width}px`,
+          height: `${height}px`,
+          pageRanges: "1-1",
+        });
+      } else {
+        await page.goto(toFileUrl(stageHtmlFile), { waitUntil: "networkidle0" });
+        await page.pdf({
+          path: outputFile,
+          format: "A4",
+          printBackground: true,
+          margin: { top: "1cm", bottom: "1cm", left: "1cm", right: "1cm" },
+        });
+      }
     } finally {
       await browser.close();
     }
