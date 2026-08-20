@@ -45,3 +45,11 @@
 - **Decision**: `export-diagrams.js`는 PNG 요청 시 `mmdc -e png`를 직접 호출한다 — SVG로 먼저 렌더링한 뒤 별도 도구로 래스터화하는 재변환 단계를 두지 않는다.
 - **Rationale**: 위 "다이어그램 렌더링/변환 엔진" Decision에서 이미 확인했듯, `mmdc`의 SVG와 PNG 출력은 하나의 렌더링 패스에서 파생되는 두 가지 캡처 방식일 뿐 서로 다른 파이프라인이 아니다. 별도 재변환을 추가하면 이점 없이 처리 단계와 위험(다른 래스터라이저로 인한 폰트·크기 차이)만 늘어난다. spec.md Assumptions에 이미 반영된 결론을 그대로 계승한다.
 - **Alternatives considered**: `mmdc -e svg`로 SVG를 만든 뒤 별도 SVG→PNG 도구(예: `sharp`, `resvg`)로 재변환 — 기각(위 Rationale).
+
+## Decision: PNG 해상도
+
+- **Decision**: PNG 변환 시 `mmdc`에 `-s`/`--scale 3`을 고정값으로 넘긴다. `mmdc`는 PNG 출력 시 `page.setViewport({ deviceScaleFactor: scale })`로 뷰포트를 설정한 뒤 다이어그램의 실제 렌더링 크기(`getBoundingClientRect()`로 측정한 SVG bounding box)에 맞춰 스크린샷을 찍는다(`src/index.js` 확인) — 즉 `--width`/`--height`는 초기 뷰포트일 뿐 최종 출력 크기를 결정하지 않고, `--scale`(Puppeteer의 `deviceScaleFactor`, 일반 화면 96 CSS px/in 기준의 배율 — 3이면 대략 288 DPI에 해당)만이 같은 레이아웃을 몇 배 밀도로 캡처할지 결정한다. 기본값(`scale=1`)으로는 다이어그램이 클수록 표시 크기 대비 픽셀 수가 부족해 흐릿하게 나온다(실사용 리포트로 확인).
+- **Rationale**: 가로·세로 픽셀 수를 직접 정하면 다이어그램마다 크기가 다른데도 화질이 다이어그램 크기에 반비례하게 된다. `--scale`은 다이어그램의 실제 레이아웃 크기와 무관하게 일정한 선명도(고정 배율)를 보장하는 mmdc/Puppeteer가 이미 제공하는 방법이라, 새 로직을 만들 필요가 없다(spec.md FR-013).
+- **Alternatives considered**:
+  - `--width`/`--height`를 크게 고정: 기각 — 다이어그램 종횡비가 그 값과 다르면 여백/잘림이 생기고, 크기가 커져도 실제 해상도(선명도)는 그대로다(위 mmdc 동작 확인 결과, 어차피 bounding box로 재설정됨).
+  - PNG를 먼저 만들고 별도 업스케일링 도구로 보정: 기각 — 손실된 디테일을 사후에 복원할 수 없고, 새 의존성과 처리 단계만 늘어난다(오버엔지니어링).

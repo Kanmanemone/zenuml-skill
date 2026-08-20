@@ -177,3 +177,5 @@ Task: "scripts/lib/inline-svg.js 작성"
 - [X] T025 `export-diagrams.js`와 `export-document-pdf.js`의 기본 출력 경로 계산을 T024의 `ensureExportDir()`을 쓰도록 바꾼다 — 출력 경로 인자가 명시적으로 주어지지 않았을 때만 적용하고, 베이스 이름·번호 매김 규칙은 그대로 둔다(spec.md FR-011~012, contracts/skill-interface.md Output Contract)
 - [X] T026 `quickstart.md` 시나리오 10을 실제로 실행해 검증한다 — `exports/`가 없는 상태에서 SVG·PDF 변환 각각 실행해 자동 생성, 산출물 위치, 다이어그램 여러 개일 때의 공유 여부, 기존 회귀(형식/범위 선택·렌더러 보존·실패 처리) 없음을 확인한다(spec.md SC-007, SC-008)
 - [X] T027 `plan.md`의 Project Structure 소스 트리와 `README.md`/`README.ko.md`의 스킬 소개에 `exports/` 산출물 디렉토리 동작을 반영한다 per plan.md Project Structure, README "Optional add-ons"
+- [X] T028 [US1] `export-diagrams.js`가 `mmdc`를 호출할 때, `format === "png"`이면 고정 배율 상수(`PNG_SCALE = 3`, research.md "PNG 해상도" Decision)를 `-s`/`--scale` 인자로 함께 전달하도록 고친다 — svg/pdf 형식에는 영향 없음(spec.md FR-013)
+- [X] T029 `quickstart.md` 시나리오 11을 실제로 실행해 검증한다 — 큰 다이어그램을 PNG로 변환해 픽셀 크기가 `SVG 뷰박스 × 3`과 일치하는지, 텍스트가 실제 크기에서 선명한지 확인하고, svg/pdf 변환에 회귀가 없는지 확인한다(spec.md SC-009)
