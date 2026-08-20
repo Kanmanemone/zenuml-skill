@@ -21,15 +21,24 @@ import { runMmdc } from "./lib/run-mmdc.js";
 import { inlineSvgImages } from "./lib/inline-svg.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 
-// Headless Chromium falls back to generic/bitmap-ish substitutes for the bare
-// "sans-serif"/"monospace" CSS keywords depending on what fonts are actually
-// registered on the host OS. Naming real fonts explicitly (with Windows/macOS/
-// Linux + Korean-CJK coverage, generic keyword last) keeps rendering legible
-// across environments instead of relying on whatever substitute Chromium picks.
+// Sourced verbatim from VS Code's own Markdown preview stylesheet — not a hand-picked
+// stack — so the PDF's body/code text matches what VS Code's Markdown preview actually
+// renders, rather than headless Chromium's generic "sans-serif"/"monospace" substitute
+// (<VS Code install>/resources/app/extensions/markdown-language-features/media/
+// markdown.css, `html, body` and `code` rules). Those rules read
+// `var(--markdown-font-family, <fallback>)` / `var(--vscode-editor-font-family,
+// <fallback>)` — VS Code injects the resolved `markdown.preview.fontFamily` /
+// `editor.fontFamily` setting into those custom properties, so what's actually
+// rendered is that setting's value if customized, or this exact fallback list
+// otherwise (confirmed against `markdown.preview.fontFamily`'s own schema default,
+// which matches the body fallback verbatim). We have no such settings/CSS vars here,
+// so we use the fallback list directly — the same list VS Code falls back to.
 const BODY_FONT_STACK =
-  '"Segoe UI", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Helvetica, Arial, sans-serif';
+  '-apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, "Ubuntu", "Droid Sans", sans-serif';
+const BODY_FONT_SIZE = "14px";
+const BODY_LINE_HEIGHT = "22px";
 const CODE_FONT_STACK =
-  '"Cascadia Mono", Consolas, "D2Coding", "Noto Sans Mono CJK KR", Menlo, Monaco, monospace';
+  '"SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace';
 
 const SUPPORTED_LAYOUTS = ["single", "paginated"];
 // Wider than the body's own 900px max-width (plus its 2rem/32px side margins) so that
@@ -104,10 +113,10 @@ async function main() {
 <head>
 <meta charset="utf-8">
 <style>
-  body { font-family: ${BODY_FONT_STACK}; max-width: 900px; margin: 2rem auto; line-height: 1.5; }
+  body { font-family: ${BODY_FONT_STACK}; font-size: ${BODY_FONT_SIZE}; line-height: ${BODY_LINE_HEIGHT}; max-width: 900px; margin: 2rem auto; }
   svg { max-width: 100%; height: auto; }
   pre { background: #f5f5f5; padding: 0.75rem; overflow-x: auto; }
-  code { font-family: ${CODE_FONT_STACK}; background: #f0f0f0; padding: 0.15em 0.35em; border-radius: 3px; }
+  code { font-family: ${CODE_FONT_STACK}; font-size: 1em; line-height: 1.357em; background: #f0f0f0; padding: 0.15em 0.35em; border-radius: 3px; }
   pre code { background: none; padding: 0; border-radius: 0; }
 </style>
 </head>

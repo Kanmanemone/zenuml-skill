@@ -184,3 +184,5 @@ Task: "scripts/lib/inline-svg.js 작성"
 - [X] T032 `quickstart.md` 시나리오 12를 실제로 실행해 검증한다 — 페이지 구성 미명시 시 확인 질문이 뜨는지, "1페이지 단일"/"표준 인쇄 규격" 각각의 결과 페이지 수(PyMuPDF로 확인)가 기대와 일치하는지 확인한다(spec.md SC-010)
 - [X] T033 [US2] `export-document-pdf.js`의 HTML 템플릿에서 `font-family: sans-serif`/`monospace` 제네릭 키워드를 한글·영문·코드를 지원하는 구체적 글꼴 스택으로 교체한다(spec.md FR-016, research.md "문서 전체 PDF의 글꼴" Decision)
 - [X] T034 `quickstart.md` 시나리오 13을 실제로 실행해 검증한다 — 변환된 PDF를 이미지로 렌더링해 한글·영문·코드 텍스트가 선명한지 육안으로 확인한다(spec.md SC-011)
+- [X] T035 [US2] T033의 직접 고른 글꼴 스택을 폐기하고, `export-document-pdf.js`의 본문·코드 `font-family`/`font-size`/`line-height`를 VS Code 자신의 Markdown 미리보기 스타일시트(`markdown-language-features/media/markdown.css`)의 `html, body`/`code` 규칙에서 그대로 옮긴 값으로 교체한다(spec.md FR-016 갱신판, research.md "문서 전체 PDF의 글꼴" Decision 갱신판)
+- [X] T036 `quickstart.md` 시나리오 13(갱신판)을 실제로 실행해 검증한다 — 재변환한 PDF를 이미지로 렌더링해 한글이 여전히 정상 표시되는지(OS 폰트 링킹에 의존), 영문·코드가 VS Code Markdown 미리보기와 같은 글꼴로 보이는지 확인한다(spec.md SC-011 갱신판)
