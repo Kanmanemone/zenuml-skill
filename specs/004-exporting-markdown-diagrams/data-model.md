@@ -12,11 +12,13 @@ spec.md의 Key Entities를 실행 가능한 수준으로 구체화한다. 이 �
 | `scope` | `"diagram"` \| `"document"` | 다이어그램만 변환할지, 문서 전체를 변환할지 (FR-002) |
 | `format` | `"svg"` \| `"png"` \| `"pdf"` | 출력 형식 (FR-001) |
 | `diagramSelector` | 선택적, 문자열/인덱스 | 사용자가 특정 다이어그램을 지목했다면 그 식별자 — 없으면 문서의 모든 다이어그램을 대상으로 함(Assumptions 기본값) |
+| `pdfLayout` | `"single"` \| `"paginated"` | `scope = "document"`일 때만 의미 있음(FR-014) — 페이지 나눔 없이 한 장에 담을지("single"), 표준 인쇄 규격으로 여러 페이지에 나눌지("paginated", 기본값). `scope = "diagram"`이면 이 필드는 무관하며 확인 질문 대상도 아니다. |
 
 **검증 규칙**:
 - `format`이 명시되지 않은 요청에서는 `AskUserQuestion`으로 확정되기 전까지 `ConversionRequest`가 완결되지 않는다(FR-001).
 - `scope`가 명시되지 않은 요청에서도 마찬가지다(FR-002).
 - `format`과 `scope`가 모두 미확정이면, 확정 질문은 하나의 `AskUserQuestion` 호출(두 개의 `questions` 항목)로 함께 이뤄져야 한다(FR-003) — 자세한 모양은 `contracts/skill-interface.md` 참고.
+- `scope`가 `"document"`로 확정됐는데 `pdfLayout`이 명시되지 않았다면, `format`/`scope` 확정과는 별도의 후속 확인 질문(1개)으로 `pdfLayout`을 확정해야 완결된다(FR-014, contracts/skill-interface.md Clarification Contract).
 - `scope = "document"`이면서 `format = "svg"` 또는 `"png"`인 조합을 spec.md 자체가 금지하지는 않지만, 이번 구현(tasks.md User Story 2)은 `scope = "document"`를 항상 `format = pdf`로 처리한다 — PDF만 여러 페이지·다중 다이어그램 문서를 온전히 표현할 수 있고, `export-document-pdf.js` 외의 문서 전체용 스크립트는 이번 범위에서 만들지 않았기 때문이다(오버엔지니어링 방지). `scope = document`가 확정되면 `format` 질문 자체를 생략한다(SKILL.md "Scope: whole document" 참고).
 
 ## DiagramSource (다이어그램 소스)

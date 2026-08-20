@@ -34,6 +34,7 @@
 - 이 저장소의 두 다이어그램 유형(zenuml 플레이버, 일반 Mermaid flowchart) 모두 지원해야 한다(FR-006).
 - 모든 산출물은 원본 마크다운과 같은 디렉토리가 아니라 그 아래의 전용 하위 디렉토리(`exports/`)에 생성되어야 하며, 그 디렉토리가 없으면 자동으로 만들어져야 한다(FR-009~012).
 - PNG 변환은 가로·세로 픽셀 크기를 고정값으로 지정하지 않고, 고정된 해상도 배율(mermaid-cli `--scale`, 즉 Puppeteer `deviceScaleFactor`)로 다이어그램의 실제 레이아웃 크기에 맞춰 픽셀 수가 정해져야 한다(FR-013).
+- 문서 전체 PDF는 페이지 구성(1페이지 단일 | 표준 인쇄 규격)이 불분명하면 확인 질문으로 선택받아야 하며, 다이어그램 단독 PDF에는 이 질문이 적용되지 않는다(FR-014~015).
 
 **Scale/Scope**: 단일 사용자(저장소 소유자), 파일 하나 단위의 변환 요청. 대량 배치 처리, 팀/커뮤니티 배포, Mermaid/ZenUML 이외의 다이어그램 문법, 완전한 오프라인 지원은 범위 밖이다(spec.md Assumptions).
 
@@ -68,8 +69,8 @@ specs/004-exporting-markdown-diagrams/
 .claude/skills/exporting-markdown-diagrams/
 ├── SKILL.md               # 워크플로: 요청에서 형식/범위 판단 → 불분명하면 AskUserQuestion(최대 2문항) → 번들 스크립트 호출 → 산출물 경로 제시
 └── scripts/
-    ├── export-diagrams.js   # 범위="다이어그램만": mmdc를 호출해 SVG/PNG/PDF로 변환(다이어그램이 여러 개면 mmdc 자체의 번호 매김 기능을 그대로 사용)
-    ├── export-document-pdf.js  # 범위="문서 전체": mmdc의 md→md 다이어그램 추출로 SVG 생성 → HTML 변환 시 SVG 인라인 삽입 → Puppeteer page.pdf()로 인쇄
+    ├── export-diagrams.js   # 범위="다이어그램만": mmdc를 호출해 SVG/PNG/PDF로 변환(다이어그램이 여러 개면 mmdc 자체의 번호 매김 기능을 그대로 사용). PNG는 고정 해상도 배율(PNG_SCALE)을 함께 전달(FR-013)
+    ├── export-document-pdf.js  # 범위="문서 전체": mmdc의 md→md 다이어그램 추출로 SVG 생성 → HTML 변환 시 SVG 인라인 삽입 → Puppeteer page.pdf()로 인쇄. `--layout single|paginated`로 페이지 구성 선택(기본 paginated, FR-014~015)
     └── lib/
         ├── inline-svg.js    # 중간 산출물(마크다운 속 이미지 참조)의 SVG 파일 내용을 HTML에 인라인으로 치환하는 공용 로직
         ├── run-mmdc.js      # 두 스크립트가 공유하는 mmdc 호출 헬퍼 — mermaid-cli의 JS 엔트리포인트를 Node로 직접 실행해 Windows의 `.cmd` 셰임 spawn 문제(EINVAL)를 피함(구현 중 발견, `/speckit-converge` T022로 문서화)

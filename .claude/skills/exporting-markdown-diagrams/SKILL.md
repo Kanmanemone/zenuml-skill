@@ -21,6 +21,7 @@ From the user's message, work out three things:
 - **targetFile**: the Markdown file to convert. If it can't be identified (no path given, no file matching a description found), say so and stop — don't guess a file.
 - **format**: `svg` | `png` | `pdf`, only if the user's wording actually names one (e.g. "png로", "SVG로 뽑아줘", "PDF 파일로"). Don't infer a format from context that doesn't name one.
 - **scope**: `diagram` (다이어그램만) | `document` (문서 전체), only if the wording actually distinguishes them (e.g. "이 다이어그램만" implies `diagram`; "문서 전체를"/"파일을 통째로" implies `document`). A bare "이거 변환해줘" with no such wording is unresolved, not defaulted.
+- **pdfLayout** (only meaningful when `scope` is `document`): `single` (1페이지 단일) | `paginated` (표준 인쇄 규격), only if the wording actually names one (e.g. "한 페이지로", "안 잘리게" implies `single`; "인쇄용으로", "페이지 나눠서" implies `paginated`). Leave unresolved otherwise — never infer it from `scope`/`format` wording alone.
 
 ## Step 2 — Clarify missing details
 
@@ -46,6 +47,18 @@ Format question — options `SVG`, `PNG`, `PDF`. Scope question — options `다
   ]
 ```
 
+**Page layout for `scope=document`**: once `scope` is confirmed as `document` (whether it was given outright or just resolved from the question above) and `pdfLayout` is still unresolved, ask one more, separate `AskUserQuestion` — a follow-up round after the format/scope interaction, not folded into it — with options in this exact order: `1페이지 단일` first, `표준 인쇄 규격` second. Skip this question entirely when `scope` resolves to `diagram` — page layout has no meaning for a diagram-only export.
+
+```text
+예시 — scope=document가 확정된 뒤 pdfLayout이 아직 불분명할 때의 후속 AskUserQuestion:
+  questions: [
+    { header: "PDF 페이지 구성", question: "PDF 페이지를 어떻게 만들까요?", options: [
+      { label: "1페이지 단일", description: "페이지 나눔 없이 문서 전체를 한 장에 담습니다." },
+      { label: "표준 인쇄 규격", description: "A4 등 표준 용지 크기로 필요한 만큼 여러 페이지에 나눠 인쇄합니다(지금까지의 기본 방식)." }
+    ] }
+  ]
+```
+
 ## Renderer preservation
 
 The diagram source (everything inside its code fence, including any `%%{init: ...}%%` renderer directive such as `defaultRenderer`) is passed to the script **exactly as written** — never parsed, rewritten, or re-serialized by you first. Don't add logic here to detect or branch on renderer directives; the bundled script hands the raw source straight to the renderer, which is what makes preserving them automatic rather than something to implement.
@@ -68,10 +81,12 @@ On success, the script prints one output file path per line — report those pat
 
 ## Scope: whole document
 
-Once `targetFile` and `scope=document` are confirmed (format is always `pdf` for this scope — see "Step 2" above), run:
+Once `targetFile`, `scope=document` (format is always `pdf` for this scope), and `pdfLayout` are all confirmed (see "Step 2" above), run:
 
 ```text
-node scripts/export-document-pdf.js <targetFile> [outputFile.pdf]
+node scripts/export-document-pdf.js <targetFile> "" --layout <single|paginated>
 ```
 
-This script extracts every diagram in the document, embeds it back into the printed PDF as a real vector `<svg>` (not a linked image or a rasterized picture), and cleans up its own intermediate files — you don't need to manage temp files or call any other script for this scope. On success, it prints the PDF's path — report that back to the user. On failure, follow "Failure handling" above.
+(The empty `""` positional keeps the script's default `exports/`-based output naming — pass a real path there only if the user asked for a specific output location.)
+
+This script extracts every diagram in the document, embeds it back into the printed PDF as a real vector `<svg>` (not a linked image or a rasterized picture), and cleans up its own intermediate files — you don't need to manage temp files or call any other script for this scope. `single` prints the whole document onto one continuously tall page (no page breaks); `paginated` prints onto standard A4 pages, flowing content across as many as it needs. On success, it prints the PDF's path — report that back to the user. On failure, follow "Failure handling" above.

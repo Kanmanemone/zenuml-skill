@@ -53,3 +53,17 @@
 - **Alternatives considered**:
   - `--width`/`--height`를 크게 고정: 기각 — 다이어그램 종횡비가 그 값과 다르면 여백/잘림이 생기고, 크기가 커져도 실제 해상도(선명도)는 그대로다(위 mmdc 동작 확인 결과, 어차피 bounding box로 재설정됨).
   - PNG를 먼저 만들고 별도 업스케일링 도구로 보정: 기각 — 손실된 디테일을 사후에 복원할 수 없고, 새 의존성과 처리 단계만 늘어난다(오버엔지니어링).
+
+## Decision: 문서 전체 PDF의 페이지 구성("1페이지 단일" 모드) 구현 방식
+
+- **Decision**: `export-document-pdf.js`에 `--layout single|paginated`(기본값 `paginated`, 기존 동작)를 추가한다. `paginated`는 기존 그대로 `page.pdf({ format: "A4", ... })`를 쓴다. `single`은 인쇄용 페이지 크기를 지정하는 대신, 렌더링된 문서 전체의 실제 크기(`document.documentElement.scrollWidth`/`scrollHeight`, 뷰포트를 본문 `max-width`보다 넉넉히 넓게 고정한 뒤 측정)를 `page.pdf()`의 `width`/`height`에 그대로 넘기고 `pageRanges: "1-1"`로 안전장치를 둔다.
+- **Rationale**: `mmdc` 자신의 `pdfFit` 옵션이 정확히 같은 패턴(콘텐츠의 `getBoundingClientRect()`를 측정해 그 값을 `page.pdf()`의 `width`/`height`로 그대로 사용, `pageRanges: "1-1"`로 반올림 오차에 의한 의도치 않은 2페이지 생성 방지)을 이미 쓰고 있음을 소스에서 확인했다(`export-diagrams.js`의 PDF 경로가 의존하는 `@mermaid-js/mermaid-cli`의 동일 로직) — 검증된 방식을 그대로 재사용한다. `format: "A4"`처럼 표준 용지 크기를 지정하는 방식은 본질적으로 콘텐츠 흐름을 그 크기에 맞춰 여러 페이지로 나누는 것이므로, "1페이지"를 만들려면 페이지 크기 자체를 콘텐츠 크기에 맞추는 것이 유일하게 확실한 방법이다.
+- **Alternatives considered**:
+  - CSS `@media print { body { break-inside: avoid } }` 등으로 페이지 나눔을 억제: 기각 — Chromium의 print 페이지네이션은 여전히 지정된 페이지 크기(A4)를 기준으로 콘텐츠를 자르므로, 콘텐츠가 A4 한 장보다 크면 이 방법만으로는 "1페이지"가 보장되지 않는다.
+  - 매우 큰 고정 용지 크기(예: `Legal` 확장판)를 지정: 기각 — 문서 길이는 다이어그램 개수·프로즈 분량에 따라 임의로 달라지므로 고정된 큰 값도 언젠가는 넘친다. 콘텐츠 실측 크기를 쓰는 것만이 항상 정확하다.
+
+## Decision: 문서 전체 PDF의 글꼴
+
+- **Decision**: `export-document-pdf.js`의 HTML 템플릿에서 `font-family: sans-serif`/`monospace` 같은 제네릭 키워드 대신, 한글·영문·코드 각각을 잘 지원하는 구체적인 글꼴 이름을 나열한 스택으로 명시한다(본문: `"Segoe UI", -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Helvetica, Arial, sans-serif` / 코드: `"Cascadia Mono", Consolas, "D2Coding", "Noto Sans Mono CJK KR", Menlo, Monaco, monospace`), 제네릭 키워드는 항상 마지막 폴백으로만 남긴다.
+- **Rationale**: 실제 산출물(이 환경의 Windows용 헤드리스 Chromium)에서 `sans-serif`/`monospace` 제네릭 키워드가 가독성이 떨어지는 대체 글꼴로 렌더링되는 것을 육안으로 확인했다(FR-016). 구체적인 글꼴 이름을 나열하면 Chromium이 그중 실제로 설치된 첫 글꼴을 쓰므로, 운영체제가 달라져도(Windows/macOS/Linux) 합리적인 글꼴을 고를 가능성이 크게 높아진다.
+- **Alternatives considered**: 웹폰트를 파일로 번들해 `@font-face`로 삽입 — 기각(오버엔지니어링) — 라이선스 파일 관리와 번들 크기가 늘어나는데, 대부분의 개발 머신에 이미 깔려 있는 시스템 글꼴 이름을 나열하는 것만으로 문제(제네릭 키워드의 저품질 대체)가 해결된다.
