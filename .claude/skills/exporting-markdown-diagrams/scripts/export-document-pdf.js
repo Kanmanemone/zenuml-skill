@@ -19,6 +19,7 @@ import MarkdownIt from "markdown-it";
 import puppeteer from "puppeteer";
 import { runMmdc } from "./lib/run-mmdc.js";
 import { inlineSvgImages } from "./lib/inline-svg.js";
+import { fitSvgFile } from "./lib/fit-svg.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 
 // Sourced verbatim from VS Code's own Markdown preview stylesheet — not a hand-picked
@@ -103,12 +104,23 @@ async function main() {
       fail(`mermaid-cli did not produce an intermediate Markdown file:\n${stage1.combinedOutput}`);
     }
 
-    // --- Stage 2: Markdown -> HTML, inline the extracted SVGs, print to PDF ---
-    const stageMarkdown = fs.readFileSync(stageMdFile, "utf-8");
-    const md = new MarkdownIt({ html: true });
-    const bodyHtml = inlineSvgImages(md.render(stageMarkdown), workDir);
+    const browser = await puppeteer.launch({ headless: "shell" });
+    try {
+      // --- Stage 1.5: widen each extracted SVG's viewBox to its real drawn bounding box ---
+      // (some renderers, e.g. zenuml, compute a viewBox that clips content such as comments).
+      // Measured in the same browser that prints the PDF, so text widths match.
+      for (const entry of fs.readdirSync(workDir)) {
+        if (/\.svg$/i.test(entry)) {
+          await fitSvgFile(browser, path.join(workDir, entry));
+        }
+      }
 
-    const fullHtml = `<!doctype html>
+      // --- Stage 2: Markdown -> HTML, inline the extracted SVGs, print to PDF ---
+      const stageMarkdown = fs.readFileSync(stageMdFile, "utf-8");
+      const md = new MarkdownIt({ html: true });
+      const bodyHtml = inlineSvgImages(md.render(stageMarkdown), workDir);
+
+      const fullHtml = `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -126,11 +138,9 @@ ${bodyHtml}
 </html>
 `;
 
-    const stageHtmlFile = path.join(workDir, "stage.html");
-    fs.writeFileSync(stageHtmlFile, fullHtml, "utf-8");
+      const stageHtmlFile = path.join(workDir, "stage.html");
+      fs.writeFileSync(stageHtmlFile, fullHtml, "utf-8");
 
-    const browser = await puppeteer.launch({ headless: "shell" });
-    try {
       const page = await browser.newPage();
       if (layout === "single") {
         // Match mmdc's own --pdfFit approach: measure the actually-rendered content size
