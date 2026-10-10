@@ -40,14 +40,9 @@ Copy these into your `.claude/skills/` directory alongside the core skill:
 - **[`generating-architecture-views`](.claude/skills/generating-architecture-views/)** — adds a structural view (components, groups, dependencies). Want a specific Mermaid renderer (e.g. `elk`) for its Dependency diagrams? Say so in your request and it's added to the `%%{init}%%` block; leave it unspecified and it won't be.
 - **[`exporting-markdown-diagrams`](.claude/skills/exporting-markdown-diagrams/)** — converts a diagram to SVG/PNG, or a whole Markdown file to PDF (diagrams embedded as selectable-text vectors), always through bundled scripts (mermaid-cli) — never LLM reasoning. Run `npm install` once inside its `scripts/` folder to fetch the dependencies those scripts use. Output lands in an `exports/` subdirectory next to the source file, created automatically.
 
-## Development history
+## Development
 
-Built through the [Spec Kit](https://github.com/github/spec-kit) spec-driven development pipeline. The list below is in build order. Each feature's full spec/plan/tasks trail lives under `specs/`:
-
-1. [`specs/001-zenuml-diagram-skill/`](specs/001-zenuml-diagram-skill/) — the core skill described above
-2. [`specs/002-diagram-feedback-log/`](specs/002-diagram-feedback-log/) — regenerate a diagram in place and keep a log of what changed and why
-3. [`specs/003-architecture-view-skill/`](specs/003-architecture-view-skill/) — a companion `generating-architecture-views` skill that adds a structural view (components, groups, dependencies) and can hand off into the sequence diagram above
-4. [`specs/004-exporting-markdown-diagrams/`](specs/004-exporting-markdown-diagrams/) — a script-based `exporting-markdown-diagrams` skill that converts a diagram to SVG/PNG or a whole Markdown file to PDF (diagrams embedded as selectable-text vectors), collecting output into an `exports/` subdirectory next to the source file, with zero LLM inference in the conversion step itself
+Built through the [Spec Kit](https://github.com/github/spec-kit) spec-driven development pipeline. Each feature's spec/plan/tasks trail lives under [`specs/`](specs/).
 
 ## Requirements
 

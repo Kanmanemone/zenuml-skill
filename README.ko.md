@@ -40,14 +40,9 @@
 - **[`generating-architecture-views`](.claude/skills/generating-architecture-views/)** — 구조 뷰(컴포넌트·그룹·의존관계)를 추가합니다. Dependency 다이어그램에 특정 Mermaid 렌더러(예: `elk`)를 쓰고 싶다면 요청에 그렇게 명시하세요 — `%%{init}%%` 블록에 `defaultRenderer`가 추가됩니다. 명시하지 않으면 추가되지 않습니다.
 - **[`exporting-markdown-diagrams`](.claude/skills/exporting-markdown-diagrams/)** — 다이어그램을 SVG/PNG로, 마크다운 파일 전체를 PDF(다이어그램은 텍스트 선택 가능한 벡터로 삽입)로 변환합니다. 변환은 항상 번들 스크립트(mermaid-cli)로만 이뤄지고 LLM 추론을 거치지 않습니다. 그 스크립트가 쓰는 의존성을 받기 위해 `scripts/` 폴더에서 `npm install`을 한 번 실행하세요. 결과 파일은 원본과 같은 디렉토리가 아니라 그 아래 `exports/`(자동 생성)에 모입니다.
 
-## 개발 히스토리
+## 개발
 
-[Spec Kit](https://github.com/github/spec-kit) 스펙 기반 개발 파이프라인을 거쳐 만들어졌습니다. 아래는 개발한 순서대로입니다. 각 기능의 전체 스펙/계획/태스크 기록은 `specs/` 아래에 있습니다:
-
-1. [`specs/001-zenuml-diagram-skill/`](specs/001-zenuml-diagram-skill/) — 위에서 설명한 핵심 스킬
-2. [`specs/002-diagram-feedback-log/`](specs/002-diagram-feedback-log/) — 다이어그램을 그 자리에서 재생성하고 무엇을 왜 고쳤는지 로그로 남김
-3. [`specs/003-architecture-view-skill/`](specs/003-architecture-view-skill/) — 구조 뷰(컴포넌트·그룹·의존관계)를 추가하고 위 시퀀스 다이어그램 스킬로 이어질 수 있는 동반 스킬 `generating-architecture-views`
-4. [`specs/004-exporting-markdown-diagrams/`](specs/004-exporting-markdown-diagrams/) — 다이어그램을 SVG/PNG로, 마크다운 파일 전체를 PDF(다이어그램은 텍스트 선택 가능한 벡터로 삽입)로 변환하며 산출물을 원본 옆 `exports/` 하위 디렉토리에 모으는, 변환 단계에 LLM 추론이 전혀 들어가지 않는 스크립트 기반 스킬 `exporting-markdown-diagrams`
+[Spec Kit](https://github.com/github/spec-kit) 스펙 기반 개발 파이프라인을 거쳐 만들어졌습니다. 각 기능의 스펙/계획/태스크 기록은 [`specs/`](specs/) 아래에 있습니다.
 
 ## 요구 사항
 
