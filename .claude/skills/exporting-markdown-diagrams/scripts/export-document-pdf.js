@@ -18,6 +18,7 @@ import os from "node:os";
 import MarkdownIt from "markdown-it";
 import puppeteer from "puppeteer";
 import { runMmdc } from "./lib/run-mmdc.js";
+import { BROWSER_LAUNCH_OPTIONS } from "./lib/browser-config.js";
 import { inlineSvgImages } from "./lib/inline-svg.js";
 import { fitSvgFile } from "./lib/fit-svg.js";
 import { ensureExportDir } from "./lib/export-dir.js";
@@ -104,7 +105,7 @@ async function main() {
       fail(`mermaid-cli did not produce an intermediate Markdown file:\n${stage1.combinedOutput}`);
     }
 
-    const browser = await puppeteer.launch({ headless: "shell" });
+    const browser = await puppeteer.launch(BROWSER_LAUNCH_OPTIONS);
     try {
       // --- Stage 1.5: widen each extracted SVG's viewBox to its real drawn bounding box ---
       // (some renderers, e.g. zenuml, compute a viewBox that clips content such as comments).

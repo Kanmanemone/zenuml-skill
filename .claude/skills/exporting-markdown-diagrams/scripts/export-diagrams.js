@@ -15,6 +15,7 @@ import fs from "node:fs";
 import os from "node:os";
 import puppeteer from "puppeteer";
 import { runMmdc } from "./lib/run-mmdc.js";
+import { BROWSER_LAUNCH_OPTIONS } from "./lib/browser-config.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 import { fitSvgFile, svgFileToPng, svgFileToPdf } from "./lib/fit-svg.js";
 
@@ -105,9 +106,9 @@ async function main() {
   }
 
   // --- Stage 2: fit each SVG's viewBox to its content, then emit the requested format ---
-  // Same launch mode mmdc uses, so the text we measure is laid out exactly as mmdc laid it out.
+  // Same launch settings mmdc uses, so the text we measure is laid out exactly as mmdc laid it out.
   const produced = [];
-  const browser = await puppeteer.launch({ headless: "shell" });
+  const browser = await puppeteer.launch(BROWSER_LAUNCH_OPTIONS);
   try {
     for (const svgName of svgFiles) {
       const svgPath = path.join(workDir, svgName);
