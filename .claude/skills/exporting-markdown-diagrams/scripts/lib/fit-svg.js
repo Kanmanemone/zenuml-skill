@@ -7,7 +7,8 @@
 //
 // Text width depends on which browser measures it (chrome-headless-shell and full Chrome
 // resolve generic font families differently), so callers must pass the same browser
-// instance they render with — see research.md, "측정 브라우저 = 렌더 브라우저".
+// instance they render with — see research.md, "측정 브라우저 = 렌더 브라우저" — launched with
+// the skill's shared settings (browser-config.js), which mmdc's own browser also uses.
 
 import fs from "node:fs";
 
