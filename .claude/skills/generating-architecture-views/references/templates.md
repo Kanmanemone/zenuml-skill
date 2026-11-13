@@ -35,7 +35,7 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
+  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
 ---
 flowchart LR
   subgraph GroupA["그룹A"]
@@ -86,6 +86,7 @@ Rules:
 - Change marks (dynamic requests only, see "Change marking" below) go in the CRUD section as `class <Id> crudCreate|crudUpdate|crudDelete`; a static diagram has the label-convention comment and the three `classDef crud*` lines and no `class … crud*` line.
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
 - `defaultRenderer` under `config.flowchart` (e.g. `defaultRenderer: elk`) is optional too — add it when this request explicitly names a renderer (that exact value, open vocabulary, no validation) or, failing that, when the `dependency.renderer` setting is `elk`. Omit it otherwise, and don't carry a renderer named in an earlier round forward on its own.
+- `themeCSS` is copied verbatim. Its first rule enlarges cluster labels; the rest overrides Mermaid's default edge-label background: the stacked label backgrounds (`.edgeLabel`, `.edgeLabel p`) are cleared and the remaining one (`.labelBkg`) is painted with 70% of the current editor background (`--vscode-editor-background`, white where that variable doesn't exist), so the edge line shows faintly through the label in both light and dark themes.
 - Never add `themeVariables` (background, text, cluster, edge-label colors). Renderers pick those for the viewer's light or dark theme — VS Code's built-in Mermaid preview computes them from the active color theme and redraws when it changes, and a fixed value would override that. Node border and edge colors come only from the palette below, whose 500-shade tones read on both light and dark backgrounds.
 
 ### Color palette

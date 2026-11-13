@@ -440,4 +440,4 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 ## Phase 32: Convergence
 
-- [ ] T117 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·예시 fence), `references/templates.md`(템플릿 fence·규칙 설명), `references/examples.md`(모든 fence)의 `themeCSS` 끝에 엣지 라벨 반투명 규칙 `.edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }`를 고정으로 덧붙이고 그 의미를 설명 per FR-007 (partial)
+- [X] T117 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·예시 fence), `references/templates.md`(템플릿 fence·규칙 설명), `references/examples.md`(모든 fence)의 `themeCSS` 끝에 엣지 라벨 반투명 규칙 `.edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }`를 고정으로 덧붙이고 그 의미를 설명 per FR-007 (partial)

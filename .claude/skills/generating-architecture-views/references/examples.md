@@ -23,7 +23,7 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
+  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
 ---
 flowchart LR
   subgraph OrderDomain["주문 도메인"]
@@ -225,7 +225,7 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
+  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
 ---
 flowchart LR
   subgraph Auth["인증"]
