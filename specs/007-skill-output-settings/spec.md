@@ -39,7 +39,7 @@
 2. **Given** Responsibility는 `collapsed`, Collaboration은 `expanded`로 정한 설정, **When** 구조 뷰가 생성되어 미리보기로 열면, **Then** 두 섹션이 각각 별도 상자에 들어가 Responsibility는 접힌 채로, Collaboration은 펼쳐진 채로 보이며, 어느 상자든 펼친 내용은 `plain`일 때와 같다(항목, 링크, 볼드 표기).
 3. **Given** Responsibility를 `hidden`으로 정한 설정, **When** 구조 뷰가 생성되면, **Then** 산출 파일에 `### Responsibility` 헤딩과 내용이 모두 없고 Dependency 다음에 곧바로 Collaboration이 온다. 스킬은 Responsibility 내용을 만들지 않는다.
 4. **Given** 설정 파일이 없거나 두 옵션이 모두 `plain`인 상태, **When** 구조 뷰가 생성되면, **Then** 산출물은 이 기능 도입 전과 똑같다.
-5. **Given** `dependency.renderer`를 `elk`로 정한 설정, **When** 사용자가 렌더러를 말하지 않고 구조 뷰를 요청하면, **Then** Dependency 다이어그램의 YAML 설정(`config.flowchart.defaultRenderer`)에 elk 렌더러 지정이 들어간다. `default`로 정하면 렌더러 지정이 들어가지 않고, 요청에서 다른 렌더러를 직접 밝히면 그 요청에서는 요청한 렌더러가 쓰인다.
+5. **Given** `dependency.renderer`를 `elk`로 정한 설정, **When** 사용자가 렌더러를 말하지 않고 구조 뷰를 요청하면, **Then** Dependency 다이어그램의 YAML 설정(`config.layout`)에 elk 렌더러 지정이 들어간다. `default`로 정하면 렌더러 지정이 들어가지 않고, 요청에서 다른 렌더러를 직접 밝히면 그 요청에서는 요청한 렌더러가 쓰인다.
 6. **Given** 이미 생성된 구조 뷰가 있는 상태에서 사용자가 설정을 바꾼 뒤, **When** 그 구조 뷰의 재생성을 요청하면, **Then** 새 산출물에 바뀐 설정이 적용된다(설정을 바꾸기만 해서는 기존 파일이 고쳐지지 않는다).
 
 ---
@@ -111,7 +111,7 @@
 - **FR-009**: `collapsed`나 `expanded`인 섹션은 섹션 헤딩(`### Responsibility` / `### Collaboration`)을 상자 밖에 그대로 두고, 그 아래 내용 전체를 상자 하나에 넣어야 한다. 미리보기를 처음 열었을 때 `collapsed`는 접힌 상태로, `expanded`는 펼쳐진 상태로 보여야 하며, 어느 쪽이든 사용자가 클릭해 접고 펼 수 있어야 한다. 상자의 요약 줄(▶ 옆 문구)은 섹션과 상태에 관계없이 고정 문구 `Details`로 쓴다 — 섹션 이름은 상자 밖 헤딩에만 나온다. 상자를 펼쳤을 때의 내용(항목, 하이퍼링크, 볼드 표기, 하위 헤딩 순서)은 `plain`일 때와 같아야 한다.
 - **FR-010**: `hidden`인 섹션은 헤딩과 내용 모두 산출 파일에 넣지 않아야 하며, 스킬은 그 섹션의 내용을 만들거나 그 섹션만을 위한 자기검증을 하지 않아야 한다. 나머지 섹션의 순서(Dependency → Responsibility → Collaboration)는 유지된다.
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
-- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — Mermaid 기본 레이아웃 엔진인 dagre로 그려짐)와 `elk` 중에서 고를 수 있어야 한다(기본: `default`). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.flowchart.defaultRenderer`에 elk를 넣는다. 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
+- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — Mermaid 기본 레이아웃 엔진인 dagre로 그려짐)와 `elk` 중에서 고를 수 있어야 한다(기본: `default`). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
 
 **exporting-markdown-diagrams 옵션과 동작**
