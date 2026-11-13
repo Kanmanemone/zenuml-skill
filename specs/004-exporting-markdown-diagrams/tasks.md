@@ -191,3 +191,9 @@ Task: "scripts/lib/inline-svg.js 작성"
 
 - [X] T037 `.claude/skills/exporting-markdown-diagrams/SKILL.md`의 Workflow·Step 2를 다시 써서, 불분명한 형식·범위·페이지 구성을 모두 `AskUserQuestion` 한 번에 묻게 함 — 범위가 미정이거나 문서 전체면 페이지 구성 질문을 같은 호출에 넣고("문서 전체일 때만 적용" 명시, 다이어그램만이면 답 무시), 범위가 문서 전체로 정해진 상태면 형식 선택지는 PDF·PNG만, 범위 미정이면 SVG·PNG·PDF와 함께 범위 선택지 설명에 문서 전체는 PDF·PNG만임을 밝힘, 재질문은 문서 전체 + SVG 모순일 때 형식 하나만, 예시도 한 번 호출 형태로 갱신 per FR-003, FR-014, SC-002 (contradicts)
 - [X] T038 [P] `specs/004-exporting-markdown-diagrams/`의 data-model.md·contracts/skill-interface.md에 남은 후속 질문 서술을 한 번에 묻는 방식으로 갱신 per FR-003, FR-014 (partial)
+
+## Phase 8: Convergence
+
+- [ ] T039 `.claude/skills/exporting-markdown-diagrams/scripts/package.json`의 `@mermaid-js/mermaid-cli`를 `^12`로 올리고 `npm install`로 `package-lock.json`을 다시 만들어 커밋(Mermaid 12 내장 ELK 사용, 별도 layout-elk 제거 확인) per FR-017 (missing)
+- [ ] T040 Mermaid 12 계열에서 기존 검증 항목을 다시 실행 — Mermaid·ZenUML 다이어그램 SVG/PNG, `layout: elk` 다이어그램, 문서 전체 PDF의 선택 가능한 벡터 텍스트, 문서 전체 PNG(single·paginated), 렌더러 지정 보존 — 결과를 quickstart.md에 기록 per SC-012 (missing)
+- [ ] T041 [P] `specs/004-exporting-markdown-diagrams/research.md`의 "mermaid-cli 버전 고정" 결정을 `^12` + 커밋된 lock, 수동 업데이트 원칙으로 갱신 per FR-017 (partial)
