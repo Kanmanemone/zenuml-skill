@@ -5,25 +5,25 @@
   "responsibility": {
     // Responsibility 섹션을 어떻게 보여줄지
     //   hidden    : 섹션을 그리지 않음 — 토큰 소모 줄어듦
-    //   plain     : 상자 없이 그대로 — 영향 거의 없음
-    //   collapsed : 접은 글 상자에 넣고 처음엔 접힘 — 영향 거의 없음
-    //   expanded  : 접은 글 상자에 넣고 처음엔 펼침 — 영향 거의 없음
+    //   plain     : 상자 없이 그대로 — 토큰 소모 영향 거의 없음
+    //   collapsed : 접은 글 상자에 넣고 처음엔 접힘 — 토큰 소모 영향 거의 없음
+    //   expanded  : 접은 글 상자에 넣고 처음엔 펼침 — 토큰 소모 영향 거의 없음
     //   (기본값: collapsed)
     "display": "collapsed"
   },
   "collaboration": {
     // Collaboration 섹션을 어떻게 보여줄지
     //   hidden    : 섹션을 그리지 않음 — 토큰 소모 줄어듦
-    //   plain     : 상자 없이 그대로 — 영향 거의 없음
-    //   collapsed : 접은 글 상자에 넣고 처음엔 접힘 — 영향 거의 없음
-    //   expanded  : 접은 글 상자에 넣고 처음엔 펼침 — 영향 거의 없음
+    //   plain     : 상자 없이 그대로 — 토큰 소모 영향 거의 없음
+    //   collapsed : 접은 글 상자에 넣고 처음엔 접힘 — 토큰 소모 영향 거의 없음
+    //   expanded  : 접은 글 상자에 넣고 처음엔 펼침 — 토큰 소모 영향 거의 없음
     //   (기본값: collapsed)
     "display": "collapsed"
   },
   "dependency": {
     // Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진
-    //   default : 따로 지정하지 않음(Mermaid 기본 엔진 dagre) — 영향 거의 없음
-    //   elk     : ELK 엔진으로 그림(노드·간선이 많을 때 배치가 더 정돈되는 편) — 영향 거의 없음
+    //   default : 따로 지정하지 않음(Mermaid 기본 엔진 dagre) — 토큰 소모 영향 거의 없음
+    //   elk     : ELK 엔진으로 그림(노드·간선이 많을 때 배치가 더 정돈되는 편) — 토큰 소모 영향 거의 없음
     //   (기본값: default)
     "renderer": "default"
   }

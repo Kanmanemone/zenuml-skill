@@ -13,9 +13,9 @@
       "description": "Responsibility 섹션을 어떻게 보여줄지",
       "tokenImpact": {
         "hidden": "토큰 소모 줄어듦",
-        "plain": "영향 거의 없음",
-        "collapsed": "영향 거의 없음",
-        "expanded": "영향 거의 없음"
+        "plain": "토큰 소모 영향 거의 없음",
+        "collapsed": "토큰 소모 영향 거의 없음",
+        "expanded": "토큰 소모 영향 거의 없음"
       }
     },
     {
@@ -31,9 +31,9 @@
       "description": "Collaboration 섹션을 어떻게 보여줄지",
       "tokenImpact": {
         "hidden": "토큰 소모 줄어듦",
-        "plain": "영향 거의 없음",
-        "collapsed": "영향 거의 없음",
-        "expanded": "영향 거의 없음"
+        "plain": "토큰 소모 영향 거의 없음",
+        "collapsed": "토큰 소모 영향 거의 없음",
+        "expanded": "토큰 소모 영향 거의 없음"
       }
     },
     {
@@ -46,8 +46,8 @@
       "default": "default",
       "description": "Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진",
       "tokenImpact": {
-        "default": "영향 거의 없음",
-        "elk": "영향 거의 없음"
+        "default": "토큰 소모 영향 거의 없음",
+        "elk": "토큰 소모 영향 거의 없음"
       }
     }
   ]

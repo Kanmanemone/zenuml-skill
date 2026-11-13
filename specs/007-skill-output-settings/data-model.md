@@ -14,7 +14,7 @@
 | `options[].base` | `relativePath`일 때 기준 위치 설명: `projectRoot` 또는 `sourceFileDir` |
 | `options[].default` | 키가 없거나 값이 잘못됐을 때 쓰는 값. 배포 `settings.jsonc`의 값과 같아야 함(FR-003) |
 | `options[].description` | 한국어 한 줄 설명 |
-| `options[].tokenImpact` | 값별 토큰 소모 표시. `enum`/`boolean`은 값마다, 그 외는 `"*"` 하나. 값은 `토큰 소모 줄어듦` / `영향 거의 없음` / `토큰 소모 늘어남` / `토큰 소모 큼` 중 하나 |
+| `options[].tokenImpact` | 값별 토큰 소모 표시. `enum`/`boolean`은 값마다, 그 외는 `"*"` 하나. 값은 `토큰 소모 줄어듦` / `토큰 소모 영향 거의 없음` / `토큰 소모 늘어남` / `토큰 소모 큼` 중 하나 |
 
 **검증 규칙**: `default`는 자기 `type`·제약을 만족해야 한다. `key`는 스킬 안에서 유일하다.
 

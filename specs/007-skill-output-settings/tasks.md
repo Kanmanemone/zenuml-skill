@@ -26,7 +26,7 @@
 
 **Independent Test**: quickstart 시나리오 1(architecture 부분), 2, 3
 
-- [X] T002 [P] [US1] `.claude/skills/generating-architecture-views/settings.schema.json` 작성 — `responsibility.display`·`collaboration.display`(type `enum`, values `hidden`/`plain`/`collapsed`/`expanded`, default `plain`, tokenImpact `hidden`=토큰 소모 줄어듦·나머지=영향 거의 없음), `dependency.renderer`(type `enum`, values `default`/`elk`, default `default`, tokenImpact 둘 다 영향 거의 없음), 각 항목에 한국어 `description` (data-model.md "Option Definition")
+- [X] T002 [P] [US1] `.claude/skills/generating-architecture-views/settings.schema.json` 작성 — `responsibility.display`·`collaboration.display`(type `enum`, values `hidden`/`plain`/`collapsed`/`expanded`, default `plain`, tokenImpact `hidden`=토큰 소모 줄어듦·나머지=토큰 소모 영향 거의 없음), `dependency.renderer`(type `enum`, values `default`/`elk`, default `default`, tokenImpact 둘 다 토큰 소모 영향 거의 없음), 각 항목에 한국어 `description` (data-model.md "Option Definition")
 - [X] T003 [P] [US1] `.claude/skills/generating-architecture-views/settings.jsonc` 작성 — T002와 같은 기본값을 `responsibility`/`collaboration`/`dependency` 묶음 아래에 두고, 각 옵션 위에 contracts/settings-contract.md 형식의 한국어 주석(의미, 값별 뜻·토큰 영향, 기본값)
 - [X] T004 [US1] `.claude/skills/generating-architecture-views/SKILL.md`에 옵션 이름을 언급하지 않는 일반 "Settings" 절 추가 — 실행마다 `settings.schema.json`과 `settings.jsonc`를 읽고 data-model.md "해석 규칙" 표대로 값을 정하며, 요청 문장의 지정이 우선하고, 안내는 `⚙️ 설정 안내: <파일> — <내용>` 형식으로 채팅에만 붙이며, 설정 파일을 고치지 않는다. Workflow overview 첫 단계로 설정 읽기를 넣는다 (FR-002, FR-004~FR-007, FR-017, FR-019)
 - [X] T005 [US1] `SKILL.md` Step 3·Step 4와 "File contents"/"Nothing but content"에 `display` 동작 규칙 추가 — `hidden`은 헤딩·내용·그 섹션 전용 자기검증(AP 항목)을 모두 생략, `collapsed`/`expanded`는 헤딩을 밖에 두고 research.md "접은 글 상자 마크업" 형태로 감싸며(`expanded`는 `<details open>`), 상자 마크업은 메타 코멘트가 아닌 허용 구조로 명시. 자기검증에 표시 방식 점검 AP 항목 추가, 채팅 안내 허용 예외에 설정 안내 추가 (FR-008~FR-010, FR-012, FR-005)
@@ -43,7 +43,7 @@
 
 **Independent Test**: quickstart 시나리오 1(exporting 부분), 5, 6, 7, 8, 9
 
-- [X] T008 [P] [US2] `.claude/skills/exporting-markdown-diagrams/settings.schema.json` 작성 — `questions.enabled`(boolean, default `true`, tokenImpact `true`=영향 거의 없음·`false`=토큰 소모 줄어듦), `defaults.format`(enum `none`/`svg`/`png`/`pdf`, default `none`), `defaults.scope`(enum `none`/`diagram`/`document`, default `none`), `defaults.pdfLayout`(enum `none`/`single`/`paginated`, default `none`), `png.scale`(number, min 0 초과, default `3`), `output.directory`(relativePath, base `sourceFileDir`, default `./exports`), 각 한국어 description·tokenImpact
+- [X] T008 [P] [US2] `.claude/skills/exporting-markdown-diagrams/settings.schema.json` 작성 — `questions.enabled`(boolean, default `true`, tokenImpact `true`=토큰 소모 영향 거의 없음·`false`=토큰 소모 줄어듦), `defaults.format`(enum `none`/`svg`/`png`/`pdf`, default `none`), `defaults.scope`(enum `none`/`diagram`/`document`, default `none`), `defaults.pdfLayout`(enum `none`/`single`/`paginated`, default `none`), `png.scale`(number, min 0 초과, default `3`), `output.directory`(relativePath, base `sourceFileDir`, default `./exports`), 각 한국어 description·tokenImpact
 - [X] T009 [P] [US2] `.claude/skills/exporting-markdown-diagrams/settings.jsonc` 작성 — T008 기본값과 한국어 주석(contracts 형식)
 - [X] T010 [US2] `.claude/skills/exporting-markdown-diagrams/scripts/lib/settings.js` 작성 — `loadSettings(skillDir)`: JSONC 주석 제거(문자열 안 `//` 보존) → `JSON.parse` → 옵션 정의의 각 `key`를 점 경로로 읽어 타입별 검증(`enum` 허용 값, `boolean`, `number` 유한·`min` 초과, `relativePath` 비어 있지 않고 `/`·`\`·`~`·드라이브 문자로 시작하지 않음) → 위반·알 수 없는 잎 키·읽기 실패를 안내 문구로 모아 `{values, notices}` 반환. 파일 없음·키 없음은 안내 없음. 옵션 이름을 코드에 하드코딩하지 않음 (FR-017, FR-019)
 - [X] T011 [US2] `.claude/skills/exporting-markdown-diagrams/scripts/read-settings.js` 작성 — `loadSettings`를 호출해 `{"values":…, "notices":[…]}` 한 줄 JSON을 표준 출력, 항상 종료 코드 0
@@ -62,7 +62,7 @@
 
 **Independent Test**: quickstart 시나리오 1(zenuml 부분), 4
 
-- [X] T016 [P] [US3] `.claude/skills/generating-zenuml-diagrams/settings.schema.json` 작성 — `log.directory`(relativePath, base `projectRoot`, default `./.zenuml/log`, tokenImpact 영향 거의 없음, 한국어 description)
+- [X] T016 [P] [US3] `.claude/skills/generating-zenuml-diagrams/settings.schema.json` 작성 — `log.directory`(relativePath, base `projectRoot`, default `./.zenuml/log`, tokenImpact 토큰 소모 영향 거의 없음, 한국어 description)
 - [X] T017 [P] [US3] `.claude/skills/generating-zenuml-diagrams/settings.jsonc` 작성 — `log` 묶음 아래 `directory`와 한국어 주석
 - [X] T018 [US3] `.claude/skills/generating-zenuml-diagrams/SKILL.md`에 T004와 같은 형태의 일반 "Settings" 절을 추가하고, "Diagram feedback log"와 인용 시 스테이징 규칙의 `.zenuml/log/` 경로를 `log.directory` 해석 값으로 바꾸며(없으면 생성, 이전 위치 로그는 옮기지 않음), 채팅 허용 예외(FR-012/AP-6)에 설정 안내 추가 (FR-015c, FR-005)
 
