@@ -65,7 +65,7 @@ Use only components and dependencies the description explicitly states or clearl
 
 Group components with a Mermaid `subgraph` **only** when the description gives an actual signal: a shared name prefix/namespace, or an explicit layer/domain word ("주문 도메인", "인증 계층", etc.). If there is no such signal, do not create any `subgraph` — treat every component as part of one unlabeled set instead (this still counts as "one group" for Steps 3–4, it's just not drawn as a box).
 
-**Diagram shape**: the code fence starts with a fixed YAML frontmatter `config:` block (curve, node/rank spacing, `titleTopMargin`, theme colors, cluster-label typography — never `%%{init}%%`), then `flowchart LR` overall (groups arranged left-to-right), with each group written as `subgraph Id["라벨"]` and `direction TB` inside it (members arranged top-to-bottom). A node whose display name can't serve as its ID (parentheses, spaces, etc.) is declared `Id@{ label: "표시 이름" }`. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` (followed by the fixed label-convention comment `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>` and the three fixed `crud*` classDefs, always present, static or dynamic) → `click` lines; those four section comments are fixed structure. See `references/templates.md` for the exact block to copy.
+**Diagram shape**: the code fence starts with a fixed YAML frontmatter `config:` block (curve, node/rank spacing, `titleTopMargin`, cluster-label typography — never `%%{init}%%`, and never `themeVariables`: leave background/text/cluster/edge-label colors to the renderer so the diagram follows the viewer's light or dark theme), then `flowchart LR` overall (groups arranged left-to-right), with each group written as `subgraph Id["라벨"]` and `direction TB` inside it (members arranged top-to-bottom). A node whose display name can't serve as its ID (parentheses, spaces, etc.) is declared `Id@{ label: "표시 이름" }`. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` (followed by the fixed label-convention comment `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>` and the three fixed `crud*` classDefs, always present, static or dynamic) → `click` lines; those four section comments are fixed structure. See `references/templates.md` for the exact block to copy.
 
 **Renderer selection**: only when the user explicitly names a Mermaid renderer in the request (e.g. "elk"), add `defaultRenderer: <the exact value they typed>` under `config.flowchart` in that YAML frontmatter — vocabulary is open (whatever renderer name they type), not a fixed list, and the value is never validated or remapped. When the request doesn't name one, follow the `dependency.renderer` setting: `elk` adds `defaultRenderer: elk` the same way; `default` omits the field entirely. A renderer named in an earlier round never carries over on its own — only the request or the setting decides, every round.
 
@@ -164,7 +164,7 @@ Architecture view anti-pattern check:
 - [ ] AP-2: No dependencies beyond what the description states or clearly implies, and no chain (A calls B, B calls C) collapsed into a shortcut edge (A→C) that skips the intermediate hop
 - [ ] AP-3: No subgraph group without an explicit naming/layer/domain signal in the description
 - [ ] AP-4: Every arrow has a relationship-nature label grounded in the description, or the "호출" default when the description doesn't specify one — never a guessed specific nature
-- [ ] AP-5: The fence opens with the YAML frontmatter `config` (no `%%{init}%%`); every edge has an `eN@` ID; every node has a color class, every edge is colored by an edge class in its source node's color (no `linkStyle`); siblings only share a class when none of them is individually distinguished elsewhere; the section comments appear in the fixed order
+- [ ] AP-5: The fence opens with the YAML frontmatter `config` (no `%%{init}%%`, no `themeVariables`); every edge has an `eN@` ID; every node has a color class, every edge is colored by an edge class in its source node's color (no `linkStyle`); siblings only share a class when none of them is individually distinguished elsewhere; the section comments appear in the fixed order
 - [ ] AP-5b: `config.flowchart.defaultRenderer` is present exactly when this request named a renderer (that exact value) or, failing that, when `dependency.renderer` is `elk` (value `elk`) — and absent otherwise, never carried over from an earlier round
 - [ ] AP-5c: The `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` section with the label-convention comment and the three fixed `classDef crud*` lines appears exactly once; static request → no `class … crud*` line and no ✨/♻️/🗑️ prefix; dynamic request → exactly the nodes the description names as added/changed/removed carry the matching prefix and class, and every node still keeps its own border-color class
 - [ ] AP-6: Every group and every element has both 책임(추상) and 역할(구체) — "설명에 명시되지 않음" where the description doesn't support one, never a guess; every code-level identifier cited in 역할(구체) is wrapped in backticks
@@ -274,16 +274,6 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeVariables:
-    clusterBkg: "#eaeaea"
-    clusterBorder: "#f0f1f2"
-    mainBkg: "#fafafd"
-    primaryColor: "#fafafd"
-    textColor: "#202020"
-    primaryTextColor: "#202020"
-    tertiaryTextColor: "#202020"
-    background: "#ffffff"
-    edgeLabelBackground: "#ffffff"
   themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
 ---
 flowchart LR

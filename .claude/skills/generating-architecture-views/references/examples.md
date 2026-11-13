@@ -23,16 +23,6 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeVariables:
-    clusterBkg: "#eaeaea"
-    clusterBorder: "#f0f1f2"
-    mainBkg: "#fafafd"
-    primaryColor: "#fafafd"
-    textColor: "#202020"
-    primaryTextColor: "#202020"
-    tertiaryTextColor: "#202020"
-    background: "#ffffff"
-    edgeLabelBackground: "#ffffff"
   themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
 ---
 flowchart LR
@@ -235,16 +225,6 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeVariables:
-    clusterBkg: "#eaeaea"
-    clusterBorder: "#f0f1f2"
-    mainBkg: "#fafafd"
-    primaryColor: "#fafafd"
-    textColor: "#202020"
-    primaryTextColor: "#202020"
-    tertiaryTextColor: "#202020"
-    background: "#ffffff"
-    edgeLabelBackground: "#ffffff"
   themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
 ---
 flowchart LR

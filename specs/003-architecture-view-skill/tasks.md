@@ -436,4 +436,4 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 ## Phase 31: Convergence
 
-- [ ] T116 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·AP-5·예시 fence), `references/templates.md`(템플릿 fence·`themeVariables` 규칙 줄), `references/examples.md`(모든 fence)에서 `themeVariables` 블록을 제거하고, 테마 색은 지정하지 않아 렌더러가 라이트·다크에 맞춰 칠한다는 규칙으로 고침 per FR-007 (contradicts)
+- [X] T116 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·AP-5·예시 fence), `references/templates.md`(템플릿 fence·`themeVariables` 규칙 줄), `references/examples.md`(모든 fence)에서 `themeVariables` 블록을 제거하고, 테마 색은 지정하지 않아 렌더러가 라이트·다크에 맞춰 칠한다는 규칙으로 고침 per FR-007 (contradicts)

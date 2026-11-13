@@ -35,16 +35,6 @@ config:
     nodeSpacing: 45
     rankSpacing: 70
     titleTopMargin: 25
-  themeVariables:
-    clusterBkg: "#eaeaea"
-    clusterBorder: "#f0f1f2"
-    mainBkg: "#fafafd"
-    primaryColor: "#fafafd"
-    textColor: "#202020"
-    primaryTextColor: "#202020"
-    tertiaryTextColor: "#202020"
-    background: "#ffffff"
-    edgeLabelBackground: "#ffffff"
   themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
 ---
 flowchart LR
@@ -96,7 +86,7 @@ Rules:
 - Change marks (dynamic requests only, see "Change marking" below) go in the CRUD section as `class <Id> crudCreate|crudUpdate|crudDelete`; a static diagram has the label-convention comment and the three `classDef crud*` lines and no `class … crud*` line.
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
 - `defaultRenderer` under `config.flowchart` (e.g. `defaultRenderer: elk`) is optional too — add it when this request explicitly names a renderer (that exact value, open vocabulary, no validation) or, failing that, when the `dependency.renderer` setting is `elk`. Omit it otherwise, and don't carry a renderer named in an earlier round forward on its own.
-- `themeVariables` is always present, unlike the optional fields above — it keeps node/cluster colors matching VS Code's Markdown preview instead of mermaid's own defaults. Copy the values verbatim. Source: VS Code 1.132.1's active color theme ("Light 2026")'s `colorMap`, run through its bundled `mermaid-markdown-features` extension's `computeVsCodeMermaidThemeVariables` mapping. Re-derive by reading the real active theme first — `sqlite3 <VS Code User>/globalStorage/state.vscdb "SELECT value FROM ItemTable WHERE key='colorThemeData';"` — never assume a "default" theme name.
+- Never add `themeVariables` (background, text, cluster, edge-label colors). Renderers pick those for the viewer's light or dark theme — VS Code's built-in Mermaid preview computes them from the active color theme and redraws when it changes, and a fixed value would override that. Node border and edge colors come only from the palette below, whose 500-shade tones read on both light and dark backgrounds.
 
 ### Color palette
 
