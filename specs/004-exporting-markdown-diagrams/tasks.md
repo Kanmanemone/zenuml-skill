@@ -186,3 +186,8 @@ Task: "scripts/lib/inline-svg.js 작성"
 - [X] T034 `quickstart.md` 시나리오 13을 실제로 실행해 검증한다 — 변환된 PDF를 이미지로 렌더링해 한글·영문·코드 텍스트가 선명한지 육안으로 확인한다(spec.md SC-011)
 - [X] T035 [US2] T033의 직접 고른 글꼴 스택을 폐기하고, `export-document-pdf.js`의 본문·코드 `font-family`/`font-size`/`line-height`를 VS Code 자신의 Markdown 미리보기 스타일시트(`markdown-language-features/media/markdown.css`)의 `html, body`/`code` 규칙에서 그대로 옮긴 값으로 교체한다(spec.md FR-016 갱신판, research.md "문서 전체 PDF의 글꼴" Decision 갱신판)
 - [X] T036 `quickstart.md` 시나리오 13(갱신판)을 실제로 실행해 검증한다 — 재변환한 PDF를 이미지로 렌더링해 한글이 여전히 정상 표시되는지(OS 폰트 링킹에 의존), 영문·코드가 VS Code Markdown 미리보기와 같은 글꼴로 보이는지 확인한다(spec.md SC-011 갱신판)
+
+## Phase 7: Convergence
+
+- [ ] T037 `.claude/skills/exporting-markdown-diagrams/SKILL.md`의 Workflow·Step 2를 다시 써서, 불분명한 형식·범위·페이지 구성을 모두 `AskUserQuestion` 한 번에 묻게 함 — 범위가 미정이거나 문서 전체면 페이지 구성 질문을 같은 호출에 넣고("문서 전체일 때만 적용" 명시, 다이어그램만이면 답 무시), 범위가 문서 전체로 정해진 상태면 형식 선택지는 PDF·PNG만, 범위 미정이면 SVG·PNG·PDF와 함께 범위 선택지 설명에 문서 전체는 PDF·PNG만임을 밝힘, 재질문은 문서 전체 + SVG 모순일 때 형식 하나만, 예시도 한 번 호출 형태로 갱신 per FR-003, FR-014, SC-002 (contradicts)
+- [ ] T038 [P] `specs/004-exporting-markdown-diagrams/`의 data-model.md·contracts/skill-interface.md에 남은 후속 질문 서술을 한 번에 묻는 방식으로 갱신 per FR-003, FR-014 (partial)
