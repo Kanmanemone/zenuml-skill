@@ -431,5 +431,5 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 ## Phase 30: Convergence
 
-- [ ] T114 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape·Change marking·AP-5c·Nothing but content·예시 fence)와 `references/templates.md`(템플릿·규칙·Change marking 예시), `references/examples.md`의 모든 CRUD 구역에 구역 주석 바로 다음 줄로 라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`를 정적·동적 무관하게 항상 넣도록 반영 per FR-035, FR-032, SC-014 (partial)
-- [ ] T115 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md(시나리오 25)에 라벨 규칙 주석을 반영 per plan, FR-035 (partial)
+- [X] T114 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape·Change marking·AP-5c·Nothing but content·예시 fence)와 `references/templates.md`(템플릿·규칙·Change marking 예시), `references/examples.md`의 모든 CRUD 구역에 구역 주석 바로 다음 줄로 라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`를 정적·동적 무관하게 항상 넣도록 반영 per FR-035, FR-032, SC-014 (partial)
+- [X] T115 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md(시나리오 25)에 라벨 규칙 주석을 반영 per plan, FR-035 (partial)

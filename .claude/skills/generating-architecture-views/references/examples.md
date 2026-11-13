@@ -64,6 +64,7 @@ flowchart LR
   class e1 orderEdge
 
   %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
+  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
   classDef crudCreate stroke-width:5px
   classDef crudUpdate stroke-dasharray:12 4 2 4
   classDef crudDelete stroke-dasharray:5 10,color:#6B7280
@@ -273,6 +274,7 @@ flowchart LR
   class e1 sessionManagerEdge
 
   %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
+  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
   classDef crudCreate stroke-width:5px
   classDef crudUpdate stroke-dasharray:12 4 2 4
   classDef crudDelete stroke-dasharray:5 10,color:#6B7280

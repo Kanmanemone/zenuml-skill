@@ -20,7 +20,7 @@ All three sections in the output file get a `###` heading (never `##` or shallow
 
 ## Dependency template
 
-Every diagram opens with this fixed YAML frontmatter `config` block (inside the code fence, before `flowchart LR`). Groups are `subgraph Id["라벨"]` with `direction TB`; components with no grouping signal sit at the top level instead. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` → `click` lines (if any). Those four section comments are fixed structure, always written exactly like this, and the three `classDef crud*` lines are always copied verbatim, even when nothing is marked.
+Every diagram opens with this fixed YAML frontmatter `config` block (inside the code fence, before `flowchart LR`). Groups are `subgraph Id["라벨"]` with `direction TB`; components with no grouping signal sit at the top level instead. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` → `click` lines (if any). Those four section comments are fixed structure, always written exactly like this, and the label-convention comment right under the CRUD section comment plus the three `classDef crud*` lines are always copied verbatim, even when nothing is marked.
 
 ````markdown
 ### Dependency
@@ -73,6 +73,7 @@ flowchart LR
   class e1 componentAEdge
 
   %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
+  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
   classDef crudCreate stroke-width:5px
   classDef crudUpdate stroke-dasharray:12 4 2 4
   classDef crudDelete stroke-dasharray:5 10,color:#6B7280
@@ -92,7 +93,7 @@ Rules:
 - A node whose display name can't be its ID (parentheses, spaces, etc.) is declared as `Id@{ label: "표시 이름" }`; plain names are declared bare.
 - Every node gets a `classDef` + `class` pair. Name the class after the node's role, not a generic counter (`navHostNode`, not `class3`). Interchangeable siblings share one class: `class A,B,C siblingNode`.
 - Every edge is colored by an edge class in its **source** node's color: one `classDef <role>Edge stroke:<color>,stroke-width:3.5px` per source node, then `class eN <role>Edge` for each of that node's edges. Never use `linkStyle`.
-- Change marks (dynamic requests only, see "Change marking" below) go in the CRUD section as `class <Id> crudCreate|crudUpdate|crudDelete`; a static diagram has the three `classDef crud*` lines and no `class … crud*` line.
+- Change marks (dynamic requests only, see "Change marking" below) go in the CRUD section as `class <Id> crudCreate|crudUpdate|crudDelete`; a static diagram has the label-convention comment and the three `classDef crud*` lines and no `class … crud*` line.
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
 - `defaultRenderer` under `config.flowchart` (e.g. `defaultRenderer: elk`) is optional too — add it when this request explicitly names a renderer (that exact value, open vocabulary, no validation) or, failing that, when the `dependency.renderer` setting is `elk`. Omit it otherwise, and don't carry a renderer named in an earlier round forward on its own.
 - `themeVariables` is always present, unlike the optional fields above — it keeps node/cluster colors matching VS Code's Markdown preview instead of mermaid's own defaults. Copy the values verbatim. Source: VS Code 1.132.1's active color theme ("Light 2026")'s `colorMap`, run through its bundled `mermaid-markdown-features` extension's `computeVsCodeMermaidThemeVariables` mapping. Re-derive by reading the real active theme first — `sqlite3 <VS Code User>/globalStorage/state.vscdb "SELECT value FROM ItemTable WHERE key='colorThemeData';"` — never assume a "default" theme name.
@@ -132,6 +133,7 @@ For a structure-change (dynamic) request, only the nodes the description names a
   RemovedNode["🗑️&nbsp;<s>RemovedNode</s>"]
   ...
   %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
+  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
   classDef crudCreate stroke-width:5px
   classDef crudUpdate stroke-dasharray:12 4 2 4
   classDef crudDelete stroke-dasharray:5 10,color:#6B7280

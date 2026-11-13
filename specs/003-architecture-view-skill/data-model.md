@@ -85,7 +85,7 @@ Dependency 다이어그램에서 노드를 시각적으로 구분하는 색상 �
 | node_classes | Node Color Class 목록 |
 | hyperlinks | 노드별 Hyperlink Target |
 
-**표현 형식**: Mermaid `flowchart LR`, 그룹별 `direction TB`, 코드펜스 맨 앞 YAML frontmatter `config` 스타일 블록(curve: basis, nodeSpacing 45, rankSpacing 70, titleTopMargin 25, cluster-label 20px/weight 700) — 그룹은 `subgraph Id["라벨"]`, 의존관계는 `eN@` ID와 성격 레이블이 붙은 화살표, 각 노드는 `classDef`+`class`(라벨이 ID와 다르면 `@{ label }`), 각 엣지는 출발 노드 색의 엣지 클래스(`class eN …`), 구역 주석 순서 고정, 항상 두는 CRUD 구역(`crudCreate`/`crudUpdate`/`crudDelete` classDef), 하이퍼링크가 있는 노드는 `click`(spec.md FR-007, FR-008, FR-008b, FR-027c). 요청이 구조 변화(동적)이면 설명이 추가·변경·삭제라고 밝힌 노드만 ✨<b>/♻️/🗑️<s> 라벨 접두와 `class <Id> crud*`를 받으며, 테두리 색 클래스는 그대로 둔다(FR-034, FR-035).
+**표현 형식**: Mermaid `flowchart LR`, 그룹별 `direction TB`, 코드펜스 맨 앞 YAML frontmatter `config` 스타일 블록(curve: basis, nodeSpacing 45, rankSpacing 70, titleTopMargin 25, cluster-label 20px/weight 700) — 그룹은 `subgraph Id["라벨"]`, 의존관계는 `eN@` ID와 성격 레이블이 붙은 화살표, 각 노드는 `classDef`+`class`(라벨이 ID와 다르면 `@{ label }`), 각 엣지는 출발 노드 색의 엣지 클래스(`class eN …`), 구역 주석 순서 고정, 항상 두는 CRUD 구역(라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`와 `crudCreate`/`crudUpdate`/`crudDelete` classDef), 하이퍼링크가 있는 노드는 `click`(spec.md FR-007, FR-008, FR-008b, FR-027c). 요청이 구조 변화(동적)이면 설명이 추가·변경·삭제라고 밝힌 노드만 ✨<b>/♻️/🗑️<s> 라벨 접두와 `class <Id> crud*`를 받으며, 테두리 색 클래스는 그대로 둔다(FR-034, FR-035).
 
 ## Responsibility Entry (책임 서술)
 

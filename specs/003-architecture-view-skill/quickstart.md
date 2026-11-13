@@ -229,6 +229,7 @@
 
 **기대 결과**:
 - 동적 요청: 세 노드 라벨이 `✨&nbsp;<b>NewNode</b>`, `♻️&nbsp;ChangedNode`, `🗑️&nbsp;<s>RemovedNode</s>`이고 CRUD 구역에 `class NewNode crudCreate`·`class ChangedNode crudUpdate`·`class RemovedNode crudDelete`가 있다. 세 노드는 각자의 테두리 색 클래스를 유지하며, 언급되지 않은 노드에는 표시가 없다. 범례는 없다.
+- 두 요청 모두 CRUD 구역 주석 바로 다음 줄에 라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`이 있다.
 - 정적 요청: CRUD 구역과 세 `classDef crud*`는 있지만 `class … crud*` 줄과 이모지 접두가 없다.
 - 정적/동적을 묻는 질문은 판단이 실제로 불가능할 때만 나온다.
 
