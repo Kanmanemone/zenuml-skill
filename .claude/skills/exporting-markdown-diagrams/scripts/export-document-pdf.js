@@ -22,6 +22,7 @@ import { BROWSER_LAUNCH_OPTIONS } from "./lib/browser-config.js";
 import { inlineSvgImages } from "./lib/inline-svg.js";
 import { fitSvgFile } from "./lib/fit-svg.js";
 import { ensureExportDir } from "./lib/export-dir.js";
+import { loadSettings, SKILL_DIR } from "./lib/settings.js";
 
 // Sourced verbatim from VS Code's own Markdown preview stylesheet — not a hand-picked
 // stack — so the PDF's body/code text matches what VS Code's Markdown preview actually
@@ -53,6 +54,11 @@ function fail(message, code = 1) {
   process.exit(code);
 }
 
+// Add `open` to every <details> opening tag that doesn't already have it.
+function openAllDetails(html) {
+  return html.replace(/<details(?![^>]*\bopen\b)(\s[^>]*)?>/gi, (match, attrs = "") => `<details open${attrs}>`);
+}
+
 function toFileUrl(filePath) {
   return `file://${path.resolve(filePath).replace(/\\/g, "/")}`;
 }
@@ -80,10 +86,11 @@ async function main() {
     fail(`Unsupported file type: ${targetFile} — only .md/.markdown files are supported.`);
   }
 
+  const { values: settings } = loadSettings(SKILL_DIR);
   const outputFile =
     outputFileArg ||
     path.join(
-      ensureExportDir(targetFile),
+      ensureExportDir(targetFile, settings["output.directory"]),
       path.basename(targetFile).replace(/\.(md|markdown)$/i, ".pdf"),
     );
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "export-document-pdf-"));
@@ -119,7 +126,8 @@ async function main() {
       // --- Stage 2: Markdown -> HTML, inline the extracted SVGs, print to PDF ---
       const stageMarkdown = fs.readFileSync(stageMdFile, "utf-8");
       const md = new MarkdownIt({ html: true });
-      const bodyHtml = inlineSvgImages(md.render(stageMarkdown), workDir);
+      // Collapsible <details> blocks can't be clicked open in a PDF, so print them all open.
+      const bodyHtml = openAllDetails(inlineSvgImages(md.render(stageMarkdown), workDir));
 
       const fullHtml = `<!doctype html>
 <html>

@@ -11,9 +11,28 @@ Full grammar: [references/syntax.md](references/syntax.md) (participants, messag
 
 Target renderer/grammar baseline: `mermaid-js/zenuml-core`. Do not assume compatibility with the standalone `zenuml.com` product or other ZenUML tooling unless the user says so.
 
+## Settings
+
+Before anything else in each run, read this skill's own `settings.schema.json` (the option definition — the only source of truth for every option's key, allowed values, and default) and `settings.jsonc` (the user's values; `//` and `/* */` comments allowed), both in this skill's directory. Read them fresh every run — never reuse values from an earlier run. Resolve every option in the definition:
+
+- **No `settings.jsonc` at all**: use every option's `default`, and say nothing about it.
+- **The file can't be read** (still not valid JSON once comments are stripped, or its top level isn't an object): use every `default`, finish the work, and add one notice.
+- **A key is missing**: use its `default`, silently.
+- **A value breaks its option's type or allowed values** (a `relativePath` must be a non-empty relative path — not starting with `/`, `\`, `~`, or a drive letter like `C:`): use that option's `default`, keep every other value, and add one notice naming the key.
+- **A leaf key that the definition doesn't have** (typo, or an option that no longer exists): ignore it and add one notice naming the key.
+- **The request itself names a value** for something an option controls: use what the request says, for this request only.
+
+Notices go only at the end of the chat response, one line each, in this form — never into the output file or log:
+
+```text
+⚙️ 설정 안내: settings.jsonc — <읽지 못해 모든 값을 기본값으로 사용 | `<key>` 값이 허용되지 않아 기본값 `<default>` 사용 | 알 수 없는 키 `<key>` 무시>
+```
+
+Never edit either settings file. What each option actually does lives in the section it affects.
+
 ## Request classification (do this first)
 
-Before generating anything, checking syntax, or touching any file, classify the request. This determines which of the branches below applies, and getting it wrong risks silently overwriting an unrelated diagram or appending history to the wrong log — so don't skip or defer this.
+After reading the settings and before generating anything, checking syntax, or touching any file, classify the request. This determines which of the branches below applies, and getting it wrong risks silently overwriting an unrelated diagram or appending history to the wrong log — so don't skip or defer this.
 
 1. **Regeneration** — this message is a follow-up asking to change a diagram already presented earlier in this conversation (e.g. "use Gateway instead of Server", "add a return value", "that's not quite right, retry"). The target is that diagram's existing `<slug>`.
 2. **Initial generation** — a self-contained description of a process that isn't a follow-up to something just shown, and no `.zenuml/<slug>.md` exists yet for the slug derived from it.
@@ -76,7 +95,7 @@ ZenUML anti-pattern check:
 - [ ] AP-3: No conditional branches or loops beyond what the description states or clearly implies
 - [ ] AP-4: No unjustified try/catch blocks or invented return values
 - [ ] AP-5: Uses the shallowest nesting that still represents the described logic
-- [ ] AP-6: The output file holds only the `zenuml` code fence and the chat response only the file link (or the DSL code block when there's no filesystem) — no length/complexity notice, split suggestion, fallback notice, or other added commentary
+- [ ] AP-6: The output file holds only the `zenuml` code fence and the chat response only the file link (or the DSL code block when there's no filesystem) — no length/complexity notice, split suggestion, fallback notice, or other added commentary (settings notices from "Settings" are the only extra lines allowed)
 ```
 
 Workflow: **generate a draft → check it against AP-1 through AP-6 → if anything fails, revise the draft → re-check → only then present the result to the user.** A draft that hasn't passed all six items is not ready to show. If a fix for one item would violate another (rare), prefer accuracy (AP-1–AP-4) over minimal nesting (AP-5).
@@ -107,13 +126,13 @@ After writing the file, the entire chat response is just a relative link to it �
 
 📄 [Client calls Server.getData()](.zenuml/client-server-getdata.md)
 
-If the current environment has no filesystem access to write to, skip the file and put the ZenUML DSL in a fenced code block in the chat response instead — just the code block, with no notice that you fell back to it.
+If the current environment has no filesystem access to write to, skip the file and put the ZenUML DSL in a fenced code block in the chat response instead — just the code block, with no notice that you fell back to it. Skip the feedback log below too in that case — there's no file to log against.
 
-Don't add anything else to the chat response either — no remarks on the diagram's size or complexity, split suggestions, or explanations of how it was built. The only exceptions are a clarifying question (when the description is too ambiguous to draw), an out-of-scope notice (see "Out-of-scope requests"), and a direct answer when the user actually asked something (e.g. how to render it). Skip the feedback log below too in that case — there's no file to log against.
+Don't add anything else to the chat response either — no remarks on the diagram's size or complexity, split suggestions, or explanations of how it was built. The only exceptions are a clarifying question (when the description is too ambiguous to draw), an out-of-scope notice (see "Out-of-scope requests"), a direct answer when the user actually asked something (e.g. how to render it), and settings notices (see "Settings").
 
 ### Diagram feedback log
 
-Alongside `.zenuml/<slug>.md`, every successfully generated or regenerated diagram gets a feedback log at `.zenuml/log/<slug>.md` — same slug, `log/` subdirectory. This is already covered by the `.zenuml/` `.gitignore` entry above, so it needs no gitignore entry of its own.
+Alongside `.zenuml/<slug>.md`, every successfully generated or regenerated diagram gets a feedback log at `<log.directory>/<slug>.md` — same slug, in the directory the `log.directory` setting names, resolved from the project root (default `./.zenuml/log`, i.e. `.zenuml/log/<slug>.md`). Create the directory if it doesn't exist. Changing the setting never moves or deletes logs already written elsewhere — a regeneration just continues in the log at the currently configured location (starting a fresh Round 1 there if none exists yet). The default location is already covered by the `.zenuml/` `.gitignore` entry; if the setting points somewhere `.gitignore` doesn't cover, leave `.gitignore` alone — that's the user's call.
 
 Any markdown heading added to `.zenuml/<slug>.md` itself (e.g. a supplementary table title) must be `###` or deeper — never `##` or shallower. This is a property of the primary file, not a log-only rule: each round's `**Response**:` field here echoes `.zenuml/<slug>.md`'s content verbatim underneath that round's own `## Round N — <ISO date>` heading, so keeping the primary file's own headings at `###`+ from the start means they always nest correctly once copied in, with no separate transformation needed at log time.
 
@@ -132,7 +151,7 @@ zenuml
 ```
 ````
 
-**On regeneration**, append a new round to the existing `.zenuml/log/<slug>.md` — never rewrite or delete earlier rounds, no matter how many rounds accumulate:
+**On regeneration**, append a new round to the existing `<log.directory>/<slug>.md` — never rewrite or delete earlier rounds, no matter how many rounds accumulate:
 
 ````markdown
 ## Round N — <ISO date>
@@ -147,7 +166,7 @@ zenuml
 
 Don't summarize, analyze, or prune this log's content, ever — it exists purely so a human can read it later and decide what's worth acting on. After presenting the updated diagram, if the user sends another follow-up, go back to "Request classification" above and classify it fresh — don't assume it's automatically another regeneration of the same diagram.
 
-**Citing a feedback log elsewhere**: `.zenuml/log/` is gitignored by default, same as the rest of `.zenuml/`. If some other piece of work (e.g. a future `/speckit-assess-research` run) actually reads and cites a specific `.zenuml/log/<slug>.md` as a source, stage that one file right then with `git add -f .zenuml/log/<slug>.md` — nothing else in `.zenuml/` gets staged automatically, and uncited logs stay untracked. `.zenuml/<slug>.md` itself is never a citation target — it gets overwritten on every regeneration, so it has no history worth citing. This skill doesn't do any citing itself and this convention doesn't reach into other skills' files — it only documents, here, what to do when the citing happens.
+**Citing a feedback log elsewhere**: the default log location `.zenuml/log/` is gitignored, same as the rest of `.zenuml/`. If some other piece of work actually reads and cites a specific `<log.directory>/<slug>.md` as a source, stage that one file right then with `git add -f <log.directory>/<slug>.md` — nothing else gets staged automatically, and uncited logs stay untracked. `.zenuml/<slug>.md` itself is never a citation target — it gets overwritten on every regeneration, so it has no history worth citing. This skill doesn't do any citing itself and this convention doesn't reach into other skills' files — it only documents, here, what to do when the citing happens.
 
 ## When the description is ambiguous
 

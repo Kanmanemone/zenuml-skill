@@ -13,6 +13,7 @@ Reusable Mermaid and prose templates for the three sections this skill produces.
   - [Group-to-group comparisons](#group-to-group-comparisons)
   - [Element-to-element comparisons](#element-to-element-comparisons)
   - [Multi-target consolidation](#multi-target-consolidation)
+- [Collapsible section](#collapsible-section)
 
 All three sections in the output file get a `###` heading (never `##` or shallower — see `SKILL.md`, "Output file") so they're easy to tell apart at a glance.
 
@@ -213,3 +214,31 @@ When one source has **3 or more** targets that share the same group, share the s
 Targets with their own edges elsewhere, or their own distinct Responsibility wording (different function names, for instance), still qualify — that's just a different name/implementation filling the same role, not a reason to exclude. Only a target with a real difference in kind (a responsibility or relationship the others don't have) is excluded from the collective phrase and gets its own individual entry.
 
 2 or fewer targets, mixed groups, or mixed relationship natures → list every target by name instead (joined with "와"/"과" for exactly two), no consolidation.
+
+## Collapsible section
+
+Used for Responsibility or Collaboration when its display setting is `collapsed` or `expanded` (see `SKILL.md`, "Section display"). The `###` heading stays outside the box; the summary is just the section name; the content inside is exactly what `plain` would have written.
+
+`collapsed` (closed when the preview opens):
+
+````markdown
+### Collaboration
+
+<details>
+<summary>Collaboration</summary>
+
+#### 요소 간 비교
+
+- <strong>A</strong>는 <strong>B</strong>에 의존한다.
+  - …
+
+</details>
+````
+
+`expanded` (open when the preview opens, still clickable to close) — identical except the opening tag:
+
+````markdown
+<details open>
+````
+
+Keep the blank line after `<summary>…</summary>` and before `</details>` — without them the Markdown inside isn't rendered.

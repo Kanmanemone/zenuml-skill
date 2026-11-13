@@ -9,10 +9,23 @@ Converts a diagram embedded in a Markdown file to SVG/PNG, or a whole Markdown f
 
 ## Workflow overview
 
+0. Read the settings (see "Settings" below).
 1. Determine the target file, output format, and conversion scope from the request.
-2. If format and/or scope are missing, ask — via a single `AskUserQuestion` call — for exactly the missing piece(s).
+2. Fill whatever is missing from the settings' defaults, or ask — via a single `AskUserQuestion` call — for exactly the pieces still missing (see "Step 2").
 3. Dispatch to the script matching the confirmed scope (see "Scope: diagram-only" / "Scope: whole document" below).
 4. Report the resulting file path(s). Never paste the script's raw output or a diagram's rendered content into the chat.
+
+## Settings
+
+Before anything else in each run, from this skill's directory run:
+
+```text
+node scripts/read-settings.js
+```
+
+It prints one line of JSON: `values` (every option resolved from `settings.schema.json` and the user's `settings.jsonc` — missing file or keys fall back to defaults, invalid values fall back per key, unknown keys are ignored) and `notices`. Use `values` for the conversation decisions below. Put each string in `notices`, unchanged, on its own line at the end of the chat response — never anywhere else, and don't add other remarks about settings. Never edit `settings.jsonc` yourself. The conversion scripts read the same settings on their own (output location, PNG scale), so don't pass those values to them.
+
+A value the user states in the request always wins over the settings for that request.
 
 ## Step 1 — Determine the request
 
@@ -25,7 +38,10 @@ From the user's message, work out three things:
 
 ## Step 2 — Clarify missing details
 
-Ask only for what's actually missing — never re-ask something already implied by the request.
+Ask only for what's actually missing — never re-ask something already implied by the request. The settings decide how a missing piece gets resolved (`values` from "Settings"):
+
+- **`questions.enabled` is `false`**: don't ask. Fill each missing piece from its default — `defaults.format` for format, `defaults.scope` for scope, `defaults.pdfLayout` for pdfLayout — then apply the rules below as if the user had said it. Only a piece whose default is `none` (nothing to fill it with) is still asked, using the rules below, without any " (기본값)" mark.
+- **`questions.enabled` is `true`**: ask exactly as below. In every question, append ` (기본값)` to the end of the `label` of the option that matches that question's default (`defaults.format` → `SVG`/`PNG`/`PDF` for `svg`/`png`/`pdf`; `defaults.scope` → `다이어그램만`/`문서 전체` for `diagram`/`document`; `defaults.pdfLayout` → `1페이지 단일`/`표준 인쇄 규격` for `single`/`paginated`). Which option gets it comes only from the settings; when the default is `none`, no option gets it. Never move or reorder options to mark the default.
 
 `scope=document` only ever produces PDF (see "Scope: whole document" below — no other script exists for this scope), which changes how `format` factors in:
 
@@ -37,7 +53,7 @@ Ask only for what's actually missing — never re-ask something already implied 
   - **Only `scope` missing**: ask a single question for scope alone. If the answer is `문서 전체`, apply the `document`-scope rule above (format becomes `pdf`, no follow-up question).
   - **Neither missing**: skip straight to dispatch — no question at all.
 
-Format question — options `SVG`, `PNG`, `PDF`. Scope question — options `다이어그램만`, `문서 전체`. When `scope` is still being asked and the request already leans toward a whole-file conversion (e.g. mentions "문서"), you may note in the option's description that whole-document export produces PDF — but still let the user pick freely; never pre-select for them.
+Format question — options `SVG`, `PNG`, `PDF`. Scope question — options `다이어그램만`, `문서 전체`. When `scope` is still being asked and the request already leans toward a whole-file conversion (e.g. mentions "문서"), you may note in the option's description that whole-document export produces PDF — but still let the user pick freely; the only marking is the settings-driven " (기본값)" above.
 
 ```text
 예시 — 형식·범위 둘 다 불분명한 "이거 변환해줘"에 대한 AskUserQuestion:
@@ -47,14 +63,22 @@ Format question — options `SVG`, `PNG`, `PDF`. Scope question — options `다
   ]
 ```
 
-**Page layout for `scope=document`**: once `scope` is confirmed as `document` (whether it was given outright or just resolved from the question above) and `pdfLayout` is still unresolved, ask one more, separate `AskUserQuestion` — a follow-up round after the format/scope interaction, not folded into it — with options in this exact order: `1페이지 단일` first, `표준 인쇄 규격` second. Skip this question entirely when `scope` resolves to `diagram` — page layout has no meaning for a diagram-only export.
+```text
+예시 — 같은 요청에서 questions.enabled=true, defaults.format="png", defaults.scope="none"일 때:
+  questions: [
+    { header: "출력 형식", question: "어떤 형식으로 변환할까요?", options: [SVG, PNG (기본값), PDF] },
+    { header: "변환 범위", question: "다이어그램만 변환할까요, 문서 전체를 변환할까요?", options: [다이어그램만, 문서 전체] }
+  ]
+```
+
+**Page layout for `scope=document`**: once `scope` is confirmed as `document` (whether it was given outright, resolved from the question above, or filled from `defaults.scope`) and `pdfLayout` is still unresolved (not in the request, and not filled from `defaults.pdfLayout` because questions are off), ask one more, separate `AskUserQuestion` — a follow-up round after the format/scope interaction, not folded into it — with options in this exact order: `1페이지 단일` first, `표준 인쇄 규격` second. Skip this question entirely when `scope` resolves to `diagram` — page layout has no meaning for a diagram-only export.
 
 ```text
 예시 — scope=document가 확정된 뒤 pdfLayout이 아직 불분명할 때의 후속 AskUserQuestion:
   questions: [
     { header: "PDF 페이지 구성", question: "PDF 페이지를 어떻게 만들까요?", options: [
       { label: "1페이지 단일", description: "페이지 나눔 없이 문서 전체를 한 장에 담습니다." },
-      { label: "표준 인쇄 규격", description: "A4 등 표준 용지 크기로 필요한 만큼 여러 페이지에 나눠 인쇄합니다(지금까지의 기본 방식)." }
+      { label: "표준 인쇄 규격", description: "A4 등 표준 용지 크기로 필요한 만큼 여러 페이지에 나눠 인쇄합니다." }
     ] }
   ]
 ```
@@ -87,6 +111,6 @@ Once `targetFile`, `scope=document` (format is always `pdf` for this scope), and
 node scripts/export-document-pdf.js <targetFile> "" --layout <single|paginated>
 ```
 
-(The empty `""` positional keeps the script's default `exports/`-based output naming — pass a real path there only if the user asked for a specific output location.)
+(The empty `""` positional keeps the script's default output naming in the `output.directory` setting's location — pass a real path there only if the user asked for a specific output location.)
 
-This script extracts every diagram in the document, embeds it back into the printed PDF as a real vector `<svg>` (not a linked image or a rasterized picture), and cleans up its own intermediate files — you don't need to manage temp files or call any other script for this scope. `single` prints the whole document onto one continuously tall page (no page breaks); `paginated` prints onto standard A4 pages, flowing content across as many as it needs. On success, it prints the PDF's path — report that back to the user. On failure, follow "Failure handling" above.
+This script extracts every diagram in the document, embeds it back into the printed PDF as a real vector `<svg>` (not a linked image or a rasterized picture), and cleans up its own intermediate files — you don't need to manage temp files or call any other script for this scope. `single` prints the whole document onto one continuously tall page (no page breaks); `paginated` prints onto standard A4 pages, flowing content across as many as it needs. Collapsible `<details>` blocks are always printed open, so their content is never hidden in the PDF; the source file isn't changed. On success, it prints the PDF's path — report that back to the user. On failure, follow "Failure handling" above.

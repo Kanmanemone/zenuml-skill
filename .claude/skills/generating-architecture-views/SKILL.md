@@ -7,12 +7,32 @@ description: Generates a structural architecture view (evidence-based components
 
 ## Workflow overview
 
+0. Read the settings (see "Settings" below).
 1. Determine the purpose (from what's stated/implied; ask only if genuinely unclear).
 2. Generate the Dependency section (components, groups, relationship-labeled and color-coded diagram, hyperlinks).
-3. Generate the Responsibility section (per-group and per-element, abstract + concrete).
-4. Generate the Collaboration section (dependency-gated group and element entries, with multi-target consolidation).
+3. Generate the Responsibility section (per-group and per-element, abstract + concrete) — unless its display setting is `hidden`.
+4. Generate the Collaboration section (dependency-gated group and element entries, with multi-target consolidation) — unless its display setting is `hidden`.
 5. Self-check (AP-1–AP-15) and fix before presenting.
 6. Save the architecture view file and feedback log, and present the file link. That's the end — this skill produces only the architecture view.
+
+## Settings
+
+Before anything else in each run, read this skill's own `settings.schema.json` (the option definition — the only source of truth for every option's key, allowed values, and default) and `settings.jsonc` (the user's values; `//` and `/* */` comments allowed), both in this skill's directory. Read them fresh every run — never reuse values from an earlier run. Resolve every option in the definition:
+
+- **No `settings.jsonc` at all**: use every option's `default`, and say nothing about it.
+- **The file can't be read** (still not valid JSON once comments are stripped, or its top level isn't an object): use every `default`, finish the work, and add one notice.
+- **A key is missing**: use its `default`, silently.
+- **A value breaks its option's type or allowed values**: use that option's `default`, keep every other value, and add one notice naming the key.
+- **A leaf key that the definition doesn't have** (typo, or an option that no longer exists): ignore it and add one notice naming the key.
+- **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "Responsibility도 보여줘", "elk로"): use what the request says, for this request only.
+
+Notices go only at the end of the chat response, one line each, in this form — never into the output file:
+
+```text
+⚙️ 설정 안내: settings.jsonc — <읽지 못해 모든 값을 기본값으로 사용 | `<key>` 값이 허용되지 않아 기본값 `<default>` 사용 | 알 수 없는 키 `<key>` 무시>
+```
+
+Never edit either settings file. What each option actually does lives in the step it affects (Steps 2–4, "Output file").
 
 ## Step 1 — Confirm the purpose
 
@@ -38,7 +58,7 @@ Group components with a Mermaid `subgraph` **only** when the description gives a
 
 **Diagram shape**: `flowchart LR` overall (groups arranged left-to-right), with `direction TB` inside each `subgraph` (members arranged top-to-bottom), and a fixed `%%{init}%%` styling block controlling curve, spacing, and cluster-label typography. See `references/templates.md` for the exact block to copy.
 
-**Renderer selection**: only when the user explicitly names a Mermaid renderer in the request (e.g. "elk"), add `"defaultRenderer": "<the exact value they typed>"` to the `flowchart` config of that same `%%{init}%%` block — vocabulary is open (whatever renderer name they type), not a fixed list, and the value is never validated or remapped. Omit the field entirely when the request doesn't name one, including on a regeneration of a view that named one in an earlier round — a renderer choice never carries over from a prior round on its own.
+**Renderer selection**: only when the user explicitly names a Mermaid renderer in the request (e.g. "elk"), add `"defaultRenderer": "<the exact value they typed>"` to the `flowchart` config of that same `%%{init}%%` block — vocabulary is open (whatever renderer name they type), not a fixed list, and the value is never validated or remapped. When the request doesn't name one, follow the `dependency.renderer` setting: `elk` adds `"defaultRenderer": "elk"` the same way; `default` omits the field entirely. A renderer named in an earlier round never carries over on its own — only the request or the setting decides, every round.
 
 **Relationship labels**: label every arrow with the nature of the relationship as the description states or clearly implies it (e.g., 호출, 타입 참조, 선언 참조, 화면·타입 참조— this vocabulary is open-ended, not a fixed enum). If the description doesn't specify a relationship's nature, label it with the generic default "호출" rather than guessing a more specific nature that wasn't stated.
 
@@ -60,6 +80,8 @@ This skill never derives these targets itself by reading or searching the codeba
 
 ## Step 3 — Generate Responsibility
 
+If `responsibility.display` is `hidden`, skip this whole step — don't work out responsibilities at all, write no `### Responsibility` section, and skip the self-check items that only concern Responsibility (AP-6, AP-6b). Otherwise generate it as below, then wrap it per "Section display" (Output file).
+
 No pairwise comparison here — every group and every element gets its own two-part entry, except parallel sibling elements that qualify for consolidation below (see "Parallel-sibling consolidation"):
 
 - <strong>책임 (추상)</strong>: one sentence, the high-level responsibility, in your own words but grounded in what the description says.
@@ -80,6 +102,8 @@ If any member actually carries a responsibility or relationship the others don't
 This reuses the exact same threshold and judgment as Step 4's "Multi-target consolidation" for Collaboration — don't invent a second mechanism.
 
 ## Step 4 — Generate Collaboration
+
+If `collaboration.display` is `hidden`, skip this whole step — no `### Collaboration` section, and skip the self-check items that only concern Collaboration (AP-7–AP-10). Otherwise generate it as below, then wrap it per "Section display" (Output file).
 
 This section holds every entry for a pair (or, per "Multi-target consolidation" below, a source and a consolidated set of targets) with a **real dependency between them** — no dependency, no entry, at either level below.
 
@@ -122,7 +146,7 @@ Architecture view anti-pattern check:
 - [ ] AP-3: No subgraph group without an explicit naming/layer/domain signal in the description
 - [ ] AP-4: Every arrow has a relationship-nature label grounded in the description, or the "호출" default when the description doesn't specify one — never a guessed specific nature
 - [ ] AP-5: Every node has a color class, every edge is colored to match its source node, and siblings only share a class when none of them is individually distinguished elsewhere
-- [ ] AP-5b: `defaultRenderer` appears in the `%%{init}%%` block only when this request explicitly named a renderer, using that exact value — and it's absent whenever the request didn't, even on a regeneration of a view whose earlier round did name one
+- [ ] AP-5b: `defaultRenderer` is present exactly when this request named a renderer (that exact value) or, failing that, when `dependency.renderer` is `elk` (value `elk`) — and absent otherwise, never carried over from an earlier round
 - [ ] AP-6: Every group and every element has both 책임(추상) and 역할(구체) — "설명에 명시되지 않음" where the description doesn't support one, never a guess; every code-level identifier cited in 역할(구체) is wrapped in backticks
 - [ ] AP-6b: Responsibility parallel-sibling consolidation was applied only where the condition holds (3+ elements, same group, parallel structural role, no member with a genuinely different kind of role) — the combined heading lists and hyperlinks every member, 역할(구체) still cites each member's own evidence, and a member with a real difference in kind was excluded and given its own entry instead
 - [ ] AP-7: Group-level Collaboration entries exist only for group pairs with at least one cross-group dependency edge (zero if 1 or fewer groups)
@@ -133,7 +157,8 @@ Architecture view anti-pattern check:
 - [ ] AP-12: Every entry (Responsibility and Collaboration alike) restates its content in full and independently (no "위와 동일"-style backreferences), and entries don't get thinner/more generic later in a long list than earlier
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
 - [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
-- [ ] AP-13c: The file holds nothing but the three headings, the caption, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question or the onboarding-default notice)
+- [ ] AP-13d: Each of Responsibility/Collaboration matches its display setting (or the request's override): `hidden` — heading and content entirely absent; `plain` — no box; `collapsed`/`expanded` — heading outside, content inside one `<details>` box (with `open` only for `expanded`) whose summary is just the section name, content identical to `plain`
+- [ ] AP-13c: The file holds nothing but the three headings, the caption, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, or settings notices)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
 - [ ] AP-15: No sequence/runtime-flow diagram drawn, and no offer or question about building one — the response ends with the architecture view
 ```
@@ -148,9 +173,24 @@ Don't paste the Dependency, Responsibility, or Collaboration content into the ch
 
 **Request classification**: before writing, classify the request — (1) *Regeneration* (a follow-up refining the architecture view just shown in this conversation) overwrites the existing `.zenuml/<slug>.architecture.md` completely; (2) *Initial generation* (a self-contained description with no existing file for this slug) creates a new file; (3) *new request with a colliding slug* (an unrelated description that happens to hash to an existing `.zenuml/<slug>.architecture.md`) appends `-2`, `-3`, … rather than overwriting; (4) if genuinely unclear which of the three this is, ask rather than guessing.
 
-**File contents**: a `### Dependency` heading followed by its one-line caption (Step 2, "Caption") and then its Mermaid code fence, then `### Responsibility`, then `### Collaboration`, in that order — no other ordering. Use `###` for all three (never `##` or shallower, matching this repository's `.zenuml/` heading convention). Within Collaboration, `#### 그룹 간 비교` (if 2+ groups) comes before `#### 요소 간 비교`.
+**File contents**: a `### Dependency` heading followed by its one-line caption (Step 2, "Caption") and then its Mermaid code fence, then `### Responsibility`, then `### Collaboration`, in that order — no other ordering. A section whose display setting is `hidden` is simply absent; the others keep this order. Use `###` for all three (never `##` or shallower, matching this repository's `.zenuml/` heading convention). Within Collaboration, `#### 그룹 간 비교` (if 2+ groups) comes before `#### 요소 간 비교`.
 
-**Nothing but content**: the file holds only those three headings, the caption, and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified) and the onboarding-default notice from Step 1.
+**Section display**: Dependency is never boxed. For Responsibility and Collaboration, `plain` writes the section as is. `collapsed` and `expanded` keep the `###` heading outside and put everything under it inside one box — blank line after `<summary>`, blank line before `</details>`, so the Markdown inside renders (see `references/templates.md`, "Collapsible section"):
+
+```markdown
+### Responsibility
+
+<details>
+<summary>Responsibility</summary>
+
+…the section's content, unchanged…
+
+</details>
+```
+
+`expanded` is the same with `<details open>`. This box is structure, not commentary — it's the one thing besides content allowed in the file.
+
+**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, and the settings notices from "Settings".
 
 After writing, the entire chat response for this part is a relative link:
 
@@ -199,7 +239,7 @@ Don't summarize, analyze, or prune this log's content, ever — it exists purely
 
 Input: "OrderService는 주문을 생성하고, PaymentService는 결제를 담당하며, OrderService가 PaymentService를 호출한다. 이 시스템의 구조를 보여줘." Purpose confirmed as 온보딩. No file paths or URLs given, so no hyperlinks are attached.
 
-Generated file (`.zenuml/<slug>.architecture.md`, not pasted into the chat response):
+Generated file (`.zenuml/<slug>.architecture.md`, not pasted into the chat response) — shown with both display settings at `plain`; with `collapsed`/`expanded` each of Responsibility and Collaboration is wrapped as in "Section display", and with `hidden` it's absent:
 
 ````markdown
 ### Dependency

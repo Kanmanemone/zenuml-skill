@@ -2,6 +2,8 @@
 
 Full input→output walkthroughs, end to end. See `templates.md` for the underlying section shapes and `SKILL.md` (Step 2's minimal example) for the rules these follow. Each example below focuses on facets the `SKILL.md` example doesn't show.
 
+All examples below show Responsibility and Collaboration with display `plain` so the content is easy to read; under `collapsed`/`expanded` each is wrapped as in `SKILL.md` "Section display", and under `hidden` it's absent.
+
 ## Example 1 — Onboarding, two groups, local-project hyperlinks
 
 **User**: "OrderService(src/main/kotlin/order/OrderService.kt)와 PaymentService(src/main/kotlin/order/PaymentService.kt)는 '주문 도메인'에 속해. InventoryService(src/main/kotlin/inventory/InventoryService.kt)는 '재고 도메인'에 속해. OrderService가 PaymentService를 호출해서 결제를 진행하고(호출), InventoryService의 재고 수량 타입을 참조해서 주문 가능 여부를 판단해(타입 참조). OrderService는 주문 생성을 담당하고, PaymentService는 결제 처리를 담당해. 이 저장소 루트 기준 경로야."

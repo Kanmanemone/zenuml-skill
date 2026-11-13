@@ -45,3 +45,14 @@ node .claude/skills/exporting-markdown-diagrams/scripts/read-settings.js
 ## 시나리오 9 — 옵션 추가 내구성 (SC-006)
 
 시험용 옵션 하나를 exporting의 옵션 정의에 더하고(설정 파일엔 추가하지 않음) `read-settings.js`를 실행 → 기본값으로 해석되고 안내가 없으며 `lib/settings.js`는 바꿀 필요가 없다. 확인 후 되돌린다.
+
+## Validation Results (T019, 2026-11-13)
+
+| 시나리오 | 방법 | 결과 | 비고 |
+|----------|------|------|------|
+| 5. 설정 해석 | `read-settings.js` 실제 실행 | PASS | (a) 배포본·(e) 파일 없음 → 안내 없음. (b) `png.scale: 0` → 그 키만 기본값 + 안내 1줄. (c) 절대 경로 `output.directory`·정의에 없는 `pngg.scale` → 각각 안내 1줄, 나머지 값(`png.scale: 2`)은 적용. (d) 끝 쉼표 → 읽지 못함 안내 1줄·모든 값 기본값. 문자열 안 `//`(`"url//x"`)는 주석으로 잘리지 않고 값 검증 단계에서 거부됨 |
+| 6. PNG 배율·산출물 위치 | 다이어그램 1개짜리 마크다운을 실제 변환 | PASS | 배포본: `src/exports/sample-1.png` 615×210. `png.scale: 2`, `output.directory: "../tmp-exports"`: 원본 한 단계 위 `tmp-exports/sample-1.png` 410×140(정확히 2/3) |
+| 7. PDF 접은 글 펼치기 | `<details>`(open 없음)가 있는 파일을 문서 PDF로 변환 후 `pypdf`로 텍스트 추출 | PASS | 접힌 내용의 표식 문자열이 PDF 텍스트에 포함됨 |
+| 9. 옵션 추가 내구성 | exporting 옵션 정의에 시험용 `trial.flag` 추가 후 `read-settings.js` 실행 | PASS | `lib/settings.js` 수정 없이 기본값 `false`로 해석, 안내 없음. 확인 후 되돌림 |
+
+시나리오 1~4·8은 LLM이 따르는 지침 동작이라 실제 스킬 호출로 확인해야 하며, 이번 구현 단계에서는 SKILL.md 규칙 대조까지만 했다.

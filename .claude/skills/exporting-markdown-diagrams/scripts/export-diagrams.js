@@ -17,14 +17,15 @@ import puppeteer from "puppeteer";
 import { runMmdc } from "./lib/run-mmdc.js";
 import { BROWSER_LAUNCH_OPTIONS } from "./lib/browser-config.js";
 import { ensureExportDir } from "./lib/export-dir.js";
+import { loadSettings, SKILL_DIR } from "./lib/settings.js";
 import { fitSvgFile, svgFileToPng, svgFileToPdf } from "./lib/fit-svg.js";
 
 const SUPPORTED_FORMATS = ["svg", "png", "pdf"];
-// Puppeteer deviceScaleFactor for PNG capture (~288 DPI-equivalent at the standard
+// Puppeteer deviceScaleFactor for PNG capture comes from the `png.scale` setting (default 3,
+// ~288 DPI-equivalent at the standard
 // 96 CSS px/in baseline). The viewport is sized to the fitted viewBox itself before
 // screenshotting — never squeezed into a fixed page width — so this scale, not an
 // explicit width/height, is what keeps PNGs sharp regardless of diagram size.
-const PNG_SCALE = 3;
 
 function fail(message, code = 1) {
   console.error(message);
@@ -54,10 +55,11 @@ async function main() {
     fail(`Unsupported file type: ${targetFile} — only .md/.markdown files are supported.`);
   }
 
+  const { values: settings } = loadSettings(SKILL_DIR);
   const outputBase =
     outputBaseArg ||
     path.join(
-      ensureExportDir(targetFile),
+      ensureExportDir(targetFile, settings["output.directory"]),
       path.basename(targetFile).replace(/\.(md|markdown)$/i, ""),
     );
   const outputDir = path.dirname(outputBase) || ".";
@@ -118,7 +120,7 @@ async function main() {
       if (format === "svg") {
         fs.copyFileSync(svgPath, outputFile);
       } else if (format === "png") {
-        await svgFileToPng(browser, svgPath, outputFile, PNG_SCALE);
+        await svgFileToPng(browser, svgPath, outputFile, settings["png.scale"]);
       } else {
         await svgFileToPdf(browser, svgPath, outputFile);
       }

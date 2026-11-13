@@ -35,7 +35,7 @@
 
 ## 추가 기능
 
-아래는 각각 독립된 스킬입니다 — 필요한 것만 `.claude/skills/`에 복사하세요:
+아래는 각각 독립된 스킬입니다 — 필요한 것만 `.claude/skills/`에 복사하세요. 핵심 스킬을 포함한 모든 스킬은 자기 폴더의 `settings.jsonc`를 읽으므로, 그 파일을 고쳐 동작을 바꿀 수 있습니다(각 옵션 위에 한국어 설명 주석이 있습니다):
 
 - **[`generating-architecture-views`](.claude/skills/generating-architecture-views/)** — 구조 뷰(컴포넌트·그룹·의존관계)를 추가합니다. Dependency 다이어그램에 특정 Mermaid 렌더러(예: `elk`)를 쓰고 싶다면 요청에 그렇게 명시하세요 — `%%{init}%%` 블록에 `defaultRenderer`가 추가됩니다. 명시하지 않으면 추가되지 않습니다.
 - **[`exporting-markdown-diagrams`](.claude/skills/exporting-markdown-diagrams/)** — 다이어그램을 SVG/PNG로, 마크다운 파일 전체를 PDF(다이어그램은 텍스트 선택 가능한 벡터로 삽입)로 변환합니다. 변환은 항상 번들 스크립트(mermaid-cli)로만 이뤄지고 LLM 추론을 거치지 않습니다. 그 스크립트가 쓰는 의존성을 받기 위해 `scripts/` 폴더에서 `npm install`을 한 번 실행하세요. 결과 파일은 원본과 같은 디렉토리가 아니라 그 아래 `exports/`(자동 생성)에 모입니다.
