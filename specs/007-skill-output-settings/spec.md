@@ -21,6 +21,7 @@
 - Q: `exporting-markdown-diagrams`가 빠진 정보를 선택지 질문으로 물을지도 설정하는가? 질문할 때 기본값을 표시하는가? → A: 둘 다 설정으로 정한다. `questions.enabled`(기본 `true` — 지금처럼 물음)로 질문 여부를 고르고, 형식·범위·PDF 레이아웃 각각의 기본값을 `defaults.format`, `defaults.scope`, `defaults.pdfLayout`으로 정한다(배포 초기값은 모두 `none` — 기본값 없음, 지금 동작과 같음). 질문을 켜 두면, 설정된 기본값과 같은 선택지의 문자열 끝에 " (기본값)"을 붙인다 — 어느 선택지에 붙을지는 고정이 아니라 설정 값으로 정해진다. 질문을 끄면 빠진 정보를 설정된 기본값으로 묻지 않고 채우되, 기본값이 `none`인 항목만은 그 항목에 한해 여전히 묻는다. 이에 따라 옛 "PDF 레이아웃 기본값(매번 묻기/1페이지/인쇄 규격)" 옵션은 `defaults.pdfLayout`으로 대체된다(FR-013 개정, FR-013b 신설).
 - Q: 배포되는 설정 파일의 초기값은 누가 정하는가? → A: 사용자가 항목별로 직접 지정한다. 세 스킬의 구현이 모두 끝난 뒤 모든 옵션의 초기값을 한꺼번에 사용자에게 확인한다. 그때까지 이 spec에 적힌 기본값은 잠정값이며, 잠정값은 기능 도입 전 동작과 같게 둔다(FR-003 개정).
 - Q: Dependency 다이어그램의 설정 표기가 `%%{init}%%`에서 YAML frontmatter `config`로 바뀐 뒤(003, 2026-11-13), `dependency.renderer`가 `elk`일 때 렌더러 지정은 어디에 들어가는가? → A: `config.flowchart.defaultRenderer`에 `elk`로 들어간다. 동작(설정·요청 우선순위)은 그대로다(FR-011b, US1/AC5 문구 개정).
+- Q: 접은 글 상자의 요약 줄에 섹션 이름을 쓰면 바로 위 헤딩과 단어가 겹친다. 요약 줄을 무엇으로 쓰는가? → A: 고정 문구 `Details`로 쓴다. HTML이 요약 줄이 없을 때 쓰는 기본값과 같은 영어 관례이고, 열림·닫힘 상태와 무관해 어색하지 않다. 섹션 헤딩은 상자 밖에 그대로 두어 개요·앵커를 유지한다(FR-009, Key Entities "접은 글 상자" 개정).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -107,7 +108,7 @@
 **generating-architecture-views 옵션**
 
 - **FR-008**: 설정은 Responsibility와 Collaboration 각각의 표시 방식(`display`)을 `hidden`(그리지 않음), `plain`(상자 없음), `collapsed`(접은 글 상자, 처음 접힘), `expanded`(접은 글 상자, 처음 펼침) 중 하나로 독립적으로 고를 수 있어야 한다(기본: 둘 다 `plain`).
-- **FR-009**: `collapsed`나 `expanded`인 섹션은 섹션 헤딩(`### Responsibility` / `### Collaboration`)을 상자 밖에 그대로 두고, 그 아래 내용 전체를 상자 하나에 넣어야 한다. 미리보기를 처음 열었을 때 `collapsed`는 접힌 상태로, `expanded`는 펼쳐진 상태로 보여야 하며, 어느 쪽이든 사용자가 클릭해 접고 펼 수 있어야 한다. 상자의 요약 줄에는 섹션 이름만 쓴다. 상자를 펼쳤을 때의 내용(항목, 하이퍼링크, 볼드 표기, 하위 헤딩 순서)은 `plain`일 때와 같아야 한다.
+- **FR-009**: `collapsed`나 `expanded`인 섹션은 섹션 헤딩(`### Responsibility` / `### Collaboration`)을 상자 밖에 그대로 두고, 그 아래 내용 전체를 상자 하나에 넣어야 한다. 미리보기를 처음 열었을 때 `collapsed`는 접힌 상태로, `expanded`는 펼쳐진 상태로 보여야 하며, 어느 쪽이든 사용자가 클릭해 접고 펼 수 있어야 한다. 상자의 요약 줄(▶ 옆 문구)은 섹션과 상태에 관계없이 고정 문구 `Details`로 쓴다 — 섹션 이름은 상자 밖 헤딩에만 나온다. 상자를 펼쳤을 때의 내용(항목, 하이퍼링크, 볼드 표기, 하위 헤딩 순서)은 `plain`일 때와 같아야 한다.
 - **FR-010**: `hidden`인 섹션은 헤딩과 내용 모두 산출 파일에 넣지 않아야 하며, 스킬은 그 섹션의 내용을 만들거나 그 섹션만을 위한 자기검증을 하지 않아야 한다. 나머지 섹션의 순서(Dependency → Responsibility → Collaboration)는 유지된다.
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
 - **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — Mermaid 기본 레이아웃 엔진인 dagre로 그려짐)와 `elk` 중에서 고를 수 있어야 한다(기본: `default`). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.flowchart.defaultRenderer`에 elk를 넣는다. 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
@@ -139,7 +140,7 @@
 - **옵션 정의**: 스킬마다 하나씩 있는, 그 스킬 옵션 전체의 유일한 기준. 옵션마다 키(소속 묶음 포함), 허용 값, 기본값, 한 줄 설명, 값별 토큰 소모 영향을 담는다(FR-016). 설정 읽기·검증·안내는 이 정의만 보고 동작한다.
 - **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008)와 `dependency.renderer`(FR-011b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
 - **설정 안내**: 설정 파일을 읽지 못했거나 일부 값을 기본값으로 대체·무시했을 때 채팅 응답에만 붙는 한 줄. 대상 파일과 키를 밝힌다.
-- **접은 글 상자**: 마크다운 미리보기에서 클릭해 접고 펼 수 있는 블록. 요약 줄과 내용으로 이뤄지며, 처음 열었을 때의 상태(접힘/펼침)가 파일 안에 적혀 있다. 클릭으로 바꾼 상태는 파일에 저장되지 않으므로 다시 열면 적힌 초기 상태로 돌아간다.
+- **접은 글 상자**: 마크다운 미리보기에서 클릭해 접고 펼 수 있는 블록. 요약 줄(고정 문구 `Details`)과 내용으로 이뤄지며, 처음 열었을 때의 상태(접힘/펼침)가 파일 안에 적혀 있다. 클릭으로 바꾼 상태는 파일에 저장되지 않으므로 다시 열면 적힌 초기 상태로 돌아간다.
 
 ## Success Criteria *(mandatory)*
 
