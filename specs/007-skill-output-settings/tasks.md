@@ -101,3 +101,13 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 - [X] T022 `specs/007-skill-output-settings/quickstart.md` 시나리오 1을, 확정 초기값이 세 스킬의 `settings.schema.json` `default`와 `settings.jsonc` 값에 똑같이 들어 있는지와, 잠정값(기능 도입 전 동작)으로 설정을 바꾸면 산출물이 기능 도입 전과 같은지를 확인하는 내용으로 고친다 per FR-003, SC-001 (partial)
 - [X] T023 [P] `specs/007-skill-output-settings/data-model.md` "현재 옵션 목록"에 사용자가 확정한 배포 초기값 열을 추가하고 표 제목을 그에 맞게 바꾼다 per FR-003 (partial)
+
+---
+
+## Phase 8: Convergence
+
+**Purpose**: `/speckit-converge`가 개정된 FR-009(접은 글 상자의 요약 줄 = 고정 문구 `Details`) 대비 남은 옛 요약 줄(섹션 이름)을 찾아 바꾼다.
+
+- [ ] T024 `.claude/skills/generating-architecture-views/SKILL.md`의 "Section display" 설명·예시 블록과 AP-13d에서 요약 줄을 섹션 이름 대신 고정 문구 `<summary>Details</summary>`로 고침(섹션 이름은 상자 밖 `###` 헤딩에만) per FR-009 (contradicts)
+- [ ] T025 [P] `.claude/skills/generating-architecture-views/references/templates.md` "Collapsible section"의 설명과 예시를 `<summary>Details</summary>`로 고침 per FR-009 (contradicts)
+- [ ] T026 [P] `specs/007-skill-output-settings/research.md` "접은 글 상자 마크업" Decision의 예시·근거를 `Details`로 갱신 per FR-009 (contradicts)
