@@ -441,3 +441,9 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 ## Phase 32: Convergence
 
 - [X] T117 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·예시 fence), `references/templates.md`(템플릿 fence·규칙 설명), `references/examples.md`(모든 fence)의 `themeCSS` 끝에 엣지 라벨 반투명 규칙 `.edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }`를 고정으로 덧붙이고 그 의미를 설명 per FR-007 (partial)
+
+## Phase 33: Convergence
+
+- [ ] T118 `.claude/skills/generating-architecture-views/SKILL.md`의 Renderer selection·AP-5b와 `references/templates.md`의 렌더러 규칙을 `config.flowchart.defaultRenderer` 대신 YAML frontmatter `config` 바로 아래 `layout: <값>`으로 고침(이유: VS Code 내장 Mermaid가 defaultRenderer를 무시) per FR-007b, 007 FR-011b (contradicts)
+- [ ] T119 [P] `README.md`·`README.ko.md`의 렌더러 안내(`%%{init}%%`의 `defaultRenderer`)를 `config.layout`으로 갱신 per FR-007b (contradicts)
+- [ ] T120 [P] `specs/003-architecture-view-skill/` plan.md·quickstart.md(시나리오 22)와 `specs/007-skill-output-settings/` research.md·quickstart.md의 렌더러 위치 서술을 `config.layout`으로 갱신 per FR-007b, 007 FR-011b (partial)
