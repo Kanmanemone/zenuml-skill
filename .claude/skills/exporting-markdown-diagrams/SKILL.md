@@ -86,7 +86,7 @@ Format question — options `SVG`, `PNG`, `PDF` (only `PDF`, `PNG` once `scope` 
 
 ## Renderer preservation
 
-The diagram source (everything inside its code fence, including any `%%{init: ...}%%` renderer directive such as `defaultRenderer`) is passed to the script **exactly as written** — never parsed, rewritten, or re-serialized by you first. Don't add logic here to detect or branch on renderer directives; the bundled script hands the raw source straight to the renderer, which is what makes preserving them automatic rather than something to implement.
+The diagram source (everything inside its code fence, including a YAML frontmatter `config:` block or a `%%{init: ...}%%` directive, and any renderer setting such as `defaultRenderer` inside them) is passed to the script **exactly as written** — never parsed, rewritten, or re-serialized by you first. Don't add logic here to detect or branch on renderer directives; the bundled script hands the raw source straight to the renderer, which is what makes preserving them automatic rather than something to implement.
 
 ## Failure handling
 
