@@ -43,7 +43,7 @@
   ### Responsibility
 
   <details>
-  <summary>Responsibility</summary>
+  <summary>Details</summary>
 
   …섹션 내용(하위 헤딩·항목 그대로)…
 
@@ -51,7 +51,8 @@
   ```
 
 - **Rationale**: VS Code 미리보기와 GitHub는 `<details>` 안에서 빈 줄로 분리된 마크다운을 정상 렌더링하고, `open` 속성으로 처음 펼친 상태를 표현한다(FR-009). exporting의 `markdown-it`은 `html: true`로 같은 구조를 통과시킨다.
-- **Alternatives considered**: 섹션 헤딩을 `<summary>` 안에 넣기(헤딩이 접힌 상자 안으로 들어가 FR-009의 "헤딩은 상자 밖"과 어긋남).
+- **2026-11-13 개정**: 요약 줄은 섹션 이름 대신 고정 문구 `Details`로 쓴다(FR-009 개정). 섹션 이름을 쓰면 바로 위 헤딩과 단어가 겹치기 때문이며, `Details`는 HTML이 요약 줄이 없을 때 쓰는 기본값과 같은 영어 관례다.
+- **Alternatives considered**: 섹션 헤딩을 `<summary>` 안에 넣기(헤딩이 접힌 상자 안으로 들어가 FR-009의 "헤딩은 상자 밖"과 어긋남. GitHub은 요약 줄 안 헤딩을 inline-block으로 그리지만 VS Code 개요에서 빠질 수 있음), 요약 줄 생략(브라우저 기본값이 언어 설정에 따라 달라짐).
 
 ## Decision: PDF에서 접은 글 펼치기
 

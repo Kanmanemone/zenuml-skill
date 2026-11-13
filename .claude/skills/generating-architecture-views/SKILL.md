@@ -157,7 +157,7 @@ Architecture view anti-pattern check:
 - [ ] AP-12: Every entry (Responsibility and Collaboration alike) restates its content in full and independently (no "위와 동일"-style backreferences), and entries don't get thinner/more generic later in a long list than earlier
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
 - [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
-- [ ] AP-13d: Each of Responsibility/Collaboration matches its display setting (or the request's override): `hidden` — heading and content entirely absent; `plain` — no box; `collapsed`/`expanded` — heading outside, content inside one `<details>` box (with `open` only for `expanded`) whose summary is just the section name, content identical to `plain`
+- [ ] AP-13d: Each of Responsibility/Collaboration matches its display setting (or the request's override): `hidden` — heading and content entirely absent; `plain` — no box; `collapsed`/`expanded` — heading outside, content inside one `<details>` box (with `open` only for `expanded`) whose summary is the fixed text `Details` (never the section name), content identical to `plain`
 - [ ] AP-13c: The file holds nothing but the three headings, the caption, the fixed section comments inside the Dependency fence, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, or settings notices)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
 - [ ] AP-15: No sequence/runtime-flow diagram drawn, and no offer or question about building one — the response ends with the architecture view
@@ -175,13 +175,13 @@ Don't paste the Dependency, Responsibility, or Collaboration content into the ch
 
 **File contents**: a `### Dependency` heading followed by its one-line caption (Step 2, "Caption") and then its Mermaid code fence, then `### Responsibility`, then `### Collaboration`, in that order — no other ordering. A section whose display setting is `hidden` is simply absent; the others keep this order. Use `###` for all three (never `##` or shallower, matching this repository's `.zenuml/` heading convention). Within Collaboration, `#### 그룹 간 비교` (if 2+ groups) comes before `#### 요소 간 비교`.
 
-**Section display**: Dependency is never boxed. For Responsibility and Collaboration, `plain` writes the section as is. `collapsed` and `expanded` keep the `###` heading outside and put everything under it inside one box — blank line after `<summary>`, blank line before `</details>`, so the Markdown inside renders (see `references/templates.md`, "Collapsible section"):
+**Section display**: Dependency is never boxed. For Responsibility and Collaboration, `plain` writes the section as is. `collapsed` and `expanded` keep the `###` heading outside and put everything under it inside one box whose summary is always the fixed text `Details` — the section name appears only in the heading, never repeated in the summary — with a blank line after `<summary>`, blank line before `</details>`, so the Markdown inside renders (see `references/templates.md`, "Collapsible section"):
 
 ```markdown
 ### Responsibility
 
 <details>
-<summary>Responsibility</summary>
+<summary>Details</summary>
 
 …the section's content, unchanged…
 

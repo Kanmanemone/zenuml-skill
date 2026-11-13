@@ -222,7 +222,7 @@ Targets with their own edges elsewhere, or their own distinct Responsibility wor
 
 ## Collapsible section
 
-Used for Responsibility or Collaboration when its display setting is `collapsed` or `expanded` (see `SKILL.md`, "Section display"). The `###` heading stays outside the box; the summary is just the section name; the content inside is exactly what `plain` would have written.
+Used for Responsibility or Collaboration when its display setting is `collapsed` or `expanded` (see `SKILL.md`, "Section display"). The `###` heading stays outside the box; the summary is always the fixed text `Details` (the browser's own default label — never the section name, which would just repeat the heading); the content inside is exactly what `plain` would have written.
 
 `collapsed` (closed when the preview opens):
 
@@ -230,7 +230,7 @@ Used for Responsibility or Collaboration when its display setting is `collapsed`
 ### Collaboration
 
 <details>
-<summary>Collaboration</summary>
+<summary>Details</summary>
 
 #### 요소 간 비교
 
@@ -246,4 +246,4 @@ Used for Responsibility or Collaboration when its display setting is `collapsed`
 <details open>
 ````
 
-Keep the blank line after `<summary>…</summary>` and before `</details>` — without them the Markdown inside isn't rendered.
+Keep the blank line after `<summary>Details</summary>` and before `</details>` — without them the Markdown inside isn't rendered.

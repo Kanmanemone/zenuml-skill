@@ -108,6 +108,6 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 **Purpose**: `/speckit-converge`가 개정된 FR-009(접은 글 상자의 요약 줄 = 고정 문구 `Details`) 대비 남은 옛 요약 줄(섹션 이름)을 찾아 바꾼다.
 
-- [ ] T024 `.claude/skills/generating-architecture-views/SKILL.md`의 "Section display" 설명·예시 블록과 AP-13d에서 요약 줄을 섹션 이름 대신 고정 문구 `<summary>Details</summary>`로 고침(섹션 이름은 상자 밖 `###` 헤딩에만) per FR-009 (contradicts)
-- [ ] T025 [P] `.claude/skills/generating-architecture-views/references/templates.md` "Collapsible section"의 설명과 예시를 `<summary>Details</summary>`로 고침 per FR-009 (contradicts)
-- [ ] T026 [P] `specs/007-skill-output-settings/research.md` "접은 글 상자 마크업" Decision의 예시·근거를 `Details`로 갱신 per FR-009 (contradicts)
+- [X] T024 `.claude/skills/generating-architecture-views/SKILL.md`의 "Section display" 설명·예시 블록과 AP-13d에서 요약 줄을 섹션 이름 대신 고정 문구 `<summary>Details</summary>`로 고침(섹션 이름은 상자 밖 `###` 헤딩에만) per FR-009 (contradicts)
+- [X] T025 [P] `.claude/skills/generating-architecture-views/references/templates.md` "Collapsible section"의 설명과 예시를 `<summary>Details</summary>`로 고침 per FR-009 (contradicts)
+- [X] T026 [P] `specs/007-skill-output-settings/research.md` "접은 글 상자 마크업" Decision의 예시·근거를 `Details`로 갱신 per FR-009 (contradicts)
