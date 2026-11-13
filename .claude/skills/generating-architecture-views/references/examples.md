@@ -41,15 +41,15 @@ flowchart LR
   OrderService e1@-->|타입 참조| InventoryService
 
   %% ---- 노드 스타일 ----
-  classDef orderNode stroke:#64748B,stroke-width:3px
+  classDef orderNode stroke:#E69F00,stroke-width:3px
   class OrderService orderNode
-  classDef paymentNode stroke:#3B82F6,stroke-width:3px
+  classDef paymentNode stroke:#56B4E9,stroke-width:3px
   class PaymentService paymentNode
-  classDef inventoryNode stroke:#A855F7,stroke-width:3px
+  classDef inventoryNode stroke:#009E73,stroke-width:3px
   class InventoryService inventoryNode
 
   %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef orderEdge stroke:#64748B,stroke-width:3.5px
+  classDef orderEdge stroke:#E69F00,stroke-width:3.5px
   class e0 orderEdge
   class e1 orderEdge
 
@@ -240,17 +240,17 @@ flowchart LR
   SessionManager e1@-->|호출| TokenStore
 
   %% ---- 노드 스타일 ----
-  classDef authGatewayNode stroke:#64748B,stroke-width:3px
+  classDef authGatewayNode stroke:#E69F00,stroke-width:3px
   class AuthGateway authGatewayNode
-  classDef tokenStoreNode stroke:#3B82F6,stroke-width:3px
+  classDef tokenStoreNode stroke:#56B4E9,stroke-width:3px
   class TokenStore tokenStoreNode
-  classDef sessionManagerNode stroke:#A855F7,stroke-width:3px
+  classDef sessionManagerNode stroke:#009E73,stroke-width:3px
   class SessionManager sessionManagerNode
 
   %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef authGatewayEdge stroke:#64748B,stroke-width:3.5px
+  classDef authGatewayEdge stroke:#E69F00,stroke-width:3.5px
   class e0 authGatewayEdge
-  classDef sessionManagerEdge stroke:#A855F7,stroke-width:3.5px
+  classDef sessionManagerEdge stroke:#009E73,stroke-width:3.5px
   class e1 sessionManagerEdge
 
   %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----

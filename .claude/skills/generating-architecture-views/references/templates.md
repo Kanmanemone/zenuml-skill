@@ -50,15 +50,15 @@ flowchart LR
   ComponentA e1@-->|타입 참조| ComponentC
 
   %% ---- 노드 스타일 ----
-  classDef componentANode stroke:#64748B,stroke-width:3px
+  classDef componentANode stroke:#E69F00,stroke-width:3px
   class ComponentA componentANode
-  classDef componentBNode stroke:#3B82F6,stroke-width:3px
+  classDef componentBNode stroke:#56B4E9,stroke-width:3px
   class ComponentB componentBNode
-  classDef componentCNode stroke:#A855F7,stroke-width:3px
+  classDef componentCNode stroke:#009E73,stroke-width:3px
   class ComponentC componentCNode
 
   %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef componentAEdge stroke:#64748B,stroke-width:3.5px
+  classDef componentAEdge stroke:#E69F00,stroke-width:3.5px
   class e0 componentAEdge
   class e1 componentAEdge
 
@@ -87,30 +87,24 @@ Rules:
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
 - `layout` directly under `config` (e.g. `layout: elk`, at the same level as `flowchart:`) is optional too — add it when this request explicitly names a renderer (that exact value, open vocabulary, no validation) or, failing that, when the `dependency.renderer` setting is `elk`. Omit it otherwise, and don't carry a renderer named in an earlier round forward on its own. Never use `config.flowchart.defaultRenderer` instead: newer Mermaid builds (VS Code's built-in preview among them) ignore it and fall back to the default layout.
 - `themeCSS` is copied verbatim. Its first rule enlarges cluster labels; the rest overrides Mermaid's default edge-label background: the stacked label backgrounds (`.edgeLabel`, `.edgeLabel p`) are cleared and the remaining one (`.labelBkg`) is painted with 70% of the current editor background (`--vscode-editor-background`, white where that variable doesn't exist), so the edge line shows faintly through the label in both light and dark themes.
-- Never add `themeVariables` (background, text, cluster, edge-label colors). Renderers pick those for the viewer's light or dark theme — VS Code's built-in Mermaid preview computes them from the active color theme and redraws when it changes, and a fixed value would override that. Node border and edge colors come only from the palette below, whose 500-shade tones read on both light and dark backgrounds.
+- Never add `themeVariables` (background, text, cluster, edge-label colors). Renderers pick those for the viewer's light or dark theme — VS Code's built-in Mermaid preview computes them from the active color theme and redraws when it changes, and a fixed value would override that. Node border and edge colors come only from the palette below, chosen to read on both light and dark backgrounds.
 
 ### Color palette
 
-Assign colors from this fixed, ordered list (Tailwind CSS 500-shade hex values) to nodes in the order they're first introduced (a node that originates an edge, or otherwise needs individual distinction, claims the next unused color; interchangeable siblings that need no individual distinction share one class instead of each claiming a new color). Cycle back to the start of the list in the rare case a diagram needs more than 16 distinct colors.
+Assign colors from this fixed, ordered list — the Okabe-Ito palette, the most widely cited color-vision-deficiency-safe categorical palette — to nodes in the order they're first introduced (a node that originates an edge, or otherwise needs individual distinction, claims the next color; interchangeable siblings that need no individual distinction share one class instead of each claiming a new color).
 
 | # | Name | Hex |
 |---|------|-----|
-| 1 | slate | `#64748B` |
-| 2 | blue | `#3B82F6` |
-| 3 | purple | `#A855F7` |
-| 4 | yellow | `#EAB308` |
-| 5 | cyan | `#06B6D4` |
-| 6 | orange | `#F97316` |
-| 7 | pink | `#EC4899` |
-| 8 | green | `#22C55E` |
-| 9 | red | `#EF4444` |
-| 10 | indigo | `#6366F1` |
-| 11 | teal | `#14B8A6` |
-| 12 | violet | `#8B5CF6` |
-| 13 | amber | `#F59E0B` |
-| 14 | lime | `#84CC16` |
-| 15 | rose | `#F43F5E` |
-| 16 | fuchsia | `#D946EF` |
+| 1 | orange | `#E69F00` |
+| 2 | sky blue | `#56B4E9` |
+| 3 | bluish green | `#009E73` |
+| 4 | blue | `#0072B2` |
+| 5 | vermillion | `#D55E00` |
+| 6 | reddish purple | `#CC79A7` |
+
+Okabe-Ito's black (`#000000`, invisible on dark backgrounds) and yellow (`#F0E442`, 1.32:1 on white) are left out, because one diagram has to read on both VS Code's light and dark themes. Every pair of these six is at least 15.6 apart (OKLab ΔE×100, normal vision), so any two crossing or overlapping edges stay distinguishable. Six is also about where categorical colors stop being reliably told apart, so the list is not extended.
+
+**Reusing a color** (a diagram needing more than six colors): go around the list again, but give an already-used color only to a node that is in a different group from every node already holding it, and whose outgoing edges won't cross, run alongside, or converge on the same target as theirs. When no color meets that for a node, pick the one whose holders are farthest from it in the diagram. The relationship label on every edge stays as the second way to tell edges apart.
 
 Node border width is always `3px`; edge-class width is always `3.5px`.
 

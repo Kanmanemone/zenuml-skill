@@ -71,7 +71,7 @@ Group components with a Mermaid `subgraph` **only** when the description gives a
 
 **Relationship labels**: label every arrow with the nature of the relationship as the description states or clearly implies it (e.g., 호출, 타입 참조, 선언 참조, 화면·타입 참조— this vocabulary is open-ended, not a fixed enum). If the description doesn't specify a relationship's nature, label it with the generic default "호출" rather than guessing a more specific nature that wasn't stated.
 
-**Node and edge coloring**: give every node a border-color class (`classDef` + `class`) so it's visually distinguishable, and color every arrow leaving that node the same way: write every edge with an ID (`Source eN@-->|관계 성격| Target`, `N` from 0 in writing order), declare one edge class per source node in that node's color (`classDef <role>Edge stroke:<color>,stroke-width:3.5px`), and assign it with `class eN <role>Edge` — never `linkStyle` (see `references/templates.md` for the fixed palette and the exact syntax). Name each class descriptively after the node's role (e.g. `navHostNode`, not `color3`). Sibling nodes that never need individual distinction anywhere in the diagram — same group, same relationship nature, no edges of their own — may share one class instead of each getting a unique color; nodes that originate at least one edge, or that play a individually-notable role, should get their own class.
+**Node and edge coloring**: give every node a border-color class (`classDef` + `class`) so it's visually distinguishable, and color every arrow leaving that node the same way: write every edge with an ID (`Source eN@-->|관계 성격| Target`, `N` from 0 in writing order), declare one edge class per source node in that node's color (`classDef <role>Edge stroke:<color>,stroke-width:3.5px`), and assign it with `class eN <role>Edge` — never `linkStyle` (see `references/templates.md` for the fixed six-color Okabe-Ito palette and the exact syntax). Past six colors, reuse a color only for a node in a different group from every node already holding it, whose outgoing edges won't cross, run alongside, or converge on the same target as theirs (see "Reusing a color" there). Name each class descriptively after the node's role (e.g. `navHostNode`, not `color3`). Sibling nodes that never need individual distinction anywhere in the diagram — same group, same relationship nature, no edges of their own — may share one class instead of each getting a unique color; nodes that originate at least one edge, or that play a individually-notable role, should get their own class.
 
 **Change marking** (dynamic requests only): mark only the nodes the description states or clearly implies were added, changed, or removed — never guess a change for a node it doesn't mention. Prefix the label and add one `class` line in the CRUD section:
 
@@ -164,7 +164,7 @@ Architecture view anti-pattern check:
 - [ ] AP-2: No dependencies beyond what the description states or clearly implies, and no chain (A calls B, B calls C) collapsed into a shortcut edge (A→C) that skips the intermediate hop
 - [ ] AP-3: No subgraph group without an explicit naming/layer/domain signal in the description
 - [ ] AP-4: Every arrow has a relationship-nature label grounded in the description, or the "호출" default when the description doesn't specify one — never a guessed specific nature
-- [ ] AP-5: The fence opens with the YAML frontmatter `config` (no `%%{init}%%`, no `themeVariables`); every edge has an `eN@` ID; every node has a color class, every edge is colored by an edge class in its source node's color (no `linkStyle`); siblings only share a class when none of them is individually distinguished elsewhere; the section comments appear in the fixed order
+- [ ] AP-5: The fence opens with the YAML frontmatter `config` (no `%%{init}%%`, no `themeVariables`); every edge has an `eN@` ID; every node has a color class, every edge is colored by an edge class in its source node's color (no `linkStyle`); siblings only share a class when none of them is individually distinguished elsewhere; colors come only from the six-color palette, and two nodes with the same color are in different groups and their edges don't cross, run alongside, or meet at the same target; the section comments appear in the fixed order
 - [ ] AP-5b: `config.layout` is present exactly when this request named a renderer (that exact value) or, failing that, when `dependency.renderer` is `elk` (value `elk`) — and absent otherwise, never carried over from an earlier round; `config.flowchart.defaultRenderer` never appears
 - [ ] AP-5c: The `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` section with the label-convention comment and the three fixed `classDef crud*` lines appears exactly once; static request → no `class … crud*` line and no ✨/♻️/🗑️ prefix; dynamic request → exactly the nodes the description names as added/changed/removed carry the matching prefix and class, and every node still keeps its own border-color class
 - [ ] AP-6: Every group and every element has both 책임(추상) and 역할(구체) — "설명에 명시되지 않음" where the description doesn't support one, never a guess; every code-level identifier cited in 역할(구체) is wrapped in backticks
@@ -284,11 +284,11 @@ flowchart LR
   OrderService e0@-->|호출| PaymentService
 
   %% ---- 노드 스타일 ----
-  classDef orderNode stroke:#64748B,stroke-width:3px
+  classDef orderNode stroke:#E69F00,stroke-width:3px
   class OrderService orderNode
 
   %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef orderEdge stroke:#64748B,stroke-width:3.5px
+  classDef orderEdge stroke:#E69F00,stroke-width:3.5px
   class e0 orderEdge
 
   %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----

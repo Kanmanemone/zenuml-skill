@@ -450,6 +450,6 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 ## Phase 34: Convergence
 
-- [ ] T121 `.claude/skills/generating-architecture-views/references/templates.md`의 "Color palette" 절을 Okabe-Ito 6색 표(`#E69F00`, `#56B4E9`, `#009E73`, `#0072B2`, `#D55E00`, `#CC79A7`, 순서 고정)와 재사용 규칙(6색 초과 시 다른 그룹이면서 선이 겹치거나 같은 대상으로 모이지 않는 노드에만 같은 색)으로 교체하고, 검정·노랑 제외 이유와 출처를 적음 per FR-008b (contradicts)
-- [ ] T122 `references/templates.md`·`references/examples.md`·`SKILL.md`의 모든 예시 다이어그램 색을 Okabe-Ito 6색 순서로 바꿈(노드 클래스와 같은 색의 엣지 클래스 함께) per FR-008b (contradicts)
-- [ ] T123 `SKILL.md` "Node and edge coloring"에 6색 팔레트와 재사용 규칙을 넣고, AP-5에 "같은 색 노드끼리 같은 그룹이거나 선이 겹치지 않음" 확인을 추가 per FR-008b (partial)
+- [X] T121 `.claude/skills/generating-architecture-views/references/templates.md`의 "Color palette" 절을 Okabe-Ito 6색 표(`#E69F00`, `#56B4E9`, `#009E73`, `#0072B2`, `#D55E00`, `#CC79A7`, 순서 고정)와 재사용 규칙(6색 초과 시 다른 그룹이면서 선이 겹치거나 같은 대상으로 모이지 않는 노드에만 같은 색)으로 교체하고, 검정·노랑 제외 이유와 출처를 적음 per FR-008b (contradicts)
+- [X] T122 `references/templates.md`·`references/examples.md`·`SKILL.md`의 모든 예시 다이어그램 색을 Okabe-Ito 6색 순서로 바꿈(노드 클래스와 같은 색의 엣지 클래스 함께) per FR-008b (contradicts)
+- [X] T123 `SKILL.md` "Node and edge coloring"에 6색 팔레트와 재사용 규칙을 넣고, AP-5에 "같은 색 노드끼리 같은 그룹이거나 선이 겹치지 않음" 확인을 추가 per FR-008b (partial)
