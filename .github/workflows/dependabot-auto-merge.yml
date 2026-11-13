@@ -1,0 +1,25 @@
+# Dependabot이 만든 PR을 저장소 커밋 규칙(AGENTS.md)에 맞는 메시지로 바로 squash 병합한다.
+# (English: Immediately squash-merge Dependabot PRs with a commit message that follows the repository's commit rules in AGENTS.md.)
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Squash-merge with the repository commit format
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          body="$(printf 'Dependabot이 나온 지 21일이 지난 최신 버전으로 내보내기 스크립트 의존성을 올렸다.\n\n(English: %s)' "$PR_TITLE")"
+          gh pr merge "$PR_URL" --squash \
+            --subject "build(deps): 내보내기 스크립트 의존성을 최신 버전으로 자동 업데이트" \
+            --body "$body"
