@@ -182,3 +182,14 @@ Task: "SKILL.md 뼈대(frontmatter + 섹션 헤딩) 작성"
 
 - [X] T016 `.claude/skills/generating-zenuml-diagrams/SKILL.md`에 "Output file" 섹션 추가 — 자기검증(AP-1~AP-5)을 통과한 다이어그램을 채팅 응답에 코드로 노출하지 않고, ZenUML 원문을 Mermaid `zenuml` 코드펜스에 담아 `.zenuml/<slug>.md` 파일에 저장한 뒤 그 파일을 가리키는 상대 경로 링크만 응답에 남기는 규칙을 명시한다(번역 불필요 — VS Code 마크다운 프리뷰가 `zenuml` 타입을 네이티브로 렌더링함이 실측으로 확인됨; Claude Artifact는 발행 시 자동 팝업을 억제할 수 없고 `zenuml` 타입도 렌더링되지 않아 사용하지 않는다). 파일 저장이 불가능한 환경에서는 채팅 응답에 ZenUML DSL 텍스트를 직접 제공하는 규칙도 포함한다 per spec.md FR-011
 - [X] T017 `.gitignore`에 `.zenuml/` 항목 추가 per research.md Decision: 출력 파일 위치와 이름
+
+---
+
+## Phase 9: Convergence
+
+**Purpose**: `/speckit-converge`가 2026-11-13 `/speckit-clarify`로 신설된 FR-012/SC-006(산출 파일은 코드펜스만, 채팅 응답은 파일 링크만 — 길이·복잡도 안내, 분할 제안, 대체 출력 고지 금지) 대비 스킬 파일과 설계 문서에 남은 불일치를 바로잡는다.
+
+- [ ] T018 `.claude/skills/generating-zenuml-diagrams/SKILL.md` Generation rules의 "결과가 읽기 어려울 수 있다고 알리고 분할을 제안하라"는 규칙을, 내용을 빼거나 단순화하지 않고 그대로 생성하되 길이·복잡도 안내나 분할 제안은 하지 않는다는 규칙으로 교체 per FR-012, Edge Cases (contradicts)
+- [ ] T019 `SKILL.md` "Output file"에 산출 파일은 `zenuml` 코드펜스만, 채팅 응답은 파일 링크(파일 저장 불가 시 DSL 코드 블록)만 담고 부연 문구를 덧붙이지 않는다는 규칙(예외: 명확화 질문, 범위 밖 요청 안내, 사용자가 직접 물은 질문에 대한 답)을 추가하고, 자기검증 체크리스트에 이를 점검하는 AP-6을 추가 per FR-012, SC-006 (partial)
+- [ ] T020 [P] `specs/001-zenuml-diagram-skill/contracts/skill-interface.md` Output Contract 두 성공 케이스에 부연 문구 금지를, `data-model.md` Anti-Pattern Checklist 표와 Checked 상태 정의에 AP-6을 반영 per FR-012 (partial)
+- [ ] T021 [P] `specs/001-zenuml-diagram-skill/quickstart.md`에 참가자가 많은 설명과 파일 저장 불가 환경에서 산출 파일·채팅 응답에 부연 문구가 없는지 확인하는 시나리오를 추가 per SC-006 (missing)
