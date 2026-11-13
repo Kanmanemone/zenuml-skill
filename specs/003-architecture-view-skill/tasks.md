@@ -423,8 +423,8 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 ## Phase 29: Convergence
 
-- [ ] T109 `.claude/skills/generating-architecture-views/SKILL.md`의 Workflow overview와 Step 1에 요청을 '구조(정적)'와 '구조 변화(동적)' 중 하나로 분류하는 단계를 추가(커밋·PR·diff·전후 비교·"무엇이 바뀌었나"는 동적, 실제로 판단 불가할 때만 짧게 질문, 매 요청 새로 판단) per FR-034 (missing)
-- [ ] T110 `SKILL.md` Step 2에 "Change marking" 규칙을 추가 — 동적 요청에서 설명이 추가·변경·삭제라고 밝힌 노드에만 `✨&nbsp;<b>이름</b>`+`crudCreate` / `♻️&nbsp;이름`+`crudUpdate` / `🗑️&nbsp;<s>이름</s>`+`crudDelete`, 테두리 색·엣지 색 유지, 삭제 노드도 이전 관계와 함께 그림, 범례 없음 — 그리고 "Diagram shape" 구역 순서에 `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----`(세 classDef 항상 포함)을 엣지 스타일 다음·`click` 앞에 추가 per FR-035, FR-007 (missing)
-- [ ] T111 [P] `references/templates.md` Dependency 템플릿에 CRUD 구역(세 고정 classDef)을 추가하고 동적 요청용 표시 예(라벨·`class` 줄)를 덧붙이며, `references/examples.md`의 모든 Dependency 다이어그램에 CRUD 구역을 추가 per FR-007, FR-035, SC-014 (missing)
-- [ ] T112 `SKILL.md` "Nothing but content"·AP-13c에 CRUD classDef 구역을 허용 구조로 명시하고, AP 항목(AP-5c)으로 "CRUD 구역 정확히 한 번, 정적이면 `class … crud*`·이모지 접두 없음, 동적이면 설명이 밝힌 노드에만 표시"를 추가 per FR-032, SC-014 (partial)
-- [ ] T113 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md에 정적/동적 분류와 CRUD 구역·표시 규칙을 반영 per plan, FR-034, FR-035 (partial)
+- [X] T109 `.claude/skills/generating-architecture-views/SKILL.md`의 Workflow overview와 Step 1에 요청을 '구조(정적)'와 '구조 변화(동적)' 중 하나로 분류하는 단계를 추가(커밋·PR·diff·전후 비교·"무엇이 바뀌었나"는 동적, 실제로 판단 불가할 때만 짧게 질문, 매 요청 새로 판단) per FR-034 (missing)
+- [X] T110 `SKILL.md` Step 2에 "Change marking" 규칙을 추가 — 동적 요청에서 설명이 추가·변경·삭제라고 밝힌 노드에만 `✨&nbsp;<b>이름</b>`+`crudCreate` / `♻️&nbsp;이름`+`crudUpdate` / `🗑️&nbsp;<s>이름</s>`+`crudDelete`, 테두리 색·엣지 색 유지, 삭제 노드도 이전 관계와 함께 그림, 범례 없음 — 그리고 "Diagram shape" 구역 순서에 `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----`(세 classDef 항상 포함)을 엣지 스타일 다음·`click` 앞에 추가 per FR-035, FR-007 (missing)
+- [X] T111 [P] `references/templates.md` Dependency 템플릿에 CRUD 구역(세 고정 classDef)을 추가하고 동적 요청용 표시 예(라벨·`class` 줄)를 덧붙이며, `references/examples.md`의 모든 Dependency 다이어그램에 CRUD 구역을 추가 per FR-007, FR-035, SC-014 (missing)
+- [X] T112 `SKILL.md` "Nothing but content"·AP-13c에 CRUD classDef 구역을 허용 구조로 명시하고, AP 항목(AP-5c)으로 "CRUD 구역 정확히 한 번, 정적이면 `class … crud*`·이모지 접두 없음, 동적이면 설명이 밝힌 노드에만 표시"를 추가 per FR-032, SC-014 (partial)
+- [X] T113 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md에 정적/동적 분류와 CRUD 구역·표시 규칙을 반영 per plan, FR-034, FR-035 (partial)

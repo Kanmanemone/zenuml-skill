@@ -8,7 +8,7 @@ description: Generates a structural architecture view (evidence-based components
 ## Workflow overview
 
 0. Read the settings (see "Settings" below).
-1. Determine the purpose (from what's stated/implied; ask only if genuinely unclear).
+1. Determine the purpose (from what's stated/implied; ask only if genuinely unclear), and classify the request as structure (static) or structure change (dynamic).
 2. Generate the Dependency section (components, groups, relationship-labeled and color-coded diagram, hyperlinks).
 3. Generate the Responsibility section (per-group and per-element, abstract + concrete) — unless its display setting is `hidden`.
 4. Generate the Collaboration section (dependency-gated group and element entries, with multi-target consolidation) — unless its display setting is `hidden`.
@@ -50,19 +50,38 @@ Before generating anything, judge whether the purpose is already clear — eithe
 - In the current scope, the confirmed purpose does not change which sections get produced — Dependency, Responsibility, and Collaboration are always all three generated (see Steps 2–4) regardless of purpose. That's exactly why this question isn't worth forcing on every request: don't ask it just to have asked it — only when you genuinely can't tell which purpose applies.
 - If the description doesn't identify any components at all, don't ask about purpose — ask what process/system to diagram instead.
 
+### Static or dynamic
+
+Also classify every request (regenerations included, judged fresh each round) as exactly one of:
+
+- **Structure change (dynamic)** — the request asks what changed: a commit, PR, diff, before/after of a refactor, "무엇이 추가/변경/삭제됐나". Step 2 then marks the added/changed/removed nodes (see "Change marking").
+- **Structure (static)** — everything else. No node gets a change mark.
+
+Decide from the request and context without asking; only when you genuinely can't tell, ask briefly: "현재 구조를 보여드릴까요, 변화(추가·변경·삭제)를 표시할까요?"
+
 ## Step 2 — Generate Dependency
 
 Use only components and dependencies the description explicitly states or clearly implies — never add one to make the picture feel complete. Each arrow represents a relationship the description directly states or implies between those exact two components — if the description only establishes a chain (A calls B, B calls C), draw A→B and B→C, never a collapsed A→C shortcut implying A relates to C directly when nothing said that.
 
 Group components with a Mermaid `subgraph` **only** when the description gives an actual signal: a shared name prefix/namespace, or an explicit layer/domain word ("주문 도메인", "인증 계층", etc.). If there is no such signal, do not create any `subgraph` — treat every component as part of one unlabeled set instead (this still counts as "one group" for Steps 3–4, it's just not drawn as a box).
 
-**Diagram shape**: the code fence starts with a fixed YAML frontmatter `config:` block (curve, node/rank spacing, `titleTopMargin`, theme colors, cluster-label typography — never `%%{init}%%`), then `flowchart LR` overall (groups arranged left-to-right), with each group written as `subgraph Id["라벨"]` and `direction TB` inside it (members arranged top-to-bottom). A node whose display name can't serve as its ID (parentheses, spaces, etc.) is declared `Id@{ label: "표시 이름" }`. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `click` lines; those three section comments are fixed structure. See `references/templates.md` for the exact block to copy.
+**Diagram shape**: the code fence starts with a fixed YAML frontmatter `config:` block (curve, node/rank spacing, `titleTopMargin`, theme colors, cluster-label typography — never `%%{init}%%`), then `flowchart LR` overall (groups arranged left-to-right), with each group written as `subgraph Id["라벨"]` and `direction TB` inside it (members arranged top-to-bottom). A node whose display name can't serve as its ID (parentheses, spaces, etc.) is declared `Id@{ label: "표시 이름" }`. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` (the three fixed `crud*` classDefs, always present, static or dynamic) → `click` lines; those four section comments are fixed structure. See `references/templates.md` for the exact block to copy.
 
 **Renderer selection**: only when the user explicitly names a Mermaid renderer in the request (e.g. "elk"), add `defaultRenderer: <the exact value they typed>` under `config.flowchart` in that YAML frontmatter — vocabulary is open (whatever renderer name they type), not a fixed list, and the value is never validated or remapped. When the request doesn't name one, follow the `dependency.renderer` setting: `elk` adds `defaultRenderer: elk` the same way; `default` omits the field entirely. A renderer named in an earlier round never carries over on its own — only the request or the setting decides, every round.
 
 **Relationship labels**: label every arrow with the nature of the relationship as the description states or clearly implies it (e.g., 호출, 타입 참조, 선언 참조, 화면·타입 참조— this vocabulary is open-ended, not a fixed enum). If the description doesn't specify a relationship's nature, label it with the generic default "호출" rather than guessing a more specific nature that wasn't stated.
 
 **Node and edge coloring**: give every node a border-color class (`classDef` + `class`) so it's visually distinguishable, and color every arrow leaving that node the same way: write every edge with an ID (`Source eN@-->|관계 성격| Target`, `N` from 0 in writing order), declare one edge class per source node in that node's color (`classDef <role>Edge stroke:<color>,stroke-width:3.5px`), and assign it with `class eN <role>Edge` — never `linkStyle` (see `references/templates.md` for the fixed palette and the exact syntax). Name each class descriptively after the node's role (e.g. `navHostNode`, not `color3`). Sibling nodes that never need individual distinction anywhere in the diagram — same group, same relationship nature, no edges of their own — may share one class instead of each getting a unique color; nodes that originate at least one edge, or that play a individually-notable role, should get their own class.
+
+**Change marking** (dynamic requests only): mark only the nodes the description states or clearly implies were added, changed, or removed — never guess a change for a node it doesn't mention. Prefix the label and add one `class` line in the CRUD section:
+
+| Change | Label | Class line |
+|---|---|---|
+| Added (C) | `Id["✨&nbsp;<b>Name</b>"]` | `class Id crudCreate` |
+| Changed (U) | `Id["♻️&nbsp;Name"]` | `class Id crudUpdate` |
+| Removed (D) | `Id["🗑️&nbsp;<s>Name</s>"]` | `class Id crudDelete` |
+
+The `crud*` classes set only stroke width/dash (and grey text for removed) — the node keeps its own border-color class and its edges keep their edge class. Draw a removed node with the relations the description says it had. Don't add a legend. In a static request, keep the three `classDef crud*` lines but write no `class … crud*` line and no prefix.
 
 **Hyperlinks**: attach a `click NodeName "target" "label"` directive to every node whose real location the description establishes (see "Hyperlink resolution" below for how `target` is determined). Skip `click` entirely for a node with no resolvable target — don't invent one. Never add a note about whether a renderer follows `click` links or where else to find them — the `click` directives and the Markdown links in Responsibility/Collaboration speak for themselves.
 
@@ -147,6 +166,7 @@ Architecture view anti-pattern check:
 - [ ] AP-4: Every arrow has a relationship-nature label grounded in the description, or the "호출" default when the description doesn't specify one — never a guessed specific nature
 - [ ] AP-5: The fence opens with the YAML frontmatter `config` (no `%%{init}%%`); every edge has an `eN@` ID; every node has a color class, every edge is colored by an edge class in its source node's color (no `linkStyle`); siblings only share a class when none of them is individually distinguished elsewhere; the section comments appear in the fixed order
 - [ ] AP-5b: `config.flowchart.defaultRenderer` is present exactly when this request named a renderer (that exact value) or, failing that, when `dependency.renderer` is `elk` (value `elk`) — and absent otherwise, never carried over from an earlier round
+- [ ] AP-5c: The `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` section with the three fixed `classDef crud*` lines appears exactly once; static request → no `class … crud*` line and no ✨/♻️/🗑️ prefix; dynamic request → exactly the nodes the description names as added/changed/removed carry the matching prefix and class, and every node still keeps its own border-color class
 - [ ] AP-6: Every group and every element has both 책임(추상) and 역할(구체) — "설명에 명시되지 않음" where the description doesn't support one, never a guess; every code-level identifier cited in 역할(구체) is wrapped in backticks
 - [ ] AP-6b: Responsibility parallel-sibling consolidation was applied only where the condition holds (3+ elements, same group, parallel structural role, no member with a genuinely different kind of role) — the combined heading lists and hyperlinks every member, 역할(구체) still cites each member's own evidence, and a member with a real difference in kind was excluded and given its own entry instead
 - [ ] AP-7: Group-level Collaboration entries exist only for group pairs with at least one cross-group dependency edge (zero if 1 or fewer groups)
@@ -158,7 +178,7 @@ Architecture view anti-pattern check:
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
 - [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
 - [ ] AP-13d: Each of Responsibility/Collaboration matches its display setting (or the request's override): `hidden` — heading and content entirely absent; `plain` — no box; `collapsed`/`expanded` — heading outside, content inside one `<details>` box (with `open` only for `expanded`) whose summary is the fixed text `Details` (never the section name), content identical to `plain`
-- [ ] AP-13c: The file holds nothing but the three headings, the caption, the fixed section comments inside the Dependency fence, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, or settings notices)
+- [ ] AP-13c: The file holds nothing but the three headings, the caption, the fixed section comments and the `crud*` classDefs inside the Dependency fence, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, or settings notices)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
 - [ ] AP-15: No sequence/runtime-flow diagram drawn, and no offer or question about building one — the response ends with the architecture view
 ```
@@ -190,7 +210,7 @@ Don't paste the Dependency, Responsibility, or Collaboration content into the ch
 
 `expanded` is the same with `<details open>`. This box is structure, not commentary — it's the one thing besides content allowed in the file.
 
-**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", the fixed section comments inside the Dependency fence (Step 2), and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, and the settings notices from "Settings".
+**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", the fixed section comments and the `crud*` classDefs inside the Dependency fence (Step 2), and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, and the settings notices from "Settings".
 
 After writing, the entire chat response for this part is a relative link:
 
@@ -280,6 +300,11 @@ flowchart LR
   %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
   classDef orderEdge stroke:#64748B,stroke-width:3.5px
   class e0 orderEdge
+
+  %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
+  classDef crudCreate stroke-width:5px
+  classDef crudUpdate stroke-dasharray:12 4 2 4
+  classDef crudDelete stroke-dasharray:5 10,color:#6B7280
 ```
 
 ### Responsibility
