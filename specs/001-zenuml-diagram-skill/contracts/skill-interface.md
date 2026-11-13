@@ -28,6 +28,7 @@
 - 저장되는 파일은 ZenUML 원문을 Mermaid `zenuml` 코드펜스에 담는다 — 번역 없이 원문 그대로가 VS Code 마크다운 프리뷰에서 렌더링되는 미리보기이기도 하다(research.md 참조. Claude Artifact는 `zenuml` 타입을 렌더링하지 않으므로 이 파일 방식을 쓰는 이유이기도 하다).
 - 설명에 없는 참가자·메시지·분기·예외 처리를 포함해서는 안 된다(spec.md FR-001, FR-002).
 - 파일에 저장되는 내용은 Anti-Pattern Checklist(data-model.md 참조) 전체 항목을 통과한 이후에만 확정된다.
+- 파일에는 `zenuml` 코드펜스만, 응답에는 링크 한 줄만 둔다 — 길이·복잡도 안내, 분할 제안, 생성 과정 해설 같은 부연 문구를 덧붙이지 않는다(spec.md FR-012).
 
 ### 성공 시 (파일 저장 불가능한 환경)
 
@@ -35,7 +36,7 @@
 <ZenUML DSL 코드 블록>
 ```
 
-- 파일시스템 접근이 없는 환경에서는 `.zenuml/` 링크 대신 ZenUML DSL 텍스트를 채팅 응답에 직접 제공한다(spec.md FR-011, Edge Cases).
+- 파일시스템 접근이 없는 환경에서는 `.zenuml/` 링크 대신 ZenUML DSL 텍스트를 채팅 응답에 직접 제공한다(spec.md FR-011, Edge Cases). 대체 출력을 했다는 고지나 다른 부연 문구는 덧붙이지 않는다(spec.md FR-012).
 
 ### 명확화가 필요할 때 (Process Description에 ambiguity 있음)
 

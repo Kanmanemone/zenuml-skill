@@ -38,6 +38,7 @@
 | AP-3 | 설명에 없는 조건 분기·반복이 추가되지 않았는가 |
 | AP-4 | 근거 없는 예외 처리(try/catch)나 반환값이 삽입되지 않았는가 |
 | AP-5 | 동일 로직을 표현하는 가장 얕은 중첩 구조를 사용했는가 |
+| AP-6 | 산출 파일에는 `zenuml` 코드펜스만, 채팅 응답에는 파일 링크(파일 저장 불가 시 DSL 코드 블록)만 있고 길이·복잡도 안내·분할 제안·대체 출력 고지 같은 부연 문구가 없는가 (FR-012) |
 
 **검증 규칙**: 하나라도 위반(위반=해당 항목에 대해 "아니오")이면, 사용자에게 결과를 제시하기 전에 초안을 수정해야 한다(spec.md FR-006).
 
@@ -48,7 +49,7 @@ skill이 생성하는 ZenUML DSL 텍스트. 상태가 두 단계로 전이된다
 | 상태 | 설명 | 전이 조건 |
 |------|------|-----------|
 | Draft | Process Description으로부터 1차 생성된 ZenUML DSL 텍스트 | Process Description에 `ambiguities`가 없을 때 생성 |
-| Checked | Anti-Pattern Checklist 전체 항목을 통과(또는 위반 수정 완료)한 상태 | Draft에 대해 AP-1~AP-5 전부 "예" |
+| Checked | Anti-Pattern Checklist 전체 항목을 통과(또는 위반 수정 완료)한 상태 | Draft에 대해 AP-1~AP-6 전부 "예" |
 | Presented | 사용자에게 최종적으로 제시된 결과 — 채팅 응답에는 Output File 링크만 포함(코드 미노출) | Draft가 Checked 상태에 도달한 후에만 전이 가능 |
 
 **불변 조건**: `Presented` 상태의 다이어그램은 항상 `Checked`를 거쳐야 하며, `Checked`를 건너뛰고 바로 `Presented`될 수 없다(spec.md FR-005, FR-006).

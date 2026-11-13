@@ -28,7 +28,7 @@ Only proceed past this point once the request is classified as (1), (2), or (3).
 - When a call chain is described ("A calls B, which calls C"), nest the calls with braces per the syntax reference rather than flattening them into a sequence of unrelated messages.
 - Prefer the shallowest nesting that still represents the described logic correctly.
 - The ZenUML DSL text is the primary output, but don't paste it into the chat response — save it to a file and link to it (see "Output file" below).
-- If the description implies a very large number of participants or an unusually complex flow, still generate it faithfully — don't silently drop or simplify described content — but tell the user the result may be hard to read, and suggest splitting it into multiple diagrams if that would help.
+- If the description implies a very large number of participants or an unusually complex flow, still generate it faithfully — don't silently drop or simplify described content — and don't add any notice that the result may be hard to read or any suggestion to split it.
 - Match the user's language for anything you invent — participant/method names that merely describe an actor's behavior (no real code backs them), plus all surrounding prose (comments, table text, log `Request`/`Response` write-ups). Proper nouns copied from real source (actual class/function names, exact identifiers a codebase uses) are exempt — keep those exactly as given, regardless of language. `zenuml-core`'s `ID` token accepts Unicode letters (`\p{L}`), so non-Latin identifiers are valid ZenUML, e.g. `A.데이터_가져오기()`. In a script with no letter case (Korean, Japanese, Chinese, ...), use `snake_case` for multi-word invented names instead of camelCase, since camelCase relies on a case distinction that script doesn't have.
 
 ### Example: minimal request
@@ -76,9 +76,10 @@ ZenUML anti-pattern check:
 - [ ] AP-3: No conditional branches or loops beyond what the description states or clearly implies
 - [ ] AP-4: No unjustified try/catch blocks or invented return values
 - [ ] AP-5: Uses the shallowest nesting that still represents the described logic
+- [ ] AP-6: The output file holds only the `zenuml` code fence and the chat response only the file link (or the DSL code block when there's no filesystem) — no length/complexity notice, split suggestion, fallback notice, or other added commentary
 ```
 
-Workflow: **generate a draft → check it against AP-1 through AP-5 → if anything fails, revise the draft → re-check → only then present the result to the user.** A draft that hasn't passed all five items is not ready to show. If a fix for one item would violate another (rare), prefer accuracy (AP-1–AP-4) over minimal nesting (AP-5).
+Workflow: **generate a draft → check it against AP-1 through AP-6 → if anything fails, revise the draft → re-check → only then present the result to the user.** A draft that hasn't passed all six items is not ready to show. If a fix for one item would violate another (rare), prefer accuracy (AP-1–AP-4) over minimal nesting (AP-5).
 
 For a simple, unambiguous request the check is quick — don't narrate it verbatim to the user, just perform it before responding.
 
@@ -100,13 +101,15 @@ Client->Server.getData()
 ```
 ````
 
-No title heading needed — the filename already identifies the diagram.
+No title heading needed — the filename already identifies the diagram. Nothing else goes in the file either: no notes, captions, or commentary around the code fence.
 
 After writing the file, the entire chat response is just a relative link to it — no code block:
 
 📄 [Client calls Server.getData()](.zenuml/client-server-getdata.md)
 
-If the current environment has no filesystem access to write to, skip the file and put the ZenUML DSL in a fenced code block in the chat response instead. Skip the feedback log below too in that case — there's no file to log against.
+If the current environment has no filesystem access to write to, skip the file and put the ZenUML DSL in a fenced code block in the chat response instead — just the code block, with no notice that you fell back to it.
+
+Don't add anything else to the chat response either — no remarks on the diagram's size or complexity, split suggestions, or explanations of how it was built. The only exceptions are a clarifying question (when the description is too ambiguous to draw), an out-of-scope notice (see "Out-of-scope requests"), and a direct answer when the user actually asked something (e.g. how to render it). Skip the feedback log below too in that case — there's no file to log against.
 
 ### Diagram feedback log
 
@@ -156,5 +159,5 @@ Don't over-ask, though: minor cosmetic details (exact display names, colors, par
 
 - **Non-sequence diagrams** (class, deployment, component, etc.): ZenUML supports sequence diagrams only. Say so rather than attempting a workaround.
 - **Converting an existing Mermaid/PlantUML diagram**: out of scope for this skill. Say so; only natural-language process descriptions are supported as input.
-- **Analyzing a codebase to produce a diagram**: this skill's self-check (AP-1–AP-5) only verifies that a diagram doesn't exceed a *given* description — it has no way to verify that a description faithfully covers an entire codebase. So this skill still takes only a natural-language description as input, not raw code or a repository. If real code is available, read it yourself first (directly, or via Explore/Grep/gh), distill what you find into a description that cites concrete evidence (file paths, exact identifiers, commit/PR references), then pass that description in as normal.
+- **Analyzing a codebase to produce a diagram**: this skill's self-check (AP-1–AP-6) only verifies that a diagram doesn't exceed a *given* description — it has no way to verify that a description faithfully covers an entire codebase. So this skill still takes only a natural-language description as input, not raw code or a repository. If real code is available, read it yourself first (directly, or via Explore/Grep/gh), distill what you find into a description that cites concrete evidence (file paths, exact identifiers, commit/PR references), then pass that description in as normal.
 - **Rendering / producing an image**: the primary output is ZenUML DSL text, not an image. The output file already renders as a diagram in VS Code's Markdown preview (see "Output file"); for anything beyond that, tell the user to render it with other `mermaid-js/zenuml-core`-compatible tooling.
