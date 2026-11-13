@@ -139,18 +139,6 @@ Dependency, Responsibility, Collaboration 세 섹션으로 구성된 문서.
 
 **불변 조건**: `Presented` 상태의 구조 뷰는 항상 `Checked`를 거쳐야 한다(spec.md FR-019, FR-020).
 
-## Delegation Handoff (위임)
-
-구조 뷰가 `Presented` 상태에 도달한 뒤, 시퀀스 다이어그램 생성 여부를 결정하는 절차.
-
-| 속성 | 설명 |
-|------|------|
-| offered | 확인 질문을 했는지 (구조 뷰가 `Presented`에 도달하면 항상 `true`) |
-| user_response | `agreed` / `declined` / `no_response` |
-| enriched_description | 원래 `Process Description.raw_text` + Dependency의 컴포넌트·그룹·의존관계 + Responsibility의 책임 정보를 반영해 재구성한, 더 풍부한 자연어 프로세스 설명 — `user_response == agreed`일 때만 생성되어 `generating-zenuml-diagrams`의 입력이 됨 |
-
-**검증 규칙**: `user_response`가 `agreed`일 때만 `generating-zenuml-diagrams`를 실행한다. `declined`나 `no_response`면 실행하지 않으며, 재차 확인 질문을 하지 않는다(spec.md FR-015, FR-016). `offered`가 `false`인 경우(구조 뷰 생성이 완료되지 않은 경우)는 이 엔티티 자체가 생성되지 않는다(spec.md FR-017).
-
 ## Anti-Pattern Checklist (번들 자산)
 
 구조 뷰 초안을 사용자에게 보여주기 전 대조하는 규칙 목록. `.claude/skills/generating-architecture-views/SKILL.md` 본문에 포함된다.
@@ -174,8 +162,7 @@ Dependency, Responsibility, Collaboration 세 섹션으로 구성된 문서.
 | AP-13b | `### Dependency`와 Mermaid 코드펜스 사이에 요청 키워드로만 만든 일반 텍스트 캡션이 정확히 한 줄 있는가 (FR-033) |
 | AP-13c | 산출 파일이 세 섹션의 헤딩·캡션·실제 내용만 담고(클릭 이동 안내·길이 안내·렌더러 경고·레이아웃 설명 등 메타 코멘트 없음), 채팅 응답이 파일 링크와 위임 확인 질문만 담는가 (FR-012, FR-027d, FR-032) |
 | AP-14 | 요청이 올바르게 분류됐고(신규/재생성/충돌) 로그 기록이 그에 맞으며, Dependency~Collaboration이 완료되지 못했으면 산출물·로그 모두 만들지 않았는가 |
-| AP-15 | Runtime Flow(시퀀스) 다이어그램을 스스로 그리지 않았는가 (위임 대상 영역 침범 금지) |
-| AP-16 | 시퀀스 다이어그램 생성 여부를 확인했는가, 동의 없이 `generating-zenuml-diagrams`를 실행하지 않았는가 |
+| AP-15 | 시퀀스·실행 흐름 다이어그램을 그리지 않았고, 그것을 만들자는 제안·질문 없이 구조 뷰로 응답을 끝냈는가 (FR-014) |
 
 **검증 규칙**: 하나라도 위반(위반=해당 항목에 대해 "아니오")이면, 사용자에게 결과를 제시하기 전에 초안을 수정해야 한다(spec.md FR-019, FR-020).
 
@@ -195,7 +182,6 @@ Dependency, Responsibility, Collaboration 세 섹션으로 구성된 문서.
 | 속성 | 설명 |
 |------|------|
 | architecture_file_path | `.zenuml/<slug>.architecture.md` — 구조 뷰(Dependency, Responsibility, Collaboration)를 담는 파일. 항상 생성됨(구조 뷰가 완성된 경우) |
-| sequence_file_path | `.zenuml/<slug>.md` — `generating-zenuml-diagrams`가 생성하는 시퀀스 다이어그램 파일. `Delegation Handoff.user_response == agreed`일 때만 존재 |
 | available | 파일 저장(파일시스템 접근) 가능 여부 — `false`면 파일 대신 채팅 응답에 텍스트를 직접 제공 |
 
-**검증 규칙**: `sequence_file_path`는 위임에 동의하지 않으면 존재하지 않는다(spec.md Key Entities "출력 파일"). `available`이 `false`인 경우 두 산출물 모두 채팅 응답에 직접 텍스트로 제공된다(spec.md FR-024).
+**검증 규칙**: `available`이 `false`인 경우 구조 뷰는 채팅 응답에 직접 텍스트로 제공된다(spec.md FR-024).

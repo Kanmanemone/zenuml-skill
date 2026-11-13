@@ -2,7 +2,7 @@
 
 Full input→output walkthroughs, end to end. See `templates.md` for the underlying section shapes and `SKILL.md` (Step 2's minimal example) for the rules these follow. Each example below focuses on facets the `SKILL.md` example doesn't show.
 
-## Example 1 — Onboarding, two groups, local-project hyperlinks, hand-off agreed
+## Example 1 — Onboarding, two groups, local-project hyperlinks
 
 **User**: "OrderService(src/main/kotlin/order/OrderService.kt)와 PaymentService(src/main/kotlin/order/PaymentService.kt)는 '주문 도메인'에 속해. InventoryService(src/main/kotlin/inventory/InventoryService.kt)는 '재고 도메인'에 속해. OrderService가 PaymentService를 호출해서 결제를 진행하고(호출), InventoryService의 재고 수량 타입을 참조해서 주문 가능 여부를 판단해(타입 참조). OrderService는 주문 생성을 담당하고, PaymentService는 결제 처리를 담당해. 이 저장소 루트 기준 경로야."
 
@@ -127,9 +127,9 @@ flowchart LR
     - 이 참조가 타입 하나로 충분한가, 더 넓은 API가 필요한가?
 ````
 
-**Skill** responds with the file link and the hand-off question. **User**: "응, 만들어줘." **Skill** runs `generating-zenuml-diagrams` with an enriched description built from the above and appends its `.zenuml/order-inventory.md` link.
+**Skill** responds with the file link only.
 
-## Example 2 — Troubleshooting, multi-target consolidation, web-repo hyperlinks, hand-off declined
+## Example 2 — Troubleshooting, multi-target consolidation, web-repo hyperlinks
 
 **User** (troubleshooting stated up front): "NotificationDispatcher가 문제인 것 같아 봐야 해. '알림 모듈'의 NotificationDispatcher가 '채널 모듈'에 속한 EmailSender, SmsSender, PushSender를 전부 호출해서(호출) 발송을 위임하고, '템플릿 모듈'의 TemplateRenderer가 만든 렌더링 결과 타입도 참조해(타입 참조). EmailSender는 sendEmail()을, SmsSender는 sendSms()를, PushSender는 sendPush()를 각각 호출해서 발송하는데, 셋 다 발송 채널을 구현하는 동일한 역할이야. 이 저장소는 https://github.com/example/notify-service 에 있고, NotificationDispatcher는 src/notify/NotificationDispatcher.kt, EmailSender/SmsSender/PushSender는 각각 src/channel/EmailSender.kt·SmsSender.kt·PushSender.kt, TemplateRenderer는 src/template/TemplateRenderer.kt에 있어."
 
@@ -202,7 +202,7 @@ Collaboration:
 
 EmailSender, SmsSender, PushSender all share the same group (채널 모듈) and the same relationship nature (호출) from NotificationDispatcher, and all three play the same parallel structural role (each is its own channel-sender implementation) — 3 targets meets the consolidation threshold, so they're collapsed into "채널 발신 요소들" instead of three separate entries, the same way their Responsibility entries were combined above. Each sender having its own distinct function name and its own edge in the diagram doesn't block this — that's just a different implementation filling the same role, not a difference in kind (see the Responsibility consolidation above for the retry-policy counterexample that *would* have excluded PushSender). TemplateRenderer is a single target in a different group with a different nature (타입 참조), so it stays its own entry.
 
-**Skill** responds with the file link and the hand-off question. **User**: "아니, 지금은 구조만 보면 돼." **Skill** ends the response there — no `generating-zenuml-diagrams` run, no repeated offer.
+**Skill** responds with the file link only.
 
 ## Example 3 — No hyperlink evidence, single group, unspecified responsibility
 

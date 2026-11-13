@@ -1,13 +1,9 @@
 ---
 name: generating-architecture-views
-description: Generates a structural architecture view (evidence-based components, groups, and labeled/colored dependencies; per-group and per-element responsibility; and collaboration analysis between actually-connected pairs, with hyperlinks to real source) from a natural-language process description, then offers to hand off to generating-zenuml-diagrams for the sequence/behavior diagram. Use when the user asks about a system's or process's structure, architecture, component responsibilities, or component relationships — including when they say a sequence diagram alone didn't make the structure clear. Do not use for sequence diagrams, call order, or runtime/behavior flow — that is generating-zenuml-diagrams's job.
+description: Generates a structural architecture view (evidence-based components, groups, and labeled/colored dependencies; per-group and per-element responsibility; and collaboration analysis between actually-connected pairs, with hyperlinks to real source) from a natural-language process description. Use when the user asks about a system's or process's structure, architecture, component responsibilities, or component relationships — including when they say a sequence diagram alone didn't make the structure clear. Do not use for sequence diagrams, call order, or runtime/behavior flow — this skill only produces structural views.
 ---
 
 # Generating Architecture Views
-
-## Relationship to `generating-zenuml-diagrams`
-
-This skill depends on `generating-zenuml-diagrams` and is not a replacement for it. This skill only produces three things — **Dependency**, **Responsibility**, and **Collaboration** — and never draws a sequence/runtime-flow diagram itself. When the user also wants to see how the process actually runs, this skill hands off to `generating-zenuml-diagrams` (see "Offering the sequence diagram" below). Never edit that skill's `SKILL.md` or any file under its directory — always run it as it already exists.
 
 ## Workflow overview
 
@@ -15,14 +11,12 @@ This skill depends on `generating-zenuml-diagrams` and is not a replacement for 
 2. Generate the Dependency section (components, groups, relationship-labeled and color-coded diagram, hyperlinks).
 3. Generate the Responsibility section (per-group and per-element, abstract + concrete).
 4. Generate the Collaboration section (dependency-gated group and element entries, with multi-target consolidation).
-5. Self-check (AP-1–AP-14) and fix before presenting.
-6. Save the architecture view file and feedback log, and present the file link.
-7. Ask whether to continue into a sequence diagram.
-8. If agreed: self-check the hand-off (AP-15–AP-16), then run `generating-zenuml-diagrams`. If declined or no response: stop here.
+5. Self-check (AP-1–AP-15) and fix before presenting.
+6. Save the architecture view file and feedback log, and present the file link. That's the end — this skill produces only the architecture view.
 
 ## Step 1 — Confirm the purpose
 
-Before generating anything, judge whether the purpose is already clear — either stated outright or clearly implied by context (e.g., "새로 합류한 팀원에게 보여주려고" implies onboarding; "OrderService 쪽에서 이상한 게 있어서 봐야 해" implies troubleshooting). If so, use that purpose and don't ask — the same "only stop for ambiguity that actually matters" judgment `generating-zenuml-diagrams` applies to structural gaps. Only when the purpose is genuinely unclear — you can't reasonably tell which of the three it is — ask before doing anything else:
+Before generating anything, judge whether the purpose is already clear — either stated outright or clearly implied by context (e.g., "새로 합류한 팀원에게 보여주려고" implies onboarding; "OrderService 쪽에서 이상한 게 있어서 봐야 해" implies troubleshooting). If so, use that purpose and don't ask — only stop for ambiguity that actually matters. Only when the purpose is genuinely unclear — you can't reasonably tell which of the three it is — ask before doing anything else:
 
 ```text
 이 구조 뷰를 어떤 목적으로 보시나요?
@@ -34,7 +28,7 @@ Before generating anything, judge whether the purpose is already clear — eithe
 - A clear answer to 1/2/3 sets the purpose. For "기타" (3), ask one more question — "어떤 정보가 필요하신지 한 문장으로 알려주세요" — and wait for that answer before continuing.
 - An ambiguous answer or no answer at all (the user asks something unrelated instead) is **not** treated as agreement to guess — default to **온보딩** and say so explicitly in your response (e.g., "목적을 명확히 하지 않으셔서 온보딩 기준으로 진행합니다").
 - In the current scope, the confirmed purpose does not change which sections get produced — Dependency, Responsibility, and Collaboration are always all three generated (see Steps 2–4) regardless of purpose. That's exactly why this question isn't worth forcing on every request: don't ask it just to have asked it — only when you genuinely can't tell which purpose applies.
-- If the description doesn't identify any components at all, don't ask about purpose — ask what process/system to diagram instead, the same way `generating-zenuml-diagrams` does when it can't identify participants.
+- If the description doesn't identify any components at all, don't ask about purpose — ask what process/system to diagram instead.
 
 ## Step 2 — Generate Dependency
 
@@ -139,23 +133,24 @@ Architecture view anti-pattern check:
 - [ ] AP-12: Every entry (Responsibility and Collaboration alike) restates its content in full and independently (no "위와 동일"-style backreferences), and entries don't get thinner/more generic later in a long list than earlier
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
 - [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
-- [ ] AP-13c: The file holds nothing but the three headings, the caption, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link and the hand-off question (plus a needed clarifying question or the onboarding-default notice)
+- [ ] AP-13c: The file holds nothing but the three headings, the caption, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question or the onboarding-default notice)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
+- [ ] AP-15: No sequence/runtime-flow diagram drawn, and no offer or question about building one — the response ends with the architecture view
 ```
 
-Workflow: generate a draft → check it against AP-1 through AP-14 (including AP-13b/13c) → if anything fails, revise → re-check → only then present the result. Don't narrate the checklist to the user; just perform it before responding.
+Workflow: generate a draft → check it against AP-1 through AP-15 (including AP-13b/13c) → if anything fails, revise → re-check → only then present the result. Don't narrate the checklist to the user; just perform it before responding.
 
 ## Output file
 
-Don't paste the Dependency, Responsibility, or Collaboration content into the chat response. Save it to a file and link to it instead — the same reasoning `generating-zenuml-diagrams` uses (see its `SKILL.md`, "Output file"): file links don't trigger unwanted auto-preview behavior the way Claude Artifacts do, and this repository already has a working Mermaid-preview path through VS Code.
+Don't paste the Dependency, Responsibility, or Collaboration content into the chat response. Save it to a file and link to it instead: file links don't trigger unwanted auto-preview behavior the way Claude Artifacts do, and this repository already has a working Mermaid-preview path through VS Code.
 
-**Where**: `.zenuml/<slug>.architecture.md`, sharing the same `<slug>` as the process's sequence diagram file (`.zenuml/<slug>.md`) if one exists — but always a distinct file. Never write into or overwrite `.zenuml/<slug>.md` from this skill; that file belongs to `generating-zenuml-diagrams`.
+**Where**: `.zenuml/<slug>.architecture.md`, where `<slug>` is a short kebab-case name derived from what the view is about. Write only `*.architecture.md` files (and their logs) — never touch any other file in `.zenuml/`.
 
-**Request classification**: before writing, classify the request the same way `generating-zenuml-diagrams` does — (1) *Regeneration* (a follow-up refining the architecture view just shown in this conversation) overwrites the existing `.zenuml/<slug>.architecture.md` completely; (2) *Initial generation* (a self-contained description with no existing file for this slug) creates a new file; (3) *new request with a colliding slug* (an unrelated description that happens to hash to an existing `.zenuml/<slug>.architecture.md`) appends `-2`, `-3`, … rather than overwriting; (4) if genuinely unclear which of the three this is, ask rather than guessing.
+**Request classification**: before writing, classify the request — (1) *Regeneration* (a follow-up refining the architecture view just shown in this conversation) overwrites the existing `.zenuml/<slug>.architecture.md` completely; (2) *Initial generation* (a self-contained description with no existing file for this slug) creates a new file; (3) *new request with a colliding slug* (an unrelated description that happens to hash to an existing `.zenuml/<slug>.architecture.md`) appends `-2`, `-3`, … rather than overwriting; (4) if genuinely unclear which of the three this is, ask rather than guessing.
 
 **File contents**: a `### Dependency` heading followed by its one-line caption (Step 2, "Caption") and then its Mermaid code fence, then `### Responsibility`, then `### Collaboration`, in that order — no other ordering. Use `###` for all three (never `##` or shallower, matching this repository's `.zenuml/` heading convention). Within Collaboration, `#### 그룹 간 비교` (if 2+ groups) comes before `#### 요소 간 비교`.
 
-**Nothing but content**: the file holds only those three headings, the caption, and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link and the hand-off question (see "Offering the sequence diagram"); the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified) and the onboarding-default notice from Step 1.
+**Nothing but content**: the file holds only those three headings, the caption, and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified) and the onboarding-default notice from Step 1.
 
 After writing, the entire chat response for this part is a relative link:
 
@@ -165,7 +160,7 @@ If there is no filesystem access in the current environment, skip the file and p
 
 ### Architecture view feedback log
 
-Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or regenerated architecture view gets a feedback log at `.zenuml/log/<slug>.architecture.md` — same slug, `log/` subdirectory, mirroring the mechanism `generating-zenuml-diagrams` already uses for its own output (see its `SKILL.md`, "Diagram feedback log"). This is already covered by the `.zenuml/` `.gitignore` entry, so it needs no gitignore entry of its own.
+Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or regenerated architecture view gets a feedback log at `.zenuml/log/<slug>.architecture.md` — same slug, `log/` subdirectory. This is already covered by the `.zenuml/` `.gitignore` entry, so it needs no gitignore entry of its own.
 
 **What goes in the `**Request**:` field**: not just the single message that immediately triggered this round. Gather every turn since the previous round (or, for Round 1, since the conversation about this architecture view started) that actually contributed to what got built — including the purpose-confirmation exchange from Step 1, if that's how this round's scope was pinned down. Drop anything unrelated (small talk, tangents), and lightly edit the rest into one coherent entry rather than pasting a raw transcript.
 
@@ -196,7 +191,8 @@ Don't summarize, analyze, or prune this log's content, ever — it exists purely
 ## Out-of-scope requests
 
 - **Class diagrams, deployment diagrams, or any non-Dependency/Responsibility/Collaboration structural view**: say this skill only produces those three things; it doesn't attempt a workaround.
-- **Analyzing an actual codebase to produce the view**: this skill's self-check only verifies that a view doesn't exceed a *given* description — it has no way to verify that a description faithfully covers an entire codebase. So this skill still takes only a natural-language description as input, not raw code or a repository, the same restriction `generating-zenuml-diagrams` has. If real code is available, read it yourself first (directly, or via Explore/Grep/gh), distill what you find into a description that cites concrete evidence (file paths, exact identifiers, repository URLs, commit/PR references — this evidence is also what "Hyperlink resolution" above needs), then pass that description in as normal.
+- **Sequence diagrams, call order, or runtime/behavior flow**: say this skill only produces structural views. Don't draw one, and don't suggest or run any other tool for it.
+- **Analyzing an actual codebase to produce the view**: this skill's self-check only verifies that a view doesn't exceed a *given* description — it has no way to verify that a description faithfully covers an entire codebase. So this skill still takes only a natural-language description as input, not raw code or a repository. If real code is available, read it yourself first (directly, or via Explore/Grep/gh), distill what you find into a description that cites concrete evidence (file paths, exact identifiers, repository URLs, commit/PR references — this evidence is also what "Hyperlink resolution" above needs), then pass that description in as normal.
 - **Comparing concepts that aren't groups/elements identified in the description** (e.g., "Controller vs Application 패턴이 뭐가 다른가요?" with no such components in the input): say Collaboration only compares groups/elements actually identified from the description, not general concepts or patterns.
 
 ### Example: minimal request
@@ -269,43 +265,6 @@ flowchart LR
 ````
 
 No `subgraph` because the description gave no grouping signal. Only one component originates an edge (OrderService), so only one color class is needed. No `click` directives or Markdown links anywhere, since the description gave no real file paths or URLs — nothing is fabricated to fill that gap. See `references/examples.md` for fuller examples covering groups, multi-target consolidation, and all three hyperlink modes.
-
-## Offering the sequence diagram
-
-Once the architecture view file (or chat text, if no filesystem) has been presented, ask — in the same response, right after the file link:
-
-```text
-이 구조를 바탕으로 시퀀스 다이어그램도 만들까요?
-```
-
-Skip this question entirely if Steps 2–4 never completed (you asked a clarifying question about the target process instead) — there is no architecture view to build on yet.
-
-### If the user agrees
-
-Build a single enriched natural-language process description that combines: the user's original description, the components/groups/dependencies from Dependency, and the responsibilities from Responsibility. Pass that description to `generating-zenuml-diagrams` exactly as if the user had typed it themselves, and let that skill run its own complete workflow (request classification, generation rules, anti-pattern self-check, output file, feedback log) untouched — don't reimplement or shortcut any part of it here.
-
-Carry the current environment's file-availability status into that run too: if this environment has no filesystem access, `generating-zenuml-diagrams` should fall back to its own chat-text output (its `SKILL.md`, "Output file") rather than attempting a file write.
-
-### If the user declines or doesn't respond clearly
-
-Do not run `generating-zenuml-diagrams`. Do not ask again in this response, and don't bring it up unprompted in a later one — end with the architecture view alone. If the user wants the sequence diagram later, they'll ask for it (directly, or by invoking either skill again).
-
-## Self-check for the hand-off
-
-Add these to the same working checklist before offering or running the hand-off:
-
-```text
-- [ ] AP-15: No sequence/Runtime-Flow diagram drawn by this skill itself
-- [ ] AP-16: The hand-off question was asked (if a structure view was produced), and generating-zenuml-diagrams was not run without explicit agreement
-```
-
-### Example: agreement
-
-Continuing the minimal-request example above, if the user replies "응, 만들어줘": run `generating-zenuml-diagrams` with the description "OrderService가 주문을 생성하고 PaymentService를 호출해 결제를 처리한다. OrderService는 주문 생성을, PaymentService는 결제 처리를 담당한다." and present its resulting `.zenuml/<slug>.md` link right after the architecture view link.
-
-### Example: decline
-
-If the user replies "아니 됐어" (or asks an unrelated question instead): respond with nothing further about the sequence diagram — the architecture view link from the previous step is the complete answer.
 
 ## Scale control
 

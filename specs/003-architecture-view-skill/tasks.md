@@ -404,8 +404,8 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 **Purpose**: `/speckit-converge`가 2026-11-13 `/speckit-clarify`로 결정된 시퀀스 다이어그램 스킬과의 의존성 제거(FR-014, FR-017, FR-021, FR-024, FR-032, SC-007~SC-010 개정, 옛 User Story 4 폐지) 대비 스킬 파일과 설계 문서에 남은 연계를 찾아 없앤다.
 
-- [ ] T100 `.claude/skills/generating-architecture-views/SKILL.md`에서 "Relationship to …" 절, workflow의 hand-off 단계(7–8), "Offering the sequence diagram" 절 전체(동의/거부 처리와 예시 포함), "Self-check for the hand-off" 절(AP-15/16)을 제거하고, 시퀀스·실행 흐름 요청은 지원 범위 밖으로 안내한다는 규칙을 "Out-of-scope requests"에 둔다 per FR-014, SC-007 (contradicts)
-- [ ] T101 `SKILL.md`의 frontmatter description과 본문에서 다른 스킬을 이름으로 언급하거나 그 동작에 빗대 설명하는 모든 곳(목적 판단·요청 분류·출력 파일·피드백 로그·범위 밖 요청 설명, `.zenuml/<slug>.md`와의 슬러그 공유)을 이 스킬만의 독립 서술로 바꾼다 per SC-008, FR-021 (contradicts)
-- [ ] T102 `SKILL.md`의 "Nothing but content" 규칙과 AP-13c에서 채팅 응답 허용 항목을 파일 링크만으로 고친다(허용 예외: 필요한 확인 질문, 온보딩 기본값 고지) per FR-032 (contradicts)
-- [ ] T103 [P] `references/examples.md`에서 hand-off 질문·동의·거부 서술과 예시 제목의 hand-off 표기를 제거 per FR-014 (contradicts)
-- [ ] T104 [P] `specs/003-architecture-view-skill/`의 plan.md, data-model.md(위임 엔티티, AP-15/16 행), contracts/skill-interface.md, quickstart.md(위임 시나리오), research.md(위임 관련 Decision)를 의존성 제거에 맞게 갱신 per FR-014, FR-021, SC-008 (contradicts)
+- [X] T100 `.claude/skills/generating-architecture-views/SKILL.md`에서 "Relationship to …" 절, workflow의 hand-off 단계(7–8), "Offering the sequence diagram" 절 전체(동의/거부 처리와 예시 포함), "Self-check for the hand-off" 절(AP-15/16)을 제거하고, 시퀀스·실행 흐름 요청은 지원 범위 밖으로 안내한다는 규칙을 "Out-of-scope requests"에 둔다 per FR-014, SC-007 (contradicts)
+- [X] T101 `SKILL.md`의 frontmatter description과 본문에서 다른 스킬을 이름으로 언급하거나 그 동작에 빗대 설명하는 모든 곳(목적 판단·요청 분류·출력 파일·피드백 로그·범위 밖 요청 설명, `.zenuml/<slug>.md`와의 슬러그 공유)을 이 스킬만의 독립 서술로 바꾼다 per SC-008, FR-021 (contradicts)
+- [X] T102 `SKILL.md`의 "Nothing but content" 규칙과 AP-13c에서 채팅 응답 허용 항목을 파일 링크만으로 고친다(허용 예외: 필요한 확인 질문, 온보딩 기본값 고지) per FR-032 (contradicts)
+- [X] T103 [P] `references/examples.md`에서 hand-off 질문·동의·거부 서술과 예시 제목의 hand-off 표기를 제거 per FR-014 (contradicts)
+- [X] T104 [P] `specs/003-architecture-view-skill/`의 plan.md, data-model.md(위임 엔티티, AP-15/16 행), contracts/skill-interface.md, quickstart.md(위임 시나리오), research.md(위임 관련 Decision)를 의존성 제거에 맞게 갱신 per FR-014, FR-021, SC-008 (contradicts)
