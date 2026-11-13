@@ -99,5 +99,5 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 **Purpose**: `/speckit-converge`가 사용자가 배포 초기값을 확정(T021)한 뒤에도 잠정값을 전제로 남아 있는 설계 문서를 찾아 바로잡는다.
 
-- [ ] T022 `specs/007-skill-output-settings/quickstart.md` 시나리오 1을, 확정 초기값이 세 스킬의 `settings.schema.json` `default`와 `settings.jsonc` 값에 똑같이 들어 있는지와, 잠정값(기능 도입 전 동작)으로 설정을 바꾸면 산출물이 기능 도입 전과 같은지를 확인하는 내용으로 고친다 per FR-003, SC-001 (partial)
-- [ ] T023 [P] `specs/007-skill-output-settings/data-model.md` "현재 옵션 목록"에 사용자가 확정한 배포 초기값 열을 추가하고 표 제목을 그에 맞게 바꾼다 per FR-003 (partial)
+- [X] T022 `specs/007-skill-output-settings/quickstart.md` 시나리오 1을, 확정 초기값이 세 스킬의 `settings.schema.json` `default`와 `settings.jsonc` 값에 똑같이 들어 있는지와, 잠정값(기능 도입 전 동작)으로 설정을 바꾸면 산출물이 기능 도입 전과 같은지를 확인하는 내용으로 고친다 per FR-003, SC-001 (partial)
+- [X] T023 [P] `specs/007-skill-output-settings/data-model.md` "현재 옵션 목록"에 사용자가 확정한 배포 초기값 열을 추가하고 표 제목을 그에 맞게 바꾼다 per FR-003 (partial)

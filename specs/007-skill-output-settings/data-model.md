@@ -40,20 +40,22 @@
 | 정의에 없는 키(묶음 객체 안의 잎 키 기준) | 무시 | `<키>` 무시 |
 | 요청 문장이 그 옵션의 값을 직접 밝힘 | 요청 값(이번 요청만) | 없음 |
 
-## 현재 옵션 목록 (잠정 기본값)
+## 현재 옵션 목록 (잠정 기본값과 확정 배포 초기값)
 
-| 스킬 | key | type | 값 | 잠정 기본값 |
-|------|-----|------|----|-------------|
-| architecture | `responsibility.display` | enum | `hidden`/`plain`/`collapsed`/`expanded` | `plain` |
-| architecture | `collaboration.display` | enum | 위와 같음 | `plain` |
-| architecture | `dependency.renderer` | enum | `default`/`elk` | `default` |
-| zenuml | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` |
-| exporting | `questions.enabled` | boolean | — | `true` |
-| exporting | `defaults.format` | enum | `none`/`svg`/`png`/`pdf` | `none` |
-| exporting | `defaults.scope` | enum | `none`/`diagram`/`document` | `none` |
-| exporting | `defaults.pdfLayout` | enum | `none`/`single`/`paginated` | `none` |
-| exporting | `png.scale` | number(min 0) | — | `3` |
-| exporting | `output.directory` | relativePath(sourceFileDir) | — | `./exports` |
+| 스킬 | key | type | 값 | 잠정 기본값 | 확정 배포 초기값 |
+|------|-----|------|----|-------------|-----------------|
+| architecture | `responsibility.display` | enum | `hidden`/`plain`/`collapsed`/`expanded` | `plain` | `collapsed` |
+| architecture | `collaboration.display` | enum | 위와 같음 | `plain` | `collapsed` |
+| architecture | `dependency.renderer` | enum | `default`/`elk` | `default` | `default` |
+| zenuml | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
+| exporting | `questions.enabled` | boolean | — | `true` | `true` |
+| exporting | `defaults.format` | enum | `none`/`svg`/`png`/`pdf` | `none` | `png` |
+| exporting | `defaults.scope` | enum | `none`/`diagram`/`document` | `none` | `document` |
+| exporting | `defaults.pdfLayout` | enum | `none`/`single`/`paginated` | `none` | `single` |
+| exporting | `png.scale` | number(min 0) | — | `3` | `3` |
+| exporting | `output.directory` | relativePath(sourceFileDir) | — | `./exports` | `./exports` |
+
+확정 배포 초기값은 2026-11-13 사용자가 항목별로 지정했다(FR-003). 옵션 정의의 `default`와 배포 `settings.jsonc` 값은 이 열과 같다.
 
 ## Collapsible Section (구조 뷰 산출물 안)
 

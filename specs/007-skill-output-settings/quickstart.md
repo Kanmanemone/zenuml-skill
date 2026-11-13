@@ -6,9 +6,9 @@
 2. exporting 스크립트 의존성이 설치돼 있다(`.claude/skills/exporting-markdown-diagrams/scripts`에서 `npm install`).
 3. 각 시나리오는 끝나면 `settings.jsonc`를 배포본으로 되돌린다(`git checkout -- <파일>`).
 
-## 시나리오 1 — 기본값 = 기존 동작 (SC-001)
+## 시나리오 1 — 확정 초기값 반영과 잠정값 = 기존 동작 (FR-003, SC-001)
 
-배포본 설정 그대로 세 스킬을 한 번씩 실행해, 산출물이 기능 도입 전과 같은지 확인한다(구조 뷰 상자 없음·렌더러 지정 없음, 로그 `.zenuml/log/`, 내보내기 질문 그대로·" (기본값)" 없음·`exports/`·PNG 배율 3).
+(a) 세 스킬의 `settings.schema.json` `default`와 배포 `settings.jsonc` 값·주석의 "(기본값: …)"이 data-model.md "현재 옵션 목록"의 확정 초기값과 모두 같은지 대조한다. (b) 설정을 잠정값(같은 표의 잠정값 열 — 기능 도입 전 동작)으로 바꿔 세 스킬을 한 번씩 실행해, 산출물이 기능 도입 전과 같은지 확인한다(구조 뷰 상자 없음·렌더러 지정 없음, 로그 `.zenuml/log/`, 내보내기 질문 그대로·" (기본값)" 없음·`exports/`·PNG 배율 3).
 
 ## 시나리오 2 — 구조 뷰 표시 방식 (US1, FR-008~FR-010, SC-008)
 
