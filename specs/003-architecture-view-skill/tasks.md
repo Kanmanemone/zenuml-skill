@@ -388,12 +388,12 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 **Purpose**: `/speckit-converge`가 2026-11-13 `/speckit-clarify`로 개정·신설된 FR-012(길이 안내 금지), FR-027d(클릭 이동 안내 폐지), FR-032(메타 코멘트 금지), FR-033(Dependency 캡션) 대비 스킬 파일과 설계 문서에 남은 불일치를 바로잡는다.
 
-- [ ] T091 `SKILL.md` Step 2에서 로컬 경로 `click` 사용 시 다이어그램 아래에 안내 문구를 붙이라는 규칙과 그 문구 블록, "Skip this note…" 문단을 제거하고, "Output file"의 File contents 설명에서 "(and the click-caveat note, if applicable)"를 제거 per FR-027d, US3/AC4 (contradicts)
-- [ ] T092 [P] `references/templates.md`와 `references/examples.md`에서 클릭 이동 안내 blockquote를 제거 per FR-027d (contradicts)
-- [ ] T093 `SKILL.md` "Scale control"의 길이 안내 문단을, 항목이 많아도 전체를 생성하되 길이 안내는 파일·채팅 어디에도 하지 않는다는 규칙으로 교체 per FR-012 (contradicts)
-- [ ] T094 `SKILL.md`에 산출 파일은 세 섹션의 헤딩·실제 내용(과 FR-033 캡션)만, 채팅 응답은 파일 링크와 hand-off 질문만 담는다는 규칙(허용 예외: 확인 질문, 온보딩 기본값 고지)을 추가하고, 자기검증 체크리스트에 이를 점검하는 AP 항목을 추가 per FR-032, SC-012 (missing)
-- [ ] T095 `SKILL.md` Step 2와 File contents 설명에 `### Dependency` 헤딩과 Mermaid 코드펜스 사이의 요청 키워드 기반 한 줄 일반 텍스트 캡션 규칙을 추가하고, 자기검증 체크리스트에 캡션 점검 AP 항목을 추가하며, "Example: minimal request"의 생성 파일에 캡션을 넣음 per FR-033, SC-013, US1/AC5 (missing)
-- [ ] T096 [P] `references/templates.md` Dependency 템플릿과 `references/examples.md`의 모든 예시 Dependency 섹션에 캡션 자리/예시 캡션을 추가 per FR-033 (missing)
-- [ ] T097 [P] `quickstart.md` 시나리오 4(로컬 경로 링크)의 기대 결과를 "다이어그램 아래 안내 문구 없음"으로, 시나리오 14를 "길이 안내 없이 전체 생성"으로 고치고, 메타 코멘트 부재와 Dependency 캡션을 확인하는 검증 시나리오를 추가 per FR-012, FR-027d, FR-032, FR-033 (contradicts)
-- [ ] T098 [P] `plan.md`의 클릭 이동 안내 서술과 `research.md` "규모 통제" Decision/Rationale의 사전 안내 부분을 개정된 FR-012·FR-027d에 맞게 갱신 per FR-012, FR-027d (contradicts)
-- [ ] T099 [P] `contracts/skill-interface.md`의 파일 구성 설명에 Dependency 캡션과 메타 코멘트 금지를, `data-model.md`의 Anti-Pattern Checklist 표에 T094·T095의 AP 항목을 반영 per FR-032, FR-033 (partial)
+- [X] T091 `SKILL.md` Step 2에서 로컬 경로 `click` 사용 시 다이어그램 아래에 안내 문구를 붙이라는 규칙과 그 문구 블록, "Skip this note…" 문단을 제거하고, "Output file"의 File contents 설명에서 "(and the click-caveat note, if applicable)"를 제거 per FR-027d, US3/AC4 (contradicts)
+- [X] T092 [P] `references/templates.md`와 `references/examples.md`에서 클릭 이동 안내 blockquote를 제거 per FR-027d (contradicts)
+- [X] T093 `SKILL.md` "Scale control"의 길이 안내 문단을, 항목이 많아도 전체를 생성하되 길이 안내는 파일·채팅 어디에도 하지 않는다는 규칙으로 교체 per FR-012 (contradicts)
+- [X] T094 `SKILL.md`에 산출 파일은 세 섹션의 헤딩·실제 내용(과 FR-033 캡션)만, 채팅 응답은 파일 링크와 hand-off 질문만 담는다는 규칙(허용 예외: 확인 질문, 온보딩 기본값 고지)을 추가하고, 자기검증 체크리스트에 이를 점검하는 AP 항목을 추가 per FR-032, SC-012 (missing)
+- [X] T095 `SKILL.md` Step 2와 File contents 설명에 `### Dependency` 헤딩과 Mermaid 코드펜스 사이의 요청 키워드 기반 한 줄 일반 텍스트 캡션 규칙을 추가하고, 자기검증 체크리스트에 캡션 점검 AP 항목을 추가하며, "Example: minimal request"의 생성 파일에 캡션을 넣음 per FR-033, SC-013, US1/AC5 (missing)
+- [X] T096 [P] `references/templates.md` Dependency 템플릿과 `references/examples.md`의 모든 예시 Dependency 섹션에 캡션 자리/예시 캡션을 추가 per FR-033 (missing)
+- [X] T097 [P] `quickstart.md` 시나리오 4(로컬 경로 링크)의 기대 결과를 "다이어그램 아래 안내 문구 없음"으로, 시나리오 14를 "길이 안내 없이 전체 생성"으로 고치고, 메타 코멘트 부재와 Dependency 캡션을 확인하는 검증 시나리오를 추가 per FR-012, FR-027d, FR-032, FR-033 (contradicts)
+- [X] T098 [P] `plan.md`의 클릭 이동 안내 서술과 `research.md` "규모 통제" Decision/Rationale의 사전 안내 부분을 개정된 FR-012·FR-027d에 맞게 갱신 per FR-012, FR-027d (contradicts)
+- [X] T099 [P] `contracts/skill-interface.md`의 파일 구성 설명에 Dependency 캡션과 메타 코멘트 금지를, `data-model.md`의 Anti-Pattern Checklist 표에 T094·T095의 AP 항목을 반영 per FR-032, FR-033 (partial)

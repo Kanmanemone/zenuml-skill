@@ -23,6 +23,8 @@ Every diagram opens with this fixed styling block, then `flowchart LR`. Groups a
 ````markdown
 ### Dependency
 
+<요청의 핵심 키워드로 만든, 이 다이어그램이 무엇을 그린 것인지 밝히는 한 줄>
+
 ```mermaid
 %%{init: {
   "flowchart": {
@@ -67,12 +69,12 @@ flowchart LR
   click ComponentA "../path/to/ComponentA.kt" "ComponentA.kt"
   click ComponentB "../path/to/ComponentB.kt" "ComponentB.kt"
 ```
-
-> 참고: 위 다이어그램 노드에는 `click` 지시어로 해당 소스 파일 경로를 연결해 두었습니다. 다만 VS Code 마크다운 미리보기의 Mermaid 렌더러는 보안상 로컬 파일로의 클릭 이동을 지원하지 않을 수 있습니다. 이 경우 아래 Responsibility 섹션의 마크다운 링크를 이용합니다.
 ````
 
 Rules:
 
+- Exactly one plain-text caption line sits between `### Dependency` and the Mermaid fence — built only from the request's key keywords (the system/process named and the aspect asked about), in the user's language; no blockquote/heading/bold, nothing the request didn't say, nothing about rendering or layout.
+- Nothing follows the closing fence except the next section's heading — no notes about `click` behavior, renderers, or layout.
 - `subgraph` only for evidence-based groups (a name/layer/domain signal in the description); components with no such signal sit at the top level, no `subgraph` at all.
 - Every edge gets a `-->|관계 성격|` label. Use the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
 - Draw only edges the description directly states or implies between those exact two components. A described chain (A calls B, B calls C) becomes `A --> B` and `B --> C` — never a collapsed `A --> C` shortcut.

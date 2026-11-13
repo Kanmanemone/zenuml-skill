@@ -50,15 +50,9 @@ Group components with a Mermaid `subgraph` **only** when the description gives a
 
 **Node and edge coloring**: give every node a border-color class (`classDef` + `class`) so it's visually distinguishable, and color every arrow leaving that node the same way via `linkStyle` (see `references/templates.md` for the fixed palette and the exact syntax). Name each class descriptively after the node's role (e.g. `navHostNode`, not `color3`). Sibling nodes that never need individual distinction anywhere in the diagram — same group, same relationship nature, no edges of their own — may share one class instead of each getting a unique color; nodes that originate at least one edge, or that play a individually-notable role, should get their own class.
 
-**Hyperlinks**: attach a `click NodeName "target" "label"` directive to every node whose real location the description establishes (see "Hyperlink resolution" below for how `target` is determined). Skip `click` entirely for a node with no resolvable target — don't invent one.
+**Hyperlinks**: attach a `click NodeName "target" "label"` directive to every node whose real location the description establishes (see "Hyperlink resolution" below for how `target` is determined). Skip `click` entirely for a node with no resolvable target — don't invent one. Never add a note about whether a renderer follows `click` links or where else to find them — the `click` directives and the Markdown links in Responsibility/Collaboration speak for themselves.
 
-If at least one `click` directive points at a local file path, add this note directly under the diagram (adapt the wording, keep the meaning):
-
-```text
-> 참고: 위 다이어그램 노드에는 `click` 지시어로 해당 소스 파일 경로를 연결해 두었습니다. 다만 VS Code 마크다운 미리보기의 Mermaid 렌더러는 보안상 로컬 파일로의 클릭 이동을 지원하지 않을 수 있습니다. 이 경우 아래 Responsibility 섹션의 마크다운 링크를 이용합니다.
-```
-
-Skip this note if every `click` target is a URL (browsers and GitHub-style Markdown renderers follow `click` URLs fine), or if no node has a resolvable target at all.
+**Caption**: put exactly one short plain-text line between the `### Dependency` heading and the Mermaid code fence, saying what this diagram depicts. Build it only from the key keywords of the user's request — the system/process it names and the aspect they asked to focus on (e.g. a request "Jetpack Navigation 3에서 백스택과 화면 전환 구조를 보여줘" → `Jetpack Navigation 3의 백스택과 화면 전환 의존 구조`). Write it in the user's language, as a plain line (not a blockquote, heading, or bold text), with nothing the request didn't say and nothing about rendering, layout, or how the view was produced. On regeneration, rewrite it to reflect every request up to this round.
 
 ### Hyperlink resolution
 
@@ -144,10 +138,12 @@ Architecture view anti-pattern check:
 - [ ] AP-11: No section comparing concepts that don't appear as identified groups/elements in the description
 - [ ] AP-12: Every entry (Responsibility and Collaboration alike) restates its content in full and independently (no "위와 동일"-style backreferences), and entries don't get thinner/more generic later in a long list than earlier
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
+- [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
+- [ ] AP-13c: The file holds nothing but the three headings, the caption, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link and the hand-off question (plus a needed clarifying question or the onboarding-default notice)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
 ```
 
-Workflow: generate a draft → check it against AP-1 through AP-14 → if anything fails, revise → re-check → only then present the result. Don't narrate the checklist to the user; just perform it before responding.
+Workflow: generate a draft → check it against AP-1 through AP-14 (including AP-13b/13c) → if anything fails, revise → re-check → only then present the result. Don't narrate the checklist to the user; just perform it before responding.
 
 ## Output file
 
@@ -157,7 +153,9 @@ Don't paste the Dependency, Responsibility, or Collaboration content into the ch
 
 **Request classification**: before writing, classify the request the same way `generating-zenuml-diagrams` does — (1) *Regeneration* (a follow-up refining the architecture view just shown in this conversation) overwrites the existing `.zenuml/<slug>.architecture.md` completely; (2) *Initial generation* (a self-contained description with no existing file for this slug) creates a new file; (3) *new request with a colliding slug* (an unrelated description that happens to hash to an existing `.zenuml/<slug>.architecture.md`) appends `-2`, `-3`, … rather than overwriting; (4) if genuinely unclear which of the three this is, ask rather than guessing.
 
-**File contents**: a `### Dependency` heading followed by its Mermaid code fence (and the click-caveat note, if applicable), then `### Responsibility`, then `### Collaboration`, in that order — no other ordering. Use `###` for all three (never `##` or shallower, matching this repository's `.zenuml/` heading convention). Within Collaboration, `#### 그룹 간 비교` (if 2+ groups) comes before `#### 요소 간 비교`.
+**File contents**: a `### Dependency` heading followed by its one-line caption (Step 2, "Caption") and then its Mermaid code fence, then `### Responsibility`, then `### Collaboration`, in that order — no other ordering. Use `###` for all three (never `##` or shallower, matching this repository's `.zenuml/` heading convention). Within Collaboration, `#### 그룹 간 비교` (if 2+ groups) comes before `#### 요소 간 비교`.
+
+**Nothing but content**: the file holds only those three headings, the caption, and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link and the hand-off question (see "Offering the sequence diagram"); the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified) and the onboarding-default notice from Step 1.
 
 After writing, the entire chat response for this part is a relative link:
 
@@ -209,6 +207,8 @@ Generated file (`.zenuml/<slug>.architecture.md`, not pasted into the chat respo
 
 ````markdown
 ### Dependency
+
+OrderService와 PaymentService의 주문·결제 의존 구조
 
 ```mermaid
 %%{init: {
@@ -311,4 +311,4 @@ If the user replies "아니 됐어" (or asks an unrelated question instead): res
 
 Never add a component, group, or dependency beyond what Step 2 already restricts you to (FR-011) — this is the first line of defense against an unwieldy Collaboration section. On top of that, multi-target consolidation (Step 4) is this format's dedicated scale-control mechanism: a source with many same-group, same-nature targets collapses to one entry instead of growing linearly with target count. Don't "helpfully" split a large group into smaller invented ones to reduce a count, and don't invent extra dependencies just to change a count in either direction.
 
-If Collaboration is still going to be noticeably long even after consolidation (as a rule of thumb, a densely-connected group of 8+ elements can still produce many individual entries once each pair that doesn't qualify for consolidation is counted), say so before or alongside the Collaboration section — e.g., "이 그룹은 요소 간 연결이 많아 Collaboration 항목이 꽤 깁니다." Still generate the full list; don't refuse or truncate it.
+If Collaboration or Responsibility still ends up long after consolidation (a densely-connected group of 8+ elements can still produce many individual entries), generate the full list anyway — don't refuse, truncate, or drop entries — and don't announce the length anywhere, in the file or the chat response.

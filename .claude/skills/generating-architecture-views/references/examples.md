@@ -11,6 +11,8 @@ Full input→output walkthroughs, end to end. See `templates.md` for the underly
 ````markdown
 ### Dependency
 
+주문 도메인과 재고 도메인의 주문·결제·재고 참조 의존 구조
+
 ```mermaid
 %%{init: {
   "flowchart": {
@@ -59,8 +61,6 @@ flowchart LR
   click PaymentService "../src/main/kotlin/order/PaymentService.kt" "PaymentService.kt"
   click InventoryService "../src/main/kotlin/inventory/InventoryService.kt" "InventoryService.kt"
 ```
-
-> 참고: 위 다이어그램 노드에는 `click` 지시어로 해당 소스 파일 경로를 연결해 두었습니다. 다만 VS Code 마크다운 미리보기의 Mermaid 렌더러는 보안상 로컬 파일로의 클릭 이동을 지원하지 않을 수 있습니다. 이 경우 아래 Responsibility 섹션의 마크다운 링크를 이용합니다.
 
 ### Responsibility
 
@@ -133,7 +133,7 @@ flowchart LR
 
 **User** (troubleshooting stated up front): "NotificationDispatcher가 문제인 것 같아 봐야 해. '알림 모듈'의 NotificationDispatcher가 '채널 모듈'에 속한 EmailSender, SmsSender, PushSender를 전부 호출해서(호출) 발송을 위임하고, '템플릿 모듈'의 TemplateRenderer가 만든 렌더링 결과 타입도 참조해(타입 참조). EmailSender는 sendEmail()을, SmsSender는 sendSms()를, PushSender는 sendPush()를 각각 호출해서 발송하는데, 셋 다 발송 채널을 구현하는 동일한 역할이야. 이 저장소는 https://github.com/example/notify-service 에 있고, NotificationDispatcher는 src/notify/NotificationDispatcher.kt, EmailSender/SmsSender/PushSender는 각각 src/channel/EmailSender.kt·SmsSender.kt·PushSender.kt, TemplateRenderer는 src/template/TemplateRenderer.kt에 있어."
 
-**Skill** (purpose already stated as troubleshooting — no question needed) writes `.zenuml/notify-dispatch.architecture.md`. Dependency has 3 groups (알림 모듈, 채널 모듈, 템플릿 모듈) with `click` directives pointing at full GitHub URLs (e.g. `https://github.com/example/notify-service/blob/main/src/channel/EmailSender.kt`) instead of relative paths, since the evidence here is a web repository, not the local project.
+**Skill** (purpose already stated as troubleshooting — no question needed) writes `.zenuml/notify-dispatch.architecture.md`. Its Dependency caption, taken from the request's keywords, is `NotificationDispatcher의 알림 발송 위임 의존 구조`. Dependency has 3 groups (알림 모듈, 채널 모듈, 템플릿 모듈) with `click` directives pointing at full GitHub URLs (e.g. `https://github.com/example/notify-service/blob/main/src/channel/EmailSender.kt`) instead of relative paths, since the evidence here is a web repository, not the local project.
 
 Responsibility lists 알림 모듈, 채널 모듈, 템플릿 모듈 (그룹) and NotificationDispatcher, TemplateRenderer (요소) individually — same shape as Example 1, omitted here for brevity. EmailSender/SmsSender/PushSender, however, qualify for parallel-sibling consolidation (3 elements, same group, same parallel role — each is its own channel-sender implementation, no member with a genuinely different kind of role) and get one combined entry instead of three:
 
@@ -212,6 +212,8 @@ EmailSender, SmsSender, PushSender all share the same group (채널 모듈) and 
 
 ````markdown
 ### Dependency
+
+인증 묶음의 토큰 저장·세션 조회 의존 구조
 
 ```mermaid
 %%{init: {
