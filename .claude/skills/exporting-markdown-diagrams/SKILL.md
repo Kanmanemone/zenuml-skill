@@ -11,7 +11,7 @@ Converts a diagram embedded in a Markdown file to SVG/PNG/PDF, or a whole Markdo
 
 0. Read the settings (see "Settings" below).
 1. Determine the target file, output format, and conversion scope from the request.
-2. Fill whatever is missing from the settings' defaults, or ask — via a single `AskUserQuestion` call — for exactly the pieces still missing (see "Step 2").
+2. Fill whatever is missing from the settings' defaults, or ask for every piece still missing (format, scope, page layout) together in one `AskUserQuestion` call (see "Step 2").
 3. Dispatch to the script matching the confirmed scope (see "Scope: diagram-only" / "Scope: whole document" below).
 4. Report the resulting file path(s). Never paste the script's raw output or a diagram's rendered content into the chat.
 
@@ -38,49 +38,52 @@ From the user's message, work out three things:
 
 ## Step 2 — Clarify missing details
 
-Ask only for what's actually missing — never re-ask something already implied by the request. The settings decide how a missing piece gets resolved (`values` from "Settings"):
+Ask only for what's actually missing — never re-ask something already implied by the request. Everything still missing is asked **together in one `AskUserQuestion` call** (its `questions` array holds one entry per missing piece) — never ask one piece, wait for the answer, then ask the next.
 
-- **`questions.enabled` is `false`**: don't ask. Fill each missing piece from its default — `defaults.format` for format, `defaults.scope` for scope, `defaults.pdfLayout` for pdfLayout — then apply the rules below as if the user had said it. Only a piece whose default is `none` (nothing to fill it with) is still asked, using the rules below, without any " (기본값)" mark.
-- **`questions.enabled` is `true`**: ask exactly as below. In every question, append ` (기본값)` to the end of the `label` of the option that matches that question's default (`defaults.format` → `SVG`/`PNG`/`PDF` for `svg`/`png`/`pdf`; `defaults.scope` → `다이어그램만`/`문서 전체` for `diagram`/`document`; `defaults.pdfLayout` → `1페이지 단일`/`표준 인쇄 규격` for `single`/`paginated`). Which option gets it comes only from the settings; when the default is `none`, no option gets it. Never move or reorder options to mark the default.
+### What counts as missing
 
-`scope=document` produces PDF or PNG only — there is no whole-document SVG (see "Scope: whole document" below) — which changes how `format` factors in:
+The settings decide how a missing piece gets resolved (`values` from "Settings"):
 
-- **`scope` resolves to `document` and the request named `pdf` or `png`**: use it.
-- **`scope` resolves to `document` and the request named `svg`**: don't silently substitute another format. Tell the user whole-document SVG isn't supported, then ask a single format question with only `PDF` and `PNG`.
-- **`scope` resolves to `document` and no format was named**: if questions are off and `defaults.format` is `pdf` or `png`, use it. Otherwise (questions on, or `defaults.format` is `svg`/`none`) ask a single format question with only `PDF` and `PNG` — mark ` (기본값)` only when `defaults.format` is `pdf` or `png`.
-- **Otherwise** (`scope` is `diagram`, or still unresolved), fall back to the general rule:
-  - **Both `format` and `scope` missing**: make a single `AskUserQuestion` call whose `questions` array has exactly two entries — one for format, one for scope — presented together in one interaction. Never split this into two separate `AskUserQuestion` calls.
-  - **Only `format` missing**: ask a single question for format alone.
-  - **Only `scope` missing**: ask a single question for scope alone. If the answer is `문서 전체`, apply the `document`-scope rules above (the format already named still applies; `svg` gets the not-supported notice and a PDF/PNG question).
-  - **Neither missing**: skip straight to dispatch — no question at all.
+- **`questions.enabled` is `false`**: don't ask. Fill each missing piece from its default — `defaults.format` for format, `defaults.scope` for scope, `defaults.pdfLayout` for pdfLayout — and treat it as if the user had said it. Only a piece whose default is `none` (nothing to fill it with) is still asked, without any " (기본값)" mark.
+- **`questions.enabled` is `true`**: every piece the request didn't name is asked. In every question, append ` (기본값)` to the end of the `label` of the option that matches that question's default (`defaults.format` → `SVG`/`PNG`/`PDF` for `svg`/`png`/`pdf`; `defaults.scope` → `다이어그램만`/`문서 전체` for `diagram`/`document`; `defaults.pdfLayout` → `1페이지 단일`/`표준 인쇄 규격` for `single`/`paginated`). Which option gets it comes only from the settings; when the default is `none`, no option gets it. Never move or reorder options to mark the default.
 
-Format question — options `SVG`, `PNG`, `PDF` (only `PDF`, `PNG` once `scope` is `document`). Scope question — options `다이어그램만`, `문서 전체`. When format and scope are asked together and the user might pick `문서 전체`, you may note in the scope option's description that whole-document export produces PDF or PNG — but still let the user pick freely; the only marking is the settings-driven " (기본값)" above. If they end up with `문서 전체` + `SVG`, apply the `svg` rule above.
+`pdfLayout` only matters for `scope=document`: it is missing only while `scope` is `document` or still unresolved. Once `scope` is `diagram` (from the request or a default), drop it.
+
+### Building the one call
+
+Put a question in the call for each missing piece, in this order:
+
+1. **Format** (`header: "출력 형식"`) — options `SVG`, `PNG`, `PDF`. If `scope` is already `document`, options are `PDF`, `PNG` only (there is no whole-document SVG).
+2. **Scope** (`header: "변환 범위"`) — options `다이어그램만`, `문서 전체`. When format is asked in the same call or the request named `svg`, the `문서 전체` description says whole-document export produces PDF or PNG only.
+3. **Page layout** (`header: "페이지 구성"`) — options in this exact order: `1페이지 단일`, `표준 인쇄 규격`. When scope is asked in the same call, the question text says it applies only to `문서 전체`.
+
+If nothing is missing, skip straight to dispatch — no question at all.
+
+### After the answers
+
+- `scope` ends up `diagram`: ignore any page-layout answer.
+- `scope` is `document` and format is `svg` (the request named SVG, or the answers combined `문서 전체` + `SVG`): don't silently substitute another format. Tell the user whole-document SVG isn't supported and ask one format question with only `PDF` and `PNG` (` (기본값)` only when `defaults.format` is `pdf` or `png`). This contradiction is the only case that ever produces a second question round.
 
 ```text
-예시 — 형식·범위 둘 다 불분명한 "이거 변환해줘"에 대한 AskUserQuestion:
-  questions: [
-    { header: "출력 형식", question: "어떤 형식으로 변환할까요?", options: [SVG, PNG, PDF] },
-    { header: "변환 범위", question: "다이어그램만 변환할까요, 문서 전체를 변환할까요?", options: [다이어그램만, 문서 전체] }
-  ]
-```
-
-```text
-예시 — 같은 요청에서 questions.enabled=true, defaults.format="png", defaults.scope="none"일 때:
+예시 — 형식·범위·페이지 구성이 모두 불분명한 "이거 변환해줘" (questions.enabled=true, defaults: png / document / single):
   questions: [
     { header: "출력 형식", question: "어떤 형식으로 변환할까요?", options: [SVG, PNG (기본값), PDF] },
-    { header: "변환 범위", question: "다이어그램만 변환할까요, 문서 전체를 변환할까요?", options: [다이어그램만, 문서 전체] }
+    { header: "변환 범위", question: "다이어그램만 변환할까요, 문서 전체를 변환할까요?", options: [
+      { label: "다이어그램만" },
+      { label: "문서 전체 (기본값)", description: "문서 전체는 PDF 또는 PNG로만 만들 수 있습니다." }
+    ] },
+    { header: "페이지 구성", question: "문서 전체를 고르면 페이지를 어떻게 나눌까요? (다이어그램만이면 쓰지 않음)", options: [
+      { label: "1페이지 단일 (기본값)", description: "페이지 나눔 없이 문서 전체를 한 장(PNG면 세로로 긴 이미지 한 장)에 담습니다." },
+      { label: "표준 인쇄 규격", description: "A4 용지 크기로 필요한 만큼 나눕니다(PNG면 페이지마다 이미지 한 장)." }
+    ] }
   ]
 ```
 
-**Page layout for `scope=document`** (applies to both PDF and PNG): once `scope` is confirmed as `document` (whether it was given outright, resolved from the question above, or filled from `defaults.scope`) and `pdfLayout` is still unresolved (not in the request, and not filled from `defaults.pdfLayout` because questions are off), ask one more, separate `AskUserQuestion` — a follow-up round after the format/scope interaction, not folded into it — with options in this exact order: `1페이지 단일` first, `표준 인쇄 규격` second. Skip this question entirely when `scope` resolves to `diagram` — page layout has no meaning for a diagram-only export.
-
 ```text
-예시 — scope=document가 확정된 뒤 pdfLayout이 아직 불분명할 때의 후속 AskUserQuestion:
+예시 — "이거 png로" (format만 명시, 같은 설정): 범위와 페이지 구성 두 질문을 한 번에 묻는다.
   questions: [
-    { header: "페이지 구성", question: "페이지를 어떻게 나눌까요?", options: [
-      { label: "1페이지 단일", description: "페이지 나눔 없이 문서 전체를 한 장(PNG면 세로로 긴 이미지 한 장)에 담습니다." },
-      { label: "표준 인쇄 규격", description: "A4 용지 크기로 필요한 만큼 나눕니다(PNG면 페이지마다 이미지 한 장)." }
-    ] }
+    { header: "변환 범위", ... options: [다이어그램만, 문서 전체 (기본값)] },
+    { header: "페이지 구성", ... options: [1페이지 단일 (기본값), 표준 인쇄 규격] }
   ]
 ```
 

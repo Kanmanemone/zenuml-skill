@@ -189,5 +189,5 @@ Task: "scripts/lib/inline-svg.js 작성"
 
 ## Phase 7: Convergence
 
-- [ ] T037 `.claude/skills/exporting-markdown-diagrams/SKILL.md`의 Workflow·Step 2를 다시 써서, 불분명한 형식·범위·페이지 구성을 모두 `AskUserQuestion` 한 번에 묻게 함 — 범위가 미정이거나 문서 전체면 페이지 구성 질문을 같은 호출에 넣고("문서 전체일 때만 적용" 명시, 다이어그램만이면 답 무시), 범위가 문서 전체로 정해진 상태면 형식 선택지는 PDF·PNG만, 범위 미정이면 SVG·PNG·PDF와 함께 범위 선택지 설명에 문서 전체는 PDF·PNG만임을 밝힘, 재질문은 문서 전체 + SVG 모순일 때 형식 하나만, 예시도 한 번 호출 형태로 갱신 per FR-003, FR-014, SC-002 (contradicts)
-- [ ] T038 [P] `specs/004-exporting-markdown-diagrams/`의 data-model.md·contracts/skill-interface.md에 남은 후속 질문 서술을 한 번에 묻는 방식으로 갱신 per FR-003, FR-014 (partial)
+- [X] T037 `.claude/skills/exporting-markdown-diagrams/SKILL.md`의 Workflow·Step 2를 다시 써서, 불분명한 형식·범위·페이지 구성을 모두 `AskUserQuestion` 한 번에 묻게 함 — 범위가 미정이거나 문서 전체면 페이지 구성 질문을 같은 호출에 넣고("문서 전체일 때만 적용" 명시, 다이어그램만이면 답 무시), 범위가 문서 전체로 정해진 상태면 형식 선택지는 PDF·PNG만, 범위 미정이면 SVG·PNG·PDF와 함께 범위 선택지 설명에 문서 전체는 PDF·PNG만임을 밝힘, 재질문은 문서 전체 + SVG 모순일 때 형식 하나만, 예시도 한 번 호출 형태로 갱신 per FR-003, FR-014, SC-002 (contradicts)
+- [X] T038 [P] `specs/004-exporting-markdown-diagrams/`의 data-model.md·contracts/skill-interface.md에 남은 후속 질문 서술을 한 번에 묻는 방식으로 갱신 per FR-003, FR-014 (partial)

@@ -18,7 +18,7 @@ spec.md의 Key Entities를 실행 가능한 수준으로 구체화한다. 이 �
 - `format`이 명시되지 않은 요청에서는 `AskUserQuestion`으로 확정되기 전까지 `ConversionRequest`가 완결되지 않는다(FR-001).
 - `scope`가 명시되지 않은 요청에서도 마찬가지다(FR-002).
 - `format`과 `scope`가 모두 미확정이면, 확정 질문은 하나의 `AskUserQuestion` 호출(두 개의 `questions` 항목)로 함께 이뤄져야 한다(FR-003) — 자세한 모양은 `contracts/skill-interface.md` 참고.
-- `scope`가 `"document"`로 확정됐는데 `pdfLayout`이 명시되지 않았다면, `format`/`scope` 확정과는 별도의 후속 확인 질문(1개)으로 `pdfLayout`을 확정해야 완결된다(FR-014, contracts/skill-interface.md Clarification Contract).
+- `scope`가 `"document"`이거나 아직 미정인데 `pdfLayout`이 명시되지 않았다면, `pdfLayout`은 `format`/`scope`와 같은 확인 상호작용(`AskUserQuestion` 한 번) 안에서 함께 확정된다. 답으로 `scope`가 `"diagram"`이 되면 `pdfLayout` 답은 쓰지 않는다(FR-003, FR-014, contracts/skill-interface.md Clarification Contract).
 - `scope = "document"`이면서 `format = "svg"` 또는 `"png"`인 조합을 spec.md 자체가 금지하지는 않지만, 이번 구현(tasks.md User Story 2)은 `scope = "document"`를 항상 `format = pdf`로 처리한다 — PDF만 여러 페이지·다중 다이어그램 문서를 온전히 표현할 수 있고, `export-document-pdf.js` 외의 문서 전체용 스크립트는 이번 범위에서 만들지 않았기 때문이다(오버엔지니어링 방지). `scope = document`가 확정되면 `format` 질문 자체를 생략한다(SKILL.md "Scope: whole document" 참고).
 
 ## DiagramSource (다이어그램 소스)
