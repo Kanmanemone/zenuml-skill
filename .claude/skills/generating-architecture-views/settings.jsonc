@@ -22,9 +22,9 @@
   },
   "dependency": {
     // Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진
-    //   default : 따로 지정하지 않음(Mermaid 기본 엔진 dagre) — 토큰 소모 영향 거의 없음
-    //   elk     : ELK 엔진으로 그림(노드·간선이 많을 때 배치가 더 정돈되는 편) — 토큰 소모 영향 거의 없음
-    //   (기본값: default)
-    "renderer": "default"
+    //   default : 따로 지정하지 않음 — 보는 곳의 기본 엔진을 따름(VS Code 미리보기는 ELK, PNG/PDF 내보내기는 dagre) — 토큰 소모 영향 거의 없음
+    //   elk     : ELK 엔진으로 그림(미리보기와 내보내기가 같은 배치가 됨) — 토큰 소모 영향 거의 없음
+    //   (기본값: elk)
+    "renderer": "elk"
   }
 }

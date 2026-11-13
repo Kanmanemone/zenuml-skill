@@ -114,5 +114,5 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 ## Phase 9: Convergence
 
-- [ ] T027 `.claude/skills/generating-architecture-views/settings.schema.json`의 `dependency.renderer` `default`와 `settings.jsonc`의 값을 `elk`로 바꾸고, jsonc 주석의 `default` 설명을 "지정 안 함 — 보는 곳의 기본 레이아웃을 따름(VS Code 미리보기는 elk, 내보내기는 dagre)"으로, 기본값 표시를 `(기본값: elk)`로 고침 per FR-011b, FR-003 (contradicts)
-- [ ] T028 [P] `specs/007-skill-output-settings/` data-model.md 옵션 표와 research.md 렌더러 결정의 기본값·`default` 의미 서술을 갱신 per FR-011b (partial)
+- [X] T027 `.claude/skills/generating-architecture-views/settings.schema.json`의 `dependency.renderer` `default`와 `settings.jsonc`의 값을 `elk`로 바꾸고, jsonc 주석의 `default` 설명을 "지정 안 함 — 보는 곳의 기본 레이아웃을 따름(VS Code 미리보기는 elk, 내보내기는 dagre)"으로, 기본값 표시를 `(기본값: elk)`로 고침 per FR-011b, FR-003 (contradicts)
+- [X] T028 [P] `specs/007-skill-output-settings/` data-model.md 옵션 표와 research.md 렌더러 결정의 기본값·`default` 의미 서술을 갱신 per FR-011b (partial)

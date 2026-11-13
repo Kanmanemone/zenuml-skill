@@ -43,7 +43,7 @@
         "default",
         "elk"
       ],
-      "default": "default",
+      "default": "elk",
       "description": "Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진",
       "tokenImpact": {
         "default": "토큰 소모 영향 거의 없음",

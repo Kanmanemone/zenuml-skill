@@ -46,7 +46,7 @@
 |------|-----|------|----|-------------|-----------------|
 | architecture | `responsibility.display` | enum | `hidden`/`plain`/`collapsed`/`expanded` | `plain` | `collapsed` |
 | architecture | `collaboration.display` | enum | 위와 같음 | `plain` | `collapsed` |
-| architecture | `dependency.renderer` | enum | `default`/`elk` | `default` | `default` |
+| architecture | `dependency.renderer` | enum | `default`/`elk` | `default` | `elk` (2026-11-13 사용자 확정) |
 | zenuml | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
 | exporting | `questions.enabled` | boolean | — | `true` | `true` |
 | exporting | `defaults.format` | enum | `none`/`svg`/`png`/`pdf` | `none` | `png` |
