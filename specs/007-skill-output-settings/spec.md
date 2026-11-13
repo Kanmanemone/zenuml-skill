@@ -23,6 +23,7 @@
 - Q: Dependency 다이어그램의 설정 표기가 `%%{init}%%`에서 YAML frontmatter `config`로 바뀐 뒤(003, 2026-11-13), `dependency.renderer`가 `elk`일 때 렌더러 지정은 어디에 들어가는가? → A: `config.flowchart.defaultRenderer`에 `elk`로 들어간다. 동작(설정·요청 우선순위)은 그대로다(FR-011b, US1/AC5 문구 개정).
 - Q: 접은 글 상자의 요약 줄에 섹션 이름을 쓰면 바로 위 헤딩과 단어가 겹친다. 요약 줄을 무엇으로 쓰는가? → A: 고정 문구 `Details`로 쓴다. HTML이 요약 줄이 없을 때 쓰는 기본값과 같은 영어 관례이고, 열림·닫힘 상태와 무관해 어색하지 않다. 섹션 헤딩은 상자 밖에 그대로 두어 개요·앵커를 유지한다(FR-009, Key Entities "접은 글 상자" 개정).
 - Q: `dependency.renderer`의 배포 초기값을 무엇으로 하는가? → A: `elk`로 바꾼다(FR-011b 개정, 옵션 정의 기본값과 `settings.jsonc` 값 모두). VS Code 내장 Mermaid 번들(12 계열)은 기본 설정에 `layout: "elk"`가 들어 있어 레이아웃을 지정하지 않아도 이미 ELK로 그리는 반면, PNG/PDF 내보내기 스크립트의 mermaid 11.17은 지정이 없으면 dagre로 그린다. elk를 기본으로 두면 `config.layout: elk`가 늘 들어가 미리보기와 내보내기가 같은 배치가 된다. `default`의 의미는 "지정하지 않음 — 보는 곳의 기본 레이아웃을 따름"으로 정정한다.
+- Q: 세 스킬 중 `generating-architecture-views`만 저장 위치 설정이 없다. 구조 뷰의 피드백 로그 저장 위치도 설정으로 정하는가? → A: 그렇다. `generating-zenuml-diagrams`의 `log.directory`와 같은 옵션(`log.directory`, 프로젝트 루트 기준 상대 경로, 기본값 `./.zenuml/log` — 지금 위치)을 둔다. 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작, 위치 변경 시 기존 로그를 옮기거나 지우지 않는 동작, 허용되지 않는 값 처리는 FR-015c와 같다. 구조 뷰 산출 파일 자체의 위치(`.zenuml/<slug>.architecture.md`)는 `generating-zenuml-diagrams`와 마찬가지로 설정 대상이 아니다(FR-012b 신설).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -42,6 +43,7 @@
 4. **Given** 설정 파일이 없거나 두 옵션이 모두 `plain`인 상태, **When** 구조 뷰가 생성되면, **Then** 산출물은 이 기능 도입 전과 똑같다.
 5. **Given** `dependency.renderer`를 `elk`로 정한 설정, **When** 사용자가 렌더러를 말하지 않고 구조 뷰를 요청하면, **Then** Dependency 다이어그램의 YAML 설정(`config.layout`)에 elk 렌더러 지정이 들어간다. `default`로 정하면 렌더러 지정이 들어가지 않고, 요청에서 다른 렌더러를 직접 밝히면 그 요청에서는 요청한 렌더러가 쓰인다.
 6. **Given** 이미 생성된 구조 뷰가 있는 상태에서 사용자가 설정을 바꾼 뒤, **When** 그 구조 뷰의 재생성을 요청하면, **Then** 새 산출물에 바뀐 설정이 적용된다(설정을 바꾸기만 해서는 기존 파일이 고쳐지지 않는다).
+7. **Given** 피드백 로그 저장 위치(`log.directory`)를 `./docs/architecture-logs`로 정한 설정, **When** 구조 뷰가 생성·재생성되면, **Then** 로그가 프로젝트 루트 아래 `docs/architecture-logs/<slug>.architecture.md`에 만들어지고 이어 쓰이며, 폴더가 없으면 새로 만든다. 배포된 그대로의 설정이면 로그 위치(`.zenuml/log/<slug>.architecture.md`)는 이 기능 도입 전과 같다.
 
 ---
 
@@ -114,6 +116,7 @@
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
 - **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다(기본: `elk`, 사용자 확정 2026-11-13). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
+- **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다(기본: `./.zenuml/log` — 지금 위치). 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
 
 **exporting-markdown-diagrams 옵션과 동작**
 
@@ -139,7 +142,7 @@
 
 - **스킬 설정 파일**: 스킬마다 하나씩 그 스킬 디렉터리 안에 있는, 주석을 허용하는 JSON 문서. 섹션·기능 단위 묶음 아래 옵션 키를 둔다. 사용자가 직접 편집하며, 처음부터 모든 옵션이 기본값으로 적혀 있다. 키와 값은 영어, 각 옵션 위의 설명 주석은 한국어다(FR-020).
 - **옵션 정의**: 스킬마다 하나씩 있는, 그 스킬 옵션 전체의 유일한 기준. 옵션마다 키(소속 묶음 포함), 허용 값, 기본값, 한 줄 설명, 값별 토큰 소모 영향을 담는다(FR-016). 설정 읽기·검증·안내는 이 정의만 보고 동작한다.
-- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008)와 `dependency.renderer`(FR-011b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
+- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008)와 `dependency.renderer`(FR-011b), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
 - **설정 안내**: 설정 파일을 읽지 못했거나 일부 값을 기본값으로 대체·무시했을 때 채팅 응답에만 붙는 한 줄. 대상 파일과 키를 밝힌다.
 - **접은 글 상자**: 마크다운 미리보기에서 클릭해 접고 펼 수 있는 블록. 요약 줄(고정 문구 `Details`)과 내용으로 이뤄지며, 처음 열었을 때의 상태(접힘/펼침)가 파일 안에 적혀 있다. 클릭으로 바꾼 상태는 파일에 저장되지 않으므로 다시 열면 적힌 초기 상태로 돌아간다.
 
@@ -162,7 +165,7 @@
 - **설정 파일 위치**: 각 스킬 디렉터리 안에 둔다. 스킬을 다른 프로젝트에 복사해 쓰면 설정도 함께 따라간다. 저장소에서는 기본값이 적힌 상태로 추적된다.
 - **접은 글 상자의 형식**: 마크다운 미리보기(VS Code 기본 미리보기, GitHub)가 접고 펼 수 있게 렌더링하는 표준 HTML 접기 블록을 쓰며, `expanded`는 그 블록의 표준 "처음부터 열림" 속성으로 표현한다. 상자 안의 마크다운이 펼쳤을 때 정상 렌더링되도록 형식을 맞추는 것과, PDF 변환 파이프라인에서 상자를 펼치는 방법은 계획 단계에서 실측으로 확정한다.
 - **Dependency는 표시 방식 옵션에서 제외**: 사용자가 Responsibility와 Collaboration만 언급했고, Dependency는 구조 뷰에서 가장 먼저 보여야 할 내용이므로 옵션을 두지 않는다.
-- **옵션 선정 기준**: 실제 SKILL.md·스크립트에 근거가 있는 것만 옵션으로 둔다 — 사용자가 직접 요청한 것(표시 방식, 렌더러, 저장 위치, 질문 여부와 기본값 표시), 그리고 지금 스크립트에 고정돼 있거나(PNG 배율, 산출물 저장 위치) 매번 묻는 것(형식·범위·PDF 레이아웃)이다. 기존 동작에 켬/끔만 덧붙인 제안(피드백 로그, 다이어그램 주석, 지어낸 이름 언어, 다이어그램 표시 방식)과 근거가 없는 제안(참가자 종류 표시)은 넣지 않는다. 형식·범위 질문은 요청마다 달라지는 값이므로 설정으로 고정하지 않는다.
+- **옵션 선정 기준**: 실제 SKILL.md·스크립트에 근거가 있는 것만 옵션으로 둔다 — 사용자가 직접 요청한 것(표시 방식, 렌더러, 저장 위치 — 세 스킬 모두, 질문 여부와 기본값 표시), 그리고 지금 스크립트에 고정돼 있거나(PNG 배율, 산출물 저장 위치) 매번 묻는 것(형식·범위·PDF 레이아웃)이다. 기존 동작에 켬/끔만 덧붙인 제안(피드백 로그, 다이어그램 주석, 지어낸 이름 언어, 다이어그램 표시 방식)과 근거가 없는 제안(참가자 종류 표시)은 넣지 않는다. 형식·범위 질문은 요청마다 달라지는 값이므로 설정으로 고정하지 않는다.
 - **`hidden`과 계층 구조의 선택 이유**: "그리느냐"(1단계)와 "어떻게 그리느냐"(2단계)를 별도 키로 나누면 "안 그림 + 접힘" 같은 의미 없는 조합이 생기므로, 표시 방식 값 하나에 `hidden`을 포함한다. 계층은 섹션·기능 단위로만 만들어, 이후 섹션별 옵션이 늘면 그 묶음 안에 키를 더한다.
 - **우선순위**: 요청 문장 > 설정 파일 > 기본값. 요청 문장의 지정은 그 요청에만 적용되고 저장되지 않는다(003 FR-007b의 렌더러 지정과 같은 원칙).
 - **로컬 개인 기본값과의 관계**: CLAUDE.local.md에 둔 "매 요청을 elk로 지정한 것처럼 취급" 같은 개인 지침은 이 설정 파일과 별개로 유지되며, 이 기능이 자동으로 바꾸거나 지우지 않는다. 그 지침은 요청 문장에 elk를 밝힌 것과 같은 효과를 내므로 설정보다 우선한다. 같은 효과를 설정으로 얻으려면 사용자가 `dependency.renderer`를 `elk`로 바꾸고 그 지침을 직접 정리하면 된다.
