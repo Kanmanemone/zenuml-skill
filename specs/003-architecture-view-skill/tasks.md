@@ -437,3 +437,7 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 ## Phase 31: Convergence
 
 - [X] T116 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·AP-5·예시 fence), `references/templates.md`(템플릿 fence·`themeVariables` 규칙 줄), `references/examples.md`(모든 fence)에서 `themeVariables` 블록을 제거하고, 테마 색은 지정하지 않아 렌더러가 라이트·다크에 맞춰 칠한다는 규칙으로 고침 per FR-007 (contradicts)
+
+## Phase 32: Convergence
+
+- [ ] T117 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·예시 fence), `references/templates.md`(템플릿 fence·규칙 설명), `references/examples.md`(모든 fence)의 `themeCSS` 끝에 엣지 라벨 반투명 규칙 `.edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }`를 고정으로 덧붙이고 그 의미를 설명 per FR-007 (partial)
