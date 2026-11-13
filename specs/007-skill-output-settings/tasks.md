@@ -121,7 +121,7 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 **Purpose**: `/speckit-converge`가 신설된 FR-012b(구조 뷰 피드백 로그 저장 위치) 대비 남은 작업을 찾아 추가한다.
 
-- [ ] T029 `.claude/skills/generating-architecture-views/settings.schema.json`에 `log.directory`(relativePath, base `projectRoot`, default `./.zenuml/log`, tokenImpact 토큰 소모 영향 거의 없음, 한국어 description)를 추가 per FR-012b, FR-016 (missing)
-- [ ] T030 [P] `.claude/skills/generating-architecture-views/settings.jsonc`에 `log.directory` 키를 기본값과 zenuml과 같은 형태의 한국어 주석(허용 값·토큰 소모 영향·기본값)으로 추가 per FR-012b, FR-018, FR-020 (missing)
-- [ ] T031 `.claude/skills/generating-architecture-views/SKILL.md` "Architecture view feedback log"와 인용 시 스테이징 규칙의 `.zenuml/log/` 경로를 `log.directory` 해석 값으로 바꾸고(없으면 생성, 이전 위치 로그는 옮기지 않음, `.gitignore`는 건드리지 않음) per FR-012b, US1/AC7 (missing)
-- [ ] T032 [P] `specs/007-skill-output-settings/` data-model.md 옵션 표에 architecture `log.directory` 행을, quickstart.md에 구조 뷰 로그 위치 시나리오를 추가 per FR-012b (partial)
+- [X] T029 `.claude/skills/generating-architecture-views/settings.schema.json`에 `log.directory`(relativePath, base `projectRoot`, default `./.zenuml/log`, tokenImpact 토큰 소모 영향 거의 없음, 한국어 description)를 추가 per FR-012b, FR-016 (missing)
+- [X] T030 [P] `.claude/skills/generating-architecture-views/settings.jsonc`에 `log.directory` 키를 기본값과 zenuml과 같은 형태의 한국어 주석(허용 값·토큰 소모 영향·기본값)으로 추가 per FR-012b, FR-018, FR-020 (missing)
+- [X] T031 `.claude/skills/generating-architecture-views/SKILL.md` "Architecture view feedback log"와 인용 시 스테이징 규칙의 `.zenuml/log/` 경로를 `log.directory` 해석 값으로 바꾸고(없으면 생성, 이전 위치 로그는 옮기지 않음, `.gitignore`는 건드리지 않음) per FR-012b, US1/AC7 (missing)
+- [X] T032 [P] `specs/007-skill-output-settings/` data-model.md 옵션 표에 architecture `log.directory` 행을, quickstart.md에 구조 뷰 로그 위치 시나리오를 추가 per FR-012b (partial)

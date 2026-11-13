@@ -220,7 +220,7 @@ If there is no filesystem access in the current environment, skip the file and p
 
 ### Architecture view feedback log
 
-Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or regenerated architecture view gets a feedback log at `.zenuml/log/<slug>.architecture.md` — same slug, `log/` subdirectory. This is already covered by the `.zenuml/` `.gitignore` entry, so it needs no gitignore entry of its own.
+Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or regenerated architecture view gets a feedback log at `<log.directory>/<slug>.architecture.md` — same slug, in the directory the `log.directory` setting names, resolved from the project root (default `./.zenuml/log`, i.e. `.zenuml/log/<slug>.architecture.md`). Create the directory if it doesn't exist. Changing the setting never moves or deletes logs already written elsewhere — a regeneration just continues in the log at the currently configured location (starting a fresh Round 1 there if none exists yet). The default location is already covered by the `.zenuml/` `.gitignore` entry; if the setting points somewhere `.gitignore` doesn't cover, leave `.gitignore` alone — that's the user's call.
 
 **What goes in the `**Request**:` field**: not just the single message that immediately triggered this round. Gather every turn since the previous round (or, for Round 1, since the conversation about this architecture view started) that actually contributed to what got built — including the purpose-confirmation exchange from Step 1, if that's how this round's scope was pinned down. Drop anything unrelated (small talk, tangents), and lightly edit the rest into one coherent entry rather than pasting a raw transcript.
 
@@ -234,7 +234,7 @@ Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or rege
 <the generated Dependency, Responsibility, and Collaboration content, exactly as written to `.zenuml/<slug>.architecture.md`>
 ````
 
-**On regeneration**, append a new round to the existing `.zenuml/log/<slug>.architecture.md` — never rewrite or delete earlier rounds, no matter how many rounds accumulate:
+**On regeneration**, append a new round to the existing `<log.directory>/<slug>.architecture.md` — never rewrite or delete earlier rounds, no matter how many rounds accumulate:
 
 ````markdown
 ## Round N — <ISO date>
@@ -246,7 +246,7 @@ Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or rege
 
 Don't summarize, analyze, or prune this log's content, ever — it exists purely so a human can read it later and decide what's worth acting on. If Steps 2–4 never completed (the request ended in a clarifying question instead of a finished architecture view), don't create either the output file or the log file — there's nothing to save yet.
 
-**Citing a feedback log elsewhere**: `.zenuml/log/` is gitignored by default. If some other piece of work actually reads and cites a specific `.zenuml/log/<slug>.architecture.md` as a source, stage that one file right then with `git add -f .zenuml/log/<slug>.architecture.md` — nothing else in `.zenuml/` gets staged automatically, and uncited logs stay untracked.
+**Citing a feedback log elsewhere**: the default log location `.zenuml/log/` is gitignored, same as the rest of `.zenuml/`. If some other piece of work actually reads and cites a specific `<log.directory>/<slug>.architecture.md` as a source, stage that one file right then with `git add -f <log.directory>/<slug>.architecture.md` — nothing else gets staged automatically, and uncited logs stay untracked.
 
 ## Out-of-scope requests
 

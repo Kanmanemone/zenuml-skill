@@ -22,6 +22,10 @@
 
 `log.directory`를 `./tmp/diagram-logs`로 바꿔 다이어그램을 생성·재생성 → `tmp/diagram-logs/<slug>.md`가 만들어지고 이어 쓰인다.
 
+## 시나리오 4b — 구조 뷰 로그 위치 (US1/AC7, FR-012b)
+
+`generating-architecture-views`의 `log.directory`를 `./tmp/architecture-logs`로 바꿔 구조 뷰를 생성·재생성 → `tmp/architecture-logs/<slug>.architecture.md`가 만들어지고 이어 쓰인다. 구조 뷰 산출 파일은 그대로 `.zenuml/<slug>.architecture.md`다.
+
 ## 시나리오 5 — exporting 설정 해석 (FR-005, FR-019, SC-003)
 
 ```text
@@ -55,4 +59,4 @@ node .claude/skills/exporting-markdown-diagrams/scripts/read-settings.js
 | 7. PDF 접은 글 펼치기 | `<details>`(open 없음)가 있는 파일을 문서 PDF로 변환 후 `pypdf`로 텍스트 추출 | PASS | 접힌 내용의 표식 문자열이 PDF 텍스트에 포함됨 |
 | 9. 옵션 추가 내구성 | exporting 옵션 정의에 시험용 `trial.flag` 추가 후 `read-settings.js` 실행 | PASS | `lib/settings.js` 수정 없이 기본값 `false`로 해석, 안내 없음. 확인 후 되돌림 |
 
-시나리오 1~4·8은 LLM이 따르는 지침 동작이라 실제 스킬 호출로 확인해야 하며, 이번 구현 단계에서는 SKILL.md 규칙 대조까지만 했다.
+시나리오 1~4b·8은 LLM이 따르는 지침 동작이라 실제 스킬 호출로 확인해야 하며, 이번 구현 단계에서는 SKILL.md 규칙 대조까지만 했다.
