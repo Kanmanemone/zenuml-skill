@@ -16,7 +16,7 @@
 
 ## 시나리오 3 — 렌더러 (FR-011b)
 
-`dependency.renderer`를 `elk`로 바꿔 생성 → `%%{init}%%`에 `"defaultRenderer": "elk"`가 있다. 같은 설정에서 요청에 다른 렌더러를 밝히면 그 값이 쓰인다.
+`dependency.renderer`를 `elk`로 바꿔 생성 → YAML 설정의 `config.flowchart`에 `defaultRenderer: elk`가 있다. 같은 설정에서 요청에 다른 렌더러를 밝히면 그 값이 쓰인다.
 
 ## 시나리오 4 — zenuml 로그 위치 (US3, FR-015c)
 

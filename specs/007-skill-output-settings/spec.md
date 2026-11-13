@@ -20,6 +20,7 @@
 - Q: 산출물·로그의 저장 위치도 설정 파일에 명시하는가? → A: 그렇다. `generating-zenuml-diagrams`의 피드백 로그 저장 위치(`log.directory`, 프로젝트 루트 기준, 기본값 `./.zenuml/log`)와 `exporting-markdown-diagrams`의 산출물 저장 위치(`output.directory`, 원본 파일이 있는 디렉터리 기준, 기본값 `./exports`)를 상대 경로 표기법으로 적는다. 기본값은 지금 위치와 같다. 이로써 `exporting-markdown-diagrams`의 "산출 폴더 이름" 옵션은 저장 위치 옵션으로 바뀌고, `generating-zenuml-diagrams`는 이 옵션 하나를 갖게 된다(FR-014, FR-015c 개정·신설).
 - Q: `exporting-markdown-diagrams`가 빠진 정보를 선택지 질문으로 물을지도 설정하는가? 질문할 때 기본값을 표시하는가? → A: 둘 다 설정으로 정한다. `questions.enabled`(기본 `true` — 지금처럼 물음)로 질문 여부를 고르고, 형식·범위·PDF 레이아웃 각각의 기본값을 `defaults.format`, `defaults.scope`, `defaults.pdfLayout`으로 정한다(배포 초기값은 모두 `none` — 기본값 없음, 지금 동작과 같음). 질문을 켜 두면, 설정된 기본값과 같은 선택지의 문자열 끝에 " (기본값)"을 붙인다 — 어느 선택지에 붙을지는 고정이 아니라 설정 값으로 정해진다. 질문을 끄면 빠진 정보를 설정된 기본값으로 묻지 않고 채우되, 기본값이 `none`인 항목만은 그 항목에 한해 여전히 묻는다. 이에 따라 옛 "PDF 레이아웃 기본값(매번 묻기/1페이지/인쇄 규격)" 옵션은 `defaults.pdfLayout`으로 대체된다(FR-013 개정, FR-013b 신설).
 - Q: 배포되는 설정 파일의 초기값은 누가 정하는가? → A: 사용자가 항목별로 직접 지정한다. 세 스킬의 구현이 모두 끝난 뒤 모든 옵션의 초기값을 한꺼번에 사용자에게 확인한다. 그때까지 이 spec에 적힌 기본값은 잠정값이며, 잠정값은 기능 도입 전 동작과 같게 둔다(FR-003 개정).
+- Q: Dependency 다이어그램의 설정 표기가 `%%{init}%%`에서 YAML frontmatter `config`로 바뀐 뒤(003, 2026-11-13), `dependency.renderer`가 `elk`일 때 렌더러 지정은 어디에 들어가는가? → A: `config.flowchart.defaultRenderer`에 `elk`로 들어간다. 동작(설정·요청 우선순위)은 그대로다(FR-011b, US1/AC5 문구 개정).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -37,7 +38,7 @@
 2. **Given** Responsibility는 `collapsed`, Collaboration은 `expanded`로 정한 설정, **When** 구조 뷰가 생성되어 미리보기로 열면, **Then** 두 섹션이 각각 별도 상자에 들어가 Responsibility는 접힌 채로, Collaboration은 펼쳐진 채로 보이며, 어느 상자든 펼친 내용은 `plain`일 때와 같다(항목, 링크, 볼드 표기).
 3. **Given** Responsibility를 `hidden`으로 정한 설정, **When** 구조 뷰가 생성되면, **Then** 산출 파일에 `### Responsibility` 헤딩과 내용이 모두 없고 Dependency 다음에 곧바로 Collaboration이 온다. 스킬은 Responsibility 내용을 만들지 않는다.
 4. **Given** 설정 파일이 없거나 두 옵션이 모두 `plain`인 상태, **When** 구조 뷰가 생성되면, **Then** 산출물은 이 기능 도입 전과 똑같다.
-5. **Given** `dependency.renderer`를 `elk`로 정한 설정, **When** 사용자가 렌더러를 말하지 않고 구조 뷰를 요청하면, **Then** Dependency 다이어그램의 `%%{init}%%` 블록에 elk 렌더러 지정이 들어간다. `default`로 정하면 렌더러 지정이 들어가지 않고, 요청에서 다른 렌더러를 직접 밝히면 그 요청에서는 요청한 렌더러가 쓰인다.
+5. **Given** `dependency.renderer`를 `elk`로 정한 설정, **When** 사용자가 렌더러를 말하지 않고 구조 뷰를 요청하면, **Then** Dependency 다이어그램의 YAML 설정(`config.flowchart.defaultRenderer`)에 elk 렌더러 지정이 들어간다. `default`로 정하면 렌더러 지정이 들어가지 않고, 요청에서 다른 렌더러를 직접 밝히면 그 요청에서는 요청한 렌더러가 쓰인다.
 6. **Given** 이미 생성된 구조 뷰가 있는 상태에서 사용자가 설정을 바꾼 뒤, **When** 그 구조 뷰의 재생성을 요청하면, **Then** 새 산출물에 바뀐 설정이 적용된다(설정을 바꾸기만 해서는 기존 파일이 고쳐지지 않는다).
 
 ---
@@ -109,7 +110,7 @@
 - **FR-009**: `collapsed`나 `expanded`인 섹션은 섹션 헤딩(`### Responsibility` / `### Collaboration`)을 상자 밖에 그대로 두고, 그 아래 내용 전체를 상자 하나에 넣어야 한다. 미리보기를 처음 열었을 때 `collapsed`는 접힌 상태로, `expanded`는 펼쳐진 상태로 보여야 하며, 어느 쪽이든 사용자가 클릭해 접고 펼 수 있어야 한다. 상자의 요약 줄에는 섹션 이름만 쓴다. 상자를 펼쳤을 때의 내용(항목, 하이퍼링크, 볼드 표기, 하위 헤딩 순서)은 `plain`일 때와 같아야 한다.
 - **FR-010**: `hidden`인 섹션은 헤딩과 내용 모두 산출 파일에 넣지 않아야 하며, 스킬은 그 섹션의 내용을 만들거나 그 섹션만을 위한 자기검증을 하지 않아야 한다. 나머지 섹션의 순서(Dependency → Responsibility → Collaboration)는 유지된다.
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
-- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — Mermaid 기본 레이아웃 엔진인 dagre로 그려짐)와 `elk` 중에서 고를 수 있어야 한다(기본: `default`). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 `%%{init}%%` 블록에 elk 렌더러 지정을 넣는다. 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
+- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — Mermaid 기본 레이아웃 엔진인 dagre로 그려짐)와 `elk` 중에서 고를 수 있어야 한다(기본: `default`). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.flowchart.defaultRenderer`에 elk를 넣는다. 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
 
 **exporting-markdown-diagrams 옵션과 동작**

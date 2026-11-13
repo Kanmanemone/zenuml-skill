@@ -60,7 +60,7 @@
 
 ## Decision: Dependency 렌더러 옵션 적용
 
-- **Decision**: `dependency.renderer`가 `elk`이면 003 FR-007b와 같은 방식으로 `%%{init}%%`의 `flowchart` 설정에 `"defaultRenderer": "elk"`를 넣는다. `default`면 넣지 않는다. 요청 문장이 렌더러를 밝히면 그 값이 우선한다.
+- **Decision**: `dependency.renderer`가 `elk`이면 003 FR-007b와 같은 방식으로 YAML 설정의 `config.flowchart`에 `defaultRenderer: elk`를 넣는다(2026-11-13 표기 최신화 반영). `default`면 넣지 않는다. 요청 문장이 렌더러를 밝히면 그 값이 우선한다.
 - **Rationale**: 기존 FR-007b 경로를 그대로 재사용한다. Mermaid flowchart의 기본 레이아웃 엔진은 dagre이므로 `default`는 "지정 없음"으로 표현한다.
 
 ## Decision: 배포 초기값
