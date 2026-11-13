@@ -428,3 +428,8 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 - [X] T111 [P] `references/templates.md` Dependency 템플릿에 CRUD 구역(세 고정 classDef)을 추가하고 동적 요청용 표시 예(라벨·`class` 줄)를 덧붙이며, `references/examples.md`의 모든 Dependency 다이어그램에 CRUD 구역을 추가 per FR-007, FR-035, SC-014 (missing)
 - [X] T112 `SKILL.md` "Nothing but content"·AP-13c에 CRUD classDef 구역을 허용 구조로 명시하고, AP 항목(AP-5c)으로 "CRUD 구역 정확히 한 번, 정적이면 `class … crud*`·이모지 접두 없음, 동적이면 설명이 밝힌 노드에만 표시"를 추가 per FR-032, SC-014 (partial)
 - [X] T113 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md에 정적/동적 분류와 CRUD 구역·표시 규칙을 반영 per plan, FR-034, FR-035 (partial)
+
+## Phase 30: Convergence
+
+- [ ] T114 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape·Change marking·AP-5c·Nothing but content·예시 fence)와 `references/templates.md`(템플릿·규칙·Change marking 예시), `references/examples.md`의 모든 CRUD 구역에 구역 주석 바로 다음 줄로 라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`를 정적·동적 무관하게 항상 넣도록 반영 per FR-035, FR-032, SC-014 (partial)
+- [ ] T115 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md(시나리오 25)에 라벨 규칙 주석을 반영 per plan, FR-035 (partial)
