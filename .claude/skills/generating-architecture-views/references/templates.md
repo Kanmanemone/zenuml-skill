@@ -19,7 +19,7 @@ All three sections in the output file get a `###` heading (never `##` or shallow
 
 ## Dependency template
 
-Every diagram opens with this fixed styling block, then `flowchart LR`. Groups are `subgraph` with `direction TB`; components with no grouping signal sit at the top level instead.
+Every diagram opens with this fixed YAML frontmatter `config` block (inside the code fence, before `flowchart LR`). Groups are `subgraph Id["라벨"]` with `direction TB`; components with no grouping signal sit at the top level instead. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `click` lines (if any). Those three section comments are fixed structure, always written exactly like this.
 
 ````markdown
 ### Dependency
@@ -27,36 +27,38 @@ Every diagram opens with this fixed styling block, then `flowchart LR`. Groups a
 <요청의 핵심 키워드로 만든, 이 다이어그램이 무엇을 그린 것인지 밝히는 한 줄>
 
 ```mermaid
-%%{init: {
-  "flowchart": {
-    "curve": "basis",
-    "nodeSpacing": 45,
-    "rankSpacing": 70
-  },
-  "themeVariables": {
-    "clusterBkg": "#eaeaea",
-    "clusterBorder": "#f0f1f2",
-    "mainBkg": "#fafafd",
-    "primaryColor": "#fafafd",
-    "textColor": "#202020",
-    "primaryTextColor": "#202020",
-    "tertiaryTextColor": "#202020",
-    "background": "#ffffff",
-    "edgeLabelBackground": "#ffffff"
-  },
-  "themeCSS": ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
-}}%%
+---
+config:
+  flowchart:
+    curve: basis
+    nodeSpacing: 45
+    rankSpacing: 70
+    titleTopMargin: 25
+  themeVariables:
+    clusterBkg: "#eaeaea"
+    clusterBorder: "#f0f1f2"
+    mainBkg: "#fafafd"
+    primaryColor: "#fafafd"
+    textColor: "#202020"
+    primaryTextColor: "#202020"
+    tertiaryTextColor: "#202020"
+    background: "#ffffff"
+    edgeLabelBackground: "#ffffff"
+  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
+---
 flowchart LR
-  subgraph 그룹A
+  subgraph GroupA["그룹A"]
     direction TB
     ComponentA
-    ComponentB
+    ComponentB@{ label: "ComponentB(state)" }
   end
   ComponentC
 
-  ComponentA -->|호출| ComponentB
-  ComponentA -->|타입 참조| ComponentC
+  %% ---- 엣지 ----
+  ComponentA e0@-->|호출| ComponentB
+  ComponentA e1@-->|타입 참조| ComponentC
 
+  %% ---- 노드 스타일 ----
   classDef componentANode stroke:#64748B,stroke-width:3px
   class ComponentA componentANode
   classDef componentBNode stroke:#3B82F6,stroke-width:3px
@@ -64,8 +66,10 @@ flowchart LR
   classDef componentCNode stroke:#A855F7,stroke-width:3px
   class ComponentC componentCNode
 
-  linkStyle 0 stroke:#64748B,stroke-width:3.5px
-  linkStyle 1 stroke:#64748B,stroke-width:3.5px
+  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
+  classDef componentAEdge stroke:#64748B,stroke-width:3.5px
+  class e0 componentAEdge
+  class e1 componentAEdge
 
   click ComponentA "../path/to/ComponentA.kt" "ComponentA.kt"
   click ComponentB "../path/to/ComponentB.kt" "ComponentB.kt"
@@ -77,13 +81,14 @@ Rules:
 - Exactly one plain-text caption line sits between `### Dependency` and the Mermaid fence — built only from the request's key keywords (the system/process named and the aspect asked about), in the user's language; no blockquote/heading/bold, nothing the request didn't say, nothing about rendering or layout.
 - Nothing follows the closing fence except the next section's heading — no notes about `click` behavior, renderers, or layout.
 - `subgraph` only for evidence-based groups (a name/layer/domain signal in the description); components with no such signal sit at the top level, no `subgraph` at all.
-- Every edge gets a `-->|관계 성격|` label. Use the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
+- Every edge gets an ID and a label: `Source eN@-->|관계 성격| Target`, with `N` counting from 0 in the order edges are written. Use the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
 - Draw only edges the description directly states or implies between those exact two components. A described chain (A calls B, B calls C) becomes `A --> B` and `B --> C` — never a collapsed `A --> C` shortcut.
-- Every node gets a `classDef` + `class` pair. Name the class after the node's role, not a generic counter (`navHostNode`, not `class3`).
-- Every edge's `linkStyle` (indexed in the order the edges appear in the diagram, starting at 0) matches its **source** node's color.
-- `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise. Include the "참고: ..." note beneath the diagram only when at least one `click` target is a local path (see `SKILL.md`, Step 2).
-- `"defaultRenderer"` inside the `flowchart` config (e.g. `"defaultRenderer": "elk"`) is optional too — add it only when this request explicitly names a renderer, using that exact value verbatim (open vocabulary, no validation). Omit it otherwise, and don't carry a renderer named in an earlier round forward into a regeneration that doesn't restate it.
-- `"themeVariables"` is always present, unlike the optional fields above — it keeps node/cluster colors matching VS Code's Markdown preview instead of mermaid's own defaults. Copy the values verbatim. Source: VS Code 1.132.1's active color theme ("Light 2026")'s `colorMap`, run through its bundled `mermaid-markdown-features` extension's `computeVsCodeMermaidThemeVariables` mapping. Re-derive by reading the real active theme first — `sqlite3 <VS Code User>/globalStorage/state.vscdb "SELECT value FROM ItemTable WHERE key='colorThemeData';"` — never assume a "default" theme name.
+- A node whose display name can't be its ID (parentheses, spaces, etc.) is declared as `Id@{ label: "표시 이름" }`; plain names are declared bare.
+- Every node gets a `classDef` + `class` pair. Name the class after the node's role, not a generic counter (`navHostNode`, not `class3`). Interchangeable siblings share one class: `class A,B,C siblingNode`.
+- Every edge is colored by an edge class in its **source** node's color: one `classDef <role>Edge stroke:<color>,stroke-width:3.5px` per source node, then `class eN <role>Edge` for each of that node's edges. Never use `linkStyle`.
+- `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
+- `defaultRenderer` under `config.flowchart` (e.g. `defaultRenderer: elk`) is optional too — add it when this request explicitly names a renderer (that exact value, open vocabulary, no validation) or, failing that, when the `dependency.renderer` setting is `elk`. Omit it otherwise, and don't carry a renderer named in an earlier round forward on its own.
+- `themeVariables` is always present, unlike the optional fields above — it keeps node/cluster colors matching VS Code's Markdown preview instead of mermaid's own defaults. Copy the values verbatim. Source: VS Code 1.132.1's active color theme ("Light 2026")'s `colorMap`, run through its bundled `mermaid-markdown-features` extension's `computeVsCodeMermaidThemeVariables` mapping. Re-derive by reading the real active theme first — `sqlite3 <VS Code User>/globalStorage/state.vscdb "SELECT value FROM ItemTable WHERE key='colorThemeData';"` — never assume a "default" theme name.
 
 ### Color palette
 
@@ -108,7 +113,7 @@ Assign colors from this fixed, ordered list (Tailwind CSS 500-shade hex values) 
 | 15 | rose | `#F43F5E` |
 | 16 | fuchsia | `#D946EF` |
 
-Node border width is always `3px`; edge (`linkStyle`) width is always `3.5px`.
+Node border width is always `3px`; edge-class width is always `3.5px`.
 
 ### Hyperlink syntax
 

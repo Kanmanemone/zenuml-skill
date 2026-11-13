@@ -48,7 +48,7 @@ Dependency 섹션에서 컴포넌트를 `subgraph`로 묶을지 결정하는 규
 |------|------|
 | source, target | 관계의 출발/도착 컴포넌트 |
 | nature | 관계의 성격(예: 호출, 타입 참조, 선언 참조) — 설명이 명시한 그대로, 열린 어휘. 명시되지 않았으면 `호출`이 기본값 |
-| color | 이 엣지의 `linkStyle` 색 — 항상 `source`의 Node Color Class와 동일 |
+| color | 이 엣지의 엣지 클래스 색(`eN@` ID에 `class eN …`으로 지정) — 항상 `source`의 Node Color Class와 동일 |
 
 **검증 규칙**: `nature`가 설명에 없으면 기본값(`호출`)을 쓰고 더 구체적인 성격을 추측해서는 안 된다(spec.md FR-008). `color`는 항상 `source` 노드의 색과 일치해야 한다(spec.md FR-008b).
 
@@ -85,7 +85,7 @@ Dependency 다이어그램에서 노드를 시각적으로 구분하는 색상 �
 | node_classes | Node Color Class 목록 |
 | hyperlinks | 노드별 Hyperlink Target |
 
-**표현 형식**: Mermaid `flowchart LR`, 그룹별 `direction TB`, 고정 `%%{init}%%` 스타일 블록(curve: basis, nodeSpacing 45, rankSpacing 70, cluster-label 20px/weight 700) — 그룹은 `subgraph`, 의존관계는 성격 레이블이 붙은 화살표, 각 노드는 `classDef`+`class`, 각 엣지는 `linkStyle`, 하이퍼링크가 있는 노드는 `click`(spec.md FR-007, FR-008, FR-008b, FR-027c).
+**표현 형식**: Mermaid `flowchart LR`, 그룹별 `direction TB`, 코드펜스 맨 앞 YAML frontmatter `config` 스타일 블록(curve: basis, nodeSpacing 45, rankSpacing 70, titleTopMargin 25, cluster-label 20px/weight 700) — 그룹은 `subgraph Id["라벨"]`, 의존관계는 `eN@` ID와 성격 레이블이 붙은 화살표, 각 노드는 `classDef`+`class`(라벨이 ID와 다르면 `@{ label }`), 각 엣지는 출발 노드 색의 엣지 클래스(`class eN …`), 구역 주석 순서 고정, 하이퍼링크가 있는 노드는 `click`(spec.md FR-007, FR-008, FR-008b, FR-027c).
 
 ## Responsibility Entry (책임 서술)
 

@@ -31,10 +31,10 @@
 
 **기대 결과**:
 - Dependency 섹션에 OrderService, PaymentService 두 컴포넌트와 `OrderService -->|호출| PaymentService` 화살표만 등장한다(관계 성격이 설명에 없으므로 기본값 "호출" 사용). 그룹 신호가 없으므로 `subgraph`는 그려지지 않는다.
-- OrderService에 `classDef`+`class`로 색상이 부여되고, 그 화살표의 `linkStyle`이 같은 색이다.
+- OrderService에 `classDef`+`class`로 색상이 부여되고, 그 화살표(`e0@`)의 엣지 클래스가 같은 색이다.
 - 설명에 없는 컴포넌트(예: NotificationService)나 관계가 등장하지 않는다.
 
-**검증**: 화살표 레이블이 정확히 "호출"인지, `linkStyle` 색이 OrderService의 `class` 색과 일치하는지 확인한다(SC-002, SC-003, SC-004 = 각 100%/100%/0% 목표).
+**검증**: 화살표 레이블이 정확히 "호출"인지, 엣지 클래스 색이 OrderService의 `class` 색과 일치하는지 확인한다(SC-002, SC-003, SC-004 = 각 100%/100%/0% 목표).
 
 ## 시나리오 4 — 그룹과 Responsibility의 책임(추상)/역할(구체) (SC-002, SC-004)
 
@@ -196,9 +196,9 @@
 **입력 예시(22b)**: 시나리오 1과 동일한 설명, 렌더러 언급 없음.
 
 **기대 결과**:
-- 22a: `%%{init}%%` 블록의 `flowchart` 설정 안에 `"defaultRenderer": "elk"`가 포함된다(값은 사용자가 입력한 문자열 그대로 — 다른 렌더러 이름을 요청해도 동일하게 그 값이 그대로 들어가야 한다).
+- 22a: YAML frontmatter `config.flowchart`에 `defaultRenderer: elk`가 포함된다(값은 사용자가 입력한 문자열 그대로 — 다른 렌더러 이름을 요청해도 동일하게 그 값이 그대로 들어가야 한다).
 - 22b: `defaultRenderer` 필드 자체가 `flowchart` 설정에 등장하지 않는다(기존 동작과 동일).
-- 22a로 생성된 뷰를 렌더러 언급 없이 재생성 요청하면(예: "컴포넌트 하나 추가해서 다시 만들어줘"), 새로 생성된 `%%{init}%%`에는 이전 라운드의 `defaultRenderer: "elk"`가 이어지지 않고 생략된다.
+- 22a로 생성된 뷰를 렌더러 언급 없이 재생성 요청하면(예: "컴포넌트 하나 추가해서 다시 만들어줘"), 새로 생성된 YAML `config`에는 이전 라운드의 `defaultRenderer: "elk"`가 이어지지 않고 생략된다.
 
 **검증**: 22a/22b 각각에서 `defaultRenderer` 필드의 유무가 요청의 명시 여부와 정확히 일치하는지, 재생성 시 이전 라운드 값이 상태로 남아 이어지지 않는지 확인한다(FR-007b — 명시율/생략율 각각 100% 목표).
 

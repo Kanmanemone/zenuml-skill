@@ -16,39 +16,41 @@ All examples below show Responsibility and Collaboration with display `plain` so
 주문 도메인과 재고 도메인의 주문·결제·재고 참조 의존 구조
 
 ```mermaid
-%%{init: {
-  "flowchart": {
-    "curve": "basis",
-    "nodeSpacing": 45,
-    "rankSpacing": 70
-  },
-  "themeVariables": {
-    "clusterBkg": "#eaeaea",
-    "clusterBorder": "#f0f1f2",
-    "mainBkg": "#fafafd",
-    "primaryColor": "#fafafd",
-    "textColor": "#202020",
-    "primaryTextColor": "#202020",
-    "tertiaryTextColor": "#202020",
-    "background": "#ffffff",
-    "edgeLabelBackground": "#ffffff"
-  },
-  "themeCSS": ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
-}}%%
+---
+config:
+  flowchart:
+    curve: basis
+    nodeSpacing: 45
+    rankSpacing: 70
+    titleTopMargin: 25
+  themeVariables:
+    clusterBkg: "#eaeaea"
+    clusterBorder: "#f0f1f2"
+    mainBkg: "#fafafd"
+    primaryColor: "#fafafd"
+    textColor: "#202020"
+    primaryTextColor: "#202020"
+    tertiaryTextColor: "#202020"
+    background: "#ffffff"
+    edgeLabelBackground: "#ffffff"
+  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
+---
 flowchart LR
-  subgraph 주문 도메인
+  subgraph OrderDomain["주문 도메인"]
     direction TB
     OrderService
     PaymentService
   end
-  subgraph 재고 도메인
+  subgraph InventoryDomain["재고 도메인"]
     direction TB
     InventoryService
   end
 
-  OrderService -->|호출| PaymentService
-  OrderService -->|타입 참조| InventoryService
+  %% ---- 엣지 ----
+  OrderService e0@-->|호출| PaymentService
+  OrderService e1@-->|타입 참조| InventoryService
 
+  %% ---- 노드 스타일 ----
   classDef orderNode stroke:#64748B,stroke-width:3px
   class OrderService orderNode
   classDef paymentNode stroke:#3B82F6,stroke-width:3px
@@ -56,8 +58,10 @@ flowchart LR
   classDef inventoryNode stroke:#A855F7,stroke-width:3px
   class InventoryService inventoryNode
 
-  linkStyle 0 stroke:#64748B,stroke-width:3.5px
-  linkStyle 1 stroke:#64748B,stroke-width:3.5px
+  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
+  classDef orderEdge stroke:#64748B,stroke-width:3.5px
+  class e0 orderEdge
+  class e1 orderEdge
 
   click OrderService "../src/main/kotlin/order/OrderService.kt" "OrderService.kt"
   click PaymentService "../src/main/kotlin/order/PaymentService.kt" "PaymentService.kt"
@@ -218,36 +222,38 @@ EmailSender, SmsSender, PushSender all share the same group (채널 모듈) and 
 인증 묶음의 토큰 저장·세션 조회 의존 구조
 
 ```mermaid
-%%{init: {
-  "flowchart": {
-    "curve": "basis",
-    "nodeSpacing": 45,
-    "rankSpacing": 70
-  },
-  "themeVariables": {
-    "clusterBkg": "#eaeaea",
-    "clusterBorder": "#f0f1f2",
-    "mainBkg": "#fafafd",
-    "primaryColor": "#fafafd",
-    "textColor": "#202020",
-    "primaryTextColor": "#202020",
-    "tertiaryTextColor": "#202020",
-    "background": "#ffffff",
-    "edgeLabelBackground": "#ffffff"
-  },
-  "themeCSS": ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
-}}%%
+---
+config:
+  flowchart:
+    curve: basis
+    nodeSpacing: 45
+    rankSpacing: 70
+    titleTopMargin: 25
+  themeVariables:
+    clusterBkg: "#eaeaea"
+    clusterBorder: "#f0f1f2"
+    mainBkg: "#fafafd"
+    primaryColor: "#fafafd"
+    textColor: "#202020"
+    primaryTextColor: "#202020"
+    tertiaryTextColor: "#202020"
+    background: "#ffffff"
+    edgeLabelBackground: "#ffffff"
+  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; }"
+---
 flowchart LR
-  subgraph 인증
+  subgraph Auth["인증"]
     direction TB
     AuthGateway
     TokenStore
     SessionManager
   end
 
-  AuthGateway -->|호출| TokenStore
-  SessionManager -->|호출| TokenStore
+  %% ---- 엣지 ----
+  AuthGateway e0@-->|호출| TokenStore
+  SessionManager e1@-->|호출| TokenStore
 
+  %% ---- 노드 스타일 ----
   classDef authGatewayNode stroke:#64748B,stroke-width:3px
   class AuthGateway authGatewayNode
   classDef tokenStoreNode stroke:#3B82F6,stroke-width:3px
@@ -255,8 +261,11 @@ flowchart LR
   classDef sessionManagerNode stroke:#A855F7,stroke-width:3px
   class SessionManager sessionManagerNode
 
-  linkStyle 0 stroke:#64748B,stroke-width:3.5px
-  linkStyle 1 stroke:#A855F7,stroke-width:3.5px
+  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
+  classDef authGatewayEdge stroke:#64748B,stroke-width:3.5px
+  class e0 authGatewayEdge
+  classDef sessionManagerEdge stroke:#A855F7,stroke-width:3.5px
+  class e1 sessionManagerEdge
 ```
 
 ### Responsibility
