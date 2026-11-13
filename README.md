@@ -38,7 +38,7 @@ If a newly added skill doesn't show up under `/`, restart Claude Code, or run "R
 Each of these is a standalone skill — copy whichever you need into your `.claude/skills/` directory. Every skill (including the core one) reads a `settings.jsonc` in its own folder; edit it to change how that skill behaves — each option is explained in Korean comments right above it:
 
 - **[`generating-architecture-views`](.claude/skills/generating-architecture-views/)** — adds a structural view (components, groups, dependencies). Want a specific Mermaid renderer (e.g. `elk`) for its Dependency diagrams? Say so in your request and it's added to the `%%{init}%%` block; leave it unspecified and it won't be.
-- **[`exporting-markdown-diagrams`](.claude/skills/exporting-markdown-diagrams/)** — converts a diagram to SVG/PNG, or a whole Markdown file to PDF (diagrams embedded as selectable-text vectors), always through bundled scripts (mermaid-cli) — never LLM reasoning. Run `npm install` once inside its `scripts/` folder to fetch the dependencies those scripts use. Output lands in an `exports/` subdirectory next to the source file, created automatically.
+- **[`exporting-markdown-diagrams`](.claude/skills/exporting-markdown-diagrams/)** — converts a diagram to SVG/PNG, or a whole Markdown file to PDF (diagrams embedded as selectable-text vectors) or PNG, always through bundled scripts (mermaid-cli) — never LLM reasoning. Run `npm install` once inside its `scripts/` folder to fetch the dependencies those scripts use. Output lands in an `exports/` subdirectory next to the source file, created automatically.
 
 ## Development
 

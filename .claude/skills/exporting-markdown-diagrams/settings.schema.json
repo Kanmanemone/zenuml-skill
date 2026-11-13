@@ -20,7 +20,7 @@
         "pdf"
       ],
       "default": "png",
-      "description": "요청이 출력 형식을 밝히지 않았을 때의 기본 형식 (none = 기본값 없음)",
+      "description": "요청이 출력 형식을 밝히지 않았을 때의 기본 형식 (none = 기본값 없음, 문서 전체에는 svg를 쓸 수 없어 pdf·png만 적용됨)",
       "tokenImpact": {
         "none": "토큰 소모 영향 거의 없음",
         "svg": "토큰 소모 영향 거의 없음",
@@ -37,7 +37,7 @@
         "document"
       ],
       "default": "document",
-      "description": "요청이 변환 범위를 밝히지 않았을 때의 기본 범위 (none = 기본값 없음)",
+      "description": "요청이 변환 범위를 밝히지 않았을 때의 기본 범위 (none = 기본값 없음, document = 문서 전체 PDF 또는 PNG)",
       "tokenImpact": {
         "none": "토큰 소모 영향 거의 없음",
         "diagram": "토큰 소모 영향 거의 없음",
@@ -53,7 +53,7 @@
         "paginated"
       ],
       "default": "single",
-      "description": "문서 전체 PDF에서 요청이 페이지 구성을 밝히지 않았을 때의 기본값 (none = 기본값 없음)",
+      "description": "문서 전체(PDF·PNG)에서 요청이 페이지 구성을 밝히지 않았을 때의 기본값 (none = 기본값 없음)",
       "tokenImpact": {
         "none": "토큰 소모 영향 거의 없음",
         "single": "토큰 소모 영향 거의 없음",

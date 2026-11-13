@@ -1,11 +1,11 @@
 ---
 name: exporting-markdown-diagrams
-description: Converts a Mermaid/ZenUML diagram already embedded in a Markdown file to SVG or PNG, or converts a whole Markdown file (diagrams included) to PDF with those diagrams embedded as selectable-text vector graphics — using bundled scripts only, never LLM reasoning, so output is deterministic and consistent across runs. Make sure to use this skill whenever the user asks to export, convert, save, download, or turn an existing diagram or Markdown document into an image or PDF file — including short asks like "이거 png로", "다이어그램 뽑아줘", "PDF로 만들어줘" — even if they don't spell out every detail; ask what's missing rather than skipping this skill. Do NOT use this to *generate* new diagram content — that is generating-zenuml-diagrams / generating-architecture-views's job. This skill only converts diagrams/documents that already exist.
+description: Converts a Mermaid/ZenUML diagram already embedded in a Markdown file to SVG or PNG, or converts a whole Markdown file (diagrams included) to PDF (diagrams embedded as selectable-text vector graphics) or to PNG — using bundled scripts only, never LLM reasoning, so output is deterministic and consistent across runs. Make sure to use this skill whenever the user asks to export, convert, save, download, or turn an existing diagram or Markdown document into an image or PDF file — including short asks like "이거 png로", "다이어그램 뽑아줘", "PDF로 만들어줘" — even if they don't spell out every detail; ask what's missing rather than skipping this skill. Do NOT use this to *generate* new diagram content — that is generating-zenuml-diagrams / generating-architecture-views's job. This skill only converts diagrams/documents that already exist.
 ---
 
 # Exporting Markdown Diagrams
 
-Converts a diagram embedded in a Markdown file to SVG/PNG, or a whole Markdown file to PDF. The conversion itself is always performed by a bundled script (`scripts/export-diagrams.js` or `scripts/export-document-pdf.js`) — never by reasoning through the diagram/document content yourself. Your job here is orchestration only: work out what the user wants, ask only what's genuinely missing, then invoke the right script and report its output.
+Converts a diagram embedded in a Markdown file to SVG/PNG/PDF, or a whole Markdown file to PDF or PNG. The conversion itself is always performed by a bundled script (`scripts/export-diagrams.js`, `scripts/export-document-pdf.js`, or `scripts/export-document-png.js`) — never by reasoning through the diagram/document content yourself. Your job here is orchestration only: work out what the user wants, ask only what's genuinely missing, then invoke the right script and report its output.
 
 ## Workflow overview
 
@@ -43,17 +43,18 @@ Ask only for what's actually missing — never re-ask something already implied 
 - **`questions.enabled` is `false`**: don't ask. Fill each missing piece from its default — `defaults.format` for format, `defaults.scope` for scope, `defaults.pdfLayout` for pdfLayout — then apply the rules below as if the user had said it. Only a piece whose default is `none` (nothing to fill it with) is still asked, using the rules below, without any " (기본값)" mark.
 - **`questions.enabled` is `true`**: ask exactly as below. In every question, append ` (기본값)` to the end of the `label` of the option that matches that question's default (`defaults.format` → `SVG`/`PNG`/`PDF` for `svg`/`png`/`pdf`; `defaults.scope` → `다이어그램만`/`문서 전체` for `diagram`/`document`; `defaults.pdfLayout` → `1페이지 단일`/`표준 인쇄 규격` for `single`/`paginated`). Which option gets it comes only from the settings; when the default is `none`, no option gets it. Never move or reorder options to mark the default.
 
-`scope=document` only ever produces PDF (see "Scope: whole document" below — no other script exists for this scope), which changes how `format` factors in:
+`scope=document` produces PDF or PNG only — there is no whole-document SVG (see "Scope: whole document" below) — which changes how `format` factors in:
 
-- **`scope` resolves to `document`** (given, or the user answers `문서 전체` to the scope question) **and no format was named, or `pdf` was named**: treat `format` as `pdf` automatically — never ask a separate format question for this scope.
-- **`scope` resolves to `document` but the user explicitly named a different format** (e.g. "문서 전체를 png로"): don't silently substitute PDF for what they asked. Tell them whole-document export only produces PDF today, and ask whether PDF is acceptable instead — a single format-only question — rather than proceeding with a combination nothing implements.
+- **`scope` resolves to `document` and the request named `pdf` or `png`**: use it.
+- **`scope` resolves to `document` and the request named `svg`**: don't silently substitute another format. Tell the user whole-document SVG isn't supported, then ask a single format question with only `PDF` and `PNG`.
+- **`scope` resolves to `document` and no format was named**: if questions are off and `defaults.format` is `pdf` or `png`, use it. Otherwise (questions on, or `defaults.format` is `svg`/`none`) ask a single format question with only `PDF` and `PNG` — mark ` (기본값)` only when `defaults.format` is `pdf` or `png`.
 - **Otherwise** (`scope` is `diagram`, or still unresolved), fall back to the general rule:
   - **Both `format` and `scope` missing**: make a single `AskUserQuestion` call whose `questions` array has exactly two entries — one for format, one for scope — presented together in one interaction. Never split this into two separate `AskUserQuestion` calls.
   - **Only `format` missing**: ask a single question for format alone.
-  - **Only `scope` missing**: ask a single question for scope alone. If the answer is `문서 전체`, apply the `document`-scope rule above (format becomes `pdf`, no follow-up question).
+  - **Only `scope` missing**: ask a single question for scope alone. If the answer is `문서 전체`, apply the `document`-scope rules above (the format already named still applies; `svg` gets the not-supported notice and a PDF/PNG question).
   - **Neither missing**: skip straight to dispatch — no question at all.
 
-Format question — options `SVG`, `PNG`, `PDF`. Scope question — options `다이어그램만`, `문서 전체`. When `scope` is still being asked and the request already leans toward a whole-file conversion (e.g. mentions "문서"), you may note in the option's description that whole-document export produces PDF — but still let the user pick freely; the only marking is the settings-driven " (기본값)" above.
+Format question — options `SVG`, `PNG`, `PDF` (only `PDF`, `PNG` once `scope` is `document`). Scope question — options `다이어그램만`, `문서 전체`. When format and scope are asked together and the user might pick `문서 전체`, you may note in the scope option's description that whole-document export produces PDF or PNG — but still let the user pick freely; the only marking is the settings-driven " (기본값)" above. If they end up with `문서 전체` + `SVG`, apply the `svg` rule above.
 
 ```text
 예시 — 형식·범위 둘 다 불분명한 "이거 변환해줘"에 대한 AskUserQuestion:
@@ -71,14 +72,14 @@ Format question — options `SVG`, `PNG`, `PDF`. Scope question — options `다
   ]
 ```
 
-**Page layout for `scope=document`**: once `scope` is confirmed as `document` (whether it was given outright, resolved from the question above, or filled from `defaults.scope`) and `pdfLayout` is still unresolved (not in the request, and not filled from `defaults.pdfLayout` because questions are off), ask one more, separate `AskUserQuestion` — a follow-up round after the format/scope interaction, not folded into it — with options in this exact order: `1페이지 단일` first, `표준 인쇄 규격` second. Skip this question entirely when `scope` resolves to `diagram` — page layout has no meaning for a diagram-only export.
+**Page layout for `scope=document`** (applies to both PDF and PNG): once `scope` is confirmed as `document` (whether it was given outright, resolved from the question above, or filled from `defaults.scope`) and `pdfLayout` is still unresolved (not in the request, and not filled from `defaults.pdfLayout` because questions are off), ask one more, separate `AskUserQuestion` — a follow-up round after the format/scope interaction, not folded into it — with options in this exact order: `1페이지 단일` first, `표준 인쇄 규격` second. Skip this question entirely when `scope` resolves to `diagram` — page layout has no meaning for a diagram-only export.
 
 ```text
 예시 — scope=document가 확정된 뒤 pdfLayout이 아직 불분명할 때의 후속 AskUserQuestion:
   questions: [
-    { header: "PDF 페이지 구성", question: "PDF 페이지를 어떻게 만들까요?", options: [
-      { label: "1페이지 단일", description: "페이지 나눔 없이 문서 전체를 한 장에 담습니다." },
-      { label: "표준 인쇄 규격", description: "A4 등 표준 용지 크기로 필요한 만큼 여러 페이지에 나눠 인쇄합니다." }
+    { header: "페이지 구성", question: "페이지를 어떻게 나눌까요?", options: [
+      { label: "1페이지 단일", description: "페이지 나눔 없이 문서 전체를 한 장(PNG면 세로로 긴 이미지 한 장)에 담습니다." },
+      { label: "표준 인쇄 규격", description: "A4 용지 크기로 필요한 만큼 나눕니다(PNG면 페이지마다 이미지 한 장)." }
     ] }
   ]
 ```
@@ -105,12 +106,15 @@ On success, the script prints one output file path per line — report those pat
 
 ## Scope: whole document
 
-Once `targetFile`, `scope=document` (format is always `pdf` for this scope), and `pdfLayout` are all confirmed (see "Step 2" above), run:
+Once `targetFile`, `scope=document`, `format` (`pdf` or `png`), and `pdfLayout` are all confirmed (see "Step 2" above), run the matching script:
 
 ```text
-node scripts/export-document-pdf.js <targetFile> "" --layout <single|paginated>
+node scripts/export-document-pdf.js <targetFile> "" --layout <single|paginated>   # format=pdf
+node scripts/export-document-png.js <targetFile> "" --layout <single|paginated>   # format=png
 ```
 
 (The empty `""` positional keeps the script's default output naming in the `output.directory` setting's location — pass a real path there only if the user asked for a specific output location.)
 
 This script extracts every diagram in the document, embeds it back into the printed PDF as a real vector `<svg>` (not a linked image or a rasterized picture), and cleans up its own intermediate files — you don't need to manage temp files or call any other script for this scope. `single` prints the whole document onto one continuously tall page (no page breaks); `paginated` prints onto standard A4 pages, flowing content across as many as it needs. Collapsible `<details>` blocks are always printed open, so their content is never hidden in the PDF; the source file isn't changed. On success, it prints the PDF's path — report that back to the user. On failure, follow "Failure handling" above.
+
+The PNG script renders the document exactly as the PDF script would (same layout, fonts, and page breaks, collapsible blocks open) and then turns each page into a PNG at the `png.scale` resolution: `single` gives one tall image `<name>.png`; `paginated` gives `<name>-page-1.png`, `<name>-page-2.png`, … — one per A4 page. A document with no diagrams is fine for either script. On success it prints one path per line — report them back. If an image can't be produced (e.g. a very long document is too tall for one `single` image), it fails with the reason — report that as is under "Failure handling"; never switch to another format or layout on your own.
