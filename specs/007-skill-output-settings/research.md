@@ -62,7 +62,7 @@
 ## Decision: Dependency 렌더러 옵션 적용
 
 - **Decision**: `dependency.renderer`가 `elk`이면 003 FR-007b와 같은 방식으로 YAML 설정의 `config` 바로 아래에 `layout: elk`를 넣는다(2026-11-13 개정 — `config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시해 elk가 적용되지 않았다). `default`면 넣지 않는다. 요청 문장이 렌더러를 밝히면 그 값이 우선한다.
-- **Rationale**: 기존 FR-007b 경로를 그대로 재사용한다. `default`는 "지정 없음"이라 보는 곳의 기본 레이아웃을 따른다 — mermaid 11(내보내기 스크립트)은 dagre, VS Code 내장 Mermaid(12 계열)는 ELK. 그래서 배포 기본값은 `elk`로 두어 미리보기와 내보내기가 같은 배치가 되게 한다(2026-11-13 사용자 확정).
+- **Rationale**: 기존 FR-007b 경로를 그대로 재사용한다. `default`는 "지정 없음"이라 보는 곳의 기본 레이아웃을 따른다 — VS Code 내장 Mermaid와 내보내기 스크립트(004 FR-017로 12 계열) 모두 지금은 ELK다(12로 올리기 전 mermaid 11은 dagre). 그래도 보는 곳의 Mermaid 버전에 따라 기본값이 달라질 수 있으므로 배포 기본값은 `elk`로 두어 미리보기와 내보내기가 같은 배치가 되게 한다(2026-11-13 사용자 확정).
 
 ## Decision: 배포 초기값
 

@@ -112,7 +112,7 @@
 - **FR-009**: `collapsed`나 `expanded`인 섹션은 섹션 헤딩(`### Responsibility` / `### Collaboration`)을 상자 밖에 그대로 두고, 그 아래 내용 전체를 상자 하나에 넣어야 한다. 미리보기를 처음 열었을 때 `collapsed`는 접힌 상태로, `expanded`는 펼쳐진 상태로 보여야 하며, 어느 쪽이든 사용자가 클릭해 접고 펼 수 있어야 한다. 상자의 요약 줄(▶ 옆 문구)은 섹션과 상태에 관계없이 고정 문구 `Details`로 쓴다 — 섹션 이름은 상자 밖 헤딩에만 나온다. 상자를 펼쳤을 때의 내용(항목, 하이퍼링크, 볼드 표기, 하위 헤딩 순서)은 `plain`일 때와 같아야 한다.
 - **FR-010**: `hidden`인 섹션은 헤딩과 내용 모두 산출 파일에 넣지 않아야 하며, 스킬은 그 섹션의 내용을 만들거나 그 섹션만을 위한 자기검증을 하지 않아야 한다. 나머지 섹션의 순서(Dependency → Responsibility → Collaboration)는 유지된다.
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
-- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid(12 계열)는 elk, 내보내기 스크립트의 mermaid 11.17은 dagre)와 `elk` 중에서 고를 수 있어야 한다(기본: `elk`, 사용자 확정 2026-11-13). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
+- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다(기본: `elk`, 사용자 확정 2026-11-13). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
 
 **exporting-markdown-diagrams 옵션과 동작**

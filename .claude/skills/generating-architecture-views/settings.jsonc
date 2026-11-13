@@ -22,8 +22,8 @@
   },
   "dependency": {
     // Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진
-    //   default : 따로 지정하지 않음 — 보는 곳의 기본 엔진을 따름(VS Code 미리보기는 ELK, PNG/PDF 내보내기는 dagre) — 토큰 소모 영향 거의 없음
-    //   elk     : ELK 엔진으로 그림(미리보기와 내보내기가 같은 배치가 됨) — 토큰 소모 영향 거의 없음
+    //   default : 따로 지정하지 않음 — 보는 곳의 기본 엔진을 따름(VS Code 미리보기·PNG/PDF 내보내기 모두 Mermaid 12라 지금은 ELK, 다만 보는 곳의 Mermaid가 바뀌면 달라질 수 있음) — 토큰 소모 영향 거의 없음
+    //   elk     : ELK 엔진으로 그림(보는 곳의 기본값과 무관하게 항상 ELK) — 토큰 소모 영향 거의 없음
     //   (기본값: elk)
     "renderer": "elk"
   }
