@@ -16,7 +16,8 @@
 
 ## Decision: `mermaid-cli` 버전 고정
 
-- **Decision**: 번들 스크립트가 호출하는 `@mermaid-js/mermaid-cli`는 zenuml 지원이 병합된 2023-08-03 이후 릴리스된 버전으로 `package.json`에 고정(예: `^11` 계열의 안정 버전)한다.
+- **Decision**: 번들 스크립트가 호출하는 `@mermaid-js/mermaid-cli`는 `package.json`에 `^12` 계열로 선언하고, 실제 설치 버전은 커밋된 `package-lock.json`으로 고정한다(2026-11-13 개정, FR-017). 같은 원칙을 나머지 의존성(`markdown-it`, `pdfjs-dist`, `puppeteer`)에도 적용한다. 자동 업데이트(`latest`, Dependabot)는 쓰지 않고, 올릴 때는 사람이 직접 올린 뒤 SC-012 검증을 다시 통과시킨다. 로컬 설치가 없을 때의 npx 대체 실행도 `package.json`의 범위를 그대로 써서 최신을 받아오지 않는다.
+- **2026-11-13 개정 근거**: VS Code 내장 Mermaid가 12 계열(ELK 내장·기본)이라, 내보내기도 12로 올려 같은 레이아웃 엔진으로 그린다. 12에서는 ELK가 Mermaid에 내장돼 별도 `@mermaid-js/layout-elk`가 빠지고, ZenUML 플러그인이 `@mermaid-js/mermaid-zenuml` 1.x로 바뀐다.
 - **Rationale**: 평가 리서치에서 재현한 `UnknownDiagramError`(오래된 `mmdc`가 zenuml을 인식하지 못함)가 조용히 재발하는 것을 막는다. 버전을 고정해두면 이 저장소의 주력 산출물(zenuml 시퀀스 다이어그램) 변환이 실패하는 시점을 설치/업데이트 시점에 명확히 드러낼 수 있다.
 - **Alternatives considered**: 버전 고정 없이 `latest` 사용 — 재현성이 없고, 향후 `mermaid-cli`가 다시 호환성을 깨뜨려도 조용히 실패할 위험을 그대로 안는다.
 

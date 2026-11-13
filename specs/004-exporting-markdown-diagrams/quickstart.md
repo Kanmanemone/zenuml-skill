@@ -131,3 +131,17 @@
 | 10. 산출물이 전용 `exports/`에 모임 | PASS | `.zenuml/exports/`가 없는 상태에서 SVG·PDF 변환 실행 → 자동 생성 확인, 두 산출물 모두 `.zenuml/exports/`에 생성되고 원본 폴더에는 새 파일 없음, 다이어그램 여러 개 파일의 `-1`/`-2` 산출물도 같은 `exports/`에 함께 생성됨 확인 |
 
 구현 중 발견해 함께 고친 이슈: Windows에서 mermaid-cli의 `.cmd` 셰임을 `spawnSync`로 직접 실행하면 `EINVAL`이 발생 — mermaid-cli의 JS 엔트리포인트(`node_modules/@mermaid-js/mermaid-cli/src/cli.js`)를 현재 Node 바이너리로 직접 실행하는 방식(`scripts/lib/run-mmdc.js`)으로 교체해 셸 이스케이핑 위험 없이 해결함.
+
+## Validation Results (T040, 2026-11-13) — Mermaid 12 업그레이드
+
+설치 버전(lock): `@mermaid-js/mermaid-cli` 12.2.0, `mermaid` 12.3.0, `@mermaid-js/mermaid-zenuml` 1.0.1, `markdown-it` 15.0.3, `pdfjs-dist` 6.5.438, `puppeteer` 25.17.0(Chrome 157). 별도 `@mermaid-js/layout-elk`는 제거됨(ELK가 Mermaid에 내장).
+
+| 항목 | 결과 | 근거 |
+|---|---|---|
+| Mermaid 다이어그램 SVG/PNG/PDF | PASS | 구조 뷰 예시(`references/examples.md`, 2개) |
+| ZenUML 다이어그램 SVG/PNG/PDF | PASS | `swemo-user-scenario.md`, 렌더 이미지 육안 확인 |
+| `layout: elk` 다이어그램 | PASS | `swemo-architecture.architecture.md` 문서 전체 변환 |
+| 문서 전체 PDF single / paginated | PASS | 1쪽 / 11쪽, pypdf로 다이어그램 텍스트(`MemoRepository`, `타입 참조`) 추출됨 |
+| 문서 전체 PNG single / paginated | PASS | 1장 / 11장 |
+| 렌더러 지정 보존 | PASS | 원본 `layout: elk`를 수정 없이 넘김 |
+

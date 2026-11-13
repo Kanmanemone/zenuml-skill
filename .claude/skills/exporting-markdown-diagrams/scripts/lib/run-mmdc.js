@@ -25,10 +25,13 @@ function resolveMmdc() {
   if (fs.existsSync(cliEntry)) {
     return { command: process.execPath, baseArgs: [cliEntry], shell: false };
   }
-  // Not installed locally yet — fall back to a one-off npx invocation of the same pinned package.
+  // Not installed locally yet — fall back to a one-off npx invocation of the same version range
+  // package.json declares (never an unpinned "latest").
+  const range = JSON.parse(fs.readFileSync(path.join(scriptsDir, "package.json"), "utf-8"))
+    .dependencies["@mermaid-js/mermaid-cli"];
   return {
     command: process.platform === "win32" ? "npx.cmd" : "npx",
-    baseArgs: ["--yes", "--package=@mermaid-js/mermaid-cli", "mmdc"],
+    baseArgs: ["--yes", `--package=@mermaid-js/mermaid-cli@${range}`, "mmdc"],
     shell: process.platform === "win32",
   };
 }

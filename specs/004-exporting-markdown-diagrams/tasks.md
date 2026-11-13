@@ -194,6 +194,6 @@ Task: "scripts/lib/inline-svg.js 작성"
 
 ## Phase 8: Convergence
 
-- [ ] T039 `.claude/skills/exporting-markdown-diagrams/scripts/package.json`의 `@mermaid-js/mermaid-cli`를 `^12`로 올리고 `npm install`로 `package-lock.json`을 다시 만들어 커밋(Mermaid 12 내장 ELK 사용, 별도 layout-elk 제거 확인) per FR-017 (missing)
-- [ ] T040 Mermaid 12 계열에서 기존 검증 항목을 다시 실행 — Mermaid·ZenUML 다이어그램 SVG/PNG, `layout: elk` 다이어그램, 문서 전체 PDF의 선택 가능한 벡터 텍스트, 문서 전체 PNG(single·paginated), 렌더러 지정 보존 — 결과를 quickstart.md에 기록 per SC-012 (missing)
-- [ ] T041 [P] `specs/004-exporting-markdown-diagrams/research.md`의 "mermaid-cli 버전 고정" 결정을 `^12` + 커밋된 lock, 수동 업데이트 원칙으로 갱신 per FR-017 (partial)
+- [X] T039 `.claude/skills/exporting-markdown-diagrams/scripts/package.json`의 `@mermaid-js/mermaid-cli`를 `^12`로 올리고 `npm install`로 `package-lock.json`을 다시 만들어 커밋(Mermaid 12 내장 ELK 사용, 별도 layout-elk 제거 확인) per FR-017 (missing)
+- [X] T040 Mermaid 12 계열에서 기존 검증 항목을 다시 실행 — Mermaid·ZenUML 다이어그램 SVG/PNG, `layout: elk` 다이어그램, 문서 전체 PDF의 선택 가능한 벡터 텍스트, 문서 전체 PNG(single·paginated), 렌더러 지정 보존 — 결과를 quickstart.md에 기록 per SC-012 (missing)
+- [X] T041 [P] `specs/004-exporting-markdown-diagrams/research.md`의 "mermaid-cli 버전 고정" 결정을 `^12` + 커밋된 lock, 수동 업데이트 원칙으로 갱신 per FR-017 (partial)
