@@ -433,3 +433,7 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 - [X] T114 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape·Change marking·AP-5c·Nothing but content·예시 fence)와 `references/templates.md`(템플릿·규칙·Change marking 예시), `references/examples.md`의 모든 CRUD 구역에 구역 주석 바로 다음 줄로 라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`를 정적·동적 무관하게 항상 넣도록 반영 per FR-035, FR-032, SC-014 (partial)
 - [X] T115 [P] `specs/003-architecture-view-skill/`의 plan.md·data-model.md·quickstart.md(시나리오 25)에 라벨 규칙 주석을 반영 per plan, FR-035 (partial)
+
+## Phase 31: Convergence
+
+- [ ] T116 `.claude/skills/generating-architecture-views/SKILL.md`(Diagram shape 문구·AP-5·예시 fence), `references/templates.md`(템플릿 fence·`themeVariables` 규칙 줄), `references/examples.md`(모든 fence)에서 `themeVariables` 블록을 제거하고, 테마 색은 지정하지 않아 렌더러가 라이트·다크에 맞춰 칠한다는 규칙으로 고침 per FR-007 (contradicts)
