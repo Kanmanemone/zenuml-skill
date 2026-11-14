@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain
+- [ ] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -32,4 +32,5 @@
 ## Notes
 
 - 이 스킬의 산출물 자체가 Mermaid·Markdown 문서이므로, 산출물 형식을 정하는 데 필요한 표기(`click` 툴팁, `<style>` 블록, 설정 키 이름)는 003·007·008 spec과 같은 관례로 spec에 남겼다. 도구의 언어·구조·실행 방식 같은 구현 선택은 plan으로 미뤘다.
-- 선행 확인 3건(VS Code 툴팁 표시, md 안 `<style>` 적용, GitHub에서 `<style>` 글자 노출 여부)은 미확인이며 Assumptions에 적었다. plan 전에 `docs/hover-tooltip-test/`로 확인하는 것을 권한다.
+- **미결 1건 (FR-015)**: GitHub에서 md 안 `<style>`이 글자로 드러나는 것이 확인되어(2026-11-14), 패널 CSS를 어디에 둘지 (A) `<link>` 한 줄 + CSS 파일 / (B) VS Code `markdown.styles` 설정 / (C) 노출 허용 중에서 정해야 한다. `/speckit-clarify`에서 정한다.
+- **선행 확인 2건**(VS Code에서 툴팁 표시, md 안 `<style>` 적용)은 미확인이다. plan 전에 `docs/hover-tooltip-test/`로 확인하는 것을 권한다.
