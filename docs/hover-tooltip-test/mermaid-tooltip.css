@@ -1,0 +1,17 @@
+/* Mermaid 노드 툴팁을 미리보기 패널 아래쪽에 고정된 넓은 상세 패널로 바꾼다.
+   다이어그램을 패널 위쪽에 두고 보면 노드를 가리지 않는다.
+   Mermaid가 툴팁에 직접 넣는 인라인 스타일(200px 폭, 노드 아래 위치)을 덮어쓰려고 !important를 쓴다. */
+div.mermaidTooltip {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  max-width: none !important;
+  max-height: 45vh !important;
+  overflow: hidden !important;
+  text-align: left !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 10px 14px !important;
+}
