@@ -81,7 +81,7 @@ Rules:
 - Every edge gets an ID and a label: `Source eN@-->|관계 성격| Target`, with `N` counting from 0 in the order edges are written. Use the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
 - Draw only edges the description directly states or implies between those exact two components. A described chain (A calls B, B calls C) becomes `A --> B` and `B --> C` — never a collapsed `A --> C` shortcut.
 - A node whose display name can't be its ID (parentheses, spaces, etc.) is declared as `Id@{ label: "표시 이름" }`; plain names are declared bare.
-- Every node gets a `classDef` + `class` pair. Name the class after the node's role, not a generic counter (`navHostNode`, not `class3`). Interchangeable siblings share one class: `class A,B,C siblingNode`.
+- Every node gets a `classDef` + `class` pair. Name the class after the node's role, not a generic counter (`navHostNode`, not `class3`). Every node gets its own class — never share one class between nodes (`class A,B,C …`).
 - Every edge is colored by an edge class in its **source** node's color: one `classDef <role>Edge stroke:<color>,stroke-width:3.5px` per source node, then `class eN <role>Edge` for each of that node's edges. Never use `linkStyle`.
 - Change marks (dynamic requests only, see "Change marking" below) go in the CRUD section as `class <Id> crudCreate|crudUpdate|crudDelete`; a static diagram has the label-convention comment and the three `classDef crud*` lines and no `class … crud*` line.
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
@@ -91,7 +91,7 @@ Rules:
 
 ### Color palette
 
-Assign colors from this fixed, ordered list — the Okabe-Ito palette, the most widely cited color-vision-deficiency-safe categorical palette — to nodes in the order they're first introduced (a node that originates an edge, or otherwise needs individual distinction, claims the next color; interchangeable siblings that need no individual distinction share one class instead of each claiming a new color).
+Assign colors from this fixed, ordered list — the Okabe-Ito palette, the most widely cited color-vision-deficiency-safe categorical palette — to nodes in the order they're first introduced, one color per node.
 
 | # | Name | Hex |
 |---|------|-----|
@@ -104,7 +104,7 @@ Assign colors from this fixed, ordered list — the Okabe-Ito palette, the most 
 
 Okabe-Ito's black (`#000000`, invisible on dark backgrounds) and yellow (`#F0E442`, 1.32:1 on white) are left out, because one diagram has to read on both VS Code's light and dark themes. Every pair of these six is at least 15.6 apart (OKLab ΔE×100, normal vision), so any two crossing or overlapping edges stay distinguishable. Six is also about where categorical colors stop being reliably told apart, so the list is not extended.
 
-**Reusing a color** (a diagram needing more than six colors): go around the list again, but give an already-used color only to a node that is in a different group from every node already holding it, and whose outgoing edges won't cross, run alongside, or converge on the same target as theirs. When no color meets that for a node, pick the one whose holders are farthest from it in the diagram. The relationship label on every edge stays as the second way to tell edges apart.
+**More than six nodes**: start over from the first color. The relationship label on every edge stays as the second way to tell edges apart.
 
 Node border width is always `3px`; edge-class width is always `3.5px`.
 
