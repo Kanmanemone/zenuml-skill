@@ -27,7 +27,7 @@
 
 1. **링크 `click` 줄** — `click Id "대상" "툴팁"`: NodePanel이 있는 노드는 세 번째 인자를 NodePanel로, 없는 노드는 파일 이름으로 둔다. 대상은 바꾸지 않는다(FR-017).
 2. **`hoverOnly` 줄** — 링크 없는 노드 중 NodePanel이 있는 노드마다 `  click Id hoverOnly "NodePanel"`. 위치는 마지막 링크 `click` 줄 다음(링크 `click` 줄이 없으면 CRUD 표시 절의 마지막 `classDef crud*` 줄 다음에 빈 줄 하나를 두고), 노드 선언 순서대로. 이전 실행이 남긴 `hoverOnly` 줄은 모두 지우고 다시 만든다.
-3. **`cursor:auto`** — `hoverOnly` 줄을 단 노드의 색상 `classDef` 줄 끝에 `,cursor:auto`. 그 클래스를 링크 있는 노드도 쓰면 붙이지 않는다. 이전 실행이 붙인 `,cursor:auto`는 먼저 모두 지운다.
+3. **`cursor:auto`** — `hoverOnly` 줄을 단 노드의 색상 `classDef` 줄 끝에 `,cursor:auto`. 색상 클래스는 노드마다 하나씩이므로(003 FR-008b) 그 노드에만 적용된다. 이전 실행이 붙인 `,cursor:auto`는 먼저 모두 지운다.
 4. **패널 모양 블록** — 파일 끝의 `div.mermaidTooltip`을 담은 `<style>…</style>` 블록을 지우고, 파일 끝에 빈 줄 하나 + 현재 `position`의 고정 블록을 붙인다. 블록 내용은 [style 블록 원본](#style-블록-원본)과 바이트 단위로 같다.
 
 ## 변환 규칙 (꺼짐)
