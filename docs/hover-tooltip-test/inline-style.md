@@ -2,16 +2,14 @@
 div.mermaidTooltip {
   position: fixed !important;
   top: auto !important;
-  bottom: 12px !important;
   left: 12px !important;
-  right: 12px !important;
+  right: 12px;
+  bottom: 12px;
   max-width: none !important;
-  max-height: 45vh !important;
-  overflow: hidden !important;
+  max-height: 45vh;
+  overflow: hidden;
   text-align: left !important;
   font-size: 14px !important;
-  line-height: 1.5 !important;
-  padding: 10px 14px !important;
 }
 </style>
 
@@ -52,7 +50,7 @@ flowchart LR
   class PaymentService paymentNode
   classDef notifyNode stroke:#0072B2,stroke-width:3px
   class NotificationSender notifyNode
-  classDef auditNode stroke:#D55E00,stroke-width:3px
+  classDef auditNode stroke:#D55E00,stroke-width:3px,cursor:auto
   class AuditLog auditNode
 
   classDef controllerEdge stroke:#E69F00,stroke-width:3.5px

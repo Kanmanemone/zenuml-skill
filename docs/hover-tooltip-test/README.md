@@ -49,7 +49,7 @@ flowchart LR
   class PaymentService paymentNode
   classDef notifyNode stroke:#0072B2,stroke-width:3px
   class NotificationSender notifyNode
-  classDef auditNode stroke:#D55E00,stroke-width:3px
+  classDef auditNode stroke:#D55E00,stroke-width:3px,cursor:auto
   class AuditLog auditNode
 
   classDef controllerEdge stroke:#E69F00,stroke-width:3.5px
