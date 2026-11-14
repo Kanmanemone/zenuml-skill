@@ -307,3 +307,23 @@ flowchart LR
 ````
 
 AuthGateway and SessionManager both call TokenStore but never call each other, so no entry exists for that pair. No group-level Collaboration subsection appears since there's only one group.
+
+## After the hover script (any example)
+
+Every example above is what you write. When hover is on, `scripts/apply_hover.py` then changes only these parts of the saved file — e.g. for Example 3's last `click` line and the end of the file (shapes per `templates.md`, "After the hover script"):
+
+```text
+  click <Node> "<target>" "<b><Node></b><br/><b>책임 (추상)</b>: …<br/><b>역할 (구체)</b>: …<br/><br/><b><Other>에 의존한다 (호출)</b><br/><b>책임의 경계</b>: …"
+```
+
+```text
+…the last line of the Collaboration section…
+
+<style>
+div.mermaidTooltip {
+  …
+}
+</style>
+```
+
+You never write these forms yourself; the body above them stays exactly as you wrote it.

@@ -59,6 +59,69 @@
       "tokenImpact": {
         "*": "토큰 소모 영향 거의 없음"
       }
+    },
+    {
+      "key": "hover.enabled",
+      "type": "boolean",
+      "default": true,
+      "description": "다이어그램 노드에 마우스를 올렸을 때 뜨는 창(hover 패널) 기능 전체를 켤지 (VS Code Markdown 미리보기 전용)",
+      "tokenImpact": {
+        "true": "토큰 소모 영향 없음",
+        "false": "토큰 소모 영향 없음"
+      }
+    },
+    {
+      "key": "hover.responsibility",
+      "type": "itemList",
+      "items": [
+        "abstract",
+        "concrete"
+      ],
+      "default": [
+        "abstract",
+        "concrete"
+      ],
+      "description": "hover 패널에 넣을 Responsibility 항목 목록 (적은 순서대로 표시, []이면 넣지 않음)",
+      "tokenImpact": {
+        "abstract": "토큰 소모 영향 없음",
+        "concrete": "토큰 소모 영향 없음"
+      }
+    },
+    {
+      "key": "hover.collaboration",
+      "type": "itemList",
+      "items": [
+        "targets",
+        "boundary",
+        "rationale",
+        "questions"
+      ],
+      "default": [
+        "targets",
+        "boundary",
+        "rationale"
+      ],
+      "description": "hover 패널에 그 노드가 의존하는 협력마다 넣을 항목 목록 (적은 순서대로 표시, []이면 넣지 않음)",
+      "tokenImpact": {
+        "targets": "토큰 소모 영향 없음",
+        "boundary": "토큰 소모 영향 없음",
+        "rationale": "토큰 소모 영향 없음",
+        "questions": "토큰 소모 영향 없음"
+      }
+    },
+    {
+      "key": "hover.position",
+      "type": "enum",
+      "values": [
+        "bottom",
+        "node"
+      ],
+      "default": "bottom",
+      "description": "hover 패널을 띄울 위치",
+      "tokenImpact": {
+        "bottom": "토큰 소모 영향 없음",
+        "node": "토큰 소모 영향 없음"
+      }
     }
   ]
 }

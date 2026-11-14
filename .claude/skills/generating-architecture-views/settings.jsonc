@@ -32,5 +32,38 @@
     //   허용: 프로젝트 루트 기준 상대 경로(예: ./.zenuml/log, ./docs/architecture-logs). 절대 경로는 안 됨 — 토큰 소모 영향 거의 없음
     //   (기본값: ./.zenuml/log)
     "directory": "./.zenuml/log"
+  },
+  "hover": {
+    // 다이어그램 노드에 마우스를 올렸을 때 뜨는 창(hover 패널) — VS Code Markdown 미리보기 전용, GitHub 등에서는 동작하지 않음
+    // 창 내용은 구조 뷰를 저장한 뒤 번들 스크립트가 본문에서 옮겨 채웁니다(Python 3.9 이상 필요, 없으면 창만 빠짐).
+    // 위 responsibility·collaboration의 display가 hidden이면 그 섹션은 아래 목록과 상관없이 빈 목록으로 동작합니다.
+    // 두 목록이 모두 비거나([]) enabled가 false면 이 기능이 꺼집니다.
+
+    // hover 기능 전체를 켜고 끌지 (아래 항목 설정은 그대로 둔 채 기능만 끄고 켤 수 있음)
+    //   true  : 켬 — 토큰 소모 영향 없음
+    //   false : 끔(이 기능 도입 전과 같은 산출물) — 토큰 소모 영향 없음
+    //   (기본값: true)
+    "enabled": true,
+
+    // 창에 넣을 Responsibility 항목 (적은 순서대로 표시, []이면 넣지 않음)
+    //   abstract : 책임 (추상) — 토큰 소모 영향 없음
+    //   concrete : 역할 (구체) — 토큰 소모 영향 없음
+    //   (기본값: ["abstract", "concrete"])
+    "responsibility": ["abstract", "concrete"],
+
+    // 창에 넣을 Collaboration 항목 (그 노드가 의존하는 협력마다, 적은 순서대로 표시, []이면 넣지 않음)
+    //   targets   : 의존 대상과 관계(예: PaymentService에 의존한다 (호출)) — 토큰 소모 영향 없음
+    //   boundary  : 책임의 경계 — 토큰 소모 영향 없음
+    //   rationale : 분리 이유 & 합리성 평가 — 토큰 소모 영향 없음
+    //   questions : 내가 할 수 있는 질문 — 토큰 소모 영향 없음
+    //   targets를 빼고 다른 항목만 적어도, 어느 협력인지 알 수 있도록 대상 줄은 항상 붙습니다.
+    //   (기본값: ["targets", "boundary", "rationale"])
+    "collaboration": ["targets", "boundary", "rationale"],
+
+    // 창의 위치
+    //   bottom : 미리보기 아래쪽에 가로로 넓게 고정된 패널(넓으면 여러 칸으로 나뉨) — 토큰 소모 영향 없음
+    //   node   : 노드 바로 아래(폭 최대 25em, 오른쪽으로 넘치면 오른쪽 끝에 붙음) — 토큰 소모 영향 없음
+    //   (기본값: bottom)
+    "position": "bottom"
   }
 }

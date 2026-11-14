@@ -25,3 +25,6 @@ CLAUDE.local.md
 # Node.js dependencies (exporting-markdown-diagrams skill scripts)
 node_modules/
 *.log
+
+# Python bytecode (generating-architecture-views skill scripts)
+__pycache__/

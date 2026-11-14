@@ -13,7 +13,7 @@ description: Generates a structural architecture view (evidence-based components
 3. Generate the Responsibility section (per-group and per-element, abstract + concrete) — unless its display setting is `hidden`.
 4. Generate the Collaboration section (dependency-gated group and element entries, with multi-target consolidation) — unless its display setting is `hidden`.
 5. Self-check (AP-1–AP-15) and fix before presenting.
-6. Save the architecture view file and feedback log, and present the file link. That's the end — this skill produces only the architecture view.
+6. Save the architecture view file and feedback log, then — if hover is on — run the hover script on the saved file (see "Hover panels" under "Output file"), and present the file link. That's the end — this skill produces only the architecture view.
 
 ## Settings
 
@@ -22,7 +22,7 @@ Before anything else in each run, read this skill's own `settings.schema.json` (
 - **No `settings.jsonc` at all**: use every option's `default`, and say nothing about it.
 - **The file can't be read** (still not valid JSON once comments are stripped, or its top level isn't an object): use every `default`, finish the work, and add one notice.
 - **A key is missing**: use its `default`, silently.
-- **A value breaks its option's type or allowed values**: use that option's `default`, keep every other value, and add one notice naming the key.
+- **A value breaks its option's type or allowed values**: use that option's `default`, keep every other value, and add one notice naming the key. An `itemList` option's value must be an array whose every element is one of the option's `items`, with no duplicates (an empty array is valid).
 - **A leaf key that the definition doesn't have** (typo, or an option that no longer exists): ignore it and add one notice naming the key.
 - **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "Responsibility도 보여줘", "elk로"): use what the request says, for this request only.
 
@@ -83,7 +83,7 @@ Group components with a Mermaid `subgraph` **only** when the description gives a
 
 The `crud*` classes set only stroke width/dash (and grey text for removed) — the node keeps its own border-color class and its edges keep their edge class. Draw a removed node with the relations the description says it had. Don't add a legend. In a static request, keep the label-convention comment and the three `classDef crud*` lines but write no `class … crud*` line and no prefix.
 
-**Hyperlinks**: attach a `click NodeName "target" "label"` directive to every node whose real location the description establishes (see "Hyperlink resolution" below for how `target` is determined). Skip `click` entirely for a node with no resolvable target — don't invent one. Never add a note about whether a renderer follows `click` links or where else to find them — the `click` directives and the Markdown links in Responsibility/Collaboration speak for themselves.
+**Hyperlinks**: attach a `click NodeName "target" "label"` directive to every node whose real location the description establishes (see "Hyperlink resolution" below for how `target` is determined). Skip `click` entirely for a node with no resolvable target — don't invent one. The `label` is always the target's file name (e.g. `"Foo.kt"`); you never write tooltip content yourself. When hover is on, the hover script later replaces these labels with each node's panel text, adds a non-navigating `click Id hoverOnly "…"` line for nodes without a target (a tooltip only — no destination is invented), and appends `,cursor:auto` to those nodes' color `classDef` lines; you never write any of that. Never add a note about whether a renderer follows `click` links or where else to find them — the `click` directives and the Markdown links in Responsibility/Collaboration speak for themselves.
 
 **Caption**: put exactly one short plain-text line between the `### Dependency` heading and the Mermaid code fence, saying what this diagram depicts. Build it only from the key keywords of the user's request — the system/process it names and the aspect they asked to focus on (e.g. a request "Jetpack Navigation 3에서 백스택과 화면 전환 구조를 보여줘" → `Jetpack Navigation 3의 백스택과 화면 전환 의존 구조`). Write it in the user's language, as a plain line (not a blockquote, heading, or bold text), with nothing the request didn't say and nothing about rendering, layout, or how the view was produced. On regeneration, rewrite it to reflect every request up to this round.
 
@@ -178,7 +178,7 @@ Architecture view anti-pattern check:
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
 - [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
 - [ ] AP-13d: Each of Responsibility/Collaboration matches its display setting (or the request's override): `hidden` — heading and content entirely absent; `plain` — no box; `collapsed`/`expanded` — heading outside, content inside one `<details>` box (with `open` only for `expanded`) whose summary is the fixed text `Details` (never the section name), content identical to `plain`
-- [ ] AP-13c: The file holds nothing but the three headings, the caption, the fixed section comments, the label-convention comment, and the `crud*` classDefs inside the Dependency fence, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, or settings notices)
+- [ ] AP-13c: The file holds nothing but the three headings, the caption, the fixed section comments, the label-convention comment, and the `crud*` classDefs inside the Dependency fence, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary; every `click` label you wrote is the target's file name, and you wrote no panel text, `hoverOnly` line, `cursor:auto`, or `<style>` block (only the hover script adds those) — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, settings notices, or hover notices)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
 - [ ] AP-15: No sequence/runtime-flow diagram drawn, and no offer or question about building one — the response ends with the architecture view
 ```
@@ -210,13 +210,34 @@ Don't paste the Dependency, Responsibility, or Collaboration content into the ch
 
 `expanded` is the same with `<details open>`. This box is structure, not commentary — it's the one thing besides content allowed in the file.
 
-**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", the fixed section comments, the label-convention comment, and the `crud*` classDefs inside the Dependency fence (Step 2), and the sections' actual content (the diagram, Responsibility entries, Collaboration entries). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, and the settings notices from "Settings".
+**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", the fixed section comments, the label-convention comment, and the `crud*` classDefs inside the Dependency fence (Step 2), and the sections' actual content (the diagram, Responsibility entries, Collaboration entries) — plus, only as written by the hover script, the panel text in `click` labels, the `click Id hoverOnly "…"` lines, `,cursor:auto` on color `classDef` lines, and the panel-shaping `<style>` block at the very end of the file (display rules, not commentary). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, the settings notices from "Settings", and the hover notices from "Hover panels".
 
 After writing, the entire chat response for this part is a relative link:
 
 📄 [<slug> 구조 뷰](.zenuml/client-server.architecture.md)
 
 If there is no filesystem access in the current environment, skip the file and put all three sections directly in the chat response as fenced/plain blocks instead. Skip the feedback log below too in that case — there's no file to log against.
+
+### Hover panels
+
+In VS Code's Markdown preview, hovering a Dependency node shows a panel with that node's Responsibility and the collaborations it depends on. The panel text is a copy of the file's own body, written by a bundled script — never by you — so it costs no extra output.
+
+**When**: after writing the architecture view file and its feedback log, if hover is on for this request. Hover is on when `hover.enabled` is `true` and at least one of `hover.responsibility`/`hover.collaboration` is non-empty — after applying any value the request itself states ("hover 빼고", "질문도 넣어줘", "노드 아래에 띄워줘"). If hover is off, don't run the script; the file is already in its no-hover form.
+
+**How**: find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and from this skill's directory run:
+
+```text
+<python> scripts/apply_hover.py <path to .zenuml/<slug>.architecture.md> [--enabled=…] [--responsibility=…] [--collaboration=…] [--position=…]
+```
+
+Add an option only for a hover value the request itself states (e.g. `--collaboration=targets,boundary,rationale,questions`, `--position=node`, `--responsibility=` for none); the script reads `settings.jsonc` for everything else.
+
+- The script prints one result line and possibly `⚙️ 설정 안내: …` lines. Add those notice lines to the end-of-response settings notices, without repeating a line you already have.
+- No Python 3.9+ found: skip the script and add `⚙️ hover 건너뜀: Python 3.9 이상을 찾지 못함` at the end of the response. The view is still saved and still counts as done.
+- Non-zero exit: leave the file as it is and add one line at the end of the response saying hover could not be applied (with the script's message).
+- The feedback log keeps the content you wrote, before the script ran — never copy the panel text into it.
+
+**Re-syncing an existing file**: when the user only asks to refresh the hover panels of an existing architecture view (e.g. after editing its body by hand, or for a file made before hover existed), don't regenerate the view and don't write a log round — just run the script on that file (with options only for values the request states) and present the file link.
 
 ### Architecture view feedback log
 

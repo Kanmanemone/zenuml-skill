@@ -1,6 +1,6 @@
 # hover 툴팁 테스트 (노드 아래, 폭 25em)
 
-`hoverPosition: node`의 A+안(중간 폭)입니다. 위치·배경은 Mermaid 기본 그대로이고, 왼쪽 정렬로 바꾸고 폭을 `25em`(글자 크기 12px에서 약 300px, 한글 한 줄 약 25자)으로 넓혔습니다. 툴팁이 미리보기 오른쪽으로 넘칠 때만 오른쪽 끝에 붙어 같은 폭을 유지합니다(`position-try-fallbacks`). `.vscode/settings.json`에 `markdown.styles`를 넣었다면 빼고 확인하세요.
+`hover.position: node` 확인용 문서입니다. 위치·배경은 Mermaid 기본 그대로이고, 왼쪽 정렬로 바꾸고 폭을 `25em`(글자 크기 12px에서 약 300px, 한글 한 줄 약 25자)으로 넓혔습니다. 툴팁이 미리보기 오른쪽으로 넘칠 때만 오른쪽 끝에 붙어 같은 폭을 유지합니다(`position-try-fallbacks`). `.vscode/settings.json`에 `markdown.styles`를 넣었다면 빼고 확인하세요.
 
 확인할 것:
 

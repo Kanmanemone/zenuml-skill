@@ -133,6 +133,19 @@ A removed node is still drawn with the relations the description says it had. No
 
 `click <NodeName> "<target>" "<label>"` — `target` is a relative path (from `.zenuml/`, e.g. `../app/src/.../Foo.kt`) or a full URL; `label` is a short tooltip, usually the file's own name. See `SKILL.md`, "Hyperlink resolution" for how `target` is determined (local root project / web repository / no link — resolve once and reuse the identical target for the Markdown link on the same name in Responsibility/Collaboration).
 
+### After the hover script
+
+You write only the shape above (`label` = file name, no `click` for a node without a target). When hover is on, `scripts/apply_hover.py` then rewrites the file like this — never write these forms yourself:
+
+```text
+  classDef auditLogNode stroke:#CC79A7,stroke-width:3px,cursor:auto
+  …
+  click OrderService "../app/order/OrderService.kt" "<b>OrderService</b><br/><b>책임 (추상)</b>: …<br/><br/><b>PaymentService에 의존한다 (호출)</b><br/><b>책임의 경계</b>: …"
+  click AuditLog hoverOnly "<b>AuditLog</b><br/><b>책임 (추상)</b>: …"
+```
+
+…and appends the fixed panel-shaping `<style>…</style>` block, after one blank line, at the very end of the file.
+
 ## Responsibility template
 
 No pairwise comparisons — one entry per group, one entry per element, each with two sub-bullets. Group subsection first (skipped entirely if there are no groups), then element subsection.

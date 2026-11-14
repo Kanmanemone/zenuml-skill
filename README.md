@@ -37,7 +37,7 @@ If a newly added skill doesn't show up under `/`, restart Claude Code, or run "R
 
 Each of these is a standalone skill — copy whichever you need into your `.claude/skills/` directory. Every skill (including the core one) reads a `settings.jsonc` in its own folder; edit it to change how that skill behaves — each option is explained in Korean comments right above it:
 
-- **[`generating-architecture-views`](.claude/skills/generating-architecture-views/)** — adds a structural view (components, groups, dependencies). Want a specific Mermaid renderer (e.g. `elk`) for its Dependency diagrams? Say so in your request and it's added as `layout` in the diagram's YAML `config` (or set `dependency.renderer` in the skill's `settings.jsonc`); leave it unspecified and it won't be.
+- **[`generating-architecture-views`](.claude/skills/generating-architecture-views/)** — adds a structural view (components, groups, dependencies). Want a specific Mermaid renderer (e.g. `elk`) for its Dependency diagrams? Say so in your request and it's added as `layout` in the diagram's YAML `config` (or set `dependency.renderer` in the skill's `settings.jsonc`); leave it unspecified and it won't be. In VS Code's Markdown preview, hovering a node in the Dependency diagram shows that node's Responsibility and the collaborations it depends on in a panel — no scrolling back and forth. A bundled Python script fills these panels from the view's own text after it's saved, so this costs no extra tokens; choose what goes in the panel and where it appears (bottom of the preview or right under the node) with the `hover` group in `settings.jsonc`, or turn it off with `hover.enabled`. GitHub and other viewers don't support it.
 - **[`exporting-markdown-diagrams`](.claude/skills/exporting-markdown-diagrams/)** — converts a diagram to SVG/PNG, or a whole Markdown file to PDF (diagrams embedded as selectable-text vectors) or PNG, always through bundled scripts (mermaid-cli) — never LLM reasoning. Run `npm install` once inside its `scripts/` folder to fetch the dependencies those scripts use. Output lands in an `exports/` subdirectory next to the source file, created automatically.
 
 ## Development
@@ -47,5 +47,6 @@ Each feature's spec/plan/tasks trail lives under [`specs/`](specs/).
 ## Requirements
 
 - [Claude Code](https://claude.com/product/claude-code)
-- No other dependencies for `generating-zenuml-diagrams` / `generating-architecture-views` — those are self-contained Markdown bundles with no runtime code
+- No other dependencies for `generating-zenuml-diagrams` — it's a self-contained Markdown bundle with no runtime code
+- `generating-architecture-views` uses [Python](https://www.python.org/) 3.9 or later already on your machine (found as `python3`, `python`, or `py -3`) for its node hover panels — the bundled script (`.claude/skills/generating-architecture-views/scripts/`) uses only the standard library, so there's nothing to install. Without Python, views are still generated, just without hover panels
 - `exporting-markdown-diagrams` needs [Node.js](https://nodejs.org/) — its bundled scripts (`.claude/skills/exporting-markdown-diagrams/scripts/`) need `npm install` run once
