@@ -2,7 +2,13 @@
 
 VS Code Markdown 미리보기에서 Mermaid 노드에 마우스를 올렸을 때 Responsibility·Collaboration 요약이 상세 패널로 뜨는지 확인하는 테스트입니다.
 
-## 준비
+## 파일
+
+- [inline-style.md](inline-style.md): `dependency.hoverPosition: bottom` — md 맨 아래 `<style>`만으로 미리보기 아래쪽에 넓은 패널을 띄웁니다(spec 009가 채택한 방식).
+- [node-25em.md](node-25em.md): `dependency.hoverPosition: node` — 노드 아래에 폭 `25em` 툴팁을 띄우고, 오른쪽으로 넘칠 때만 미리보기 오른쪽 끝에 붙입니다.
+- 이 README: `markdown.styles` 설정과 [mermaid-tooltip.css](mermaid-tooltip.css)로 패널을 거는 방식입니다. 채택하지 않았고 비교용으로 남깁니다. 위 두 파일을 확인할 때는 아래 설정을 빼야 합니다.
+
+## 준비 (이 README로 확인할 때만)
 
 로컬 `.vscode/settings.json`(저장소에서는 gitignore 대상)에 아래를 추가하고, 미리보기를 닫았다 다시 엽니다.
 
@@ -20,6 +26,7 @@ VS Code Markdown 미리보기에서 Mermaid 노드에 마우스를 올렸을 때
 4. 오른쪽 아래 노드(`NotificationSender`)의 툴팁도 잘리지 않는가
 5. 노드를 클릭하면 `click`에 지정한 파일로 이동하는가
 6. (비교용) CSS 설정을 빼면 기본 200px 툴팁이 노드 아래에 뜨는가
+7. 링크가 없는 노드(`AuditLog`)도 툴팁이 뜨고, 클릭해도 이동하거나 오류가 나지 않는가
 
 ```mermaid
 flowchart LR
@@ -33,10 +40,12 @@ flowchart LR
     PaymentService
     NotificationSender
   end
+  AuditLog
 
   OrderController e0@-->|호출| OrderService
   OrderService e1@-->|호출| PaymentService
   PaymentService e2@-->|호출| NotificationSender
+  OrderService e3@-->|기록| AuditLog
 
   classDef controllerNode stroke:#E69F00,stroke-width:3px
   class OrderController controllerNode
@@ -46,11 +55,14 @@ flowchart LR
   class PaymentService paymentNode
   classDef notifyNode stroke:#0072B2,stroke-width:3px
   class NotificationSender notifyNode
+  classDef auditNode stroke:#D55E00,stroke-width:3px,cursor:auto
+  class AuditLog auditNode
 
   classDef controllerEdge stroke:#E69F00,stroke-width:3.5px
   class e0 controllerEdge
   classDef orderEdge stroke:#56B4E9,stroke-width:3.5px
   class e1 orderEdge
+  class e3 orderEdge
   classDef paymentEdge stroke:#009E73,stroke-width:3.5px
   class e2 paymentEdge
 
@@ -58,4 +70,5 @@ flowchart LR
   click OrderService "../../README.md" "<b>책임 (추상)</b>: 주문을 생성하고 결제를 요청한다<br/><b>역할 (구체)</b>: <code>create()</code>로 주문을 저장하고 <code>PaymentService.pay()</code>를 호출<br/><br/><b>← OrderController (호출)</b><br/><b>→ PaymentService (호출)</b><br/>• 책임의 경계: 주문 상태는 OrderService만 바꾼다<br/>• 분리 이유: 결제 수단 교체가 주문에 영향 없음<br/>• 질문: 결제 실패 시 주문 상태는 누가 되돌리나?"
   click PaymentService "../../README.md" "<b>책임 (추상)</b>: 결제를 처리한다<br/><b>역할 (구체)</b>: <code>pay()</code>로 PG 승인 후 결과를 알림으로 넘긴다<br/><br/><b>← OrderService (호출)</b><br/><b>→ NotificationSender (호출)</b><br/>• 책임의 경계: 알림 채널은 모른다<br/>• 분리 이유: 알림 채널 추가가 결제 로직을 건드리지 않음"
   click NotificationSender "../../README.md" "<b>책임 (추상)</b>: 결제 결과를 사용자에게 알린다<br/><b>역할 (구체)</b>: <code>send()</code>로 메일·푸시 발송<br/><br/><b>← PaymentService (호출)</b><br/>• 긴 내용 테스트: 이 노드는 다이어그램 오른쪽 아래에 있어서, CSS가 적용되지 않으면 툴팁이 미리보기 오른쪽이나 아래 끝에서 잘릴 수 있다. CSS가 적용되면 패널 아래쪽에 고정되어 끝까지 보여야 한다.<br/>• 줄 1<br/>• 줄 2<br/>• 줄 3<br/>• 줄 4<br/>• 줄 5<br/>• 줄 6<br/>• 줄 7<br/>• 줄 8"
+  click AuditLog noHoverLink "<b>책임 (추상)</b>: 주문 이력을 남긴다<br/><br/><b>← OrderService (기록)</b><br/>(링크 없는 노드 — 클릭해도 이동하지 않아야 함)"
 ```
