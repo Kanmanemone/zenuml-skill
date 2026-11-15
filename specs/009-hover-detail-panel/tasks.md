@@ -142,3 +142,7 @@ T008(panel_text.py) 진행 중에 동시에:
 
 - SKILL.md를 고치는 태스크(T010·T011·T012·T017·T018·T021)는 같은 파일이라 [P]가 없다
 - 각 Checkpoint에서 커밋한다(커밋 메시지 규칙은 AGENTS.md)
+
+## Phase 7: Convergence
+
+- [ ] T029 Give `bottom` panel columns a minimum height of 3 lines so content of 3 lines or fewer flows in one column (update BOTTOM in `.claude/skills/generating-architecture-views/scripts/hover/style_blocks.py`, its source of truth `docs/hover-tooltip-test/inline-style.md`, and `specs/009-hover-detail-panel/fixtures/view.default.expected.md` together) per FR-005 (missing)
