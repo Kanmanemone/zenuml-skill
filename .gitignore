@@ -20,7 +20,10 @@ CLAUDE.local.md
 !.claude/skills/exporting-markdown-diagrams/
 !.claude/skills/generating-architecture-views/
 !.claude/skills/generating-zenuml-diagrams/
-.specify/
+.specify/*
+!.specify/memory/
+.specify/memory/*
+!.specify/memory/constitution.md
 
 # Node.js dependencies (exporting-markdown-diagrams skill scripts)
 node_modules/
