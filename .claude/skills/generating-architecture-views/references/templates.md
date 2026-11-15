@@ -5,7 +5,6 @@ Reusable Mermaid and prose templates for the three sections this skill produces.
 ## Table of Contents
 
 - [Dependency template](#dependency-template)
-  - [Color palette](#color-palette)
   - [Change marking](#change-marking)
   - [Hyperlink syntax](#hyperlink-syntax)
 - [Responsibility template](#responsibility-template)
@@ -20,7 +19,7 @@ All three sections in the output file get a `###` heading (never `##` or shallow
 
 ## Dependency template
 
-Every diagram opens with this fixed YAML frontmatter `config` block (inside the code fence, before `flowchart LR`). Groups are `subgraph Id["라벨"]` with `direction TB`; components with no grouping signal sit at the top level instead. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` → `click` lines (if any). Those four section comments are fixed structure, always written exactly like this, and the label-convention comment right under the CRUD section comment plus the three `classDef crud*` lines are always copied verbatim, even when nothing is marked.
+Write only this basic form; `scripts/build_diagram.py` then fills in the config block (with `layout`), edge IDs, one border-color class per node and one edge class per source node (six Okabe-Ito colors in declaration order), the four section comments, and the CRUD block — see SKILL.md, "Diagram script".
 
 ````markdown
 ### Dependency
@@ -28,15 +27,6 @@ Every diagram opens with this fixed YAML frontmatter `config` block (inside the 
 <요청의 핵심 키워드로 만든, 이 다이어그램이 무엇을 그린 것인지 밝히는 한 줄>
 
 ```mermaid
----
-config:
-  flowchart:
-    curve: basis
-    nodeSpacing: 45
-    rankSpacing: 70
-    titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
----
 flowchart LR
   subgraph GroupA["그룹A"]
     direction TB
@@ -45,28 +35,8 @@ flowchart LR
   end
   ComponentC
 
-  %% ---- 엣지 ----
-  ComponentA e0@-->|호출| ComponentB
-  ComponentA e1@-->|타입 참조| ComponentC
-
-  %% ---- 노드 스타일 ----
-  classDef componentANode stroke:#E69F00,stroke-width:3px
-  class ComponentA componentANode
-  classDef componentBNode stroke:#56B4E9,stroke-width:3px
-  class ComponentB componentBNode
-  classDef componentCNode stroke:#009E73,stroke-width:3px
-  class ComponentC componentCNode
-
-  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef componentAEdge stroke:#E69F00,stroke-width:3.5px
-  class e0 componentAEdge
-  class e1 componentAEdge
-
-  %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
-  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
-  classDef crudCreate stroke-width:5px
-  classDef crudUpdate stroke-dasharray:12 4 2 4
-  classDef crudDelete stroke-dasharray:5 10,color:#6B7280
+  ComponentA -->|호출| ComponentB
+  ComponentA -->|타입 참조| ComponentC
 
   click ComponentA "../path/to/ComponentA.kt" "ComponentA.kt"
   click ComponentB "../path/to/ComponentB.kt" "ComponentB.kt"
@@ -78,50 +48,21 @@ Rules:
 - Exactly one plain-text caption line sits between `### Dependency` and the Mermaid fence — built only from the request's key keywords (the system/process named and the aspect asked about), in the user's language; no blockquote/heading/bold, nothing the request didn't say, nothing about rendering or layout.
 - Nothing follows the closing fence except the next section's heading — no notes about `click` behavior, renderers, or layout.
 - `subgraph` only for evidence-based groups (a name/layer/domain signal in the description); components with no such signal sit at the top level, no `subgraph` at all.
-- Every edge gets an ID and a label: `Source eN@-->|관계 성격| Target`, with `N` counting from 0 in the order edges are written. Use the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
+- Declare every node, in the order you introduce it — that order decides its color. A node whose display name can't be its ID (parentheses, spaces, etc.) is declared as `Id@{ label: "표시 이름" }`; plain names are declared bare.
+- Every edge is `Source -->|관계 성격| Target`, using the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
 - Draw only edges the description directly states or implies between those exact two components. A described chain (A calls B, B calls C) becomes `A --> B` and `B --> C` — never a collapsed `A --> C` shortcut.
-- A node whose display name can't be its ID (parentheses, spaces, etc.) is declared as `Id@{ label: "표시 이름" }`; plain names are declared bare.
-- Every node gets a `classDef` + `class` pair. Name the class after the node's role, not a generic counter (`navHostNode`, not `class3`). Every node gets its own class — never share one class between nodes (`class A,B,C …`).
-- Every edge is colored by an edge class in its **source** node's color: one `classDef <role>Edge stroke:<color>,stroke-width:3.5px` per source node, then `class eN <role>Edge` for each of that node's edges. Never use `linkStyle`.
-- Change marks (dynamic requests only, see "Change marking" below) go in the CRUD section as `class <Id> crudCreate|crudUpdate|crudDelete`; a static diagram has the label-convention comment and the three `classDef crud*` lines and no `class … crud*` line.
+- After the edges come only `class <Id> crud*` lines (dynamic requests, see "Change marking" below) and `click` lines. Never write a config block, edge IDs, `classDef`/color `class` lines, `linkStyle`, or `%%` comments.
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
-- `layout` directly under `config` (e.g. `layout: elk`, at the same level as `flowchart:`) is optional too — add it when this request explicitly names a renderer (that exact value, open vocabulary, no validation) or, failing that, when the `dependency.renderer` setting is `elk`. Omit it otherwise, and don't carry a renderer named in an earlier round forward on its own. Never use `config.flowchart.defaultRenderer` instead: newer Mermaid builds (VS Code's built-in preview among them) ignore it and fall back to the default layout.
-- `themeCSS` is copied verbatim. Its first rule enlarges cluster labels; the rest overrides Mermaid's default edge-label background: the stacked label backgrounds (`.edgeLabel`, `.edgeLabel p`) are cleared and the remaining one (`.labelBkg`) is painted with 70% of the current editor background (`--vscode-editor-background`, white where that variable doesn't exist), so the edge line shows faintly through the label in both light and dark themes.
-- Never add `themeVariables` (background, text, cluster, edge-label colors). Renderers pick those for the viewer's light or dark theme — VS Code's built-in Mermaid preview computes them from the active color theme and redraws when it changes, and a fixed value would override that. Node border and edge colors come only from the palette below, chosen to read on both light and dark backgrounds.
-
-### Color palette
-
-Assign colors from this fixed, ordered list — the Okabe-Ito palette, the most widely cited color-vision-deficiency-safe categorical palette — to nodes in the order they're first introduced, one color per node.
-
-| # | Name | Hex |
-|---|------|-----|
-| 1 | orange | `#E69F00` |
-| 2 | sky blue | `#56B4E9` |
-| 3 | bluish green | `#009E73` |
-| 4 | blue | `#0072B2` |
-| 5 | vermillion | `#D55E00` |
-| 6 | reddish purple | `#CC79A7` |
-
-Okabe-Ito's black (`#000000`, invisible on dark backgrounds) and yellow (`#F0E442`, 1.32:1 on white) are left out, because one diagram has to read on both VS Code's light and dark themes. Every pair of these six is at least 15.6 apart (OKLab ΔE×100, normal vision), so any two crossing or overlapping edges stay distinguishable. Six is also about where categorical colors stop being reliably told apart, so the list is not extended.
-
-**More than six nodes**: start over from the first color. The relationship label on every edge stays as the second way to tell edges apart.
-
-Node border width is always `3px`; edge-class width is always `3.5px`.
 
 ### Change marking
 
-For a structure-change (dynamic) request, only the nodes the description names as added, changed, or removed get a label prefix and a CRUD class; every other node is written as usual. The node's own border-color class stays.
+For a structure-change (dynamic) request, only the nodes the description names as added, changed, or removed get a label prefix and a CRUD class; every other node is written as usual. The diagram script adds the `crud*` class definitions; the node keeps its own color.
 
 ```text
   NewNode["✨&nbsp;<b>NewNode</b>"]
   ChangedNode["♻️&nbsp;ChangedNode"]
   RemovedNode["🗑️&nbsp;<s>RemovedNode</s>"]
   ...
-  %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
-  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
-  classDef crudCreate stroke-width:5px
-  classDef crudUpdate stroke-dasharray:12 4 2 4
-  classDef crudDelete stroke-dasharray:5 10,color:#6B7280
   class NewNode crudCreate
   class ChangedNode crudUpdate
   class RemovedNode crudDelete

@@ -456,5 +456,5 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 ## Phase 35: Convergence
 
-- [ ] T124 Add `scripts/build_diagram.py` that turns the skill-written basic diagram into the full template form per FR-008d, plan: diagram script (missing)
-- [ ] T125 Update SKILL.md and `references/templates.md` so the skill writes only the basic diagram and runs `build_diagram.py` before the log and hover steps per FR-008d (missing)
+- [X] T124 Add `scripts/build_diagram.py` that turns the skill-written basic diagram into the full template form per FR-008d, plan: diagram script (missing)
+- [X] T125 Update SKILL.md and `references/templates.md` so the skill writes only the basic diagram and runs `build_diagram.py` before the log and hover steps per FR-008d (missing)

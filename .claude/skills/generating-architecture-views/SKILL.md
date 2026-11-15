@@ -13,7 +13,7 @@ description: Generates a structural architecture view (evidence-based components
 3. Generate the Responsibility section (per-group and per-element, abstract + concrete) — unless its display setting is `hidden`.
 4. Generate the Collaboration section (dependency-gated group and element entries, with multi-target consolidation) — unless its display setting is `hidden`.
 5. Self-check (AP-1–AP-15) and fix before presenting.
-6. Save the architecture view file and feedback log, then — if hover is on — run the hover script on the saved file (see "Hover panels" under "Output file"), and present the file link. That's the end — this skill produces only the architecture view.
+6. Save the architecture view file, run the diagram script on it (see "Diagram script" under "Output file"), write the feedback log from the finished file, then — if hover is on — run the hover script (see "Hover panels"), and present the file link. That's the end — this skill produces only the architecture view.
 
 ## Settings
 
@@ -61,15 +61,15 @@ Use only components and dependencies the description explicitly states or clearl
 
 Group components with a Mermaid `subgraph` **only** when the description gives an actual signal: a shared name prefix/namespace, or an explicit layer/domain word ("주문 도메인", "인증 계층", etc.). If there is no such signal, do not create any `subgraph` — treat every component as part of one unlabeled set instead (this still counts as "one group" for Steps 3–4, it's just not drawn as a box).
 
-**Diagram shape**: the code fence starts with a fixed YAML frontmatter `config:` block (curve, node/rank spacing, `titleTopMargin`, cluster-label typography, and a translucent edge-label background in `themeCSS` — never `%%{init}%%`, and never `themeVariables`: leave background/text/cluster/edge-label colors to the renderer so the diagram follows the viewer's light or dark theme), then `flowchart LR` overall (groups arranged left-to-right), with each group written as `subgraph Id["라벨"]` and `direction TB` inside it (members arranged top-to-bottom). A node whose display name can't serve as its ID (parentheses, spaces, etc.) is declared `Id@{ label: "표시 이름" }`. Inside the fence, keep this order: node/group declarations → `%% ---- 엣지 ----` → `%% ---- 노드 스타일 ----` → `%% ---- 엣지 스타일 (출발 노드 색과 동일) ----` → `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` (followed by the fixed label-convention comment `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>` and the three fixed `crud*` classDefs, always present, static or dynamic) → `click` lines; those four section comments are fixed structure. See `references/templates.md` for the exact block to copy.
+**Diagram shape**: write only the basic diagram — the diagram script fills in everything else (config block, edge IDs, colors, section comments, CRUD block). Inside the code fence: `flowchart LR`, then the node/group declarations, a blank line, the edges, and — only if any — the `class <Id> crud*` lines and the `click` lines. Groups are `subgraph Id["라벨"]` with `direction TB` inside and `end`. A node whose display name can't serve as its ID (parentheses, spaces, etc.) is declared `Id@{ label: "표시 이름" }`; declare every node, in the order you introduce them. Write every edge as `Source -->|관계 성격| Target` — no edge IDs, no `classDef`/`class` color lines, no `linkStyle`, no `%%` comments, no config/frontmatter.
 
-**Renderer selection**: only when the user explicitly names a Mermaid renderer in the request (e.g. "elk"), add `layout: <the exact value they typed>` directly under `config` in that YAML frontmatter (never `config.flowchart.defaultRenderer` — newer Mermaid builds, including VS Code's built-in preview, silently ignore it) — vocabulary is open (whatever renderer name they type), not a fixed list, and the value is never validated or remapped. When the request doesn't name one, follow the `dependency.renderer` setting: `elk` adds `layout: elk` the same way; `default` omits the field entirely. A renderer named in an earlier round never carries over on its own — only the request or the setting decides, every round.
+**Renderer selection**: only when the user explicitly names a Mermaid renderer in the request (e.g. "elk"), pass it to the diagram script as `--layout=<the exact value they typed>` — open vocabulary, never validated or remapped. Otherwise pass nothing; the script follows the `dependency.renderer` setting. A renderer named in an earlier round never carries over on its own.
 
 **Relationship labels**: label every arrow with the nature of the relationship as the description states or clearly implies it (e.g., 호출, 타입 참조, 선언 참조, 화면·타입 참조— this vocabulary is open-ended, not a fixed enum). If the description doesn't specify a relationship's nature, label it with the generic default "호출" rather than guessing a more specific nature that wasn't stated.
 
-**Node and edge coloring**: give every node a border-color class (`classDef` + `class`) so it's visually distinguishable, and color every arrow leaving that node the same way: write every edge with an ID (`Source eN@-->|관계 성격| Target`, `N` from 0 in writing order), declare one edge class per source node in that node's color (`classDef <role>Edge stroke:<color>,stroke-width:3.5px`), and assign it with `class eN <role>Edge` — never `linkStyle` (see `references/templates.md` for the fixed six-color Okabe-Ito palette and the exact syntax). Assign the six colors in the order nodes are first introduced, and start over from the first color past six. Name each class descriptively after the node's role (e.g. `navHostNode`, not `color3`). Every node gets its own class — never share one class between nodes (`class A,B …`).
+**Node and edge coloring**: done entirely by the diagram script — every node gets its own border-color class and every edge its source node's color, in node declaration order. You write no color lines.
 
-**Change marking** (dynamic requests only): mark only the nodes the description states or clearly implies were added, changed, or removed — never guess a change for a node it doesn't mention. Prefix the label and add one `class` line in the CRUD section:
+**Change marking** (dynamic requests only): mark only the nodes the description states or clearly implies were added, changed, or removed — never guess a change for a node it doesn't mention. Prefix the label and add one `class` line after the edges:
 
 | Change | Label | Class line |
 |---|---|---|
@@ -77,7 +77,7 @@ Group components with a Mermaid `subgraph` **only** when the description gives a
 | Changed (U) | `Id["♻️&nbsp;Name"]` | `class Id crudUpdate` |
 | Removed (D) | `Id["🗑️&nbsp;<s>Name</s>"]` | `class Id crudDelete` |
 
-The `crud*` classes set only stroke width/dash (and grey text for removed) — the node keeps its own border-color class and its edges keep their edge class. Draw a removed node with the relations the description says it had. Don't add a legend. In a static request, keep the label-convention comment and the three `classDef crud*` lines but write no `class … crud*` line and no prefix.
+The diagram script adds the `crud*` class definitions; the node keeps its own color. Draw a removed node with the relations the description says it had. Don't add a legend. In a static request, write no `class … crud*` line and no prefix.
 
 **Hyperlinks**: attach a `click NodeName "target" "label"` directive to every node whose real location the description establishes (see "Hyperlink resolution" below for how `target` is determined). Skip `click` entirely for a node with no resolvable target — don't invent one. The `label` is always the target's file name (e.g. `"Foo.kt"`); you never write tooltip content yourself. When hover is on, the hover script later replaces these labels with each node's panel text, adds a non-navigating `click Id hoverOnly "…"` line for nodes without a target (a tooltip only — no destination is invented), and appends `,cursor:auto` to those nodes' color `classDef` lines; you never write any of that. Never add a note about whether a renderer follows `click` links or where else to find them — the `click` directives and the Markdown links in Responsibility/Collaboration speak for themselves.
 
@@ -160,9 +160,9 @@ Architecture view anti-pattern check:
 - [ ] AP-2: No dependencies beyond what the description states or clearly implies, and no chain (A calls B, B calls C) collapsed into a shortcut edge (A→C) that skips the intermediate hop
 - [ ] AP-3: No subgraph group without an explicit naming/layer/domain signal in the description
 - [ ] AP-4: Every arrow has a relationship-nature label grounded in the description, or the "호출" default when the description doesn't specify one — never a guessed specific nature
-- [ ] AP-5: The fence opens with the YAML frontmatter `config` (no `%%{init}%%`, no `themeVariables`); every edge has an `eN@` ID; every node has a color class, every edge is colored by an edge class in its source node's color (no `linkStyle`); every node has its own class (no class shared by two nodes); colors come only from the six-color palette, assigned in first-introduction order and cycling past six; the section comments appear in the fixed order
-- [ ] AP-5b: `config.layout` is present exactly when this request named a renderer (that exact value) or, failing that, when `dependency.renderer` is `elk` (value `elk`) — and absent otherwise, never carried over from an earlier round; `config.flowchart.defaultRenderer` never appears
-- [ ] AP-5c: The `%% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----` section with the label-convention comment and the three fixed `classDef crud*` lines appears exactly once; static request → no `class … crud*` line and no ✨/♻️/🗑️ prefix; dynamic request → exactly the nodes the description names as added/changed/removed carry the matching prefix and class, and every node still keeps its own border-color class
+- [ ] AP-5: The diagram you wrote is the basic form — `flowchart LR`, declarations, `Source -->|관계| Target` edges, then only `class <Id> crud*` and `click` lines; no config block, edge IDs, color `classDef`/`class` lines, `linkStyle`, or `%%` comments
+- [ ] AP-5b: `--layout=<value>` is passed to the diagram script exactly when this request named a renderer (that exact value), never carried over from an earlier round
+- [ ] AP-5c: Static request → no `class … crud*` line and no ✨/♻️/🗑️ prefix; dynamic request → exactly the nodes the description names as added/changed/removed carry the matching prefix and class
 - [ ] AP-6: Every group and every element has both 책임(추상) and 역할(구체) — "설명에 명시되지 않음" where the description doesn't support one, never a guess; every code-level identifier cited in 역할(구체) is wrapped in backticks
 - [ ] AP-6b: Responsibility parallel-sibling consolidation was applied only where the condition holds (3+ elements, same group, parallel structural role, no member with a genuinely different kind of role) — the combined heading lists and hyperlinks every member, 역할(구체) still cites each member's own evidence, and a member with a real difference in kind was excluded and given its own entry instead
 - [ ] AP-7: Group-level Collaboration entries exist only for group pairs with at least one cross-group dependency edge (zero if 1 or fewer groups)
@@ -174,7 +174,7 @@ Architecture view anti-pattern check:
 - [ ] AP-13: Every hyperlink (both `click` and Markdown links) matches the resolution rule — local relative path, repo URL, or no link at all — and none is fabricated beyond what the description gives as evidence; AND every group/element with a resolved target is linked consistently everywhere its bold name appears as a heading or entry-opening name — Responsibility heading, Collaboration group-level opening line, and Collaboration element-level opening line all carry the same link (spot-check the element-level Collaboration entries specifically, since they're the most numerous and the easiest place for a link to silently go missing)
 - [ ] AP-13b: Exactly one plain-text caption sits between `### Dependency` and the Mermaid fence, built only from the request's key keywords — no invented content, no rendering/layout/process talk
 - [ ] AP-13d: Each of Responsibility/Collaboration matches its display setting (or the request's override): `hidden` — heading and content entirely absent; `plain` — no box; `collapsed`/`expanded` — heading outside, content inside one `<details>` box (with `open` only for `expanded`) whose summary is the fixed text `Details` (never the section name), content identical to `plain`
-- [ ] AP-13c: The file holds nothing but the three headings, the caption, the fixed section comments, the label-convention comment, and the `crud*` classDefs inside the Dependency fence, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary; every `click` label you wrote is the target's file name, and you wrote no panel text, `hoverOnly` line, `cursor:auto`, or `<style>` block (only the hover script adds those) — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, settings notices, or hover notices)
+- [ ] AP-13c: The file holds nothing but the three headings, the caption, and the sections' actual content — no click-navigation note, length notice, renderer warning, layout explanation, or other meta commentary; every `click` label you wrote is the target's file name, and you wrote no panel text, `hoverOnly` line, `cursor:auto`, or `<style>` block (only the hover script adds those) — and the chat response holds only the file link (plus a needed clarifying question, the onboarding-default notice, settings notices, or hover notices)
 - [ ] AP-14: The request has been classified (initial generation vs. regeneration vs. colliding slug) and the log write matches it — fresh Round 1, or a new round appended without touching earlier ones — and no output file or log gets written at all if Steps 2–4 never completed
 - [ ] AP-15: No sequence/runtime-flow diagram drawn, and no offer or question about building one — the response ends with the architecture view
 ```
@@ -206,7 +206,7 @@ Don't paste the Dependency, Responsibility, or Collaboration content into the ch
 
 `expanded` is the same with `<details open>`. This box is structure, not commentary — it's the one thing besides content allowed in the file.
 
-**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", the fixed section comments, the label-convention comment, and the `crud*` classDefs inside the Dependency fence (Step 2), and the sections' actual content (the diagram, Responsibility entries, Collaboration entries) — plus, only as written by the hover script, the panel text in `click` labels, the `click Id hoverOnly "…"` lines, `,cursor:auto` on color `classDef` lines, and the panel-shaping `<style>` block at the very end of the file (display rules, not commentary). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, the settings notices from "Settings", and the hover notices from "Hover panels".
+**Nothing but content**: the file holds only those three headings, the caption, the boxes from "Section display", and the sections' actual content (the diagram, Responsibility entries, Collaboration entries) — plus what the diagram script adds to the diagram, and, only as written by the hover script, the panel text in `click` labels, the `click Id hoverOnly "…"` lines, `,cursor:auto` on color `classDef` lines, and the panel-shaping `<style>` block at the very end of the file (display rules, not commentary). Never add meta commentary in any form — blockquote, paragraph, or comment — such as renderer-compatibility warnings, layout/arrangement explanations, notes on how or why the view was built, length notices, or link-behavior notes. The same applies to the chat response, which holds only the file link; the only other things allowed there are a clarifying question the workflow actually needs (Step 1, or when no components can be identified), the onboarding-default notice from Step 1, the settings notices from "Settings", and the hover notices from "Hover panels".
 
 After writing, the entire chat response for this part is a relative link:
 
@@ -214,11 +214,21 @@ After writing, the entire chat response for this part is a relative link:
 
 If there is no filesystem access in the current environment, skip the file and put all three sections directly in the chat response as fenced/plain blocks instead. Skip the feedback log below too in that case — there's no file to log against.
 
+### Diagram script
+
+**When**: right after writing `.zenuml/<slug>.architecture.md`, before the feedback log. With the Python found in "Settings", from this skill's directory run:
+
+```text
+<python> scripts/build_diagram.py <path to .zenuml/<slug>.architecture.md> [--layout=<renderer the request named>]
+```
+
+It completes the Dependency diagram in place (config block, edge IDs, color classes, section comments, CRUD block) and prints one line. Non-zero exit or no Python 3.9+: leave the file as it is and add `⚙️ 다이어그램 서식 건너뜀: <the script's message, or Python 3.9 이상을 찾지 못함>` at the end of the response.
+
 ### Hover panels
 
 In VS Code's Markdown preview, hovering a Dependency node shows a panel with that node's Responsibility and the collaborations it depends on. The panel text is a copy of the file's own body, written by a bundled script — never by you — so it costs no extra output.
 
-**When**: after writing the architecture view file and its feedback log, if hover is on for this request. Hover is on when `hover.enabled` is `true` and at least one of `hover.responsibility`/`hover.collaboration` is non-empty — after applying any value the request itself states ("hover 빼고", "질문도 넣어줘", "노드 아래에 띄워줘"). If hover is off, don't run the script; the file is already in its no-hover form.
+**When**: after the feedback log, if hover is on for this request. Hover is on when `hover.enabled` is `true` and at least one of `hover.responsibility`/`hover.collaboration` is non-empty — after applying any value the request itself states ("hover 빼고", "질문도 넣어줘", "노드 아래에 띄워줘"). If hover is off, don't run the script; the file is already in its no-hover form.
 
 **How**: find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and from this skill's directory run:
 
@@ -248,7 +258,7 @@ Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or rege
 **Request**: <the user's request, verbatim or lightly summarized>
 
 **Response**:
-<the generated Dependency, Responsibility, and Collaboration content, exactly as written to `.zenuml/<slug>.architecture.md`>
+<the content of `.zenuml/<slug>.architecture.md` after the diagram script, before the hover script>
 ````
 
 **On regeneration**, append a new round to the existing `<log.directory>/<slug>.architecture.md` — never rewrite or delete earlier rounds, no matter how many rounds accumulate:
@@ -258,7 +268,7 @@ Alongside `.zenuml/<slug>.architecture.md`, every successfully generated or rege
 **Request**: <this round's request>
 
 **Response**:
-<the regenerated Dependency, Responsibility, and Collaboration content>
+<the content of `.zenuml/<slug>.architecture.md` after the diagram script, before the hover script>
 ````
 
 Don't summarize, analyze, or prune this log's content, ever — it exists purely so a human can read it later and decide what's worth acting on. If Steps 2–4 never completed (the request ended in a clarifying question instead of a finished architecture view), don't create either the output file or the log file — there's nothing to save yet.
@@ -276,7 +286,7 @@ Don't summarize, analyze, or prune this log's content, ever — it exists purely
 
 Input: "OrderService는 주문을 생성하고, PaymentService는 결제를 담당하며, OrderService가 PaymentService를 호출한다. 이 시스템의 구조를 보여줘." Purpose confirmed as 온보딩. No file paths or URLs given, so no hyperlinks are attached.
 
-Generated file (`.zenuml/<slug>.architecture.md`, not pasted into the chat response) — shown with both display settings at `plain`; with `collapsed`/`expanded` each of Responsibility and Collaboration is wrapped as in "Section display", and with `hidden` it's absent:
+What you write to `.zenuml/<slug>.architecture.md` (not pasted into the chat response; the diagram script then completes the fence) — shown with both display settings at `plain`; with `collapsed`/`expanded` each of Responsibility and Collaboration is wrapped as in "Section display", and with `hidden` it's absent:
 
 ````markdown
 ### Dependency
@@ -284,35 +294,11 @@ Generated file (`.zenuml/<slug>.architecture.md`, not pasted into the chat respo
 OrderService와 PaymentService의 주문·결제 의존 구조
 
 ```mermaid
----
-config:
-  flowchart:
-    curve: basis
-    nodeSpacing: 45
-    rankSpacing: 70
-    titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
----
 flowchart LR
   OrderService
   PaymentService
 
-  %% ---- 엣지 ----
-  OrderService e0@-->|호출| PaymentService
-
-  %% ---- 노드 스타일 ----
-  classDef orderNode stroke:#E69F00,stroke-width:3px
-  class OrderService orderNode
-
-  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef orderEdge stroke:#E69F00,stroke-width:3.5px
-  class e0 orderEdge
-
-  %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
-  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
-  classDef crudCreate stroke-width:5px
-  classDef crudUpdate stroke-dasharray:12 4 2 4
-  classDef crudDelete stroke-dasharray:5 10,color:#6B7280
+  OrderService -->|호출| PaymentService
 ```
 
 ### Responsibility
@@ -343,7 +329,7 @@ flowchart LR
     - `PaymentService`가 주문 생성 로직에 역으로 의존하고 있지는 않은가?
 ````
 
-No `subgraph` because the description gave no grouping signal. Only one component originates an edge (OrderService), so only one color class is needed. No `click` directives or Markdown links anywhere, since the description gave no real file paths or URLs — nothing is fabricated to fill that gap. See `references/examples.md` for fuller examples covering groups, multi-target consolidation, and all three hyperlink modes.
+No `subgraph` because the description gave no grouping signal. No `click` directives or Markdown links anywhere, since the description gave no real file paths or URLs — nothing is fabricated to fill that gap. See `references/examples.md` for fuller examples covering groups, multi-target consolidation, and all three hyperlink modes.
 
 ## Scale control
 
