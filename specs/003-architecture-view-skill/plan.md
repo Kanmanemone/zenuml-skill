@@ -71,12 +71,20 @@ specs/003-architecture-view-skill/
 ```text
 .claude/skills/generating-architecture-views/
 ├── SKILL.md              # 워크플로: 목적 판단(필요시만 확인) → Dependency 생성(자동 그룹핑, 관계 레이블, 색상) → Responsibility 생성(그룹/요소별 책임(추상)/역할(구체)) → Collaboration 생성(의존관계 있는 쌍만, 3필드, 다수 대상 통합) → 하이퍼링크 결정 → 안티패턴 자기검증 → .zenuml/<slug>.architecture.md 저장 → 파일 링크 제시
+├── scripts/
+│   └── build_diagram.py  # Dependency 다이어그램의 고정 부분을 채움(FR-008d)
 └── references/
     ├── templates.md      # Dependency/Responsibility/Collaboration 섹션의 Mermaid/서식 템플릿과 표기 규칙(색상 팔레트, click 규칙 포함)
     └── examples.md       # 완성된 구조 뷰 예시(온보딩·특정 문제 진단 목적, 하이퍼링크 3가지 모드, 다수 대상 통합 포함)
 ```
 
 **Structure Decision**: 이 기능은 전통적인 애플리케이션이 아니라 Claude Code Skill이므로 "Option 1/2/3" 소스 구조가 적용되지 않는다. 실제 산출물은 이 저장소가 이미 사용 중인 `SKILL.md` + `references/` 패턴과 동일하게 구성되는 단일 skill 모듈이다(research.md, Decision: 참조 파일 구조 참고). 별도의 `src/`, `tests/`, 백엔드/프론트엔드 분리는 필요하지 않다.
+
+**다이어그램 고정 부분 스크립트 (FR-008d)**: `scripts/build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<값>]`. Python 3.9 이상, 표준 라이브러리만(009 hover 스크립트와 같은 실행 방식, 설정은 `scripts/hover/settings.py`로 읽음).
+- 입력: `### Dependency` 아래 첫 `mermaid` 펜스. 스킬이 쓴 기본 모양은 `flowchart LR` → 노드·그룹 선언(`subgraph`/`direction TB`/`end` 포함) → `Source -->|관계| Target` 엣지 → (동적이면) `class <Id> crud*` 줄 → `click` 줄이다. 이미 엣지 ID(`eN@`)가 있으면 손대지 않고 0이 아닌 코드로 끝난다.
+- 출력: 템플릿(`references/templates.md`)과 같은 완성 모양. 설정 블록을 펜스 맨 앞에 넣고, `layout`은 `--layout` 값(요청이 밝힌 렌더러) → 없으면 `dependency.renderer`가 `elk`일 때 `elk` → 그 외에는 넣지 않는다. 엣지에 쓴 순서대로 `e0@`부터 ID를 붙인다. 노드는 선언 순서(선언 없이 엣지에만 나온 노드는 처음 나온 순서로 뒤에)로 6색을 돌려 배정하고, 노드마다 `classDef <id>Node`+`class`, 엣지를 가진 출발 노드마다 `classDef <id>Edge`와 `class eN <id>Edge`를 만든다. 네 섹션 주석, 라벨 규약 주석, `classDef crud*` 세 줄을 넣고 스킬의 `class … crud*` 줄은 CRUD 섹션 끝으로, `click` 줄은 맨 뒤로 옮긴다.
+- 실행 순서: 산출 파일 쓰기 → `build_diagram.py` → 로그 라운드 쓰기(완성된 파일 내용) → `apply_hover.py`.
+- Python이 없거나 0이 아닌 코드로 끝나면 파일은 기본 모양 그대로 두고 응답 끝에 `⚙️ 다이어그램 서식 건너뜀: <이유>` 한 줄을 남긴다.
 
 ## Complexity Tracking
 
