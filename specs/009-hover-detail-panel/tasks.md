@@ -145,4 +145,4 @@ T008(panel_text.py) 진행 중에 동시에:
 
 ## Phase 7: Convergence
 
-- [ ] T029 Give `bottom` panel columns a minimum height of 3 lines so content of 3 lines or fewer flows in one column (update BOTTOM in `.claude/skills/generating-architecture-views/scripts/hover/style_blocks.py`, its source of truth `docs/hover-tooltip-test/inline-style.md`, and `specs/009-hover-detail-panel/fixtures/view.default.expected.md` together) per FR-005 (missing)
+- [X] T029 Give `bottom` panel columns a minimum height of 3 lines so content of 3 lines or fewer flows in one column (update BOTTOM in `.claude/skills/generating-architecture-views/scripts/hover/style_blocks.py`, its source of truth `docs/hover-tooltip-test/inline-style.md`, and `specs/009-hover-detail-panel/fixtures/view.default.expected.md` together) per FR-005 (missing)

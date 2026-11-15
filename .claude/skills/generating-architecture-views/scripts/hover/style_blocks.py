@@ -21,6 +21,12 @@ div.mermaidTooltip {
   columns: 25em;
   column-gap: 2em;
 }
+div.mermaidTooltip::before {
+  content: "";
+  float: left;
+  height: 3lh;
+  overflow: hidden;
+}
 .node.clickable:hover .nodeLabel {
   text-decoration: underline;
 }
