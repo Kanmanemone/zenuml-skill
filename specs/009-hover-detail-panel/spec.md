@@ -133,7 +133,7 @@
 - **FR-015**: PNG/PDF 내보내기 결과에 FR-005 블록의 내용이 글자로 드러나서는 안 된다. GitHub 등 VS Code 미리보기가 아닌 곳에서 보이는 모양(FR-005 블록이 글자로 드러나는 것 포함)은 요구 사항에 넣지 않는다.
 - **FR-016** (003 개정): 003의 "산출물에는 실제 내용만" 규칙(FR-032, SKILL.md AP-13c)의 허용 목록에 FR-005의 고정 블록을 추가한다. 이 블록은 메타 코멘트가 아니라 표시 규칙이다.
 - **FR-017** (003 개정): 003의 `click` 툴팁 규칙(툴팁은 파일 이름)은 해당 노드에 패널 내용이 있을 때 그 내용으로 바뀐다. 링크 대상 자체(경로·URL)는 바뀌지 않는다. 또 003의 "링크 대상이 없으면 `click`을 두지 않는다" 규칙에, 패널 내용이 있을 때 FR-013의 이동 없는 툴팁 줄을 두는 예외를 추가한다.
-- **FR-018** (007 개정): 007의 설정 옵션 목록과 옵션 정의(settings.schema.json)에 `hover.enabled`, `hover.responsibility`, `hover.collaboration`, `hover.position`을 추가하고, 사용자가 고치는 설정 파일(settings.jsonc)에 기존 형식대로 설명 주석과 함께 넣는다. 네 옵션의 모든 값의 토큰 영향 표기는 "토큰 소모 영향 없음"이다. 잘못된 값 처리는 007 FR-005를 따른다.
+- **FR-018** (007 개정): 007의 설정 옵션 목록과 옵션 정의(settings.schema.json)에 `hover.enabled`, `hover.responsibility`, `hover.collaboration`, `hover.position`을 추가하고, 사용자가 고치는 설정 파일(settings.jsonc)에 기존 형식대로 설명 주석과 함께 넣는다. 네 옵션의 모든 값의 토큰 영향 표기는 `[0]`(거의 같음)이다. 잘못된 값 처리는 007 FR-005를 따른다.
 - **FR-019**: `hover.position` 값은 `bottom`(미리보기 아래쪽에 넓게 고정된 패널)과 `node`(노드 바로 아래, Mermaid 기본 위치) 중 하나이며 기본값은 `bottom`이다. 이 값은 FR-005 블록의 내용만 바꾸고, 툴팁 내용·밑줄·링크 없는 노드 처리(FR-013)에는 영향을 주지 않는다. 두 hover 목록이 모두 빈 것으로 동작하면(`hover.enabled`가 `false`인 경우 포함) 이 값은 쓰이지 않는다.
 - **FR-020**: `hover.enabled` 값은 `true`와 `false` 중 하나이며 기본값은 `true`다. `false`이면 hover 기능 전체가 꺼져, `hover.responsibility`·`hover.collaboration`·`hover.position` 값과 상관없이 FR-006의 상태(이 기능 도입 전과 같은 산출물)가 된다. 이 값을 바꿔도 다른 hover 값은 그대로 남아, 다시 `true`로 바꾸면 이전 항목 설정대로 동작한다. 요청 문장에서 hover를 켜거나 끄라고 하면 그 요청에 한해 따른다(FR-014).
 
