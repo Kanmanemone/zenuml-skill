@@ -17,20 +17,16 @@ description: Generates a structural architecture view (evidence-based components
 
 ## Settings
 
-Before anything else in each run, read this skill's own `settings.schema.json` (the option definition — the only source of truth for every option's key, allowed values, and default) and `settings.jsonc` (the user's values; `//` and `/* */` comments allowed), both in this skill's directory. Read them fresh every run — never reuse values from an earlier run. Resolve every option in the definition:
-
-- **No `settings.jsonc` at all**: use every option's `default`, and say nothing about it.
-- **The file can't be read** (still not valid JSON once comments are stripped, or its top level isn't an object): use every `default`, finish the work, and add one notice.
-- **A key is missing**: use its `default`, silently.
-- **A value breaks its option's type or allowed values**: use that option's `default`, keep every other value, and add one notice naming the key. An `itemList` option's value must be an array whose every element is one of the option's `items`, with no duplicates (an empty array is valid).
-- **A leaf key that the definition doesn't have** (typo, or an option that no longer exists): ignore it and add one notice naming the key.
-- **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "Responsibility도 보여줘", "elk로"): use what the request says, for this request only.
-
-Notices go only at the end of the chat response, one line each, in this form — never into the output file:
+Before anything else in each run, find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and from this skill's directory run:
 
 ```text
-⚙️ 설정 안내: settings.jsonc — <읽지 못해 모든 값을 기본값으로 사용 | `<key>` 값이 허용되지 않아 기본값 `<default>` 사용 | 알 수 없는 키 `<key>` 무시>
+<python> scripts/read_settings.py
 ```
+
+It prints one line of JSON: `values` (every option resolved from `settings.schema.json` and the user's `settings.jsonc`; missing file or keys fall back to defaults, invalid values fall back per key, unknown keys are ignored) and `notices` (ready-made `⚙️ 설정 안내: …` lines). Use `values` as this run's settings — run it fresh every run, never reuse an earlier result, and don't read either settings file yourself. Add each `notices` line, as is, at the end of the chat response — never into the output file.
+
+- **No Python 3.9+, or the script fails**: read only the `default` of every option in `settings.schema.json`, use those, finish the work, and add `⚙️ 설정 안내: settings.jsonc — 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용` at the end of the response.
+- **The request itself names a value** for something an option controls: use what the request says, for this request only.
 
 Never edit either settings file. What each option actually does lives in the step it affects (Steps 2–4, "Output file").
 
