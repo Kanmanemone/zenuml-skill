@@ -4,8 +4,10 @@ Project-specific instructions for AI coding agents (Claude Code, Codex, Gemini C
 
 ## Workflow
 
-Handle every user request through Spec Kit. Choose the flow by the kind of
-request:
+Read `.specify/memory/constitution.md` first. It overrides this file and
+decides whether a request goes through Spec Kit at all and which Spec it
+belongs to. For a request that does go through Spec Kit, choose the flow by
+the kind of request:
 
 - Broken behavior → **Bug flow** (if the `bug` extension is installed)
 - The user asks whether an idea is worth pursuing → **Idea assessment**
@@ -16,8 +18,9 @@ Invoke commands in whatever form your agent exposes them (`/speckit.specify`,
 `/speckit-specify`, `$speckit-specify`, `/skill:speckit-specify`). The steps
 are the same in every form.
 
-(Korean: 사용자의 요청을 받으면 Spec Kit을 도구로 써서 진행한다. 요청의 종류에
-따라 흐름을 고른다:
+(Korean: 먼저 `.specify/memory/constitution.md`를 읽는다. 헌법은 이 파일보다
+우선하며, 요청을 Spec Kit으로 진행할지와 어느 Spec에 속하는지를 정한다. Spec
+Kit으로 진행하는 요청은 종류에 따라 흐름을 고른다:
 
 - 깨진 동작 → **버그 흐름** (`bug` 확장이 설치돼 있을 때)
 - 아이디어가 해볼 만한지 사용자가 묻는 경우 → **아이디어 평가**
@@ -278,6 +281,10 @@ default branch) and rewrite:
   atomic. E.g. `A, B, A', C, B'` → `A+A', B+B', C`.
 - Order by dependency, judged at the merged-group level; otherwise keep the
   order of first appearance. E.g. if A depends on B → `B+B', A+A', C`.
+- For a feature not yet on the default branch, squash the intermediate
+  commits of each Spec Kit step into one commit per step: `specify`
+  (including its `clarify` edits), `plan`, `tasks`, `analyze`, `implement`
+  (including its `converge` rounds).
 - If squashing would create a circular dependency, keep the commits separate.
   Correct order matters more than fewer commits.
 - A squashed commit's message describes the combined change.
@@ -297,6 +304,9 @@ default branch) and rewrite:
   예: `A, B, A', C, B'` → `A+A', B+B', C`.
 - 의존 순서를 우선하되 병합된 그룹 단위로 판단하고, 그 외에는 처음 등장한
   순서를 유지하라. 예: A가 B에 의존하면 → `B+B', A+A', C`.
+- 아직 기본 브랜치에 없는 기능은 Spec Kit 단계별 중간 커밋을 단계마다 하나로
+  합쳐라: `specify`(그 `clarify` 수정 포함), `plan`, `tasks`, `analyze`,
+  `implement`(그 `converge` 반복 포함).
 - 합쳤을 때 순환 의존이 생기면 분리해 둬라. 커밋 수보다 올바른 순서가 우선이다.
 - 합친 커밋의 메시지는 합쳐진 전체 변경을 설명해야 한다.
 - 순 변경이 0인 변경(+-0)은 처음부터 없었던 것처럼 지워라. 서로 상쇄되는
