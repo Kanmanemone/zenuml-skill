@@ -31,7 +31,7 @@
 ## generating 스크립트 계약 (FR-017b)
 
 - `generating-architecture-views`, `generating-zenuml-diagrams`는 각자 `scripts/read_settings.py`를 둔다(다른 스킬의 코드를 import하지 않음 — 003 FR-014). 표준 라이브러리만 쓰고 Python 3.9 이상에서 돈다.
-- 인터프리터는 `python3` → `python` → `py -3` 순으로 찾아 `<인터프리터> scripts/read_settings.py`로 실행한다. 출력은 exporting의 `read-settings.js`와 같은 한 줄 JSON `{"values": {...}, "notices": ["..."]}`이고 종료 코드는 0이다.
+- 인터프리터는 `python3` → `python` → `py -3` 순으로 찾되 Windows에서는 `python` → `py -3` → `python3` 순으로 찾아(Windows의 `python3`은 Microsoft Store 안내만 띄우는 경우가 많음) `<인터프리터> scripts/read_settings.py`로 실행한다. 출력은 exporting의 `read-settings.js`와 같은 한 줄 JSON `{"values": {...}, "notices": ["..."]}`이고 종료 코드는 0이다.
 - 인터프리터를 찾지 못하거나 실행이 실패하면 스킬은 옵션 정의(`settings.schema.json`)의 `default`만 읽어 쓰고(`settings.jsonc`는 읽지 않음) `⚙️ 설정 안내: settings.jsonc — 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용` 한 줄을 남긴다.
 
 ## exporting 스크립트 계약

@@ -17,7 +17,7 @@ This skill produces only the architecture view — nothing else, no follow-up of
 
 ## Scripts
 
-Every script lives in this skill's `scripts/` folder. Find a Python 3.9+ interpreter once per run — `python3`, then `python`, then `py -3` — and run each script by its full path **without changing the working directory** (paths you pass and write stay relative to the project root):
+Every script lives in this skill's `scripts/` folder. Find a Python 3.9+ interpreter once per run — `python3`, then `python`, then `py -3`; on Windows `python`, then `py -3`, then `python3` (there `python3` is often only a Microsoft Store stub) — and run each script by its full path **without changing the working directory** (paths you pass and write stay relative to the project root):
 
 ```text
 <python> <this skill's directory>/scripts/<script>.py [arguments]

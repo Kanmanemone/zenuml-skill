@@ -13,7 +13,7 @@ Target renderer/grammar baseline: `mermaid-js/zenuml-core`. Do not assume compat
 
 ## Settings
 
-Before anything else in each run, find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and run it by its full path, without changing the working directory (paths stay relative to the project root):
+Before anything else in each run, find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3` — on Windows `python`, then `py -3`, then `python3` (there `python3` is often only a Microsoft Store stub) — and run it by its full path, without changing the working directory (paths stay relative to the project root):
 
 ```text
 <python> <this skill's directory>/scripts/read_settings.py
