@@ -19,7 +19,7 @@ All three sections in the output file get a `###` heading (never `##` or shallow
 
 ## Dependency template
 
-Write only this basic form; `scripts/build_diagram.py` then fills in the config block (with `layout`), edge IDs, one border-color class per node and one edge class per source node (six Okabe-Ito colors in declaration order), the four section comments, and the CRUD block — see SKILL.md, "Diagram script".
+Write only this basic form; `scripts/build_diagram.py` then fills in the config block (with `layout`), edge IDs, one border-color class per node and one edge class per source node (six Okabe-Ito colors in declaration order), the four section comments, and the CRUD block — see SKILL.md, "Saving".
 
 ````markdown
 ### Dependency

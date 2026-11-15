@@ -2,7 +2,7 @@
 
 These examples show finished files — the Dependency diagrams are as completed by `scripts/build_diagram.py`. Write only the basic form (`templates.md`, "Dependency template").
 
-Full input→output walkthroughs, end to end. See `templates.md` for the underlying section shapes and `SKILL.md` (Step 2's minimal example) for the rules these follow. Each example below focuses on facets the `SKILL.md` example doesn't show.
+Full input→output walkthroughs, end to end. See `templates.md` for the underlying section shapes and `SKILL.md` ("Example") for the rules these follow. Each example below focuses on facets the `SKILL.md` example doesn't show.
 
 All examples below show Responsibility and Collaboration with display `plain` so the content is easy to read; under `collapsed`/`expanded` each is wrapped as in `SKILL.md` "Section display", and under `hidden` it's absent.
 
