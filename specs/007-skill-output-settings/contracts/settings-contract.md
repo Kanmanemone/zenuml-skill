@@ -4,17 +4,22 @@
 
 - 위치: `<skill dir>/settings.jsonc`(사용자 편집), `<skill dir>/settings.schema.json`(옵션 정의).
 - `settings.jsonc`: 주석(`//`, `/* */`)을 허용하는 JSON. 최상위는 객체. 묶음 객체 아래 옵션 키. 키·값은 영어.
-- 배포본 `settings.jsonc`의 각 옵션 바로 위 주석 형식:
+- 배포본 `settings.jsonc` 맨 위 두 줄과 각 옵션 바로 위 주석 형식:
 
   ```jsonc
-  // <한국어 의미 한 줄>
-  //   <값1> : <뜻> — <토큰 영향>
-  //   <값2> : <뜻> — <토큰 영향>
-  //   (기본값: <default>)
-  "<leaf key>": <default>
+  // <skill> 설정 — 요청 문장에서 다르게 말하면 그 요청에서는 말한 쪽이 우선
+  // 토큰 소모(기본값 대비): [-] 줄어듦  [0] 거의 같음  [+] 늘어남  [++] 큼
+  {
+    "<group>": {
+      // <한국어 의미 한 줄> (기본값: <default>)
+      //   <값1> [<토큰 영향>] <뜻>
+      //   <값2> [<토큰 영향>] <뜻>
+      "<leaf key>": <default>
+    }
+  }
   ```
 
-  `number`·`relativePath`는 값 목록 대신 `//   허용: <규칙> — <토큰 영향>` 한 줄을 쓴다. 주석 내용은 옵션 정의의 `description`·`values`·`tokenImpact`·`default`와 같아야 한다.
+  값 이름은 열을 맞춰 적는다. `number`·`relativePath`는 값 목록 대신 `//   허용 [<토큰 영향>] <규칙>` 한 줄을 쓴다. 주석 내용은 옵션 정의의 `description`·`values`·`tokenImpact`·`default`와 같아야 한다.
 
 ## 공통 처리 계약 (모든 스킬 공통)
 

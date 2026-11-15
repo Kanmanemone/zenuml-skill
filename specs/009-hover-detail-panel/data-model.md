@@ -11,7 +11,7 @@
 | `hover.collaboration` | `itemList` | `targets`, `boundary`, `rationale`, `questions` | `["targets", "boundary", "rationale"]` | 적은 순서대로, `[]`이면 없음(FR-009) |
 | `hover.position` | `enum` | `bottom`, `node` | `bottom` | `<style>` 블록만 바꿈(FR-019) |
 
-`itemList` 검증: 배열, 원소는 모두 `items`의 문자열, 중복 없음. 어기면 그 옵션만 기본값 + 안내 한 줄(FR-009a). 모든 값의 토큰 영향은 "토큰 소모 영향 없음"(FR-018).
+`itemList` 검증: 배열, 원소는 모두 `items`의 문자열, 중복 없음. 어기면 그 옵션만 기본값 + 안내 한 줄(FR-009a). 모든 값의 토큰 영향은 `[0]`(FR-018).
 
 **유효 설정(effective)**: 설정 파일 값 → 명령줄 재정의(research R4) 순으로 덮은 뒤, 해당 섹션이 파일에 없으면 그 목록을 `[]`로 본다(FR-010, research R5). `enabled`가 `false`이거나 두 목록이 모두 `[]`이면 **꺼짐**.
 
