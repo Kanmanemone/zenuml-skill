@@ -12,10 +12,10 @@
       "default": "collapsed",
       "description": "Responsibility 섹션을 어떻게 보여줄지",
       "tokenImpact": {
-        "hidden": "토큰 소모 줄어듦",
-        "plain": "토큰 소모 영향 거의 없음",
-        "collapsed": "토큰 소모 영향 거의 없음",
-        "expanded": "토큰 소모 영향 거의 없음"
+        "hidden": "[-]",
+        "plain": "[0]",
+        "collapsed": "[0]",
+        "expanded": "[0]"
       }
     },
     {
@@ -30,10 +30,10 @@
       "default": "collapsed",
       "description": "Collaboration 섹션을 어떻게 보여줄지",
       "tokenImpact": {
-        "hidden": "토큰 소모 줄어듦",
-        "plain": "토큰 소모 영향 거의 없음",
-        "collapsed": "토큰 소모 영향 거의 없음",
-        "expanded": "토큰 소모 영향 거의 없음"
+        "hidden": "[-]",
+        "plain": "[0]",
+        "collapsed": "[0]",
+        "expanded": "[0]"
       }
     },
     {
@@ -46,8 +46,8 @@
       "default": "elk",
       "description": "Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진",
       "tokenImpact": {
-        "default": "토큰 소모 영향 거의 없음",
-        "elk": "토큰 소모 영향 거의 없음"
+        "default": "[0]",
+        "elk": "[0]"
       }
     },
     {
@@ -57,7 +57,7 @@
       "default": "./.zenuml/log",
       "description": "피드백 로그를 저장할 위치 (프로젝트 루트 기준 상대 경로)",
       "tokenImpact": {
-        "*": "토큰 소모 영향 거의 없음"
+        "*": "[0]"
       }
     },
     {
@@ -66,8 +66,8 @@
       "default": true,
       "description": "다이어그램 노드에 마우스를 올렸을 때 뜨는 창(hover 패널) 기능 전체를 켤지 (VS Code Markdown 미리보기 전용)",
       "tokenImpact": {
-        "true": "토큰 소모 영향 없음",
-        "false": "토큰 소모 영향 없음"
+        "true": "[0]",
+        "false": "[0]"
       }
     },
     {
@@ -83,8 +83,8 @@
       ],
       "description": "hover 패널에 넣을 Responsibility 항목 목록 (적은 순서대로 표시, []이면 넣지 않음)",
       "tokenImpact": {
-        "abstract": "토큰 소모 영향 없음",
-        "concrete": "토큰 소모 영향 없음"
+        "abstract": "[0]",
+        "concrete": "[0]"
       }
     },
     {
@@ -103,10 +103,10 @@
       ],
       "description": "hover 패널에 그 노드가 의존하는 협력마다 넣을 항목 목록 (적은 순서대로 표시, []이면 넣지 않음)",
       "tokenImpact": {
-        "targets": "토큰 소모 영향 없음",
-        "boundary": "토큰 소모 영향 없음",
-        "rationale": "토큰 소모 영향 없음",
-        "questions": "토큰 소모 영향 없음"
+        "targets": "[0]",
+        "boundary": "[0]",
+        "rationale": "[0]",
+        "questions": "[0]"
       }
     },
     {
@@ -119,8 +119,8 @@
       "default": "bottom",
       "description": "hover 패널을 띄울 위치",
       "tokenImpact": {
-        "bottom": "토큰 소모 영향 없음",
-        "node": "토큰 소모 영향 없음"
+        "bottom": "[0]",
+        "node": "[0]"
       }
     }
   ]

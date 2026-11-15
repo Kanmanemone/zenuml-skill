@@ -128,5 +128,5 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 ## Phase 11: Convergence
 
-- [ ] T033 Rewrite the comments of all three `settings.jsonc` files in the compact format (legend line at the top, default on the description line, `[-]`/`[0]`/`[+]`/`[++]` per value) per FR-020, contracts/settings-contract.md (contradicts)
-- [ ] T034 Replace every `tokenImpact` text in the three `settings.schema.json` files with the matching symbol so the definition and the comments agree per FR-016, data-model.md (contradicts)
+- [X] T033 Rewrite the comments of all three `settings.jsonc` files in the compact format (legend line at the top, default on the description line, `[-]`/`[0]`/`[+]`/`[++]` per value) per FR-020, contracts/settings-contract.md (contradicts)
+- [X] T034 Replace every `tokenImpact` text in the three `settings.schema.json` files with the matching symbol so the definition and the comments agree per FR-016, data-model.md (contradicts)
