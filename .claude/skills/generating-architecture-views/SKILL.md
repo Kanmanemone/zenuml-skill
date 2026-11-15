@@ -17,10 +17,10 @@ description: Generates a structural architecture view (evidence-based components
 
 ## Settings
 
-Before anything else in each run, find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and from this skill's directory run:
+Before anything else in each run, find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and run it by its full path, without changing the working directory (paths stay relative to the project root):
 
 ```text
-<python> scripts/read_settings.py
+<python> <this skill's directory>/scripts/read_settings.py
 ```
 
 It prints one line of JSON: `values` (every option resolved from `settings.schema.json` and the user's `settings.jsonc`; missing file or keys fall back to defaults, invalid values fall back per key, unknown keys are ignored) and `notices` (ready-made `⚙️ 설정 안내: …` lines). Use `values` as this run's settings — run it fresh every run, never reuse an earlier result, and don't read either settings file yourself. Add each `notices` line, as is, at the end of the chat response — never into the output file.
@@ -216,10 +216,10 @@ If there is no filesystem access in the current environment, skip the file and p
 
 ### Diagram script
 
-**When**: right after writing `.zenuml/<slug>.architecture.md`, before the feedback log. With the Python found in "Settings", from this skill's directory run:
+**When**: right after writing `.zenuml/<slug>.architecture.md`, before the feedback log. With the Python found in "Settings", run it by its full path, without changing the working directory (paths stay relative to the project root):
 
 ```text
-<python> scripts/build_diagram.py <path to .zenuml/<slug>.architecture.md> [--layout=<renderer the request named>]
+<python> <this skill's directory>/scripts/build_diagram.py <path to .zenuml/<slug>.architecture.md> [--layout=<renderer the request named>]
 ```
 
 It completes the Dependency diagram in place (config block, edge IDs, color classes, section comments, CRUD block) and prints one line. Non-zero exit or no Python 3.9+: leave the file as it is and add `⚙️ 다이어그램 서식 건너뜀: <the script's message, or Python 3.9 이상을 찾지 못함>` at the end of the response.
@@ -230,10 +230,10 @@ In VS Code's Markdown preview, hovering a Dependency node shows a panel with tha
 
 **When**: after the feedback log, if hover is on for this request. Hover is on when `hover.enabled` is `true` and at least one of `hover.responsibility`/`hover.collaboration` is non-empty — after applying any value the request itself states ("hover 빼고", "질문도 넣어줘", "노드 아래에 띄워줘"). If hover is off, don't run the script; the file is already in its no-hover form.
 
-**How**: find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and from this skill's directory run:
+**How**: find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3`, and run it by its full path, without changing the working directory (paths stay relative to the project root):
 
 ```text
-<python> scripts/apply_hover.py <path to .zenuml/<slug>.architecture.md> [--enabled=…] [--responsibility=…] [--collaboration=…] [--position=…]
+<python> <this skill's directory>/scripts/apply_hover.py <path to .zenuml/<slug>.architecture.md> [--enabled=…] [--responsibility=…] [--collaboration=…] [--position=…]
 ```
 
 Add an option only for a hover value the request itself states (e.g. `--collaboration=targets,boundary,rationale,questions`, `--position=node`, `--responsibility=` for none); the script reads `settings.jsonc` for everything else.
