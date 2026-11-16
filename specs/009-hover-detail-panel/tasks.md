@@ -146,3 +146,8 @@ T008(panel_text.py) 진행 중에 동시에:
 ## Phase 7: Convergence
 
 - [X] T029 Give `bottom` panel columns a minimum height of 3 lines so content of 3 lines or fewer flows in one column (update BOTTOM in `.claude/skills/generating-architecture-views/scripts/hover/style_blocks.py`, its source of truth `docs/hover-tooltip-test/inline-style.md`, and `specs/009-hover-detail-panel/fixtures/view.default.expected.md` together) per FR-005 (missing)
+
+## Phase 8: Convergence
+
+- [ ] T030 Change the `hover.collaboration` default to `["targets", "boundary", "rationale", "questions"]` in `.agents/skills/generating-architecture-views/settings.schema.json` and `settings.jsonc`, and note FR-009b in its jsonc comment per FR-009, FR-009b (contradicts)
+- [ ] T031 Regenerate `specs/009-hover-detail-panel/fixtures/view.default.expected.md` for the new default and confirm quickstart Q1–Q4 still pass per FR-009, SC-003 (contradicts)

@@ -135,3 +135,10 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 - [X] T035 Add `scripts/read_settings.py` to generating-architecture-views (reuse `scripts/hover/settings.py`) and replace the Settings section of its SKILL.md with running the script per FR-017b, contracts/settings-contract.md (missing)
 - [X] T036 Add `scripts/read_settings.py` to generating-zenuml-diagrams (own copy of the loader, no cross-skill import) and replace the Settings section of its SKILL.md with running the script per FR-017b, contracts/settings-contract.md (missing)
+
+## Phase 13: Convergence
+
+**Purpose**: 신설된 FR-012c(Collaboration 질문 생성 끄고 켜기) 대비 남은 작업.
+
+- [ ] T037 Add `collaboration.questions` (boolean, default `false`, tokenImpact `false` `[0]` / `true` `[+]`) to `.agents/skills/generating-architecture-views/settings.schema.json` and the matching commented key to `settings.jsonc` per FR-012c, FR-018, FR-020 (missing)
+- [ ] T038 Make Step 4, the self-check (AP-10), the request-override examples, and the hover section of `.agents/skills/generating-architecture-views/SKILL.md` follow `collaboration.questions`, and mark the questions sub-part as conditional in `references/templates.md` per FR-012c (missing)
