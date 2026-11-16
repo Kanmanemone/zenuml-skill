@@ -149,5 +149,5 @@ T008(panel_text.py) 진행 중에 동시에:
 
 ## Phase 8: Convergence
 
-- [ ] T030 Change the `hover.collaboration` default to `["targets", "boundary", "rationale", "questions"]` in `.agents/skills/generating-architecture-views/settings.schema.json` and `settings.jsonc`, and note FR-009b in its jsonc comment per FR-009, FR-009b (contradicts)
-- [ ] T031 Regenerate `specs/009-hover-detail-panel/fixtures/view.default.expected.md` for the new default and confirm quickstart Q1–Q4 still pass per FR-009, SC-003 (contradicts)
+- [X] T030 Change the `hover.collaboration` default to `["targets", "boundary", "rationale", "questions"]` in `.agents/skills/generating-architecture-views/settings.schema.json` and `settings.jsonc`, and note FR-009b in its jsonc comment per FR-009, FR-009b (contradicts)
+- [X] T031 Regenerate `specs/009-hover-detail-panel/fixtures/view.default.expected.md` for the new default and confirm quickstart Q1–Q4 still pass per FR-009, SC-003 (contradicts)

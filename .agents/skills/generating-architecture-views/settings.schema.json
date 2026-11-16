@@ -109,7 +109,8 @@
       "default": [
         "targets",
         "boundary",
-        "rationale"
+        "rationale",
+        "questions"
       ],
       "description": "hover 패널에 그 노드가 의존하는 협력마다 넣을 항목 목록 (적은 순서대로 표시, []이면 넣지 않음)",
       "tokenImpact": {

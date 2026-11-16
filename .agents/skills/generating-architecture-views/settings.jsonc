@@ -48,12 +48,12 @@
     //   concrete [0] 역할 (구체)
     "responsibility": ["abstract", "concrete"],
 
-    // 그 노드가 의존하는 협력마다 넣을 항목, 적은 순서대로 표시 (초기 기본값: ["targets", "boundary", "rationale"])
+    // 그 노드가 의존하는 협력마다 넣을 항목, 적은 순서대로 표시 (초기 기본값: ["targets", "boundary", "rationale", "questions"])
     //   targets   [0] 의존 대상과 관계(빼도 협력 구분용으로 항상 붙음)
     //   boundary  [0] 책임의 경계
     //   rationale [0] 분리 이유 & 합리성 평가
     //   questions [0] 내가 할 수 있는 질문(위 collaboration.questions가 false면 뜨지 않음)
-    "collaboration": ["targets", "boundary", "rationale"],
+    "collaboration": ["targets", "boundary", "rationale", "questions"],
 
     // 창의 위치 (초기 기본값: bottom)
     //   bottom [0] 미리보기 아래 넓은 고정 패널(넓으면 여러 칸)
