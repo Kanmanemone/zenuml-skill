@@ -94,7 +94,7 @@ specs/010-stepwise-code-convergence/
 ### Source Code (repository root)
 
 ```text
-.claude/skills/revealing-code-step-by-step/      # 신규
+.agents/skills/revealing-code-step-by-step/      # 신규
 ├── SKILL.md            # 작업 순서: prepare → 1단계 서브에이전트 → 단계마다 begin+편집 → build → 링크 응답
 ├── stages.md           # 단계 정의 파일 — 단계 구성을 고치는 유일한 곳(spec FR-007·008)
 ├── settings.jsonc      # 단계마다 보일지(stages 맵), 결과 위치(output.directory) — 007 주석·토큰 기호 관례
@@ -102,7 +102,7 @@ specs/010-stepwise-code-convergence/
 └── scripts/
     └── stages.py       # python scripts/stages.py prepare|begin|build ...
 
-.gitignore              # 개정 — !.claude/skills/revealing-code-step-by-step/ 추가
+.gitignore              # 개정 — !.agents/skills/revealing-code-step-by-step/ 추가
 README.md, README.ko.md # 개정 — "추가 기능"·"요구 사항"에 이 스킬 항목
 specs/010-stepwise-code-convergence/spec.md   # 개정 — FR-008의 표를 stages.md 링크로 바꿈
 

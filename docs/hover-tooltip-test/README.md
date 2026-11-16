@@ -6,7 +6,7 @@ VS Code Markdown 미리보기에서 Mermaid 노드에 마우스를 올렸을 때
 
 - [inline-style.md](inline-style.md): `hover.position: bottom` — md 맨 아래 `<style>`만으로 미리보기 아래쪽에 넓은 패널을 띄웁니다(spec 009가 채택한 방식).
 - [node-25em.md](node-25em.md): `hover.position: node` — 노드 아래에 폭 `25em` 툴팁을 띄우고, 오른쪽으로 넘칠 때만 미리보기 오른쪽 끝에 붙입니다.
-- 위 두 파일의 `<style>` 블록은 `.claude/skills/generating-architecture-views/scripts/hover/style_blocks.py`의 원본입니다. CSS를 바꿀 때는 두 곳을 함께 바꿉니다.
+- 위 두 파일의 `<style>` 블록은 `.agents/skills/generating-architecture-views/scripts/hover/style_blocks.py`의 원본입니다. CSS를 바꿀 때는 두 곳을 함께 바꿉니다.
 - 이 README: `markdown.styles` 설정과 [mermaid-tooltip.css](mermaid-tooltip.css)로 패널을 거는 방식입니다. 채택하지 않았고 비교용으로 남깁니다. 위 두 파일을 확인할 때는 아래 설정을 빼야 합니다.
 
 ## 준비 (이 README로 확인할 때만)

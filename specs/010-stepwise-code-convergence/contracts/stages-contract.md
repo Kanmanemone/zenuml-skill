@@ -2,7 +2,7 @@
 
 ## 1. 단계 정의 파일 `stages.md`
 
-위치는 `.claude/skills/revealing-code-step-by-step/stages.md`이다.
+위치는 `.agents/skills/revealing-code-step-by-step/stages.md`이다.
 
 ```markdown
 # 단계 정의

@@ -3,7 +3,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /.claude/skills/exporting-markdown-diagrams/scripts
+    directory: /.agents/skills/exporting-markdown-diagrams/scripts
     schedule:
       interval: quarterly
     # 나온 지 21일이 지난 버전만 제안한다(악성 릴리스가 발견·회수될 시간을 둔다).

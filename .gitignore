@@ -13,14 +13,14 @@ tmp/
 # local-only Claude Code instructions, never shared
 CLAUDE.local.md
 
-# Claude Code tooling — keep only this project's own skills
+# Claude Code tooling — keep only this project's own skills (symlinks into .agents/skills, the canonical copies)
 .claude/*
 !.claude/skills/
 .claude/skills/*
-!.claude/skills/exporting-markdown-diagrams/
-!.claude/skills/generating-architecture-views/
-!.claude/skills/generating-zenuml-diagrams/
-!.claude/skills/revealing-code-step-by-step/
+!.claude/skills/exporting-markdown-diagrams
+!.claude/skills/generating-architecture-views
+!.claude/skills/generating-zenuml-diagrams
+!.claude/skills/revealing-code-step-by-step
 
 # Codex tooling — keep only this project's own skills
 .agents/*

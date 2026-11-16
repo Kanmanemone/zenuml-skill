@@ -28,7 +28,7 @@
     - 한 단계는 어떤 노드에서 일부러 바꾸지 않는다.
   - `expected/`: 기대 결과다. `original/*.kt`(잘라낸 원본 범위)와 문서를 둔다.
 
-명령은 저장소 루트에서 실행한다. `<py>`는 찾은 인터프리터이고, `S`는 `.claude/skills/revealing-code-step-by-step/scripts/stages.py`이다.
+명령은 저장소 루트에서 실행한다. `<py>`는 찾은 인터프리터이고, `S`는 `.agents/skills/revealing-code-step-by-step/scripts/stages.py`이다.
 
 ## Q1. prepare — 원본 범위·이유·문서 나누기 (FR-002, FR-015c, FR-017, FR-020)
 
