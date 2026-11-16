@@ -56,5 +56,5 @@ flowchart LR
   - <strong>책임 (추상)</strong>: 결제를 요청한다.
   - <strong>역할 (구체)</strong>: `charge()`
 - <strong>LegacyBridge</strong>
-  - <strong>책임 (추상)</strong>: 옛 결제 시스템에 전달한다.
+  - <strong>책임 (추상)</strong>: 설명에 명시되지 않음.
   - <strong>역할 (구체)</strong>: 설명에 명시되지 않음

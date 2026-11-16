@@ -4,6 +4,8 @@
 
 ### PaymentGateway
 
+<div class="resp"><span class="label">책임</span> 결제를 요청한다.</div>
+
 ⚠️ 원본 파일에서 PaymentGateway 선언을 찾지 못해 구체화하지 않음
 
 <div class="stages">
@@ -57,6 +59,8 @@ class LegacyBridge {
 </div>
 
 ### formatTotal
+
+<div class="resp"><span class="label">책임</span> 합계를 글로 바꾼다.</div>
 
 <div class="stages">
 
@@ -177,6 +181,8 @@ fun formatTotal(total: BigDecimal): String =
 
 ### AuditLog
 
+<div class="resp"><span class="label">책임</span> 주문 기록을 남긴다.</div>
+
 ⚠️ 원본 위치가 없어 구체화하지 않음
 
 <div class="stages">
@@ -202,6 +208,8 @@ class AuditLog {
 </div>
 
 <style>
+.resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
+.resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
 .stages > .stage { display: none; }

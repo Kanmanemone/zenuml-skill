@@ -325,9 +325,31 @@ def parse_view(text):
                 break
     if not nodes:
         raise InputError("구조 뷰에 노드가 하나도 없음")
+    responsibilities = parse_responsibilities(lines)
     for node in nodes.values():
         node["link"] = links.get(node["id"])
+        node["responsibility"] = responsibilities.get(node["name"], responsibilities.get(node["id"]))
     return list(nodes.values())
+
+
+def parse_responsibilities(lines):
+    """Name → `책임 (추상)` sentence from `#### 요소의 책임` (spec FR-015e). Unstated ones are left out."""
+    found, names, inside = {}, [], False
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            inside = stripped == "#### 요소의 책임"
+            continue
+        if not inside:
+            continue
+        if line.startswith("- "):
+            names = re.findall(r"<strong>\[?(.+?)\]?(?:\([^)]*\))?</strong>", line)
+            continue
+        m = re.match(r"\s+- <strong>책임 \(추상\)</strong>:\s*(.*)", line)
+        if m and m.group(1) and not m.group(1).startswith("설명에 명시되지 않음"):
+            for name in names:
+                found[name] = m.group(1).strip()
+    return found
 
 
 # ---- documents (FR-015c) ---------------------------------------------------------
@@ -808,7 +830,9 @@ def cmd_apply(args):
 
 # ---- build: base box (research R6) -----------------------------------------------
 
-BASE_CSS = """.stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
+BASE_CSS = """.resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
+.resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
+.stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
 .stages > .stage { display: none; }
 {STAGE_RULES}
@@ -923,6 +947,8 @@ def build_documents(result_dir, manifest, with_diff=True):
                 parts += ["## " + " / ".join(group_path), ""]
             current_path = group_path
             parts += ["### " + node["name"], ""]
+            if node["responsibility"]:
+                parts += ['<div class="resp"><span class="label">책임</span> %s</div>' % html.escape(node["responsibility"], quote=False), ""]
             if node["skip_reason"]:
                 parts += ["⚠️ " + node["skip_reason"], ""]
                 first = stages[0]

@@ -2,6 +2,8 @@
 
 ### OrderService
 
+<div class="resp"><span class="label">책임</span> 주문을 받아 처리한다.</div>
+
 <div class="stages">
 
 <input type="radio" name="OrderService" id="OrderService-1" class="s1" checked>
@@ -314,6 +316,8 @@ class OrderService(
 
 ### Validator
 
+<div class="resp"><span class="label">책임</span> 주문이 올바른지 본다.</div>
+
 <div class="stages">
 
 <input type="radio" name="Validator" id="Validator-1" class="s1" checked>
@@ -463,6 +467,8 @@ class Validator {
 </div>
 
 ### InventoryRepository
+
+<div class="resp"><span class="label">책임</span> 재고를 예약한다.</div>
 
 <div class="stages">
 
@@ -643,6 +649,8 @@ class InventoryRepository {
 </div>
 
 <style>
+.resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
+.resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
 .stages > .stage { display: none; }
