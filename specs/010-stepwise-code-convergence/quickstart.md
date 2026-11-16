@@ -1,5 +1,18 @@
 # Quickstart: 정제 단계 코드 구체화 확인
 
+## 단위 펼치기 검증 (아래의 모든 앞선 절차보다 우선)
+
+저장소 루트에서 `python specs/010-stepwise-code-convergence/test_learning_stages.py`를 실행한다. 기본 정의의 종류와 순서, 단위 계산(비공개 멤버·상태·매개변수 붙이기, 본문 없는 선언 묶기, 4개 상한), fixture 원본 전부에서 모두 펼친 장면 = 원본, 펼치기 입력 검증의 거부, 접기와 원본 장면, 원본 없는 노드의 상황 장면, 1단계 프롬프트에 `click` 줄이 없음, 숨기기, 문서의 책임 줄을 확인한다.
+
+실제 예제는 `.zenuml/nia-bookmarks-mvvm.architecture.md`로 prepare → 격리된 상황 작성 → `outline.json` 작성 → build를 실행한다. 마지막 `verified`는 7이어야 하고, 구조 뷰의 SHA256은 전후가 같아야 한다. 에디터에서 앞뒤 버튼과 문단·코드 렌더링은 직접 확인한다.
+
+
+## 학습 단계 개편 검증 (2026-11-16, 아래 legacy 절차보다 우선)
+
+저장소 루트에서 `python specs/010-stepwise-code-convergence/test_learning_stages.py`를 실행한다. 새 기본 정의의 상황 장면→실제 선언, 직접 의존별 반복, 숨기기, HTML 이스케이프, 원본 없는 노드의 상황 장면, 문장 장면 다음 코드의 시작 파일, 노드별 원본 검증을 확인한다. 같은 테스트가 아래 기존 fixture를 legacy 7단계로 실행해 원본 구간과 마지막 단계 회귀도 확인한다. 기존 Q1~Q8의 7단계 기대값은 legacy 정의에 한정된다.
+
+실제 예제는 `.zenuml/nia-bookmarks-mvvm.architecture.md`로 prepare→격리된 상황 작성→begin/apply→build를 실행한다. `others.md`의 첫 장면에는 책임 한 줄을 되풀이하지 않는 상황 문단만 있고, 다음 장면은 실제 선언이어야 한다. 연결 장면은 노드마다 직접 상대 하나만 더한다. 마지막 `verified`는 7이어야 한다. 구조 뷰의 SHA256과 원본 저장소의 기존 변경 상태가 실행 전후 같아야 한다. 에디터에서 앞뒤 버튼과 문단 렌더링은 직접 확인한다.
+
 ## 준비
 
 - Python 3.9 이상(`python3`, `python`, `py -3` 중 하나)

@@ -1,5 +1,18 @@
 # Data Model: 정제 단계 코드 구체화
 
+## 단위 펼치기 (아래의 모든 앞선 모델보다 우선)
+
+- Stage `kind`: `prose`(첫 장면) · `outline` · `unfold`(노드별 단위 수만큼 반복) · `source`(마지막). 반복 필드 `repeat`와 의존 반복은 없앤다.
+- Node `units`: 단위 목록. 단위마다 `names`(드러나는 멤버·문장 이름), `lines`(범위 기준 1부터의 줄 번호 — 멤버, 붙은 비공개 멤버·상태, 매개변수, 그 주석)를 담는다. 구체화하지 않는 노드는 빈 목록이다.
+- Node `responsibility`: 책임 한 줄(그대로).
+- `work/outline.json`: `{"<node id>": {"placeholders": [문장, …], "folds": [{"from": n, "to": m, "text": 문장}, …]}}`. 메인 에이전트가 쓰는 유일한 코드 장면 입력이다.
+- 작업 파일은 `work/01/<id>.kt`(상황 문단)과 `work/original/<id>.kt`(원본 범위)만 남는다.
+
+
+## 2026-11-16 변경 (아래 초기 모델보다 우선)
+
+Stage: `kind`(`prose`/`code`, 기본 code), `repeat`(`dependency` 또는 없음). 반복 확장본: `template`(기본 별명), `targets`(노드 ID → 상대·관계 라벨), `occurrence`(1부터). Node: `dependencies`(중복 없는 직접 상대·라벨 순서). 표시 목록·번호는 노드별로 계산한다. prose도 내부 파일은 `.kt`지만 코드로 해석하지 않는다. 원본 없는 노드도 원본과 무관한 앞 장면은 생성한다.
+
 데이터베이스는 없다. 아래는 `stages.py`가 다루는 데이터와 파일이다. 파일 형식의 세부는 [contracts/stages-contract.md](contracts/stages-contract.md)에 있다.
 
 ## Stage (정제 단계) — `stages.md`에서 읽음
