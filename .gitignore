@@ -21,6 +21,16 @@ CLAUDE.local.md
 !.claude/skills/generating-architecture-views/
 !.claude/skills/generating-zenuml-diagrams/
 !.claude/skills/revealing-code-step-by-step/
+
+# Codex tooling — keep only this project's own skills
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/exporting-markdown-diagrams/
+!.agents/skills/generating-architecture-views/
+!.agents/skills/generating-zenuml-diagrams/
+!.agents/skills/revealing-code-step-by-step/
+
 .specify/*
 !.specify/memory/
 .specify/memory/*
