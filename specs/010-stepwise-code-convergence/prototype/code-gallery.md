@@ -1,27 +1,18 @@
 # 긴 원본 예제 (상자 높이 상한: 30줄 또는 화면 70%)
 
-<style>
-.stage-wrap { position: relative; }
-.stage-gallery { display: flex; align-items: flex-start; overflow: auto; max-height: min(30lh, 70vh); scroll-snap-type: x mandatory; border: 1px solid rgba(128,128,128,.4); border-radius: 6px; }
-.stage-gallery > .slide { flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; padding: 0 1em; container-type: scroll-state; }
-@container not scroll-state(snapped: x) { .slide > * { display: none; } }
-.stage-gallery .title { position: sticky; top: 0; z-index: 1; font-weight: 600; padding: .5em 6em .5em 0; background: var(--vscode-editor-background, #fff); }
-.stage-gallery pre { margin-top: 0; }
-.stage-gallery::scroll-button(left), .stage-gallery::scroll-button(right) { position: absolute; top: .4em; z-index: 2; width: 2.2em; height: 1.8em; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; background: var(--vscode-editor-background, #fff); color: inherit; font-size: 1em; cursor: pointer; }
-.stage-gallery::scroll-button(left) { content: "←"; right: 3.4em; }
-.stage-gallery::scroll-button(right) { content: "→"; right: .8em; }
-.stage-gallery::scroll-button(*):disabled { opacity: .3; cursor: default; }
-</style>
-
 원본은 116줄입니다. 상자 안에서 세로로 스크롤한 뒤 ← → 로 넘겨 보세요. 상자 높이는 지금 보이는 단계의 길이를 따릅니다(상한 안에서).
 
 ## OrderService.kt
 
-<div class="stage-wrap"><div class="stage-gallery" tabindex="0">
+<div class="stages">
 
-<div class="slide">
+<input type="radio" name="orderservice" id="orderservice-1" class="s1" checked>
+<input type="radio" name="orderservice" id="orderservice-2" class="s2">
+<input type="radio" name="orderservice" id="orderservice-3" class="s3">
 
-<div class="title">1단계: 꾸며낸 뼈대 (1/3) — 5줄</div>
+<div class="stage s1">
+
+<div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/3) — 5줄</span><span class="nav">←</span><label class="nav" for="orderservice-2">→</label></div>
 
 ```kotlin
 class OrderService {
@@ -33,9 +24,9 @@ class OrderService {
 
 </div>
 
-<div class="slide">
+<div class="stage s2">
 
-<div class="title">2단계: 공개 시그니처 (2/3) — 54줄</div>
+<div class="head"><span class="name">2단계: 공개 시그니처 (2/3) — 54줄</span><label class="nav" for="orderservice-1">←</label><label class="nav" for="orderservice-3">→</label></div>
 
 ```kotlin
 package com.shop.order
@@ -96,9 +87,9 @@ class OrderService(private val inventory: InventoryRepository) {
 
 </div>
 
-<div class="slide">
+<div class="stage s3">
 
-<div class="title">3단계: 원본 (3/3) — 116줄</div>
+<div class="head"><span class="name">3단계: 원본 (3/3) — 116줄</span><label class="nav" for="orderservice-2">←</label><span class="nav">→</span></div>
 
 ```kotlin
 package com.shop.order
@@ -221,8 +212,23 @@ class OrderService(private val inventory: InventoryRepository) {
 
 </div>
 
-</div></div>
+</div>
 
 ## 다음 노드
 
 상자 아래 문서가 바로 이어지는지 확인용 문단입니다.
+
+<style>
+.stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; }
+.stages > input { position: absolute; opacity: 0; pointer-events: none; }
+.stages > .stage { display: none; }
+.stages > input.s1:checked ~ .stage.s1 { display: block; }
+.stages > input.s2:checked ~ .stage.s2 { display: block; }
+.stages > input.s3:checked ~ .stage.s3 { display: block; }
+.stages .head { display: flex; align-items: center; gap: .4em; padding: .5em 0; font-weight: 600; }
+.stages .head .name { flex: 1; }
+.stages .nav { display: inline-block; width: 2.2em; height: 1.8em; line-height: 1.8em; text-align: center; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; font-weight: 400; cursor: pointer; user-select: none; }
+.stages span.nav { opacity: .3; cursor: default; }
+.stages pre { margin-top: 0; max-height: min(30lh, 70vh); overflow: auto; }
+.stages pre, .stages pre code { white-space: pre; word-break: normal; }
+</style>
