@@ -15,7 +15,6 @@
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/7)</span><span class="nav">←</span><label class="nav" for="OrderService-2">→</label></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -38,7 +37,6 @@ class OrderService {
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 선언의 종류 (2/7)</span><label class="nav" for="OrderService-1">←</label><label class="nav" for="OrderService-3">→</label></div>
-<div class="note">원본과 같아진 것: 각 노드가 실제로 무엇인지 — 노드 자체의 선언에 딸린 것 전부: 클래스·인터페이스·객체·함수 등 선언의 종류, 수식어(가시성·data·abstract 등), 상속·구현 관계, 그 선언에 붙은 어노테이션</div>
 
 <div class="code">
 
@@ -62,7 +60,6 @@ class OrderService {
 <div class="stage s3">
 
 <div class="head"><span class="name">3단계: 의존 연결 (3/7)</span><label class="nav" for="OrderService-2">←</label><label class="nav" for="OrderService-4">→</label></div>
-<div class="note">원본과 같아진 것: 노드가 다른 노드를 실제로 어떻게 손에 넣는지 — 생성자 매개변수, 프로퍼티, 주입, 직접 생성</div>
 
 <div class="code">
 
@@ -89,7 +86,6 @@ class OrderService(
 <div class="stage s4">
 
 <div class="head"><span class="name">4단계: 공개 시그니처 (4/7)</span><label class="nav" for="OrderService-3">←</label><label class="nav" for="OrderService-5">→</label></div>
-<div class="note">원본과 같아진 것: 밖에서 보이는 멤버의 실제 이름·매개변수·반환 타입, 그리고 그것이 쓰는 데이터 타입의 이름</div>
 
 <div class="code">
 
@@ -116,7 +112,6 @@ class OrderService(
 <div class="stage s5">
 
 <div class="head"><span class="name">5단계: 핵심 흐름 (5/7)</span><label class="nav" for="OrderService-4">←</label><label class="nav" for="OrderService-6">→</label></div>
-<div class="note">원본과 같아진 것: 구조 뷰의 의존에 해당하는 호출이 일어나는 본문 — 공개 멤버 본문 가운데 다른 노드를 쓰는 부분</div>
 
 <div class="code">
 
@@ -147,7 +142,6 @@ class OrderService(
 <div class="stage s6">
 
 <div class="head"><span class="name">6단계: 나머지 로직 (6/7)</span><label class="nav" for="OrderService-5">←</label><label class="nav" for="OrderService-7">→</label></div>
-<div class="note">원본과 같아진 것: 남은 본문 전부와 숨은 멤버(비공개 함수·프로퍼티, 그 어노테이션 포함), 오류 처리, 분기</div>
 
 <div class="code">
 
@@ -179,7 +173,6 @@ class OrderService(
 <div class="stage s7">
 
 <div class="head"><span class="name">7단계: 원본 (7/7)</span><label class="nav" for="OrderService-6">←</label><span class="nav">→</span></div>
-<div class="note">원본과 같아진 것: 전부 — 원본 범위의 주석·빈 줄·들여쓰기까지</div>
 
 <div class="code">
 
@@ -229,7 +222,6 @@ class OrderService(
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/7)</span><span class="nav">←</span><label class="nav" for="Validator-2">→</label></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -246,7 +238,6 @@ class Validator {
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 선언의 종류 (2/7)</span><label class="nav" for="Validator-1">←</label><label class="nav" for="Validator-3">→</label></div>
-<div class="note">원본과 같아진 것: 각 노드가 실제로 무엇인지 — 노드 자체의 선언에 딸린 것 전부: 클래스·인터페이스·객체·함수 등 선언의 종류, 수식어(가시성·data·abstract 등), 상속·구현 관계, 그 선언에 붙은 어노테이션</div>
 
 <div class="code">
 
@@ -280,7 +271,6 @@ class Validator {
 <div class="stage s4">
 
 <div class="head"><span class="name">4단계: 공개 시그니처 (4/7)</span><label class="nav" for="Validator-3">←</label><label class="nav" for="Validator-5">→</label></div>
-<div class="note">원본과 같아진 것: 밖에서 보이는 멤버의 실제 이름·매개변수·반환 타입, 그리고 그것이 쓰는 데이터 타입의 이름</div>
 
 <div class="code">
 
@@ -314,7 +304,6 @@ class Validator {
 <div class="stage s6">
 
 <div class="head"><span class="name">6단계: 나머지 로직 (6/7)</span><label class="nav" for="Validator-5">←</label><label class="nav" for="Validator-7">→</label></div>
-<div class="note">원본과 같아진 것: 남은 본문 전부와 숨은 멤버(비공개 함수·프로퍼티, 그 어노테이션 포함), 오류 처리, 분기</div>
 
 <div class="code">
 
@@ -331,7 +320,6 @@ class Validator {
 <div class="stage s7">
 
 <div class="head"><span class="name">7단계: 원본 (7/7)</span><label class="nav" for="Validator-6">←</label><span class="nav">→</span></div>
-<div class="note">원본과 같아진 것: 전부 — 원본 범위의 주석·빈 줄·들여쓰기까지</div>
 
 <div class="code">
 
@@ -363,7 +351,6 @@ class Validator {
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/7)</span><span class="nav">←</span><label class="nav" for="InventoryRepository-2">→</label></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -380,7 +367,6 @@ class InventoryRepository {
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 선언의 종류 (2/7)</span><label class="nav" for="InventoryRepository-1">←</label><label class="nav" for="InventoryRepository-3">→</label></div>
-<div class="note">원본과 같아진 것: 각 노드가 실제로 무엇인지 — 노드 자체의 선언에 딸린 것 전부: 클래스·인터페이스·객체·함수 등 선언의 종류, 수식어(가시성·data·abstract 등), 상속·구현 관계, 그 선언에 붙은 어노테이션</div>
 
 <div class="code">
 
@@ -418,7 +404,6 @@ class InventoryRepository {
 <div class="stage s4">
 
 <div class="head"><span class="name">4단계: 공개 시그니처 (4/7)</span><label class="nav" for="InventoryRepository-3">←</label><label class="nav" for="InventoryRepository-5">→</label></div>
-<div class="note">원본과 같아진 것: 밖에서 보이는 멤버의 실제 이름·매개변수·반환 타입, 그리고 그것이 쓰는 데이터 타입의 이름</div>
 
 <div class="code">
 
@@ -456,7 +441,6 @@ class InventoryRepository {
 <div class="stage s6">
 
 <div class="head"><span class="name">6단계: 나머지 로직 (6/7)</span><label class="nav" for="InventoryRepository-5">←</label><label class="nav" for="InventoryRepository-7">→</label></div>
-<div class="note">원본과 같아진 것: 남은 본문 전부와 숨은 멤버(비공개 함수·프로퍼티, 그 어노테이션 포함), 오류 처리, 분기</div>
 
 <div class="code">
 

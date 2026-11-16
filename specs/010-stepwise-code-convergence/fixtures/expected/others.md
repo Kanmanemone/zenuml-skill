@@ -13,7 +13,6 @@
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -42,7 +41,6 @@ class PaymentGateway {
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -73,7 +71,6 @@ class LegacyBridge {
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/7)</span><span class="nav">←</span><label class="nav" for="formatTotal-2">→</label></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -88,7 +85,6 @@ fun formatTotal(order: Order): String = ""
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 선언의 종류 (2/7)</span><label class="nav" for="formatTotal-1">←</label><label class="nav" for="formatTotal-3">→</label></div>
-<div class="note">원본과 같아진 것: 각 노드가 실제로 무엇인지 — 노드 자체의 선언에 딸린 것 전부: 클래스·인터페이스·객체·함수 등 선언의 종류, 수식어(가시성·data·abstract 등), 상속·구현 관계, 그 선언에 붙은 어노테이션</div>
 
 <div class="code">
 
@@ -121,7 +117,6 @@ fun formatTotal(order: Order): String = ⟨합계를 글로 바꿈⟩
 <div class="stage s4">
 
 <div class="head"><span class="name">4단계: 공개 시그니처 (4/7)</span><label class="nav" for="formatTotal-3">←</label><label class="nav" for="formatTotal-5">→</label></div>
-<div class="note">원본과 같아진 것: 밖에서 보이는 멤버의 실제 이름·매개변수·반환 타입, 그리고 그것이 쓰는 데이터 타입의 이름</div>
 
 <div class="code">
 
@@ -157,7 +152,6 @@ fun formatTotal(total: BigDecimal): String =
 <div class="stage s6">
 
 <div class="head"><span class="name">6단계: 나머지 로직 (6/7)</span><label class="nav" for="formatTotal-5">←</label><label class="nav" for="formatTotal-7">→</label></div>
-<div class="note">원본과 같아진 것: 남은 본문 전부와 숨은 멤버(비공개 함수·프로퍼티, 그 어노테이션 포함), 오류 처리, 분기</div>
 
 <div class="code">
 
@@ -177,7 +171,6 @@ fun formatTotal(total: BigDecimal): String =
 <div class="stage s7">
 
 <div class="head"><span class="name">7단계: 원본 (7/7)</span><label class="nav" for="formatTotal-6">←</label><span class="nav">→</span></div>
-<div class="note">원본과 같아진 것: 전부 — 원본 범위의 주석·빈 줄·들여쓰기까지</div>
 
 <div class="code">
 
@@ -209,7 +202,6 @@ fun formatTotal(total: BigDecimal): String =
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 

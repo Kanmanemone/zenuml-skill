@@ -727,13 +727,8 @@ def fence(code):
     return ticks + "kotlin\n" + code.rstrip("\n") + "\n" + ticks
 
 
-def note_for(stage, changed):
-    if stage is None:
-        return ""
-    if not changed:
-        return "이 단계에서는 달라진 것이 없음"
-    parts = [m["becomes"] for m in stage["merged"]] + [stage["becomes"]]
-    return "원본과 같아진 것: " + "; ".join(parts)
+def note_for(changed):
+    return "" if changed else "이 단계에서는 달라진 것이 없음"
 
 
 def render_box(node_id, slides, diff_layers):
@@ -748,7 +743,7 @@ def render_box(node_id, slides, diff_layers):
         nxt = '<label class="nav" for="%s-%d">→</label>' % (node_id, k + 1) if k < n else '<span class="nav">→</span>'
         out += ['<div class="stage s%d">' % k, "",
                 '<div class="head"><span class="name">%s</span>%s%s</div>' % (html.escape(title, quote=False), prev, nxt),
-                '<div class="note">%s</div>' % html.escape(note, quote=False), "",
+                *(['<div class="note">%s</div>' % html.escape(note, quote=False)] if note else []), "",
                 '<div class="code">', "", fence(code), ""]
         if diff_layers[k - 1]:
             out += [diff_layers[k - 1], ""]
@@ -821,7 +816,7 @@ def build_documents(result_dir, manifest, with_diff=True):
                 parts += ["⚠️ " + node["skip_reason"], ""]
                 first = stages[0]
                 code = read_text(work_dir(result_dir, 1) / (node["id"] + ".kt"))
-                slides = [("1단계: %s (1/1)" % first["nickname"], note_for(first, True), code)]
+                slides = [("1단계: %s (1/1)" % first["nickname"], note_for(True), code)]
                 parts += [render_box(node["id"], slides, [None]), ""]
                 continue
             slides, layers, prev = [], [], None
@@ -834,7 +829,7 @@ def build_documents(result_dir, manifest, with_diff=True):
                 if prev is not None and not changed:
                     unchanged.setdefault(s["nickname"], []).append(node["id"])
                 title = "%d단계: %s (%d/%d)" % (s["display"], s["nickname"], s["display"], s["of"])
-                slides.append((title, note_for(s, changed), code))
+                slides.append((title, note_for(changed), code))
                 layers.append(render_diff_layer(code, diff_lines(prev, code)) if with_diff and prev is not None and changed else None)
                 prev = code
             max_slides = max(max_slides, len(slides))
