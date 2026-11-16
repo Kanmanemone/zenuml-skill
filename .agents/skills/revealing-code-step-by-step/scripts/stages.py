@@ -2,13 +2,12 @@
 """Deterministic half of the revealing-code-step-by-step skill.
 
     stages.py prepare <view.architecture.md> [--show=a,b] [--hide=a,b] [--output-dir=rel] [--pick=Id:n,...]
-    stages.py begin   <result dir> <k>
-    stages.py apply   <result dir> <k>
     stages.py build   <result dir>
 
-Each command prints one line of JSON on stdout (begin then prints the stage's code). Errors go to stderr
-as one Korean line.
-Exit codes: 0 ok, 2 bad input, 3 the last stage differs from the source (build).
+Each command prints one line of JSON on stdout (prepare then prints each node's source with its unfold
+units). Every code scene is built here from the source and work/outline.json; the model writes only the
+situation prose (stage 1) and that one file. Errors go to stderr as one Korean line.
+Exit codes: 0 ok, 2 bad input, 3 the scenes do not reach the source (build).
 Python 3.9+, standard library only. See specs/010-stepwise-code-convergence/contracts/.
 """
 
@@ -20,13 +19,12 @@ import re
 import shutil
 import sys
 import urllib.request
-from collections import Counter
 from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 STAGES_FILE = SKILL_DIR / "stages.md"
 PROMPT_FILE = SKILL_DIR / "stage1-prompt.md"
-EDITS_FILE = "edits.txt"
+OUTLINE_FILE = "outline.json"
 SETTINGS_FILE = "settings.jsonc"
 SCHEMA_FILE = "settings.schema.json"
 
@@ -176,21 +174,22 @@ def load_settings(skill_dir=SKILL_DIR):
 
 BECOMES = "- 원본과 같아지는 것:"
 UNREVEALED = "- 아직 드러나지 않은 것:"
-NOTATION = "- 보조 표기:"
+KIND = "- 표현:"
+KINDS = ("prose", "outline", "unfold", "source")
 
 
 def parse_stage_definition(path=STAGES_FILE):
     stages, current = [], None
     for line in read_text(path).split("\n"):
         if line.startswith("## "):
-            current = {"nickname": line[3:].strip(), "becomes": None, "unrevealed": None, "notation": None}
+            current = {"nickname": line[3:].strip(), "becomes": None, "unrevealed": None, "kind": None}
             stages.append(current)
         elif current is not None:
-            for head, field in ((BECOMES, "becomes"), (UNREVEALED, "unrevealed"), (NOTATION, "notation")):
+            for head, field in ((BECOMES, "becomes"), (UNREVEALED, "unrevealed"), (KIND, "kind")):
                 if line.startswith(head):
                     current[field] = line[len(head):].strip()
-    if len(stages) < 2:
-        raise InputError("stages.md에 단계가 2개 이상 있어야 함")
+    # A `##` section with none of the fields is prose about the stages (e.g. how to change them), not a stage.
+    stages = [s for s in stages if any(s[f] for f in ("becomes", "unrevealed", "kind"))]
     names = [s["nickname"] for s in stages]
     for name in names:
         if not name:
@@ -198,14 +197,18 @@ def parse_stage_definition(path=STAGES_FILE):
         if names.count(name) > 1:
             raise InputError("stages.md에 별명 `" + name + "`이 겹침")
     for s in stages:
+        if s["kind"] not in KINDS:
+            raise InputError("단계 표현은 %s 중 하나여야 함: %s" % (", ".join(KINDS), s["nickname"]))
         for head, field in ((BECOMES, "becomes"), (UNREVEALED, "unrevealed")):
             if not s[field]:
                 raise InputError("stages.md의 `" + s["nickname"] + "` 단계에 `" + head + "` 항목이 없음")
+    if [s["kind"] for s in stages] != list(KINDS):
+        raise InputError("stages.md의 단계 표현은 prose, outline, unfold, source 순서로 하나씩이어야 함")
     return stages
 
 
 def plan_stages(stages, toggles, show, hide):
-    """Decide which stages are generated and shown (research R13)."""
+    """Which stages are shown (FR-009a). The last stage (source) is always shown."""
     notices = []
     names = [s["nickname"] for s in stages]
     last = names[-1]
@@ -228,24 +231,7 @@ def plan_stages(stages, toggles, show, hide):
                 notices.append("⚙️ 요청 안내: 단계 정의에 없는 별명 `" + name + "` 무시")
             else:
                 visible[name] = value
-
-    generated, pending = [], []
-    for index, stage in enumerate(stages):
-        first, is_last = index == 0, index == len(stages) - 1
-        if not (first or is_last or visible[stage["nickname"]]):
-            pending.append({"nickname": stage["nickname"], "becomes": stage["becomes"], "notation": stage["notation"]})
-            continue
-        entry = dict(stage)
-        entry["visible"] = True if is_last else visible[stage["nickname"]]
-        entry["merged"] = pending
-        pending = []
-        generated.append(entry)
-    shown = [s for s in generated if s["visible"]]
-    for work, s in enumerate(generated, start=1):
-        s["work"] = work
-        s["display"] = shown.index(s) + 1 if s["visible"] else None
-        s["of"] = len(shown)
-    return generated, notices
+    return [dict(s, visible=visible[s["nickname"]]) for s in stages], notices
 
 
 # ---- view parsing (research R2) --------------------------------------------------
@@ -313,6 +299,8 @@ def parse_view(text):
             m = CLICK_LINK.match(line)
             if m:
                 links[m.group(1)] = m.group(2)
+            continue
+        if re.match(r"^\s*\w+\s+(?:\w+@)?-->", line):  # edges carry no stage information
             continue
         for pattern in (DECL_AT, DECL_BRACKET, DECL_BARE):
             m = pattern.match(line)
@@ -599,6 +587,223 @@ def _declaration_end(masked, mlines, pos):
     return masked.count("\n")
 
 
+# ---- unfold units and scenes (spec FR-004~005b) ----------------------------------
+
+MAX_UNFOLDS = 4
+DECL_HEAD = re.compile(r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:private|protected|internal|public|override|open|abstract|"
+                       r"suspend|const|lateinit|inline|operator|data|sealed|enum|inner)\s+)*(val|var|fun)\b")
+ENDS_OPEN = re.compile(r"([=,(\[{.+\-*/:]|->|&&|\|\||\?:)\s*$")
+STARTS_CLOSED = re.compile(r"^\s*(\.|\?\.|\?:|&&|\|\||\)|\]|->)")
+COMMENT_LINE = re.compile(r"^\s*(/\*|\*|//)")
+PARAM_HEAD = re.compile(r"^\s+(?:@\w+\s+)*(?:(?:private|protected|internal|public|override|open)\s+)*(?:val\s+|var\s+)?(\w+)\s*:")
+
+
+def _nesting(masked_line):
+    return sum(masked_line.count(c) for c in "({[") - sum(masked_line.count(c) for c in ")}]")
+
+
+def analyse(text):
+    """Header end, parameter spans and the body's top-level items of one source range."""
+    lines = text.rstrip("\n").split("\n")
+    masked = mask_code(text).rstrip("\n").split("\n")
+    depth, body_open, params = 0, None, []
+    for i, m in enumerate(masked):
+        start_depth = depth
+        if COMMENT_LINE.match(lines[i]) and depth == 0:
+            continue
+        for ch in m:
+            if ch in "([":
+                depth += 1
+            elif ch in ")]":
+                depth -= 1
+            elif ch == "{" and depth == 0:
+                body_open = i
+                break
+        if body_open is not None:
+            break
+        p = PARAM_HEAD.match(lines[i]) if start_depth == 1 else None
+        if p:
+            params.append({"name": p.group(1), "lines": [i]})
+        elif start_depth > 1 and params and params[-1]["lines"][-1] == i - 1:
+            params[-1]["lines"].append(i)
+    if body_open is None or not lines[-1].strip().startswith("}"):
+        return {"lines": lines, "body_open": None, "params": [], "items": []}
+    body_close = len(lines) - 1
+    items, cur, nest, comments, continues = [], None, 0, [], False
+    for i in range(body_open + 1, body_close):
+        line, m = lines[i], masked[i]
+        if not line.strip():
+            continue
+        if nest == 0 and not continues and COMMENT_LINE.match(line):
+            comments.append(i)
+            continue
+        if cur is None or (nest == 0 and not continues and not STARTS_CLOSED.match(line)):
+            cur = {"first": i, "lines": [], "comments": comments}
+            comments = []
+            items.append(cur)
+        cur["lines"].append(i)
+        nest += _nesting(m)
+        continues = nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
+    if comments and items:
+        items[-1]["trailing"] = comments
+    for it in items:
+        head, code = lines[it["first"]], "\n".join(masked[j] for j in it["lines"])
+        name = re.search(r"\b(?:val|var|fun|class|interface|object)\s+(?:<[^>]*>\s*)?(?:\w+\.)?(\w+)", head) or re.search(r"(\w+)", head)
+        it["name"] = name.group(1) if name else "?"
+        it["private"] = bool(re.search(r"\bprivate\b", head))
+        it["state"] = bool(re.match(r"^\s*(?:private\s+)?var\b", head)) and len(it["lines"]) == 1
+        flat = code
+        for _ in range(4):
+            flat = re.sub(r"\([^()]*\)", "", flat)
+        it["bodyless"] = bool(DECL_HEAD.match(head)) and "{" not in code and "=" not in flat
+        it["kind"] = "fun" if re.search(r"\bfun\b", head) else "prop"
+        it.setdefault("trailing", [])
+    return {"lines": lines, "body_open": body_open, "params": params, "items": items}
+
+
+def make_units(info):
+    """Unfold units (spec FR-005a): public members or statements in source order, the rest attached."""
+    lines, items = info["lines"], info["items"]
+    if not items:
+        return []
+
+    def uses(unit, name):
+        return any(re.search(r"\b%s\b" % re.escape(name), lines[j]) for it in unit["members"] + unit["attached"]
+                   for j in it["lines"])
+    anchors = [it for it in items if not it["private"] and not it["state"]] or items[:1]
+    units = []
+    for it in anchors:
+        prev = units[-1] if units else None
+        if (prev and it["bodyless"] and prev["bodyless"] and prev["kind"] == it["kind"]
+                and items.index(prev["members"][-1]) == items.index(it) - 1):
+            prev["members"].append(it)
+            continue
+        units.append({"members": [it], "attached": [], "params": [], "bodyless": it["bodyless"], "kind": it["kind"]})
+    placed = {id(m) for u in units for m in u["members"]}
+    for it in items:
+        if id(it) not in placed:
+            owner = next((u for u in units if uses(u, it["name"])), units[0])
+            owner["attached"].append(it)
+    for p in info["params"]:
+        owner = next((u for u in units if uses(u, p["name"])), units[0])
+        owner["params"].append(p)
+
+    def size(u):
+        return sum(len(it["lines"]) for it in u["members"] + u["attached"])
+    while len(units) > MAX_UNFOLDS:
+        k = min(range(len(units) - 1), key=lambda i: size(units[i]) + size(units[i + 1]))
+        a, b = units[k], units.pop(k + 1)
+        for key in ("members", "attached", "params"):
+            a[key] += b[key]
+    return units
+
+
+def unit_lines(unit):
+    """1-based range lines that belong to a unit (members, attached members, parameters, their comments)."""
+    out = set()
+    for it in unit["members"] + unit["attached"]:
+        out.update(j + 1 for j in it["comments"] + it["lines"] + it["trailing"])
+    for p in unit["params"]:
+        out.update(j + 1 for j in p["lines"])
+    return sorted(out)
+
+
+def unit_label(unit):
+    names = [it["name"] for it in unit["members"]]
+    extra = [it["name"] for it in unit["attached"]] + [p["name"] for p in unit["params"]]
+    return ", ".join(names) + (" (+ " + ", ".join(extra) + ")" if extra else "")
+
+
+def render_scene(info, units, placeholders, folds, revealed):
+    """Code of the outline (revealed=0) or of the revealed-th unfold. Folds are 1-based (from, to, text)."""
+    lines, items, body_open = info["lines"], info["items"], info["body_open"]
+    shown = {id(it) for u in units[:revealed] for it in u["members"] + u["attached"]}
+    shown_params = {p["lines"][0] for u in units[:revealed] for p in u["params"]}
+    param_line = {j: p for p in info["params"] for j in p["lines"]}
+    anchor = {id(u["members"][0]): n for n, u in enumerate(units)}
+    out, hidden_run = [], False
+    for i in range(body_open + 1):
+        p = param_line.get(i)
+        if p and p["lines"][0] not in shown_params:
+            if not hidden_run:
+                out.append(re.match(r"^\s*", lines[i]).group(0) + "..." + ("," if shown_params else ""))
+                hidden_run = True
+            continue
+        hidden_run = False if not p or i == p["lines"][0] else hidden_run
+        out.append(lines[i])
+    fold_at = {f[0] - 1: f for f in folds}
+    prev_kind, prev_end = "header", body_open
+
+    def gap(first):
+        return any(not lines[j].strip() for j in range(prev_end + 1, first))
+    for it in items:
+        if id(it) in shown:
+            block = it["comments"] + it["lines"] + it["trailing"]
+            if prev_kind == "placeholder" or gap(min(block)):
+                out.append("")
+            skip_to = -1
+            for j in it["comments"] + it["lines"]:
+                if j <= skip_to:
+                    continue
+                if j in fold_at:
+                    out.append(re.match(r"^\s*", lines[j]).group(0) + "⟨" + fold_at[j][2] + "⟩")
+                    skip_to = fold_at[j][1] - 1
+                    continue
+                out.append(lines[j])
+            out += [lines[j] for j in it["trailing"]]
+            prev_kind, prev_end = "code", max(block)
+        elif id(it) in anchor:
+            if prev_kind == "code":
+                out.append("")
+            out.append(re.match(r"^\s*", lines[it["first"]]).group(0) + "⟨" + placeholders[anchor[id(it)]] + "⟩")
+            prev_kind, prev_end = "placeholder", it["lines"][-1]
+    if prev_kind == "code" and gap(len(lines) - 1):
+        out.append("")
+    out.append(lines[-1])
+    return "\n".join(out) + "\n"
+
+
+def same_sentence(a, b):
+    return re.sub(r"[\s.]", "", a or "") == re.sub(r"[\s.]", "", b or "")
+
+
+def check_outline(node, units, info, entry):
+    """Reject bad model input for one node (spec FR-005b). Returns (placeholders, folds as tuples)."""
+    nid = node["id"]
+    if not isinstance(entry, dict):
+        raise InputError("%s에 %s 항목이 없음" % (OUTLINE_FILE, nid))
+    placeholders = entry.get("placeholders")
+    if not isinstance(placeholders, list) or len(placeholders) != len(units):
+        raise InputError("%s의 자리표시자는 단위 수와 같은 %d개여야 함" % (nid, len(units)))
+    for n, text in enumerate(placeholders, 1):
+        if not isinstance(text, str) or not text.strip() or "⟨" in text or "⟩" in text or "\n" in text:
+            raise InputError("%s의 %d번째 자리표시자가 비었거나 한 줄 문장이 아님" % (nid, n))
+        if same_sentence(text, node.get("responsibility")):
+            raise InputError("%s의 %d번째 자리표시자가 책임 한 줄과 같음" % (nid, n))
+    folds, used = [], set()
+    owner = {}
+    for u, unit in enumerate(units):
+        for it in unit["members"] + unit["attached"]:
+            for j in it["lines"]:
+                owner[j + 1] = (u, id(it), it["lines"][0] + 1)
+    for f in entry.get("folds") or []:
+        try:
+            a, b, text = int(f["from"]), int(f["to"]), f["text"]
+        except (TypeError, KeyError, ValueError):
+            raise InputError("%s의 접기는 {from, to, text} 형식이어야 함" % nid)
+        if not isinstance(text, str) or not text.strip() or "\n" in text:
+            raise InputError("%s의 %d~%d줄 접기 문장이 비었음" % (nid, a, b))
+        span = range(a, b + 1)
+        homes = {owner.get(j, (None, None, None))[:2] for j in span}
+        if a > b or len(homes) != 1 or None in next(iter(homes)) or a == owner[a][2]:
+            raise InputError("%s의 %d~%d줄 접기가 한 멤버의 본문 안에 있지 않음" % (nid, a, b))
+        if used & set(span):
+            raise InputError("%s의 %d~%d줄 접기가 다른 접기와 겹침" % (nid, a, b))
+        used |= set(span)
+        folds.append((a, b, text.strip()))
+    return [p.strip() for p in placeholders], folds
+
+
 # ---- prepare ---------------------------------------------------------------------
 
 def manifest_path(result_dir):
@@ -637,7 +842,7 @@ def cmd_prepare(args):
         if not _valid({"type": "relativePath"}, args.output_dir):
             raise InputError("--output-dir는 구조 뷰 폴더 기준 상대 경로여야 함: " + args.output_dir)
         output_dir = args.output_dir
-    generated, stage_notices = plan_stages(stages, values["stages"], split_list(args.show), split_list(args.hide))
+    planned, stage_notices = plan_stages(stages, values["stages"], split_list(args.show), split_list(args.hide))
     picks = {}
     for item in split_list(args.pick):
         node_id, _, number = item.partition(":")
@@ -648,184 +853,73 @@ def cmd_prepare(args):
 
     slug = view.name[: -len(".architecture.md")]
     result_dir = (view.parent / output_dir / (slug + ".stages")).resolve()
+    if result_dir in view.resolve().parents:
+        raise InputError("결과 폴더가 입력 구조 뷰와 겹침: " + str(result_dir))
     if result_dir.exists():
         shutil.rmtree(result_dir)
     (result_dir / "work" / "original").mkdir(parents=True)
 
     docs = assign_documents(nodes, slug)
     view_dir = view.parent.resolve()
-    spans = {}
+    listing = []
     for node in nodes:
         node["stage1"] = rel(result_dir / "work" / "01" / (node["id"] + ".kt"))
         node["original"] = node["range"] = node["skip_reason"] = None
-        node["contains"], node["candidates"] = [], []
+        node["candidates"], node["units"] = [], []
         node["pick"] = picks.get(node["id"])
         text, reason = read_source(node["link"], view_dir)
         if text is not None:
             span, reason, node["candidates"] = find_declaration(text, declaration_names(node), node["pick"])
             if span:
-                lines = text.split("\n")
-                code = "\n".join(lines[span[0] - 1: span[1]])
+                code = "\n".join(text.split("\n")[span[0] - 1: span[1]])
                 original = result_dir / "work" / "original" / (node["id"] + ".kt")
                 write_text(original, code)
                 node["original"] = rel(original)
                 node["range"] = {"source": node["link"], "start_line": span[0], "end_line": span[1]}
-                spans[node["id"]] = (node["link"], span)
+                units = make_units(analyse(code))
+                node["units"] = [{"names": unit_label(u), "lines": unit_lines(u)} for u in units]
+                listing.append(source_listing(node, code))
         node["skip_reason"] = reason
-    for node in nodes:
-        if node["id"] not in spans:
-            continue
-        source, (a, b) = spans[node["id"]]
-        node["contains"] = [other for other, (src, (c, d)) in spans.items()
-                            if other != node["id"] and src == source and a <= c and d <= b and (c, d) != (a, b)]
 
     manifest = {"view": rel(view), "slug": slug, "dir": rel(result_dir), "docs": docs,
-                "stages": generated, "notices": notices, "nodes": nodes}
+                "stages": planned, "notices": notices, "nodes": nodes}
     write_text(manifest_path(result_dir), json.dumps(manifest, ensure_ascii=False, indent=1))
-    prompt = write_stage1_prompt(result_dir, view_text, generated[0], nodes)
+    prompt = write_stage1_prompt(result_dir, view_text, planned[0], nodes)
     pick = [{"id": n["id"], "source": n["link"] if re.match(r"https?://", n["link"]) else rel(view_dir / n["link"].split("#")[0]),
              "candidates": n["candidates"]}
             for n in nodes if n["candidates"] and n["skip_reason"]]
-    emit({"dir": rel(result_dir), "stage1_prompt": prompt.as_posix(), "middle": list(range(2, len(generated))),
-          "pick": pick})
+    emit({"dir": rel(result_dir), "stage1_prompt": prompt.as_posix(),
+          "outline": rel(result_dir / "work" / OUTLINE_FILE), "pick": pick,
+          "stages": [{"nickname": s["nickname"], "kind": s["kind"], "visible": s["visible"]} for s in planned]})
+    if listing and not pick:
+        print("\n" + "\n\n".join(listing))
+
+
+def source_listing(node, code):
+    """The node's source once, each line tagged with its unit number (`-` = outline header or blank)."""
+    tag = {j: str(n) for n, u in enumerate(node["units"], 1) for j in u["lines"]}
+    head = "===== %s · 책임: %s · 단위 %d개 =====" % (node["id"], node.get("responsibility") or "없음", len(node["units"]))
+    units = ["--- 단위 %d: %s" % (n, u["names"]) for n, u in enumerate(node["units"], 1)]
+    body = ["%3d %s| %s" % (j, tag.get(j, "-"), line) for j, line in enumerate(code.split("\n"), 1)]
+    return "\n".join([head] + units + body)
 
 
 def write_stage1_prompt(result_dir, view_text, stage, nodes):
-    """The whole stage-1 subagent prompt in one file: template + stage 1 + nodes + the view itself."""
+    """The whole stage-1 subagent prompt in one file. Mermaid `click` lines only repeat the view's sections."""
     node_lines = "\n".join("- %s (%s) → %s" % (n["id"], n["name"], Path(n["stage1"]).resolve().as_posix())
                            for n in nodes)
+    view_lines = [line for line in view_text.rstrip("\n").split("\n") if not line.strip().startswith("click ")]
     text = (read_text(PROMPT_FILE)
             .replace("{stage}", "%s — %s / %s" % (stage["nickname"], stage["becomes"], stage["unrevealed"]))
             .replace("{nodes}", node_lines)
-            .replace("{view}", view_text.rstrip("\n")))
+            .replace("{view}", "\n".join(view_lines)))
     path = (Path(result_dir) / "work" / "stage1-prompt.md").resolve()
     write_text(path, text)
     return path
 
 
-# ---- begin -----------------------------------------------------------------------
-
 def work_dir(result_dir, k):
     return Path(result_dir) / "work" / ("%02d" % k)
-
-
-def cmd_begin(args):
-    result_dir = Path(args.dir)
-    manifest = load_manifest(result_dir)
-    stages = manifest["stages"]
-    g, k = len(stages), args.k
-    if not 2 <= k <= g - 1:
-        raise InputError("begin 단계 번호는 2~%d여야 함(받은 값: %d)" % (g - 1, k))
-    if not work_dir(result_dir, k - 1).is_dir():
-        raise InputError("직전 단계 폴더가 없음: " + rel(work_dir(result_dir, k - 1)))
-    if work_dir(result_dir, k).exists():
-        raise InputError("이미 시작한 단계임(지난 단계는 다시 만들지 않음): " + rel(work_dir(result_dir, k)))
-    # Stage 1 is written for every node (build shows it for skipped nodes too); later stages only for the rest.
-    expected = [n for n in manifest["nodes"] if k == 2 or not n["skip_reason"]]
-    missing = [rel(work_dir(result_dir, k - 1) / (n["id"] + ".kt")) for n in expected
-               if not (work_dir(result_dir, k - 1) / (n["id"] + ".kt")).is_file()]
-    if missing:
-        raise InputError("직전 단계 파일이 없음: " + ", ".join(missing))
-    edits = Path(result_dir) / "work" / EDITS_FILE
-    if edits.exists():
-        edits.unlink()
-    blocks = []
-    for node in manifest["nodes"]:
-        if node["skip_reason"]:
-            continue
-        dst = work_dir(result_dir, k) / (node["id"] + ".kt")
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(work_dir(result_dir, k - 1) / (node["id"] + ".kt"), dst)
-        inner = " · 안에 든 노드: " + ", ".join(node["contains"]) if node["contains"] else ""
-        blocks.append("===== %s · %d단계%s =====\n%s" % (node["id"], k, inner, read_text(dst).rstrip("\n")))
-        if k == 2:
-            blocks.append("===== %s · 원본 =====\n%s" % (node["id"], read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt")).rstrip("\n")))
-    s = stages[k - 1]
-    emit({"stage": k, "nickname": s["nickname"], "becomes": s["becomes"], "unrevealed": s["unrevealed"],
-          "notation": s["notation"], "merged": s["merged"], "edits": rel(edits)})
-    print("\n" + "\n\n".join(blocks))
-
-
-# ---- apply -----------------------------------------------------------------------
-
-def parse_edits(text):
-    """Blocks of `<<<<<<< <id>` / old lines / `=======` / new lines / `>>>>>>>`."""
-    blocks, cur, part = [], None, None
-    for number, line in enumerate(text.split("\n"), start=1):
-        if cur is None:
-            m = re.fullmatch(r"<<<<<<< (\S+)\s*", line)
-            if m:
-                cur, part = {"id": m.group(1), "old": [], "new": []}, "old"
-            elif line.strip():
-                raise InputError("%s %d번째 줄이 블록 밖에 있음: %s" % (EDITS_FILE, number, line))
-            continue
-        if line == "=======" and part == "old":
-            part = "new"
-        elif line == ">>>>>>>" and part == "new":
-            blocks.append((cur["id"], "\n".join(cur["old"]), "\n".join(cur["new"])))
-            cur = None
-        else:
-            cur[part].append(line)
-    if cur is not None:
-        raise InputError("%s의 %s 블록이 >>>>>>>로 닫히지 않음" % (EDITS_FILE, cur["id"]))
-    return blocks
-
-
-def source_lines(text, wanted):
-    """Stripped lines of `text` that are in `wanted`, with multiplicity."""
-    return Counter(line.strip() for line in text.split("\n") if line.strip() in wanted)
-
-
-def check_stage(result_dir, manifest, k):
-    """Mechanical checks of stage k against stage k-1 (rules: names stay, source lines never go back)."""
-    warnings = []
-    for node in manifest["nodes"]:
-        if node["skip_reason"]:
-            continue
-        cur = read_text(work_dir(result_dir, k) / (node["id"] + ".kt"))
-        prev = read_text(work_dir(result_dir, k - 1) / (node["id"] + ".kt"))
-        wanted = {line.strip() for line in read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt")).split("\n") if re.search(r"\w", line)}
-        for line in source_lines(prev, wanted) - source_lines(cur, wanted):
-            warnings.append("%s: 앞 단계에 있던 원본 줄이 사라지거나 바뀜: %s" % (node["id"], line))
-        if not any(re.search(r"\b%s\b" % re.escape(name), cur) for name in declaration_names(node)):
-            warnings.append("%s: 노드 이름이 코드에 없음" % node["id"])
-    return warnings
-
-
-def cmd_apply(args):
-    result_dir = Path(args.dir)
-    manifest = load_manifest(result_dir)
-    g, k = len(manifest["stages"]), args.k
-    if not 2 <= k <= g - 1 or not work_dir(result_dir, k).is_dir():
-        raise InputError("시작하지 않은 단계임(먼저 begin %d): %s" % (k, rel(work_dir(result_dir, k))))
-    if work_dir(result_dir, k + 1).exists():
-        raise InputError("다음 단계가 이미 시작되어 이 단계는 바꿀 수 없음: " + rel(work_dir(result_dir, k)))
-    edits_path = result_dir / "work" / EDITS_FILE
-    if not edits_path.is_file():
-        raise InputError("바꿀 내용 파일이 없음: " + rel(edits_path))
-    nodes = {n["id"]: n for n in manifest["nodes"] if not n["skip_reason"]}
-    texts, errors = {}, []
-    for i, (node_id, old, new) in enumerate(parse_edits(read_text(edits_path)), start=1):
-        if node_id not in nodes:
-            errors.append("%d번째 블록: 구체화하는 노드가 아님(%s)" % (i, node_id))
-            continue
-        path = work_dir(result_dir, k) / (node_id + ".kt")
-        text = texts.get(node_id, read_text(path))
-        count = text.count(old) if old else 0
-        if count != 1:
-            errors.append("%d번째 블록(%s): 바꿀 글이 %d번 나옴(정확히 1번이어야 함)" % (i, node_id, count))
-            continue
-        if new == "" and text.count(old + "\n") == 1:
-            text = text.replace(old + "\n", "", 1)  # deleting whole lines removes them, not just their text
-        else:
-            text = text.replace(old, new, 1)
-        texts[node_id] = text
-    if errors:
-        raise InputError("아무것도 바꾸지 않음 — " + "; ".join(errors))
-    for node_id, text in texts.items():
-        write_text(work_dir(result_dir, k) / (node_id + ".kt"), text)
-    edits_path.unlink()
-    emit({"stage": k, "changed": sorted(texts), "warnings": check_stage(result_dir, manifest, k)})
 
 
 # ---- build: base box (research R6) -----------------------------------------------
@@ -841,6 +935,7 @@ BASE_CSS = """.resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px sol
 .stages .nav { display: inline-block; width: 2.2em; height: 1.8em; line-height: 1.8em; text-align: center; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; font-weight: 400; cursor: pointer; user-select: none; }
 .stages span.nav { opacity: .3; cursor: default; }
 .stages .note { padding: 0 0 .5em; opacity: .8; }
+.stages .scene { padding: .5em 0 1em; max-width: 65ch; }
 .stages .code { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
 .stages .code pre { margin: 0; overflow: visible; width: max-content; min-width: 100%; box-sizing: border-box; }
 .stages .code pre, .stages .code pre code { white-space: pre; word-break: normal; }"""
@@ -866,9 +961,10 @@ def note_for(changed):
     return "" if changed else "이 단계에서는 달라진 것이 없음"
 
 
-def render_box(node_id, slides, diff_layers):
+def render_box(node_id, slides, diff_layers, kinds=None):
     """Base box. slides: [(title, note, code)]; diff_layers: [markup or None] (added after the code)."""
     n = len(slides)
+    kinds = kinds or ["code"] * n
     out = ['<div class="stages">', ""]
     for k in range(1, n + 1):
         out.append('<input type="radio" name="%s" id="%s-%d" class="s%d"%s>' % (node_id, node_id, k, k, " checked" if k == 1 else ""))
@@ -878,8 +974,11 @@ def render_box(node_id, slides, diff_layers):
         nxt = '<label class="nav" for="%s-%d">→</label>' % (node_id, k + 1) if k < n else '<span class="nav">→</span>'
         out += ['<div class="stage s%d">' % k, "",
                 '<div class="head"><span class="name">%s</span>%s%s</div>' % (html.escape(title, quote=False), prev, nxt),
-                *(['<div class="note">%s</div>' % html.escape(note, quote=False)] if note else []), "",
-                '<div class="code">', "", fence(code), ""]
+                *(['<div class="note">%s</div>' % html.escape(note, quote=False)] if note else []), ""]
+        if kinds[k - 1] == "prose":
+            out += ['<div class="scene"><p>%s</p></div>' % html.escape(code.strip(), quote=False).replace("\n", "<br>"), "", "</div>", ""]
+            continue
+        out += ['<div class="code">', "", fence(code), ""]
         if diff_layers[k - 1]:
             out += [diff_layers[k - 1], ""]
         out += ["</div>", "", "</div>", ""]
@@ -928,15 +1027,37 @@ def strip_diff_layer(doc):
 
 # ---- build -----------------------------------------------------------------------
 
-def stage_code(result_dir, manifest, node, stage):
-    if stage["work"] == len(manifest["stages"]):
-        return read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt"))
-    return read_text(work_dir(result_dir, stage["work"]) / (node["id"] + ".kt"))
+def node_scenes(result_dir, manifest, node, outline):
+    """[(title, kind, content)] of one node's pager, numbered per node (spec FR-015)."""
+    stages = {s["kind"]: s for s in manifest["stages"]}
+    prose = read_text(work_dir(result_dir, 1) / (node["id"] + ".kt")).strip()
+    scenes = [(stages["prose"]["nickname"], "prose", prose)] if stages["prose"]["visible"] else []
+    if not node["skip_reason"]:
+        original = read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt"))
+        info = analyse(original)
+        units = make_units(info)
+        if units:
+            placeholders, folds = check_outline(node, units, info, outline.get(node["id"]))
+            if render_scene(info, units, placeholders, [], len(units)).rstrip("\n") != original.rstrip("\n"):
+                raise SourceMismatch("%s: 모든 단위를 펼친 장면이 원본 범위와 다름" % node["id"])
+            if stages["outline"]["visible"]:
+                scenes.append((stages["outline"]["nickname"], "code", render_scene(info, units, placeholders, folds, 0)))
+            if stages["unfold"]["visible"]:
+                for k in range(1, len(units) + 1):
+                    title = "%s %d/%d — %s" % (stages["unfold"]["nickname"], k, len(units), placeholders[k - 1])
+                    scenes.append((title, "code", render_scene(info, units, placeholders, folds, k)))
+        last_code = next((c for _, kind, c in reversed(scenes) if kind == "code"), None)
+        if last_code is None or last_code.rstrip("\n") != original.rstrip("\n"):
+            scenes.append((stages["source"]["nickname"], "code", original))
+    return scenes
 
 
-def build_documents(result_dir, manifest, with_diff=True):
-    stages = manifest["stages"]
-    unchanged, docs_text = {}, {}
+class SourceMismatch(Exception):
+    """The scenes cannot reach the source: exit code 3."""
+
+
+def build_documents(result_dir, manifest, outline, with_diff=True):
+    unchanged, docs_text, counts = {}, {}, {}
     max_slides = 1
     for doc, title in manifest["docs"]:
         parts = ["# %s — 정제 단계" % title, ""]
@@ -947,36 +1068,30 @@ def build_documents(result_dir, manifest, with_diff=True):
                 parts += ["## " + " / ".join(group_path), ""]
             current_path = group_path
             parts += ["### " + node["name"], ""]
-            if node["responsibility"]:
+            if node.get("responsibility"):
                 parts += ['<div class="resp"><span class="label">책임</span> %s</div>' % html.escape(node["responsibility"], quote=False), ""]
             if node["skip_reason"]:
                 parts += ["⚠️ " + node["skip_reason"], ""]
-                first = stages[0]
-                code = read_text(work_dir(result_dir, 1) / (node["id"] + ".kt"))
-                slides = [("1단계: %s (1/1)" % first["nickname"], note_for(True), code)]
-                parts += [render_box(node["id"], slides, [None]), ""]
-                continue
-            slides, layers, prev = [], [], None
-            for s in stages:
-                code = stage_code(result_dir, manifest, node, s)
-                if not s["visible"]:
-                    prev = None  # the first visible stage after a hidden first stage gets no diff layer
-                    continue
-                changed = prev is None or code != prev
-                if prev is not None and not changed:
-                    unchanged.setdefault(s["nickname"], []).append(node["id"])
-                title = "%d단계: %s (%d/%d)" % (s["display"], s["nickname"], s["display"], s["of"])
-                slides.append((title, note_for(changed), code))
-                layers.append(render_diff_layer(code, diff_lines(prev, code)) if with_diff and prev is not None and changed else None)
-                prev = code
+            scenes = node_scenes(result_dir, manifest, node, outline)
+            slides, layers, kinds, prev = [], [], [], None
+            for number, (name, kind, content) in enumerate(scenes, start=1):
+                changed = kind != "code" or prev is None or content != prev
+                if not changed:
+                    unchanged.setdefault(name, []).append(node["id"])
+                slides.append(("%d단계: %s (%d/%d)" % (number, name, number, len(scenes)), note_for(changed), content))
+                layers.append(render_diff_layer(content, diff_lines(prev, content))
+                              if with_diff and kind == "code" and prev is not None and changed else None)
+                kinds.append(kind)
+                prev = content if kind == "code" else prev
+            counts[node["id"]] = len(scenes)
             max_slides = max(max_slides, len(slides))
-            parts += [render_box(node["id"], slides, layers), ""]
+            parts += [render_box(node["id"], slides, layers, kinds), ""]
         rules = "\n".join(".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k) for k in range(1, max_slides + 1))
         parts += ["<style>", BASE_CSS.replace("{STAGE_RULES}", rules), "</style>", ""]
         if with_diff:
             parts += ["<style>", DIFF_CSS, "</style>", ""]
         docs_text[doc] = "\n".join(parts)
-    return docs_text, unchanged
+    return docs_text, unchanged, counts
 
 
 def extract_last_stage(doc_text, node_id, last):
@@ -987,25 +1102,34 @@ def extract_last_stage(doc_text, node_id, last):
     return m2.group(2) if m2 else None
 
 
+def load_outline(result_dir, manifest):
+    missing = [rel(work_dir(result_dir, 1) / (n["id"] + ".kt")) for n in manifest["nodes"]
+               if not (work_dir(result_dir, 1) / (n["id"] + ".kt")).is_file()]
+    if missing:
+        raise InputError("1단계 파일이 없음: " + ", ".join(missing))
+    path = Path(result_dir) / "work" / OUTLINE_FILE
+    if not any(n["units"] for n in manifest["nodes"] if not n["skip_reason"]):
+        return {}
+    if not path.is_file():
+        raise InputError("펼치기 입력이 없음: " + rel(path))
+    try:
+        outline = json.loads(read_text(path))
+    except ValueError as e:
+        raise InputError("%s가 JSON이 아님: %s" % (rel(path), e))
+    if not isinstance(outline, dict):
+        raise InputError("%s는 노드 Id를 키로 하는 객체여야 함" % rel(path))
+    return outline
+
+
 def cmd_build(args):
     result_dir = Path(args.dir)
     manifest = load_manifest(result_dir)
-    stages = manifest["stages"]
-    g = len(stages)
-    missing = []
-    for node in manifest["nodes"]:
-        if not (work_dir(result_dir, 1) / (node["id"] + ".kt")).is_file():
-            missing.append(rel(work_dir(result_dir, 1) / (node["id"] + ".kt")))
-        if node["skip_reason"]:
-            continue
-        for k in range(2, g):
-            f = work_dir(result_dir, k) / (node["id"] + ".kt")
-            if not f.is_file():
-                missing.append(rel(f))
-    if missing:
-        raise InputError("작업 파일이 없음: " + ", ".join(missing))
-
-    docs_text, unchanged = build_documents(result_dir, manifest)
+    outline = load_outline(result_dir, manifest)
+    try:
+        docs_text, unchanged, counts = build_documents(result_dir, manifest, outline)
+    except SourceMismatch as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(3)
     paths = []
     for doc, _ in manifest["docs"]:
         path = result_dir / doc
@@ -1014,12 +1138,11 @@ def cmd_build(args):
 
     # FR-010: re-read the documents and compare the last stage with the source, read again.
     view_dir = Path(manifest["view"]).parent.resolve()
-    shown_last = stages[-1]["display"]
     mismatches, verified = [], 0
     for node in manifest["nodes"]:
         if node["skip_reason"]:
             continue
-        written = extract_last_stage(read_text(result_dir / node["doc"]), node["id"], shown_last)
+        written = extract_last_stage(read_text(result_dir / node["doc"]), node["id"], counts[node["id"]])
         text, reason = read_source(node["link"], view_dir)
         expected = None
         if text is not None:
@@ -1054,12 +1177,6 @@ def main(argv=None):
     p.add_argument("--hide")
     p.add_argument("--output-dir", dest="output_dir")
     p.add_argument("--pick")
-    b = sub.add_parser("begin")
-    b.add_argument("dir")
-    b.add_argument("k", type=int)
-    a = sub.add_parser("apply")
-    a.add_argument("dir")
-    a.add_argument("k", type=int)
     bd = sub.add_parser("build")
     bd.add_argument("dir")
     args = parser.parse_args(argv)
@@ -1067,7 +1184,7 @@ def main(argv=None):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
     try:
-        {"prepare": cmd_prepare, "begin": cmd_begin, "apply": cmd_apply, "build": cmd_build}[args.command](args)
+        {"prepare": cmd_prepare, "build": cmd_build}[args.command](args)
     except InputError as e:
         print(str(e), file=sys.stderr)
         sys.exit(2)

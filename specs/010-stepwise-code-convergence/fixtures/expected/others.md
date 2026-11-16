@@ -14,19 +14,9 @@
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
+<div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
 
-<div class="code">
-
-```kotlin
-class PaymentGateway {
-    fun pay(order: Order) {
-        LegacyBridge().forward(order)
-    }
-}
-```
-
-</div>
+<div class="scene"><p>주문 금액을 실제로 받아야 할 때 쓰인다.</p></div>
 
 </div>
 
@@ -42,17 +32,9 @@ class PaymentGateway {
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
+<div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
 
-<div class="code">
-
-```kotlin
-class LegacyBridge {
-    fun forward(order: Order) {}
-}
-```
-
-</div>
+<div class="scene"><p>구조 뷰에 사용 상황이 명시되지 않음</p></div>
 
 </div>
 
@@ -66,115 +48,18 @@ class LegacyBridge {
 
 <input type="radio" name="formatTotal" id="formatTotal-1" class="s1" checked>
 <input type="radio" name="formatTotal" id="formatTotal-2" class="s2">
-<input type="radio" name="formatTotal" id="formatTotal-3" class="s3">
-<input type="radio" name="formatTotal" id="formatTotal-4" class="s4">
-<input type="radio" name="formatTotal" id="formatTotal-5" class="s5">
-<input type="radio" name="formatTotal" id="formatTotal-6" class="s6">
-<input type="radio" name="formatTotal" id="formatTotal-7" class="s7">
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/7)</span><span class="nav">←</span><label class="nav" for="formatTotal-2">→</label></div>
+<div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="formatTotal-2">→</label></div>
 
-<div class="code">
-
-```kotlin
-fun formatTotal(order: Order): String = ""
-```
-
-</div>
+<div class="scene"><p>영수증이나 기록에 금액을 &lt;원&gt; 단위 글로 남길 때 쓰인다.</p></div>
 
 </div>
 
 <div class="stage s2">
 
-<div class="head"><span class="name">2단계: 선언의 종류 (2/7)</span><label class="nav" for="formatTotal-1">←</label><label class="nav" for="formatTotal-3">→</label></div>
-
-<div class="code">
-
-```kotlin
-fun formatTotal(order: Order): String = ⟨합계를 글로 바꿈⟩
-```
-
-<pre class="diff" aria-hidden="true"><code><span class="mod">fun formatTotal(order: Order): String = ⟨합계를 글로 바꿈⟩</span>
-</code></pre>
-
-</div>
-
-</div>
-
-<div class="stage s3">
-
-<div class="head"><span class="name">3단계: 의존 연결 (3/7)</span><label class="nav" for="formatTotal-2">←</label><label class="nav" for="formatTotal-4">→</label></div>
-<div class="note">이 단계에서는 달라진 것이 없음</div>
-
-<div class="code">
-
-```kotlin
-fun formatTotal(order: Order): String = ⟨합계를 글로 바꿈⟩
-```
-
-</div>
-
-</div>
-
-<div class="stage s4">
-
-<div class="head"><span class="name">4단계: 공개 시그니처 (4/7)</span><label class="nav" for="formatTotal-3">←</label><label class="nav" for="formatTotal-5">→</label></div>
-
-<div class="code">
-
-```kotlin
-fun formatTotal(total: BigDecimal): String =
-    ⟨합계를 글로 바꿈⟩
-```
-
-<pre class="diff" aria-hidden="true"><code><span class="mod">fun formatTotal(total: BigDecimal): String =</span>
-<span class="add">    ⟨합계를 글로 바꿈⟩</span>
-</code></pre>
-
-</div>
-
-</div>
-
-<div class="stage s5">
-
-<div class="head"><span class="name">5단계: 핵심 흐름 (5/7)</span><label class="nav" for="formatTotal-4">←</label><label class="nav" for="formatTotal-6">→</label></div>
-<div class="note">이 단계에서는 달라진 것이 없음</div>
-
-<div class="code">
-
-```kotlin
-fun formatTotal(total: BigDecimal): String =
-    ⟨합계를 글로 바꿈⟩
-```
-
-</div>
-
-</div>
-
-<div class="stage s6">
-
-<div class="head"><span class="name">6단계: 나머지 로직 (6/7)</span><label class="nav" for="formatTotal-5">←</label><label class="nav" for="formatTotal-7">→</label></div>
-
-<div class="code">
-
-```kotlin
-fun formatTotal(total: BigDecimal): String =
-    "합계: " + total.setScale(2).toPlainString() + " {원}"
-```
-
-<pre class="diff" aria-hidden="true"><code><span>fun formatTotal(total: BigDecimal): String =</span>
-<span class="mod">    "합계: " + total.setScale(2).toPlainString() + " {원}"</span>
-</code></pre>
-
-</div>
-
-</div>
-
-<div class="stage s7">
-
-<div class="head"><span class="name">7단계: 원본 (7/7)</span><label class="nav" for="formatTotal-6">←</label><span class="nav">→</span></div>
+<div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="formatTotal-1">←</label><span class="nav">→</span></div>
 
 <div class="code">
 
@@ -183,11 +68,6 @@ fun formatTotal(total: BigDecimal): String =
 fun formatTotal(total: BigDecimal): String =
     "합계: " + total.setScale(2).toPlainString() + " {원}"
 ```
-
-<pre class="diff" aria-hidden="true"><code><span class="add">/** 합계를 사람이 읽는 글로 바꾼다. */</span>
-<span>fun formatTotal(total: BigDecimal): String =</span>
-<span>    "합계: " + total.setScale(2).toPlainString() + " {원}"</span>
-</code></pre>
 
 </div>
 
@@ -207,17 +87,9 @@ fun formatTotal(total: BigDecimal): String =
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
+<div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
 
-<div class="code">
-
-```kotlin
-class AuditLog {
-    fun write(order: Order) {}
-}
-```
-
-</div>
+<div class="scene"><p>주문 처리가 끝난 뒤 나중에 확인할 기록이 필요할 때 쓰인다.</p></div>
 
 </div>
 
@@ -234,13 +106,12 @@ class AuditLog {
 .stages > input.s3:checked ~ .stage.s3 { display: block; }
 .stages > input.s4:checked ~ .stage.s4 { display: block; }
 .stages > input.s5:checked ~ .stage.s5 { display: block; }
-.stages > input.s6:checked ~ .stage.s6 { display: block; }
-.stages > input.s7:checked ~ .stage.s7 { display: block; }
 .stages .head { display: flex; align-items: center; gap: .4em; padding: .5em 0 .2em; font-weight: 600; }
 .stages .head .name { flex: 1; }
 .stages .nav { display: inline-block; width: 2.2em; height: 1.8em; line-height: 1.8em; text-align: center; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; font-weight: 400; cursor: pointer; user-select: none; }
 .stages span.nav { opacity: .3; cursor: default; }
 .stages .note { padding: 0 0 .5em; opacity: .8; }
+.stages .scene { padding: .5em 0 1em; max-width: 65ch; }
 .stages .code { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
 .stages .code pre { margin: 0; overflow: visible; width: max-content; min-width: 100%; box-sizing: border-box; }
 .stages .code pre, .stages .code pre code { white-space: pre; word-break: normal; }

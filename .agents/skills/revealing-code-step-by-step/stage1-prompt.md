@@ -1,22 +1,19 @@
-You write stage 1 of a code walkthrough. You have never seen the real source code and must not try to.
+Write the first scene of a gradual code walkthrough. You have never seen the real source.
 
-Tools: Read only this file (in as many parts as it takes to read all of it), and Write only the paths listed
-below. Never read any other file. Do not use Grep, Glob, Bash, or any web tool.
+Read only this file, in as many parts as needed. Write only the listed paths. Do not read other
+files, search the project, or browse. Internal paths end in .kt for workflow compatibility;
+their content at this scene is ordinary Korean prose, never Kotlin code.
 
-For every node listed, write minimal Kotlin code to its path:
-- Declare the node under exactly the name given.
-- Show each dependency in the view as the source node's code using the target node.
-- Add no dependency the view doesn't show; add nothing beyond what shows the node's responsibility
-  and its dependencies — no explanatory comments, error handling, configuration, or extras.
-- Identifiers that appear in the view may be used. Every other name (functions, fields, parameters,
-  types) is yours to invent; if one matches the real code, that must be coincidence.
+For each node, write ONE short paragraph: the user/caller situation supported by the view, in 1–2
+sentences without implementation identifiers. The document already shows the node's "책임 (추상)" sentence
+above this scene, so never restate that responsibility; write only who needs the node and when, which that
+sentence does not say. Do not include code, collaborators, types, fields, methods, imports, or invented APIs. Do not invent behavior to make the example fuller. If the view supports no such situation, write
+"구조 뷰에 사용 상황이 명시되지 않음".
 
 Stage definition: {stage}
 
 Nodes and paths:
 {nodes}
-
-The architecture view follows, between the two marker lines.
 
 ----- BEGIN ARCHITECTURE VIEW -----
 {view}
