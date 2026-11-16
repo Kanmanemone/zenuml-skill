@@ -95,12 +95,13 @@ specs/010-stepwise-code-convergence/
 
 ```text
 .agents/skills/revealing-code-step-by-step/      # 신규
-├── SKILL.md            # 작업 순서: prepare → 1단계 서브에이전트 → 단계마다 begin+편집 → build → 링크 응답
+├── SKILL.md            # 작업 순서: prepare → 1단계 서브에이전트 → 단계마다 begin+apply → build → reply 응답
+├── stage1-prompt.md    # 1단계 서브에이전트 지시의 틀 — prepare가 채워 work/stage1-prompt.md로 씀
 ├── stages.md           # 단계 정의 파일 — 단계 구성을 고치는 유일한 곳(spec FR-007·008)
 ├── settings.jsonc      # 단계마다 보일지(stages 맵), 결과 위치(output.directory) — 007 주석·토큰 기호 관례
 ├── settings.schema.json # 두 옵션의 정의(stageToggles 타입 기본값 {}, relativePath 타입 기본값 ".")
 └── scripts/
-    └── stages.py       # python scripts/stages.py prepare|begin|build ...
+    └── stages.py       # python scripts/stages.py prepare|begin|apply|build ...
 
 .gitignore              # 개정 — !.agents/skills/revealing-code-step-by-step/ 추가
 README.md, README.ko.md # 개정 — "추가 기능"·"요구 사항"에 이 스킬 항목

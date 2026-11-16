@@ -35,16 +35,17 @@
 ```text
 <python> <skill>/scripts/stages.py prepare <구조 뷰 파일> [--show=<별명,…>] [--hide=<별명,…>] [--output-dir=<상대 경로>] [--pick=<id>:<번호>,…]
 <python> <skill>/scripts/stages.py begin   <산출 폴더> <단계 번호>
+<python> <skill>/scripts/stages.py apply   <산출 폴더> <단계 번호>
 <python> <skill>/scripts/stages.py build   <산출 폴더>
 ```
 
 - 작업 폴더를 바꾸지 않고 실행한다. 경로는 프로젝트 루트를 기준으로 한다.
-- 표준 출력에는 결과 JSON 한 줄을 낸다. 오류는 표준 오류에 한국어 한 줄로 내고, 0이 아닌 종료 코드로 끝난다.
+- 표준 출력에는 결과 JSON 한 줄을 낸다(`begin`은 그 뒤에 코드를 더 출력한다). 오류는 표준 오류에 한국어 한 줄로 내고, 0이 아닌 종료 코드로 끝난다.
 
 | 코드 | 뜻 | 예 |
 |---|---|---|
 | 0 | 성공 | |
-| 2 | 입력 문제 | 구조 뷰 형식이 아님, 노드가 없음, `stages.md` 오류, 작업 파일 누락, 이미 시작한 단계 |
+| 2 | 입력 문제 | 구조 뷰 형식이 아님, 노드가 없음, `stages.md` 오류, 작업 파일 누락, 이미 시작한 단계, 적용할 수 없는 바꿀 내용 |
 | 3 | 마지막 단계가 원본 범위와 다름 | `build` 확인 실패 |
 
 ### `prepare <view>`
@@ -68,21 +69,19 @@
    | 선언 0개 | `원본 파일에서 <이름> 선언을 찾지 못해 구체화하지 않음` |
    | 선언 2개 이상이고 `--pick` 없음 | `원본 파일에 <이름> 선언이 여럿 — --pick으로 하나를 골라야 함` (노드에 `candidates`가 붙는다. 모델이 고른 뒤 `--pick`으로 다시 실행) |
 
-6. 만들 단계 목록을 `work/manifest.json`에 함께 적는다. `begin`과 `build`는 `stages.md`가 아니라 이 사본을 쓴다. 한 번 만드는 동안 정의가 바뀌지 않게 하기 위해서다.
-7. 출력 JSON은 아래 형태다. `notices`는 설정 알림(`⚙️ 설정 안내: …`) 목록이고, 모델은 이것을 응답 끝에 그대로 전한다.
+6. 만들 단계 목록과 노드 정보를 `work/manifest.json`에 적는다. `begin`·`apply`·`build`는 `stages.md`가 아니라 이 사본을 쓴다. 한 번 만드는 동안 정의가 바뀌지 않게 하기 위해서다.
+7. 1단계 서브에이전트에게 줄 지시 전부를 `work/stage1-prompt.md`에 쓴다(research R1). 스킬 폴더의 `stage1-prompt.md` 틀에 1단계 정의(`별명 — becomes / unrevealed`), 노드마다 `- <id> (<이름>) → <1단계 파일의 절대 경로>` 한 줄, 구조 뷰 파일 내용 전부를 채운 것이다.
+8. 출력 JSON은 아래 형태다. 모델이 다음에 할 일에 필요한 것만 담는다.
 
 ```json
 {"dir": ".zenuml/<slug>.stages",
- "stages": [{"work": 1, "nickname": "꾸며낸 뼈대", "visible": true, "display": 1, "of": 7,
-             "becomes": "…", "unrevealed": "…", "notation": null, "merged": []}, …],
- "notices": [],
- "nodes": [{"id": "OrderService", "name": "OrderService", "stage1": ".zenuml/<slug>.stages/work/01/OrderService.kt",
-            "original": ".zenuml/<slug>.stages/work/original/OrderService.kt",
-            "range": {"source": "../app/.../OrderService.kt", "start_line": 12, "end_line": 80},
-            "contains": ["Validator"], "candidates": [], "skip_reason": null, "doc": "all.md"}, …]}
+ "stage1_prompt": "<절대 경로>/work/stage1-prompt.md",
+ "middle": [2, 3, 4, 5, 6],
+ "pick": [{"id": "Screen", "source": "<원본 경로>", "candidates": [{"pick": 1, "start_line": 3, "end_line": 7, "header": "…"}, …]}]}
 ```
 
-- `contains`: 이 노드의 원본 범위 안에 들어 있는 다른 노드의 Id 목록이다. 모델은 이 목록을 보고 중간 단계에서 그 부분을 `⟨이름⟩`으로 접어 둔다.
+- `middle`: 모델이 `begin`·`apply`를 실행할 단계 번호(2…g-1)다.
+- `pick`: `--pick`이 필요한 노드다. 비어 있지 않으면 모델이 후보를 골라 `prepare`를 다시 실행한다.
 
 ### `begin <dir> <k>`
 
@@ -90,9 +89,32 @@
   - `2 ≤ k ≤ g-1` (`g`는 만드는 단계 수, research R13)
   - `work/<k-1>`이 있음
   - `work/<k>`가 없음
-- 구체화하는 노드마다 `work/<k-1>/<id>.kt`를 `work/<k>/<id>.kt`로 그대로 복사한다. 구체화하지 않는 노드는 복사하지 않는다.
+  - 직전 단계의 작업 파일이 모두 있음(k = 2이면 모든 노드의 1단계 파일, 그 밖에는 구체화하는 노드의 파일). 빠지면 빠진 경로를 모두 적는다.
+- 구체화하는 노드마다 `work/<k-1>/<id>.kt`를 `work/<k>/<id>.kt`로 그대로 복사한다. 구체화하지 않는 노드는 복사하지 않는다. 남아 있는 `work/edits.txt`는 지운다.
 - 폴더 이름의 번호는 두 자리다(`01`, `02`, …).
-- 출력 JSON은 `{"stage": k, "nickname": "…", "becomes": "…", "unrevealed": "…", "notation": "…", "merged": [{"nickname": "…", "becomes": "…", "notation": "…"}], "files": [...]}` 형태다. `merged`는 꺼져서 이 단계에 합쳐진 단계들의 몫이고, 모델은 이것까지 함께 바꾼다.
+- 출력의 첫 줄은 `{"stage": k, "nickname": "…", "becomes": "…", "unrevealed": "…", "notation": "…", "merged": [{"nickname": "…", "becomes": "…", "notation": "…"}], "edits": "<dir>/work/edits.txt"}` 형태의 JSON이다. `merged`는 꺼져서 이 단계에 합쳐진 단계들의 몫이고, 모델은 이것까지 함께 바꾼다.
+- 그 뒤에 구체화하는 노드마다 복사한 코드를 `===== <id> · <k>단계 =====` 머리 아래에 그대로 출력한다. 원본 범위 안에 다른 노드가 들어 있으면 머리에 ` · 안에 든 노드: <id>, …`를 붙인다. k = 2일 때는 노드마다 원본 범위도 `===== <id> · 원본 =====` 머리 아래에 출력한다. 모델이 작업 파일을 따로 읽지 않게 하기 위해서다.
+
+### `apply <dir> <k>`
+
+- 모델이 `work/edits.txt`에 적은 바꿀 내용을 k단계 작업 파일에 적용한다(research R11). 형식은 아래 블록의 반복이다. 블록 밖에는 빈 줄만 올 수 있다.
+
+  ```text
+  <<<<<<< <node id>
+  바꿀 글(지금 파일에 있는 그대로, 여러 줄 가능)
+  =======
+  새 글(비우면 그 줄들을 지운다)
+  >>>>>>>
+  ```
+
+- 다음 중 하나라도 어긋나면 종료 코드 2로 끝나고, 어떤 파일도 바꾸지 않는다.
+  - k단계가 시작되었고(`work/<k>`가 있음) 다음 단계는 아직 시작되지 않았음
+  - `work/edits.txt`가 있고 형식이 맞음
+  - 블록마다 노드가 구체화하는 노드이고, 바꿀 글이 그 파일(앞 블록을 적용한 뒤)에 정확히 한 번 나옴
+- 성공하면 파일을 쓰고 `work/edits.txt`를 지운 뒤, k단계를 k-1단계와 기계적으로 비교해 `warnings`를 낸다.
+  - 원본 범위에 있는 줄(공백을 뺀 글자 기준, 글자나 숫자가 하나라도 있는 줄)이 k-1단계에 있었는데 k단계에서 사라졌으면 그 줄을 알린다(1원칙, FR-012).
+  - 노드 이름(Id나 식별자인 표시 이름)이 코드에 없으면 알린다.
+- 출력 JSON은 `{"stage": k, "changed": ["<id>", …], "warnings": ["…", …]}` 형태다. 모델은 다음 `begin` 전에 경고를 고친다.
 
 ### `build <dir>`
 
@@ -109,10 +131,14 @@
 {"docs": [".zenuml/…/all.md", …],
  "unchanged": {"<별명>": ["<id>", …]},
  "skipped": [{"node": "…", "reason": "…"}],
- "verified": <개수>}
+ "verified": <개수>,
+ "notices": ["⚙️ 설정 안내: …"],
+ "reply": "📄 [<문서 title>](<문서 경로>)\n…\n⚠️ <노드>: <이유>\n…"}
 ```
 
-- `unchanged`: "달라진 것이 없음"이 붙은 노드 목록이다. 모델은 이 목록으로 그 단계에서 바꿔야 할 것을 빠뜨리지 않았는지 다시 확인한다.
+- `reply`: 채팅 응답 전체다. 문서마다 `📄` 한 줄, 구체화하지 않은 노드마다 `⚠️` 한 줄, 설정 알림을 차례로 담는다.
+
+- `unchanged`: "달라진 것이 없음"이 붙은 노드 목록이다.
 
 ## 3. 문서 형식
 
@@ -185,9 +211,10 @@
 
 ## 4. SKILL.md가 정하는 모델의 일
 
-1. `prepare`를 실행한다. 종료 코드가 2이면 그 이유를 알리고 멈춘다.
-2. 1단계 서브에이전트를 띄운다(R1). 서브에이전트는 `nodes[].stage1` 경로에만 쓴다.
-3. k = 2…g-1마다 `begin k`를 실행하고, 출력된 파일들을 그 단계의 정의대로 Edit로 고친다. 이때 R11의 규칙을 지킨다. 원본은 `work/original/`에서 읽는다. 다음 `begin`을 실행하기 전에, 이 단계의 파일들이 R11을 지키는지 스스로 점검하고 고친다. 다음 단계가 이 단계의 복사본에서 시작하므로, 이 단계를 고칠 수 있는 것은 이때뿐이다.
-4. `build`를 실행한다.
-5. 종료 코드가 3이면, 만드는 동안 원본이 바뀌었거나 스크립트에 버그가 있다는 뜻이다. 작업 파일을 고치지 말고 메시지를 그대로 알린다.
-6. 채팅 응답에는 문서 링크들과, 구체화하지 않은 노드가 있으면 그 목록만 넣는다.
+스크립트로 정할 수 있는 일은 모두 스크립트가 하고, 모델은 의미를 판단해야 하는 일만 한다.
+
+1. `prepare`를 실행한다. 종료 코드가 2이면 그 이유를 알리고 멈춘다. `pick`이 있으면 후보를 골라 `--pick`으로 다시 실행한다.
+2. 1단계 서브에이전트를 띄운다(R1). 프롬프트는 `stage1_prompt` 파일을 읽고 따르라는 한 줄뿐이다.
+3. `middle`의 k마다 `begin k`를 실행하고, 출력된 코드를 보고 그 단계의 정의와 R11의 규칙대로 바꿀 내용을 `edits.txt`에 적어 `apply k`를 실행한다. `warnings`가 있으면 다음 `begin` 전에 고친다.
+4. `build`를 실행한다. 종료 코드가 3이면 작업 파일을 고치지 말고 메시지를 그대로 알린다.
+5. 채팅 응답은 `reply` 그대로다.

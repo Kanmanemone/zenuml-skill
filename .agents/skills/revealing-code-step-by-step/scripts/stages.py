@@ -3,9 +3,11 @@
 
     stages.py prepare <view.architecture.md> [--show=a,b] [--hide=a,b] [--output-dir=rel] [--pick=Id:n,...]
     stages.py begin   <result dir> <k>
+    stages.py apply   <result dir> <k>
     stages.py build   <result dir>
 
-Each command prints one line of JSON on stdout. Errors go to stderr as one Korean line.
+Each command prints one line of JSON on stdout (begin then prints the stage's code). Errors go to stderr
+as one Korean line.
 Exit codes: 0 ok, 2 bad input, 3 the last stage differs from the source (build).
 Python 3.9+, standard library only. See specs/010-stepwise-code-convergence/contracts/.
 """
@@ -18,10 +20,13 @@ import re
 import shutil
 import sys
 import urllib.request
+from collections import Counter
 from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 STAGES_FILE = SKILL_DIR / "stages.md"
+PROMPT_FILE = SKILL_DIR / "stage1-prompt.md"
+EDITS_FILE = "edits.txt"
 SETTINGS_FILE = "settings.jsonc"
 SCHEMA_FILE = "settings.schema.json"
 
@@ -655,11 +660,25 @@ def cmd_prepare(args):
     manifest = {"view": rel(view), "slug": slug, "dir": rel(result_dir), "docs": docs,
                 "stages": generated, "notices": notices, "nodes": nodes}
     write_text(manifest_path(result_dir), json.dumps(manifest, ensure_ascii=False, indent=1))
-    public_nodes = [{k: n[k] for k in ("id", "name", "stage1", "original", "range", "contains", "candidates",
-                                       "skip_reason", "doc")} for n in nodes]
-    public_stages = [{k: s[k] for k in ("work", "nickname", "visible", "display", "of", "becomes", "unrevealed",
-                                        "notation", "merged")} for s in generated]
-    emit({"dir": rel(result_dir), "stages": public_stages, "notices": notices, "nodes": public_nodes})
+    prompt = write_stage1_prompt(result_dir, view_text, generated[0], nodes)
+    pick = [{"id": n["id"], "source": n["link"] if re.match(r"https?://", n["link"]) else rel(view_dir / n["link"].split("#")[0]),
+             "candidates": n["candidates"]}
+            for n in nodes if n["candidates"] and n["skip_reason"]]
+    emit({"dir": rel(result_dir), "stage1_prompt": prompt.as_posix(), "middle": list(range(2, len(generated))),
+          "pick": pick})
+
+
+def write_stage1_prompt(result_dir, view_text, stage, nodes):
+    """The whole stage-1 subagent prompt in one file: template + stage 1 + nodes + the view itself."""
+    node_lines = "\n".join("- %s (%s) → %s" % (n["id"], n["name"], Path(n["stage1"]).resolve().as_posix())
+                           for n in nodes)
+    text = (read_text(PROMPT_FILE)
+            .replace("{stage}", "%s — %s / %s" % (stage["nickname"], stage["becomes"], stage["unrevealed"]))
+            .replace("{nodes}", node_lines)
+            .replace("{view}", view_text.rstrip("\n")))
+    path = (Path(result_dir) / "work" / "stage1-prompt.md").resolve()
+    write_text(path, text)
+    return path
 
 
 # ---- begin -----------------------------------------------------------------------
@@ -679,20 +698,112 @@ def cmd_begin(args):
         raise InputError("직전 단계 폴더가 없음: " + rel(work_dir(result_dir, k - 1)))
     if work_dir(result_dir, k).exists():
         raise InputError("이미 시작한 단계임(지난 단계는 다시 만들지 않음): " + rel(work_dir(result_dir, k)))
-    files = []
+    # Stage 1 is written for every node (build shows it for skipped nodes too); later stages only for the rest.
+    expected = [n for n in manifest["nodes"] if k == 2 or not n["skip_reason"]]
+    missing = [rel(work_dir(result_dir, k - 1) / (n["id"] + ".kt")) for n in expected
+               if not (work_dir(result_dir, k - 1) / (n["id"] + ".kt")).is_file()]
+    if missing:
+        raise InputError("직전 단계 파일이 없음: " + ", ".join(missing))
+    edits = Path(result_dir) / "work" / EDITS_FILE
+    if edits.exists():
+        edits.unlink()
+    blocks = []
     for node in manifest["nodes"]:
         if node["skip_reason"]:
             continue
-        src = work_dir(result_dir, k - 1) / (node["id"] + ".kt")
-        if not src.is_file():
-            raise InputError("직전 단계 파일이 없음: " + rel(src))
         dst = work_dir(result_dir, k) / (node["id"] + ".kt")
         dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(src, dst)
-        files.append(rel(dst))
+        shutil.copyfile(work_dir(result_dir, k - 1) / (node["id"] + ".kt"), dst)
+        inner = " · 안에 든 노드: " + ", ".join(node["contains"]) if node["contains"] else ""
+        blocks.append("===== %s · %d단계%s =====\n%s" % (node["id"], k, inner, read_text(dst).rstrip("\n")))
+        if k == 2:
+            blocks.append("===== %s · 원본 =====\n%s" % (node["id"], read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt")).rstrip("\n")))
     s = stages[k - 1]
     emit({"stage": k, "nickname": s["nickname"], "becomes": s["becomes"], "unrevealed": s["unrevealed"],
-          "notation": s["notation"], "merged": s["merged"], "files": files})
+          "notation": s["notation"], "merged": s["merged"], "edits": rel(edits)})
+    print("\n" + "\n\n".join(blocks))
+
+
+# ---- apply -----------------------------------------------------------------------
+
+def parse_edits(text):
+    """Blocks of `<<<<<<< <id>` / old lines / `=======` / new lines / `>>>>>>>`."""
+    blocks, cur, part = [], None, None
+    for number, line in enumerate(text.split("\n"), start=1):
+        if cur is None:
+            m = re.fullmatch(r"<<<<<<< (\S+)\s*", line)
+            if m:
+                cur, part = {"id": m.group(1), "old": [], "new": []}, "old"
+            elif line.strip():
+                raise InputError("%s %d번째 줄이 블록 밖에 있음: %s" % (EDITS_FILE, number, line))
+            continue
+        if line == "=======" and part == "old":
+            part = "new"
+        elif line == ">>>>>>>" and part == "new":
+            blocks.append((cur["id"], "\n".join(cur["old"]), "\n".join(cur["new"])))
+            cur = None
+        else:
+            cur[part].append(line)
+    if cur is not None:
+        raise InputError("%s의 %s 블록이 >>>>>>>로 닫히지 않음" % (EDITS_FILE, cur["id"]))
+    return blocks
+
+
+def source_lines(text, wanted):
+    """Stripped lines of `text` that are in `wanted`, with multiplicity."""
+    return Counter(line.strip() for line in text.split("\n") if line.strip() in wanted)
+
+
+def check_stage(result_dir, manifest, k):
+    """Mechanical checks of stage k against stage k-1 (rules: names stay, source lines never go back)."""
+    warnings = []
+    for node in manifest["nodes"]:
+        if node["skip_reason"]:
+            continue
+        cur = read_text(work_dir(result_dir, k) / (node["id"] + ".kt"))
+        prev = read_text(work_dir(result_dir, k - 1) / (node["id"] + ".kt"))
+        wanted = {line.strip() for line in read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt")).split("\n") if re.search(r"\w", line)}
+        for line in source_lines(prev, wanted) - source_lines(cur, wanted):
+            warnings.append("%s: 앞 단계에 있던 원본 줄이 사라지거나 바뀜: %s" % (node["id"], line))
+        if not any(re.search(r"\b%s\b" % re.escape(name), cur) for name in declaration_names(node)):
+            warnings.append("%s: 노드 이름이 코드에 없음" % node["id"])
+    return warnings
+
+
+def cmd_apply(args):
+    result_dir = Path(args.dir)
+    manifest = load_manifest(result_dir)
+    g, k = len(manifest["stages"]), args.k
+    if not 2 <= k <= g - 1 or not work_dir(result_dir, k).is_dir():
+        raise InputError("시작하지 않은 단계임(먼저 begin %d): %s" % (k, rel(work_dir(result_dir, k))))
+    if work_dir(result_dir, k + 1).exists():
+        raise InputError("다음 단계가 이미 시작되어 이 단계는 바꿀 수 없음: " + rel(work_dir(result_dir, k)))
+    edits_path = result_dir / "work" / EDITS_FILE
+    if not edits_path.is_file():
+        raise InputError("바꿀 내용 파일이 없음: " + rel(edits_path))
+    nodes = {n["id"]: n for n in manifest["nodes"] if not n["skip_reason"]}
+    texts, errors = {}, []
+    for i, (node_id, old, new) in enumerate(parse_edits(read_text(edits_path)), start=1):
+        if node_id not in nodes:
+            errors.append("%d번째 블록: 구체화하는 노드가 아님(%s)" % (i, node_id))
+            continue
+        path = work_dir(result_dir, k) / (node_id + ".kt")
+        text = texts.get(node_id, read_text(path))
+        count = text.count(old) if old else 0
+        if count != 1:
+            errors.append("%d번째 블록(%s): 바꿀 글이 %d번 나옴(정확히 1번이어야 함)" % (i, node_id, count))
+            continue
+        if new == "" and text.count(old + "\n") == 1:
+            text = text.replace(old + "\n", "", 1)  # deleting whole lines removes them, not just their text
+        else:
+            text = text.replace(old, new, 1)
+        texts[node_id] = text
+    if errors:
+        raise InputError("아무것도 바꾸지 않음 — " + "; ".join(errors))
+    for node_id, text in texts.items():
+        write_text(work_dir(result_dir, k) / (node_id + ".kt"), text)
+    edits_path.unlink()
+    emit({"stage": k, "changed": sorted(texts), "warnings": check_stage(result_dir, manifest, k)})
 
 
 # ---- build: base box (research R6) -----------------------------------------------
@@ -900,8 +1011,10 @@ def cmd_build(args):
         print("마지막 단계가 원본 범위와 다름: " + ", ".join(mismatches), file=sys.stderr)
         sys.exit(3)
     skipped = [{"node": n["id"], "reason": n["skip_reason"]} for n in manifest["nodes"] if n["skip_reason"]]
+    reply = (["📄 [%s](%s)" % (title, path) for (_, title), path in zip(manifest["docs"], paths)]
+             + ["⚠️ %s: %s" % (s["node"], s["reason"]) for s in skipped] + manifest["notices"])
     emit({"docs": paths, "unchanged": unchanged, "skipped": skipped, "verified": verified,
-          "notices": manifest["notices"]})
+          "notices": manifest["notices"], "reply": "\n".join(reply)})
 
 
 # ---- entry -----------------------------------------------------------------------
@@ -918,13 +1031,17 @@ def main(argv=None):
     b = sub.add_parser("begin")
     b.add_argument("dir")
     b.add_argument("k", type=int)
+    a = sub.add_parser("apply")
+    a.add_argument("dir")
+    a.add_argument("k", type=int)
     bd = sub.add_parser("build")
     bd.add_argument("dir")
     args = parser.parse_args(argv)
-    if hasattr(sys.stderr, "reconfigure"):
-        sys.stderr.reconfigure(encoding="utf-8")
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     try:
-        {"prepare": cmd_prepare, "begin": cmd_begin, "build": cmd_build}[args.command](args)
+        {"prepare": cmd_prepare, "begin": cmd_begin, "apply": cmd_apply, "build": cmd_build}[args.command](args)
     except InputError as e:
         print(str(e), file=sys.stderr)
         sys.exit(2)

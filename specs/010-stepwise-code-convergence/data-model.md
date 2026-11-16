@@ -58,15 +58,15 @@
 | 단계 | 파일 | 쓰는 주체 |
 |---|---|---|
 | 1 | `work/01/<node id>.kt` | 1단계 서브에이전트(R1) |
-| 2 … g-1 | `work/<NN>/<node id>.kt` (구체화하는 노드만) | `begin`이 복사하고 메인 에이전트가 고친다(R11). |
+| 2 … g-1 | `work/<NN>/<node id>.kt` (구체화하는 노드만) | `begin`이 복사하고, 메인 에이전트가 적은 `work/edits.txt`를 `apply`가 적용한다(R11). |
 | g (마지막) | 없음. `work/original/<node id>.kt`를 그대로 쓴다. | `prepare`가 원본 범위를 잘라 둔다. |
 
 ## 상태 흐름
 
 ```text
-prepare ─▶ (서브에이전트) work/01 ─▶ begin 2 ─▶ 편집 ─▶ begin 3 ─▶ 편집 … begin n-1 ─▶ 편집 ─▶ build
+prepare ─▶ (서브에이전트) work/01 ─▶ begin 2 ─▶ apply 2 ─▶ begin 3 ─▶ apply 3 … begin g-1 ─▶ apply g-1 ─▶ build
 ```
 
-- `begin k`는 `work/<k-1>`이 있어야 하고, `work/<k>`가 이미 있으면 거부한다. 지나간 단계를 되돌아가 덮어쓰지 않기 위해서다.
+- `begin k`는 `work/<k-1>`과 그 작업 파일이 모두 있어야 하고, `work/<k>`가 이미 있으면 거부한다. 지나간 단계를 되돌아가 덮어쓰지 않기 위해서다.
 - `build`는 1단계와 2…g-1단계의 작업 파일이 모두 있어야 한다.
 - 어느 노드의 k단계 코드가 k-1단계와 같으면, 그 단계에 "이 단계에서는 달라진 것이 없음"이 붙는다(FR-014).
