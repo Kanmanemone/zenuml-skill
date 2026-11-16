@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | `hover.enabled` | `boolean` | `true`, `false` | `true` | `false`면 나머지 값과 상관없이 꺼짐(FR-020) |
 | `hover.responsibility` | `itemList` | `abstract`, `concrete` | `["abstract", "concrete"]` | 적은 순서대로, `[]`이면 없음(FR-008) |
-| `hover.collaboration` | `itemList` | `targets`, `boundary`, `rationale`, `questions` | `["targets", "boundary", "rationale"]` | 적은 순서대로, `[]`이면 없음(FR-009) |
+| `hover.collaboration` | `itemList` | `targets`, `boundary`, `rationale`, `questions` | `["targets", "boundary", "rationale", "questions"]` | 적은 순서대로, `[]`이면 없음(FR-009). 본문에 질문이 없으면(`collaboration.questions`가 `false`) `questions`는 없는 항목처럼 동작(FR-009b) |
 | `hover.position` | `enum` | `bottom`, `node` | `bottom` | `<style>` 블록만 바꿈(FR-019) |
 
 `itemList` 검증: 배열, 원소는 모두 `items`의 문자열, 중복 없음. 어기면 그 옵션만 기본값 + 안내 한 줄(FR-009a). 모든 값의 토큰 영향은 `[0]`(FR-018).
