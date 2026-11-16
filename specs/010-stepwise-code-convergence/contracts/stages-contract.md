@@ -116,7 +116,7 @@
 
 ## 3. 문서 형식
 
-줄 끝은 LF이고, 파일은 줄바꿈 하나로 끝난다. 구조는 [prototype/code-gallery.md](../prototype/code-gallery.md)를 따르고, 거기에 단계 제목·한 줄 설명·표시 줄을 더한다.
+줄 끝은 LF이고, 파일은 줄바꿈 하나로 끝난다. 구조는 [prototype/code-gallery.md](../prototype/code-gallery.md)를 따르고, 거기에 단계 제목·표시 줄을 더한다.
 
 ````markdown
 # <문서 title> — 정제 단계
@@ -134,7 +134,6 @@
 <div class="stage s1">
 
 <div class="head"><span class="name">1단계: 꾸며낸 뼈대 (1/7)</span><span class="nav">←</span><label class="nav" for="<id>-2">→</label></div>
-<div class="note">원본과 같아진 것: 없음(노드 이름만 구조 뷰와 같음)</div>
 
 <div class="code">
 
@@ -166,10 +165,7 @@
 ````
 
 - **제목**: `<k>단계: <별명> (<k>/<n>)` 형식이다(spec FR-015).
-- **한 줄 설명**: 다음 셋 중 하나다.
-  - 1단계: `원본과 같아진 것: <becomes>`
-  - 2단계 이후이고 직전 단계와 다를 때: `원본과 같아진 것: <becomes>`
-  - 2단계 이후이고 직전 단계와 같을 때: `이 단계에서는 달라진 것이 없음`
+- **표시 줄**: 2단계 이후이고 직전 단계와 같을 때만 제목 아래에 `<div class="note">이 단계에서는 달라진 것이 없음</div>`을 둔다. 그 밖의 단계에는 표시 줄이 없다. 단계의 `becomes`는 화면에 적지 않는다.
 - **달라진 줄 색칠**(research R7, VS Code의 git 변경 표시 규칙): 2단계부터 직전 단계와 비교해 줄마다 종류를 정한다.
   - `add`(추가): 왼쪽 초록 막대 + 옅은 초록 줄 배경
   - `mod`(변경): 왼쪽 파란 막대 + 옅은 파란 줄 배경
