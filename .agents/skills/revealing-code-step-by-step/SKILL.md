@@ -39,7 +39,7 @@ Each command prints one line of JSON. Exit code 2 means bad input (the one stder
 
 ## Stage 1
 
-Launch a **new** general-purpose subagent with the Agent tool — never a fork (a fork inherits this conversation, which may contain the source). Its prompt is exactly this template, filled in, and nothing else:
+Launch a **new** sub-agent that starts with no history of this conversation (Claude Code: the Agent tool with a general-purpose agent; other agents: their equivalent) — never a fork or any sub-agent that inherits this conversation, which may contain the source. Its prompt is exactly this template, filled in, and nothing else:
 
 ````text
 You write stage 1 of a code walkthrough. You have never seen the real source code and must not try to.
@@ -66,7 +66,7 @@ Architecture view file: <absolute path of the view file>
 
 The view file is the only thing the subagent may read: it is exactly the input FR-003 allows, and pointing to it instead of pasting it saves output tokens.
 
-When it returns, check that every `stage1` path exists. If the Agent tool is unavailable, reply `격리된 서브에이전트를 쓸 수 없어 정제 단계 문서를 만들지 않음` and stop — never write stage 1 yourself.
+When it returns, check that every `stage1` path exists. If your agent cannot start such a fresh sub-agent, reply `격리된 서브에이전트를 쓸 수 없어 정제 단계 문서를 만들지 않음` and stop — never write stage 1 yourself.
 
 ## Middle stages
 

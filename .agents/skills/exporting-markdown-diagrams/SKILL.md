@@ -11,7 +11,7 @@ Converts a diagram embedded in a Markdown file to SVG/PNG/PDF, or a whole Markdo
 
 0. Read the settings (see "Settings" below).
 1. Determine the target file, output format, and conversion scope from the request.
-2. Fill whatever is missing from the settings' defaults, or ask for every piece still missing (format, scope, page layout) together in one `AskUserQuestion` call (see "Step 2").
+2. Fill whatever is missing from the settings' defaults, or ask for every piece still missing (format, scope, page layout) together in one question (see "Step 2").
 3. Dispatch to the script matching the confirmed scope (see "Scope: diagram-only" / "Scope: whole document" below).
 4. Report the resulting file path(s). Never paste the script's raw output or a diagram's rendered content into the chat.
 
@@ -38,7 +38,9 @@ From the user's message, work out three things:
 
 ## Step 2 — Clarify missing details
 
-Ask only for what's actually missing — never re-ask something already implied by the request. Everything still missing is asked **together in one `AskUserQuestion` call** (its `questions` array holds one entry per missing piece) — never ask one piece, wait for the answer, then ask the next.
+Ask only for what's actually missing — never re-ask something already implied by the request. Everything still missing is asked **together in one question** — never ask one piece, wait for the answer, then ask the next.
+
+**How to ask**: if your agent has a structured multiple-choice question tool (Claude Code: `AskUserQuestion`; Codex: `request_user_input`), use it in one call, one entry per missing piece, with the headers and options below. Without one, ask in a single plain-text message that lists each missing piece with its header and numbered options (the default marked ` (기본값)` as below), then stop and wait for the answer — never guess and continue.
 
 ### What counts as missing
 

@@ -250,7 +250,7 @@ In VS Code's Markdown preview, hovering a Dependency node shows a panel with tha
 
 - **Class, deployment, or any other kind of structural diagram**: say this skill produces only Dependency, Responsibility, and Collaboration; no workaround.
 - **Sequence diagrams, call order, runtime/behavior flow**: say this skill produces only structural views; don't draw one or suggest another tool.
-- **Building the view from an actual codebase**: this skill takes a natural-language description only. If real code is available, read it first (directly, or via Explore/Grep/gh), distill a description that cites concrete evidence (file paths, identifiers, repository URLs, commit/PR references — which "Hyperlink resolution" needs), then use that description as input.
+- **Building the view from an actual codebase**: this skill takes a natural-language description only. If real code is available, read it first (directly, or with your search tools or `gh`), distill a description that cites concrete evidence (file paths, identifiers, repository URLs, commit/PR references — which "Hyperlink resolution" needs), then use that description as input.
 - **Comparing concepts that aren't identified groups/elements** (e.g. "Controller vs Application 패턴이 뭐가 다른가요?" with no such components): say Collaboration compares only groups/elements identified from the description.
 
 ## Example
