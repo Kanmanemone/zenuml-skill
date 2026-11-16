@@ -30,6 +30,10 @@
 - (사용자 결정) 설정 파일 주석을 짧게 줄인다. 토큰 소모 영향은 문장 대신 기호 `[-]` 줄어듦, `[0]` 거의 같음, `[+]` 늘어남, `[++]` 큼(모두 기본값 대비)으로 적고, 기호의 뜻은 파일 맨 위에 한 줄로 한 번만 적는다. 기본값은 옵션 설명 줄 끝에 함께 적는다(FR-020 개정).
 - (사용자 결정) 토큰 소모와 속도를 줄이기 위해, 세 스킬 모두 설정 읽기·검증·기본값 대체·안내 문구 만들기를 번들 스크립트가 하고, 스킬은 그 결과(값과 안내)만 받아 쓴다. 지금까지 `generating-architecture-views`·`generating-zenuml-diagrams`는 스킬이 설정 파일과 옵션 정의를 직접 읽었다. 스크립트를 실행할 수 없는 환경이면 모든 옵션에 기본값을 쓰고 안내 한 줄을 남긴다(FR-017b 신설).
 
+### Session 2026-11-16
+
+- (사용자 결정) `generating-architecture-views`의 Collaboration 항목에서 "내가 할 수 있는 질문"을 만들지를 `collaboration.questions`(`true`/`false`, 초기 기본값 `false`)로 켜고 끈다. `false`이면 각 항목은 책임의 경계와 분리 이유 & 합리성 평가 두 하위 항목만 갖는다. 질문이 본문에 없으므로 hover 패널에도 뜨지 않는다(009 FR-009b). 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다(FR-012c).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - 구조 뷰의 Responsibility·Collaboration 표시 방식 고르기 (Priority: P1)
@@ -120,6 +124,7 @@
 - **FR-010**: `hidden`인 섹션은 헤딩과 내용 모두 산출 파일에 넣지 않아야 하며, 스킬은 그 섹션의 내용을 만들거나 그 섹션만을 위한 자기검증을 하지 않아야 한다. 나머지 섹션의 순서(Dependency → Responsibility → Collaboration)는 유지된다.
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
 - **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다(기본: `elk`, 사용자 확정 2026-11-13). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
+- **FR-012c** (003 개정): 설정은 Collaboration 항목마다 "내가 할 수 있는 질문" 하위 항목을 만들지(`collaboration.questions`)를 `true`(만듦)와 `false`(만들지 않음) 중에서 고를 수 있어야 한다(기본: `false`, 사용자 확정 2026-11-16). `false`이면 003 FR-027의 하위 항목 중 "내가 할 수 있는 질문"만 빠지고, 나머지 하위 항목과 항목의 개수·순서·형식은 그대로다. `collaboration.display`가 `hidden`이면 이 값은 쓰이지 않는다. 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다.
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
 - **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다(기본: `./.zenuml/log` — 지금 위치). 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
 
@@ -148,7 +153,7 @@
 
 - **스킬 설정 파일**: 스킬마다 하나씩 그 스킬 디렉터리 안에 있는, 주석을 허용하는 JSON 문서. 섹션·기능 단위 묶음 아래 옵션 키를 둔다. 사용자가 직접 편집하며, 처음부터 모든 옵션이 기본값으로 적혀 있다. 키와 값은 영어, 각 옵션 위의 설명 주석은 한국어다(FR-020).
 - **옵션 정의**: 스킬마다 하나씩 있는, 그 스킬 옵션 전체의 유일한 기준. 옵션마다 키(소속 묶음 포함), 허용 값, 기본값, 한 줄 설명, 값별 토큰 소모 영향을 담는다(FR-016). 설정 읽기·검증·안내는 이 정의만 보고 동작한다.
-- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008)와 `dependency.renderer`(FR-011b), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
+- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008), `collaboration.questions`(FR-012c), `dependency.renderer`(FR-011b), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
 - **설정 안내**: 설정 파일을 읽지 못했거나 일부 값을 기본값으로 대체·무시했을 때 채팅 응답에만 붙는 한 줄. 대상 파일과 키를 밝힌다.
 - **접은 글 상자**: 마크다운 미리보기에서 클릭해 접고 펼 수 있는 블록. 요약 줄(고정 문구 `Details`)과 내용으로 이뤄지며, 처음 열었을 때의 상태(접힘/펼침)가 파일 안에 적혀 있다. 클릭으로 바꾼 상태는 파일에 저장되지 않으므로 다시 열면 적힌 초기 상태로 돌아간다.
 

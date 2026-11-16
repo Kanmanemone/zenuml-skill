@@ -30,6 +30,10 @@
 
 - (사용자 결정) `bottom` 패널의 다단은 내용이 3줄을 넘을 때(미리보기에 보이는 줄 기준, 4줄부터)만 쓴다. 3줄짜리 내용이 칸마다 한 줄씩 나뉘면 오히려 읽기 어렵기 때문이다. 그래서 칸 하나의 높이는 최소 3줄이다 — 3줄 이하는 한 칸에 모두 들어가고, 4줄은 2줄+2줄, 6줄은 3줄+3줄로 나뉜다. 그 대가로 1~2줄짜리 패널도 높이는 3줄이 된다(미리보기의 칸 나누기가 "칸마다 최소 줄 수"를 직접 지정하는 방법을 따르지 않음을 Chrome 157에서 확인했다).
 
+### Session 2026-11-16
+
+- (사용자 결정) `hover.collaboration` 기본값에 `questions`를 넣어 `["targets", "boundary", "rationale", "questions"]`로 한다. 질문 생성은 007 FR-012c의 `collaboration.questions`(기본 `false`)가 정하며, 이 값이 `false`이면 `hover.collaboration`에 `questions`가 있어도 패널에 질문이 뜨지 않는다(FR-009b).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - 노드에 마우스를 올려 책임과 협력을 그 자리에서 보기 (Priority: P1)
@@ -72,6 +76,7 @@
 9. **Given** `hover.position`이 `node`, **When** 오른쪽 끝 노드에 마우스를 올린 뒤 왼쪽 끝 노드에 마우스를 올리면, **Then** 오른쪽 끝 노드의 툴팁은 미리보기 오른쪽 끝에 붙어 잘리지 않고, 왼쪽 끝 노드의 툴팁은 그 노드 아래에 뜨며, 두 툴팁의 폭이 같다.
 10. **Given** `hover.position`만 `bottom`에서 `node`로 바꾼 경우, **When** 기존 파일에 도구를 다시 실행하면, **Then** 패널 모양 블록만 바뀌고 툴팁 내용과 본문은 그대로다.
 11. **Given** `hover.responsibility`·`hover.collaboration`이 기본값이고 `hover.enabled`가 `false`, **When** 구조 뷰를 만들면, **Then** 산출 파일은 이 기능 도입 전과 같다. **When** `hover.enabled`만 `true`로 바꾸고 다시 만들면, **Then** 패널에 책임·역할과 의존 대상(책임의 경계, 분리 이유 & 합리성 평가 포함)이 들어간다.
+12. **Given** `hover.collaboration`이 기본값(`questions` 포함)이고 `collaboration.questions`가 `false`(기본값), **When** 구조 뷰를 만들면, **Then** 본문 Collaboration에 "내가 할 수 있는 질문"이 없고 패널에도 질문이 없으며 설정 안내도 없다. **When** `collaboration.questions`만 `true`로 바꾸고 다시 만들면, **Then** 본문과 패널 모두에 질문이 들어간다.
 
 ---
 
@@ -123,7 +128,8 @@
 - **FR-006**: 패널 내용이 들어간 노드가 하나도 없으면(`hover.enabled`가 `false`이거나, 두 hover 목록이 모두 비었거나, 본문에 대응하는 항목이 없는 경우) 파일에는 FR-005 블록도, 링크 없는 노드용 툴팁 줄(FR-013)도 없어야 하고, 링크가 있는 노드의 `click` 툴팁은 기존 규칙(파일 이름)대로여야 한다. 도구는 이 상태로 되돌리는 일도 해야 한다.
 - **FR-007**: 별도 CSS 파일이나 편집기 설정 없이 산출 md 파일 하나만으로 VS Code Markdown 미리보기에서 패널이 동작해야 한다.
 - **FR-008**: `hover.responsibility` 값은 패널에 넣을 항목의 목록이다. 항목은 `abstract`(책임 (추상))와 `concrete`(역할 (구체))이며, 적은 항목만 적은 순서대로 넣는다. `[]`이면 Responsibility 부분을 넣지 않는다. 기본값은 `["abstract", "concrete"]`다.
-- **FR-009**: `hover.collaboration` 값은 그 노드가 의존하는 협력마다 넣을 항목의 목록이다. 항목은 `targets`(대상·관계 줄), `boundary`(책임의 경계), `rationale`(분리 이유 & 합리성 평가), `questions`(내가 할 수 있는 질문)이며, 적은 항목만 적은 순서대로 넣는다. `targets`를 적지 않아도 다른 항목이 하나라도 있으면 어느 협력인지 알 수 있도록 대상·관계 줄을 협력마다 맨 앞에 붙인다. `[]`이면 Collaboration 부분을 넣지 않는다. 기본값은 `["targets", "boundary", "rationale"]`다.
+- **FR-009**: `hover.collaboration` 값은 그 노드가 의존하는 협력마다 넣을 항목의 목록이다. 항목은 `targets`(대상·관계 줄), `boundary`(책임의 경계), `rationale`(분리 이유 & 합리성 평가), `questions`(내가 할 수 있는 질문)이며, 적은 항목만 적은 순서대로 넣는다. `targets`를 적지 않아도 다른 항목이 하나라도 있으면 어느 협력인지 알 수 있도록 대상·관계 줄을 협력마다 맨 앞에 붙인다. `[]`이면 Collaboration 부분을 넣지 않는다. 기본값은 `["targets", "boundary", "rationale", "questions"]`다(사용자 확정 2026-11-16).
+- **FR-009b**: 007 FR-012c의 `collaboration.questions`가 `false`이면 본문 Collaboration에 "내가 할 수 있는 질문"이 없으므로, `hover.collaboration`에 `questions`가 있어도 패널에 질문이 뜨지 않아야 한다. 이 경우 `questions`는 없는 항목처럼 동작하며 설정 안내는 하지 않는다(정상 조합으로 본다, FR-010과 같은 원칙). 두 값이 설정 파일에서 떨어져 있으므로 `hover.collaboration` 주석에 이 규칙을 적는다.
 - **FR-009a**: 두 목록에서 패널 안 순서는 Responsibility 부분이 항상 Collaboration 부분보다 위다. 목록이 아닌 값, 모르는 항목, 같은 항목을 두 번 적은 목록은 잘못된 값으로 보고 007 FR-005대로 그 설정만 기본값을 쓰고 안내 한 줄을 남긴다.
 - **FR-010**: 섹션의 `display`가 `hidden`이면 그 섹션의 hover 목록(`hover.responsibility` 또는 `hover.collaboration`)은 값과 상관없이 빈 목록으로 동작해야 한다. 이 경우 설정 안내는 하지 않는다(정상 조합으로 본다). 두 값이 설정 파일에서 떨어져 있으므로, 설정 파일의 `hover` 그룹 주석에 이 규칙을 적는다.
 - **FR-011**: Collaboration은 그 노드가 의존하는 쪽만 넣어야 한다 — 그 노드가 출발점인 협력은 `대상에 의존한다 (관계)`, 서로 의존하는 협력은 `상대와 서로 의존한다 (관계)`로 표시하고(본문 Collaboration 첫 줄에서 주어인 그 노드만 뺀 문장, 화살표 기호는 쓰지 않는다), 그 노드가 도착점인 협력(그 노드에 의존하는 쪽)은 넣지 않는다. 본문 Collaboration의 "X는 Y에 의존한다" 방향과 같다. 엣지에는 패널이 없다.
@@ -168,6 +174,6 @@
 - 산출물에 더하는 표기는 Mermaid 기본 문법과 가장 짧은 표기로 한정한다(사용자 요구). 예: 링크 없는 노드의 커서는 기존 색상 클래스에 `cursor:auto`만 덧붙인다 — `cursor:default`는 `default`가 Mermaid 예약어라 다이어그램 전체가 파싱 오류로 그려지지 않으므로 쓰지 않는다.
 - 툴팁을 지정하는 문법은 `click` 줄뿐이지만 링크가 필수는 아니다. 일반 브라우저(Mermaid 12.3, strict)에서 링크 대신 콜백 이름을 쓴 `click` 줄도 툴팁이 뜨고, 클릭해도 이동·오류가 없음을 확인했다. VS Code 미리보기에서도 같음을 확인했다(선행 확인 결과 (3)).
 - 도구를 따로 실행할 때는 설정 파일 값만 따른다. 요청 문장으로 설정과 다른 hover 양을 썼던 파일에 도구를 다시 실행하면 설정 값으로 맞춰진다.
-- 설정의 초기값(`hover.responsibility`: `["abstract", "concrete"]`, `hover.collaboration`: `["targets", "boundary", "rationale"]`)은 사용자가 정했다(007 FR-003의 "사용자가 항목별로 지정" 원칙).
+- 설정의 초기값(`hover.responsibility`: `["abstract", "concrete"]`, `hover.collaboration`: `["targets", "boundary", "rationale", "questions"]` — 2026-11-16에 `questions` 추가)은 사용자가 정했다(007 FR-003의 "사용자가 항목별로 지정" 원칙).
 - 이 기능은 `generating-architecture-views`에만 적용한다. `generating-zenuml-diagrams`의 시퀀스 다이어그램은 대상이 아니다.
 - 피드백 로그 형식은 바꾸지 않는다.
