@@ -22,14 +22,14 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 `.gitignore`에 `!.claude/skills/revealing-code-step-by-step/`를 기존 스킬 허용 줄 옆에 추가한다. 그다음 새 파일 `SK/SKILL.md`, `SK/stages.md`, `SK/settings.jsonc`, `SK/settings.schema.json`, `SK/scripts/stages.py`, `specs/010-stepwise-code-convergence/fixtures/*`가 추적 대상인지 `git check-ignore -v --no-index`로 확인한다.
-- [ ] T002 [P] 폴더를 만든다: `SK/scripts/`, `specs/010-stepwise-code-convergence/fixtures/{src,work,expected/original}/`.
+- [X] T001 `.gitignore`에 `!.claude/skills/revealing-code-step-by-step/`를 기존 스킬 허용 줄 옆에 추가한다. 그다음 새 파일 `SK/SKILL.md`, `SK/stages.md`, `SK/settings.jsonc`, `SK/settings.schema.json`, `SK/scripts/stages.py`, `specs/010-stepwise-code-convergence/fixtures/*`가 추적 대상인지 `git check-ignore -v --no-index`로 확인한다.
+- [X] T002 [P] 폴더를 만든다: `SK/scripts/`, `specs/010-stepwise-code-convergence/fixtures/{src,work,expected/original}/`.
 
 ---
 
 ## Phase 2: Foundational (모든 스토리의 전제)
 
-- [ ] T003 **diff 층 줄 맞춤 확인** (research R7의 위험을 먼저 없앰). `specs/010-stepwise-code-convergence/prototype/code-gallery.md`에 diff 층을 덧붙인다.
+- [X] T003 **diff 층 줄 맞춤 확인** (research R7의 위험을 먼저 없앰). `specs/010-stepwise-code-convergence/prototype/code-gallery.md`에 diff 층을 덧붙인다.
   - **덧붙이는 방법**:
     - 2단계·3단계마다 `.code` 안의 코드 블록 뒤에 `<pre class="diff" aria-hidden="true"><code>`를 넣는다. 줄마다 span을 하나 두고, 그 줄의 코드 글자를 이스케이프해 투명하게 담는다.
     - 추가·변경·삭제 줄을 각각 하나 이상 표시한다.
@@ -40,17 +40,17 @@
     - (b) 세로·가로 스크롤 뒤에도 (a)가 같다.
     - (c) diff 층을 지운 문서의 DOM이 기존 상자와 같다.
   - **어긋날 때**: diff 층 CSS에서만 고친다. 그래도 맞출 수 없으면 멈추고 사용자에게 보고한다(R7 대안).
-- [ ] T004 [P] `SK/stages.md`를 작성한다(contract 1절).
+- [X] T004 [P] `SK/stages.md`를 작성한다(contract 1절).
   - **머리**: 맨 위 자유 설명에 세 가지를 짧게 적는다. 1원칙(추상 → 구체), 구체화 사다리 표(spec FR-012a 요약), spec 링크다.
   - **단계**: spec FR-008의 7단계 표와 표 아래 문단을 단계마다 `## <별명>` + `- 원본과 같아지는 것:` + `- 아직 드러나지 않은 것:` 형태로 옮긴다.
   - **보조 표기**: 2단계에는 "- 보조 표기: 1단계에서 지어낸 본문과 멤버를 `⟨그 코드가 하던 일⟩`이나 `...`으로 바꾼다" 항목을 둔다. 3~6단계에는 그 단계에서 사다리 칸을 올리는 범위를 적는다.
-- [ ] T005 [P] `specs/010-stepwise-code-convergence/spec.md`의 FR-008을 고친다. 7단계 표와 표 아래 문단, "이 표는 … 초안이다" 문장을 지우고, 그 자리에 `SK/stages.md`의 링크와 "단계 정의 파일의 처음 내용은 7단계이며, 첫 단계와 마지막 단계는 FR-003~005, FR-010으로 고정"이라는 한 줄만 남긴다. T004가 끝난 뒤에 한다.
-- [ ] T006 [P] `SK/settings.schema.json`을 작성한다. 형식은 기존 스킬의 `options` 배열이다. 옵션은 둘이다.
+- [X] T005 [P] `specs/010-stepwise-code-convergence/spec.md`의 FR-008을 고친다. 7단계 표와 표 아래 문단, "이 표는 … 초안이다" 문장을 지우고, 그 자리에 `SK/stages.md`의 링크와 "단계 정의 파일의 처음 내용은 7단계이며, 첫 단계와 마지막 단계는 FR-003~005, FR-010으로 고정"이라는 한 줄만 남긴다. T004가 끝난 뒤에 한다.
+- [X] T006 [P] `SK/settings.schema.json`을 작성한다. 형식은 기존 스킬의 `options` 배열이다. 옵션은 둘이다.
   - `stages`: type `stageToggles`, default `{}`, 한국어 description, tokenImpact `{"true": "[0]", "false": "[-]"}`
   - `output.directory`: type `relativePath`, base `viewFileDir`, default `"."`, tokenImpact `{"*": "[0]"}`
 
   research R12를 따른다.
-- [ ] T007 [P] `SK/settings.jsonc`를 작성한다.
+- [X] T007 [P] `SK/settings.jsonc`를 작성한다.
   - **머리 주석**: 007 관례를 따른다. 첫 줄은 요청 우선 문구, 둘째 줄은 토큰 기호 범례다.
   - **`stages`**: 마지막 단계를 뺀 6단계를 `stages.md` 순서대로 모두 `true`로 둔다. 주석에는 다음을 적는다.
     - `true`/`false`의 뜻과 기호
@@ -61,7 +61,7 @@
   - **`output.directory`**: `"."`로 두고, 주석에는 구조 뷰 폴더 기준 상대 경로, 절대 경로 불가, 그 안에 `<slug>.stages/`가 생긴다는 것을 적는다. 프로젝트 빌드 대상(소스 폴더) 안을 고르면 결과가 빌드에 섞일 수 있으니 고르지 말라는 한 줄도 적는다(spec FR-019).
 
   research R12의 jsonc 예시를 그대로 쓴다.
-- [ ] T008 `SK/scripts/stages.py`의 공통 부분을 작성한다. 하위 명령은 아직 비워 두고 아래 함수들만 만든다.
+- [X] T008 `SK/scripts/stages.py`의 공통 부분을 작성한다. 하위 명령은 아직 비워 두고 아래 함수들만 만든다.
   - (1) **설정 로더**: 기존 스킬 로더와 같은 동작이다. 주석 허용 JSON, 파일 없음 → 기본값, 읽지 못함 → 모든 기본값 + 안내, 형식 위반 → 그 키만 기본값 + 안내, 정의에 없는 키 → 무시 + 안내. 안내 형식은 `⚙️ 설정 안내: settings.jsonc — …`이다.
     - `stageToggles` 검증: 값이 불리언이 아닌 단계는 `true` + 안내, 단계 정의에 없는 별명은 무시 + 안내, 마지막 단계 별명은 무시 + "마지막 단계는 항상 보임" 안내
     - `relativePath` 검증: 절대 경로와 드라이브 문자를 거부한다.
@@ -97,7 +97,7 @@
 
 **Independent Test**: quickstart Q1, Q3(diff 층 제외), Q4, Q7의 1단계 항목(SC-001, SC-002)
 
-- [ ] T009 [P] [US1] `specs/010-stepwise-code-convergence/fixtures/`에 입력을 작성한다(quickstart "준비").
+- [X] T009 [P] [US1] `specs/010-stepwise-code-convergence/fixtures/`에 입력을 작성한다(quickstart "준비").
   - **`view.architecture.md`**: 노드 7개로 이뤄진 구조 뷰다.
     - 그룹: 최상위 그룹 2개(노드 3개, 2개)와 그룹 없는 노드 1개로 나뉜다.
     - 링크(노드별 원본 위치):
@@ -112,7 +112,7 @@
       | 1 | 선언이 없는 `src/Missing.kt` |
   - **`src/`**: KDoc·어노테이션이 붙은 선언, 문자열 안의 `{`, `"""` 문자열을 넣는다. `Util.kt`는 CRLF로 저장한다.
   - **`expected/original/*.kt`**: 손으로 잘라낸 원본 범위 4개다.
-- [ ] T010 [US1] `SK/scripts/stages.py prepare`를 구현한다(contract 2절 `prepare`).
+- [X] T010 [US1] `SK/scripts/stages.py prepare`를 구현한다(contract 2절 `prepare`).
   - **입력 검사**: `*.architecture.md`인지와 Dependency 블록이 있는지 확인한다.
   - **산출 폴더**: `--output-dir`가 설정 `output.directory`보다 우선한다. 산출 폴더 `<view 폴더>/<output.directory>/<slug>.stages/`만 지우고 새로 만든다(FR-019a, FR-020).
   - **만들 단계 목록**: T008(6)으로 정한다.
@@ -120,7 +120,7 @@
   - **`contains`**: 이 노드의 원본 범위 안에 든 다른 노드의 Id 목록이다.
   - **`work/manifest.json`과 출력 JSON**: `dir`, `stages`, `notices`, `nodes[]`를 담는다. `nodes[]`의 항목은 `id`·`name`·`stage1`·`original`·`range`·`contains`·`skip_reason`·`doc`다.
   - **종료 코드**: 0이나 2다.
-- [ ] T011 [US1] `SK/scripts/stages.py build`의 기존 상자 부분을 구현한다(contract 2절 `build` 1~5와 3절). diff 층은 T017에서 덧붙인다.
+- [X] T011 [US1] `SK/scripts/stages.py build`의 기존 상자 부분을 구현한다(contract 2절 `build` 1~5와 3절). diff 층은 T017에서 덧붙인다.
   - **누락 검사**: 빠진 작업 파일이 있으면 종료 코드 2다.
   - **문서 구성**:
     - 문서마다 제목과 그룹 라벨 소제목을 둔다.
@@ -129,7 +129,7 @@
     - 문서 끝에 기존 상자 `<style>`을 둔다. 내용은 T003에서 확정한 시제품 규칙과 단계 수만큼의 `input.sK:checked ~ .stage.sK` 규칙이다.
   - **마지막 단계 확인**: 문서를 다시 읽어 마지막 단계 코드를 꺼낸다. 원본 위치에서 다시 읽어 다시 잘라낸 구간과 LF 기준으로 비교한다. 다르면 종료 코드 3과 노드·첫 다른 줄을 출력한다(FR-010).
   - **출력 JSON**: `docs`, `unchanged`, `skipped`, `verified`를 담는다.
-- [ ] T012 [US1] `SK/SKILL.md`를 처음 작성한다.
+- [X] T012 [US1] `SK/SKILL.md`를 처음 작성한다.
   - **frontmatter**: `name: revealing-code-step-by-step`. description은 영어로 쓴다. "구조 뷰(.architecture.md)를 받아 노드별 Kotlin 코드를 지어낸 최소 코드에서 원본까지 정제 단계로 넘겨 보는 문서를 만든다"는 내용과 사용·비사용 조건을 담는다.
   - **Workflow**: 다섯 단계를 적는다.
     1. 인터프리터를 찾는다. 순서는 기존 스킬과 같다(`python3` → `python` → `py -3`, Windows는 `python` → `py -3` → `python3`).
@@ -144,7 +144,7 @@
     - Python 3.9 이상이 없을 때: 만들지 않고 이유를 한 줄로 알린다.
     - 서브에이전트를 쓸 수 없을 때: 만들지 않고 이유를 알린다.
     - 종료 코드 2·3일 때: contract 4절을 따른다.
-- [ ] T013 [US1] `specs/010-stepwise-code-convergence/fixtures/work/`에 손으로 쓴 작업 파일을 둔다.
+- [X] T013 [US1] `specs/010-stepwise-code-convergence/fixtures/work/`에 손으로 쓴 작업 파일을 둔다.
   - 1단계: 노드 7개 파일
   - 2~6단계: 구체화하는 노드 4개 파일. 2단계에는 `⟨설명⟩`·`...`를 넣는다. 4단계에는 FR-011a처럼 다른 노드의 호출 이름을 맞춘 예를 넣는다. 바깥 노드 파일에는 중첩 노드를 `⟨이름⟩`으로 접는다. 한 단계는 어떤 노드에서 일부러 바꾸지 않는다.
 
@@ -160,11 +160,11 @@
 
 **Independent Test**: quickstart Q2, Q3(diff 층 포함), Q6, Q7(US2 항목)
 
-- [ ] T014 [US2] `SK/scripts/stages.py begin <dir> <k>`를 구현한다(contract 2절 `begin`).
+- [X] T014 [US2] `SK/scripts/stages.py begin <dir> <k>`를 구현한다(contract 2절 `begin`).
   - **검사**: `2 ≤ k ≤ g-1`인지, `work/<k-1>`이 있는지, `work/<k>`가 없는지 확인한다. 어긋나면 종료 코드 2다.
   - **복사**: 구체화하는 노드마다 `work/<k-1>/<id>.kt`를 `work/<k>/<id>.kt`로 복사한다. 폴더 번호는 두 자리다.
   - **출력**: 그 단계의 `nickname`·`becomes`·`unrevealed`·`notation`·`merged`·`files`를 JSON으로 낸다.
-- [ ] T015 [US2] `SK/SKILL.md`의 중간 단계 절을 쓴다(research R11, contract 4절 3).
+- [X] T015 [US2] `SK/SKILL.md`의 중간 단계 절을 쓴다(research R11, contract 4절 3).
   - **루프**: k = 2…g-1마다 `begin k`를 실행하고, 출력된 정의와 `merged`의 몫을 원본 `work/original/`에 맞춰 Edit로 고친다.
   - **규칙** 다섯 가지를 각각 한 문단으로, 짧은 Kotlin 예와 함께 적는다.
     1. 정의된 측면과 보조 표기만 바꾼다(FR-011).
@@ -173,12 +173,12 @@
     4. 2단계에서는 지어낸 본문을 `⟨설명⟩`/`...`로 바꾼다. `⟨⟩`는 U+27E8·U+27E9로 쓴다.
     5. `contains`에 든 노드는 `⟨이름⟩`으로 접는다.
   - **자기 점검**: 다음 `begin` 전에 위 다섯 가지를 확인한다. 지난 단계는 고치지 않는다.
-- [ ] T016 [US2] `SK/SKILL.md`에 "Self-check" 목록을 추가한다. 항목은 다음과 같다. 서술하지 말고 확인만 한다.
+- [X] T016 [US2] `SK/SKILL.md`에 "Self-check" 목록을 추가한다. 항목은 다음과 같다. 서술하지 말고 확인만 한다.
   - 1단계 프롬프트에 원본 정보가 없다.
   - 노드 이름이 구조 뷰와 같다.
   - 단계마다 R11의 다섯 규칙을 지켰다.
   - 응답이 링크와 허용된 줄만 담는다.
-- [ ] T017 [US2] `SK/scripts/stages.py build`에 diff 층을 덧붙인다(research R7, contract 3절).
+- [X] T017 [US2] `SK/scripts/stages.py build`에 diff 층을 덧붙인다(research R7, contract 3절).
   - **함수 분리**: 기존 상자를 그리는 함수(T011)는 고치지 않는다. 새 함수 `diff_lines(prev, cur)`와 `render_diff_layer(code, kinds)`만 더한다.
   - **`diff_lines`**: `SequenceMatcher` opcode로 줄마다 종류를 정한다. `insert` → `add`, `replace`의 짝 → `mod`, 남는 새 줄 → `add`, `delete`나 남는 옛 줄 → 다음 줄에 `del`(끝이면 마지막 줄에 `del-after`)이다.
   - **`render_diff_layer`**: `pre.diff > code`를 만든다. 줄마다 span을 두고, 그 줄의 이스케이프한 글자를 투명하게 담는다.
@@ -196,12 +196,12 @@
 
 **Independent Test**: quickstart Q5, Q5a
 
-- [ ] T018 [US3] `SK/scripts/stages.py prepare`·`begin`·`build`의 끈 단계 처리를 끝까지 확인하고 보완한다(research R13).
+- [X] T018 [US3] `SK/scripts/stages.py prepare`·`begin`·`build`의 끈 단계 처리를 끝까지 확인하고 보완한다(research R13).
   - 첫 단계가 꺼지면 만들기는 하되 `visible: false`이고 문서에 나오지 않는다. 처음 보이는 단계가 `1/<of>`다.
   - 첫 단계가 아닌 끈 단계는 목록에서 빠지고, 다음 단계의 `merged`에 쌓인다(연속이면 차례로).
   - 한 줄 설명은 `원본과 같아진 것: <합쳐진 becomes들>; <자기 becomes>`다.
   - `--show`·`--hide`는 그 실행에서만 설정보다 우선한다.
-- [ ] T019 [US3] `SK/SKILL.md`에 "Stage definition and settings" 절을 추가한다.
+- [X] T019 [US3] `SK/SKILL.md`에 "Stage definition and settings" 절을 추가한다.
   - 단계 구성은 `stages.md`에서 고친다(삽입·삭제·순서 변경, 첫 단계와 마지막 단계는 고정).
   - 보이기는 `settings.jsonc`의 `stages`에서, 결과 위치는 `output.directory`에서 정한다.
   - 요청에 적힌 값은 그 요청에서만 우선하며, 옵션으로 넘긴다.
@@ -213,19 +213,19 @@
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T020 `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 문서를 확정한다.
+- [X] T020 `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 문서를 확정한다.
   - `<그룹 Id>.md`, `others.md`, 그리고 같은 이름의 `*.base.md`(diff 층 없음)를 둔다.
   - T011·T017 결과를 한 줄씩 검토해 contract 3절과 맞는지 확인하고 확정한다.
   - 확정한 뒤 Q3를 바이트 비교로 다시 돌린다.
-- [ ] T021 [P] `README.md`와 `README.ko.md`의 "Optional add-ons/추가 기능"에 `revealing-code-step-by-step` 항목을 추가한다. 담을 내용은 다음과 같다.
+- [X] T021 [P] `README.md`와 `README.ko.md`의 "Optional add-ons/추가 기능"에 `revealing-code-step-by-step` 항목을 추가한다. 담을 내용은 다음과 같다.
   - 무엇을 하는지(구조 뷰 → 노드별 정제 단계 문서)
   - VS Code 미리보기에서 ← →로 넘김, 달라진 줄의 git 색
   - `stages.md`로 단계 구성을 바꾸고 `settings.jsonc`로 보이기와 위치를 정함
   - GitHub에서는 단계가 나열됨
 
   "Requirements/요구 사항"에는 Python 3.9 이상이 필요하고 없으면 만들지 않는다고 적는다.
-- [ ] T022 quickstart Q1~Q6을 처음부터 다시 돌려 모두 통과하는지 확인한다. 실패한 시나리오가 있으면 해당 태스크로 돌아가 고친다.
-- [ ] T023 quickstart Q7을 실행한다. 실제 구조 뷰 `.zenuml/swemo-architecture.architecture.md`로 스킬을 요청하고 다음을 확인한다.
+- [X] T022 quickstart Q1~Q6을 처음부터 다시 돌려 모두 통과하는지 확인한다. 실패한 시나리오가 있으면 해당 태스크로 돌아가 고친다.
+- [X] T023 quickstart Q7을 실행한다. 실제 구조 뷰 `.zenuml/swemo-architecture.architecture.md`로 스킬을 요청하고 다음을 확인한다.
   - 1단계 서브에이전트 프롬프트와 도구 사용(SC-002)
   - 1단계 이름과 의존(SC-001)
   - 2단계 보조 표기
@@ -236,6 +236,21 @@
   몇 개 노드는 미리보기에서 넘겨 보며 FR-011·FR-012를 눈으로 확인한다. 결과는 사용자에게 보고한다.
 
 ---
+
+---
+
+## Phase 7: T023에서 드러난 문제 보완 (2026-11-16 clarify 결정)
+
+- [X] T024 `SK/scripts/stages.py`에서 같은 이름의 선언이 여럿이면 후보(`candidates`)를 내놓고, `prepare --pick=<id>:<번호>`로 고르게 한다. `build`의 마지막 단계 확인도 같은 번호로 다시 찾는다(spec FR-002, research R5). swemo `MemoScreen`으로 확인: 후보 2개(공개 54–86줄, 비공개 88–254줄), `--pick=MemoScreen:1`이면 공개 함수가 범위가 된다.
+- [X] T025 `SK/stages.md`에서 어노테이션을 선언 단계로 옮긴다. "선언의 종류"는 선언의 종류·수식어·상속·어노테이션을 함께 드러내고, 긴 인자는 `...`로 둔다. "공개 시그니처"는 멤버 어노테이션과 함께 드러낸다. "나머지 로직"과 "원본"에서는 어노테이션 몫을 뺀다(FR-011b).
+- [X] T026 `SK/SKILL.md`를 고친다.
+  - 오버로드 후보를 고르는 절차를 넣는다.
+  - 규칙 4에 "우연히 원본과 같은 줄은 둔다"를 더한다(FR-013).
+  - 규칙 5로 어노테이션 규칙을 넣는다.
+  - `unchanged` 점검 지시를 뺀다(FR-014).
+  - 편집 지침을 "바꿀 부분만, Edit 도구나 정확히 한 번 나오는 글만 바꾸는 도구로"로 고친다.
+  - research R1·R5·R11, contract, data-model을 함께 맞춘다.
+- [X] T027 바뀐 `stages.md`의 한 줄 설명에 맞춰 `fixtures/expected/*.md`·`*.base.md`를 다시 만든다. 그다음 Q1~Q4 회귀를 다시 확인한다(원본 범위 4개 같음, `verified` 4).
 
 ## Dependencies & Execution Order
 
@@ -264,3 +279,9 @@
 3. **US2**: 모델이 중간 단계를 직접 만드는 루프와 diff 층을 더해 기능을 완성한다.
 4. **US3**: 단계 정의 수정과 설정 끄기의 합치기·번호 매기기를 완성하고 확인한다.
 5. **Polish**: 기대 문서를 확정하고, README를 갱신하고, 실제 구조 뷰로 끝까지 확인한다.
+
+---
+
+## Phase 8: Convergence
+
+- [X] T028 `specs/010-stepwise-code-convergence/fixtures/`에 같은 이름의 선언이 둘인 노드(예: `src/Screen.kt`의 공개 `fun Screen(vm: Vm)`과 `private fun Screen(state: State)`)를 넣고, `quickstart.md`에 시나리오를 추가해 실행한다 — `--pick` 없이 `prepare`하면 그 노드에 `candidates` 2개와 "--pick으로 골라야 함" 사유가 나오고, `--pick=<id>:1`로 다시 하면 첫 선언이 원본 범위가 되며 `build`의 확인도 통과한다. 기존 Q1~Q4 기대 결과가 바뀌면 함께 갱신한다 per FR-002 (partial)

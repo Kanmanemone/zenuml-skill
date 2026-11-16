@@ -140,3 +140,19 @@ Q1 뒤에 `fixtures/work/01/*`를 산출 폴더의 `work/01/`로 복사하고 �
 - **단계 내용**: 몇 개 노드를 넘겨 보며 눈으로 확인한다.
   - 각 단계가 정의된 측면만 바꿨다(FR-011).
   - 구체화 사다리를 내려간 곳이 없다(FR-012, FR-012a).
+
+## Q8. 같은 이름의 선언 고르기 (FR-002)
+
+오버로드만 담은 구조 뷰 `fixtures/overload.architecture.md`(노드 `Screen`, `ScreenViewModel`)와 원본 `fixtures/src/Screen.kt`(공개 `fun Screen(vm)`과 `private fun Screen(state, ...)`)를 쓴다.
+
+```text
+<py> S prepare specs/010-stepwise-code-convergence/fixtures/overload.architecture.md
+<py> S prepare specs/010-stepwise-code-convergence/fixtures/overload.architecture.md --pick=Screen:1
+```
+
+**기대 결과**:
+
+- 첫 실행: `Screen` 노드에 `candidates` 2개(3–7줄 공개, 9–15줄 비공개)와 `--pick으로 하나를 골라야 함` 사유가 있다.
+- 두 번째 실행: `Screen`의 `range`가 3–7줄이다. `work/original/Screen.kt`는 `fixtures/expected/original/overload-Screen.kt`와 바이트 단위로 같다.
+- 그다음 `fixtures/work-overload/01/*`를 `work/01/`에 복사하고 `begin 2`~`begin 6`, `build`를 실행한다. 종료 코드는 0이고 `verified`는 1이다(`ScreenViewModel`은 링크가 없어 구체화하지 않음).
+- 확인한 뒤 `fixtures/overload.stages/`를 지운다.

@@ -1,0 +1,24 @@
+{
+  "options": [
+    {
+      "key": "stages",
+      "type": "stageToggles",
+      "default": {},
+      "description": "단계마다 보일지 (단계 정의의 별명 → true/false, 없는 단계는 true, 마지막 단계는 항상 보임)",
+      "tokenImpact": {
+        "true": "[0]",
+        "false": "[-]"
+      }
+    },
+    {
+      "key": "output.directory",
+      "type": "relativePath",
+      "base": "viewFileDir",
+      "default": ".",
+      "description": "결과를 만들 위치 (구조 뷰 파일 폴더 기준 상대 경로, 그 안에 <slug>.stages/ 폴더가 생김)",
+      "tokenImpact": {
+        "*": "[0]"
+      }
+    }
+  ]
+}

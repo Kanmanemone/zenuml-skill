@@ -33,7 +33,7 @@
 ## 2. 실행 규약
 
 ```text
-<python> <skill>/scripts/stages.py prepare <구조 뷰 파일> [--show=<별명,…>] [--hide=<별명,…>] [--output-dir=<상대 경로>]
+<python> <skill>/scripts/stages.py prepare <구조 뷰 파일> [--show=<별명,…>] [--hide=<별명,…>] [--output-dir=<상대 경로>] [--pick=<id>:<번호>,…]
 <python> <skill>/scripts/stages.py begin   <산출 폴더> <단계 번호>
 <python> <skill>/scripts/stages.py build   <산출 폴더>
 ```
@@ -66,7 +66,7 @@
    | 없거나 받지 못함 | `원본을 읽을 수 없어 구체화하지 않음 (<원인>)` |
    | UTF-8 아님 | `원본을 UTF-8로 읽을 수 없어 구체화하지 않음` |
    | 선언 0개 | `원본 파일에서 <이름> 선언을 찾지 못해 구체화하지 않음` |
-   | 선언 2개 이상 | `원본 파일에 <이름> 선언이 여럿이라 구체화하지 않음` |
+   | 선언 2개 이상이고 `--pick` 없음 | `원본 파일에 <이름> 선언이 여럿 — --pick으로 하나를 골라야 함` (노드에 `candidates`가 붙는다. 모델이 고른 뒤 `--pick`으로 다시 실행) |
 
 6. 만들 단계 목록을 `work/manifest.json`에 함께 적는다. `begin`과 `build`는 `stages.md`가 아니라 이 사본을 쓴다. 한 번 만드는 동안 정의가 바뀌지 않게 하기 위해서다.
 7. 출력 JSON은 아래 형태다. `notices`는 설정 알림(`⚙️ 설정 안내: …`) 목록이고, 모델은 이것을 응답 끝에 그대로 전한다.
@@ -79,7 +79,7 @@
  "nodes": [{"id": "OrderService", "name": "OrderService", "stage1": ".zenuml/<slug>.stages/work/01/OrderService.kt",
             "original": ".zenuml/<slug>.stages/work/original/OrderService.kt",
             "range": {"source": "../app/.../OrderService.kt", "start_line": 12, "end_line": 80},
-            "contains": ["Validator"], "skip_reason": null, "doc": "all.md"}, …]}
+            "contains": ["Validator"], "candidates": [], "skip_reason": null, "doc": "all.md"}, …]}
 ```
 
 - `contains`: 이 노드의 원본 범위 안에 들어 있는 다른 노드의 Id 목록이다. 모델은 이 목록을 보고 중간 단계에서 그 부분을 `⟨이름⟩`으로 접어 둔다.

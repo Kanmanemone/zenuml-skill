@@ -1,0 +1,3 @@
+    class Validator {
+        fun check(order: Order): Boolean = ...
+    }
