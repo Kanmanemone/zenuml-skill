@@ -45,6 +45,34 @@ Each of these is a standalone skill — copy whichever you need into your `.clau
 
 Each feature's spec/plan/tasks trail lives under [`specs/`](specs/).
 
+### Skill folder layout
+
+The skills live in [`.agents/skills/`](.agents/skills/) — the Agent Skills standard folder, which Codex and other agents read directly — and each `.claude/skills/<name>` is a symlink to it. When you change a skill, edit it under `.agents/skills/`.
+
+### Cloning on Windows
+
+Creating symlinks on Windows needs a permission. Without the setup below, `.claude/skills/<name>` checks out as a one-line text file holding the target path, and the skills don't show up in Claude Code (agents that read `.agents/skills`, such as Codex, are unaffected).
+
+1. Turn on Developer Mode: Settings → System → For developers → Developer Mode. (Alternatively, run Git as Administrator.)
+2. Clone with symlinks enabled:
+
+   ```bash
+   git clone -c core.symlinks=true https://github.com/Kanmanemone/zenuml-skill.git
+   ```
+
+   Git for Windows may turn symlink support on by itself once it detects Developer Mode, but passing `-c core.symlinks=true` makes sure.
+
+Already cloned? Inside the repository run:
+
+```bash
+git config core.symlinks true
+git checkout -- .claude/skills
+```
+
+Check: each skill name under `.claude/skills/` should open as a folder (a link) containing `SKILL.md`.
+
+> You don't need any of this to use a single skill as described in "How to use": copying a folder from `.agents/skills/<name>` copies the real files.
+
 ## Requirements
 
 - [Claude Code](https://claude.com/product/claude-code)

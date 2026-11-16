@@ -45,6 +45,34 @@
 
 각 기능의 스펙/계획/태스크 기록은 [`specs/`](specs/) 아래에 있습니다.
 
+### 스킬 폴더 구조
+
+스킬 원본은 [`.agents/skills/`](.agents/skills/)에 있고(Agent Skills 표준 폴더라 Codex 등이 바로 읽습니다), `.claude/skills/<이름>`은 그곳을 가리키는 심볼릭 링크입니다. 스킬을 고칠 때는 `.agents/skills/` 쪽을 고치세요.
+
+### Windows에서 clone할 때
+
+Windows는 심볼릭 링크를 만들려면 권한이 필요합니다. 아래 설정 없이 clone하면 `.claude/skills/<이름>`이 대상 경로 한 줄이 적힌 텍스트 파일로 풀려, Claude Code에 스킬이 보이지 않습니다(Codex 등 `.agents/skills`를 읽는 에이전트는 영향이 없습니다).
+
+1. 개발자 모드를 켭니다: 설정 → 시스템 → 개발자용 → 개발자 모드. (또는 Git을 관리자 권한으로 실행합니다.)
+2. 링크를 살려서 clone합니다.
+
+   ```bash
+   git clone -c core.symlinks=true https://github.com/Kanmanemone/zenuml-skill.git
+   ```
+
+   개발자 모드를 켜면 Git for Windows가 이를 감지해 링크 지원을 스스로 켜기도 하지만, `-c core.symlinks=true`를 붙이면 확실합니다.
+
+이미 clone했다면 저장소 안에서 다음을 실행합니다.
+
+```bash
+git config core.symlinks true
+git checkout -- .claude/skills
+```
+
+확인: `.claude/skills/` 안의 스킬 이름이 폴더(링크)로 열리고 그 안에 `SKILL.md`가 있으면 됩니다.
+
+> 스킬 하나만 가져다 쓰는 경우("사용법"대로 폴더 복사)에는 이 설정이 필요 없습니다. `.agents/skills/<이름>` 폴더를 복사하면 진짜 파일이 옮겨집니다.
+
 ## 요구 사항
 
 - [Claude Code](https://claude.com/product/claude-code)
