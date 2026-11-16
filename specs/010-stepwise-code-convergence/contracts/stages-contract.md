@@ -74,7 +74,7 @@
 ```json
 {"dir": ".zenuml/<slug>.stages",
  "stages": [{"work": 1, "nickname": "꾸며낸 뼈대", "visible": true, "display": 1, "of": 7,
-             "becomes": "…", "hidden": "…", "notation": null, "merged": []}, …],
+             "becomes": "…", "unrevealed": "…", "notation": null, "merged": []}, …],
  "notices": [],
  "nodes": [{"id": "OrderService", "name": "OrderService", "stage1": ".zenuml/<slug>.stages/work/01/OrderService.kt",
             "original": ".zenuml/<slug>.stages/work/original/OrderService.kt",
@@ -92,7 +92,7 @@
   - `work/<k>`가 없음
 - 구체화하는 노드마다 `work/<k-1>/<id>.kt`를 `work/<k>/<id>.kt`로 그대로 복사한다. 구체화하지 않는 노드는 복사하지 않는다.
 - 폴더 이름의 번호는 두 자리다(`01`, `02`, …).
-- 출력 JSON은 `{"stage": k, "nickname": "…", "becomes": "…", "hidden": "…", "notation": "…", "merged": [{"nickname": "…", "becomes": "…", "notation": "…"}], "files": [...]}` 형태다. `merged`는 꺼져서 이 단계에 합쳐진 단계들의 몫이고, 모델은 이것까지 함께 바꾼다.
+- 출력 JSON은 `{"stage": k, "nickname": "…", "becomes": "…", "unrevealed": "…", "notation": "…", "merged": [{"nickname": "…", "becomes": "…", "notation": "…"}], "files": [...]}` 형태다. `merged`는 꺼져서 이 단계에 합쳐진 단계들의 몫이고, 모델은 이것까지 함께 바꾼다.
 
 ### `build <dir>`
 
@@ -183,7 +183,7 @@
 - **코드 블록**: 펜스 길이는 코드 안에서 가장 긴 백틱 연속보다 하나 더 길게 한다(최소 3).
 - **`.code` 영역**(기존 상자의 몫): 코드의 높이 상한 `min(30lh, 70vh)`과 세로·가로 스크롤을 맡는다. 코드는 `white-space: pre`로 줄바꿈하지 않는다.
 - **diff 층 CSS**(두 번째 `<style>`): `.code`를 기준점으로 삼아 `pre.diff`를 코드 위에 겹친다. 줄 위치는 `pre > code` 구조와 글자가 같아서 맞는다(research R7 원칙 4). 기존 상자의 여백·줄 높이 수치를 베끼지 않는다. 가로·세로로 스크롤해도 줄을 따라간다. 색은 `--vscode-editorGutter-addedBackground`·`modifiedBackground`·`deletedBackground` 테마 변수를 쓰고, 대체 색을 함께 적는다.
-- **구체화하지 않는 노드**: `### <노드 이름>` 바로 아래에 `⚠️ <skip_reason>` 한 줄을 두고, 상자에는 1단계 하나만 둔다.
+- **구체화하지 않는 노드**: `### <노드 이름>` 바로 아래에 `⚠️ <skip_reason>` 한 줄을 두고, 상자에는 1단계 하나만 둔다(spec FR-017, 넘길 단계 없음).
 - **같은 문서에서 Id가 겹치는 경우**: 라디오의 `name`과 `id`는 노드 Id로 만든다. 노드 Id는 구조 뷰 안에서 유일하다.
 - 문서에는 단계 코드와 위 표시만 담는다(FR-018).
 
