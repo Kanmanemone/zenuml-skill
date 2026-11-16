@@ -31,6 +31,7 @@
 | `range` | 원본 범위(R5). `{source, start_line, end_line}` 형태이고, 구체화하지 않는 노드는 null이다. |
 | `candidates` | 같은 이름의 선언이 여럿일 때의 후보 `{pick, start_line, end_line, header}` 목록. 하나뿐이면 빈 목록 |
 | `pick` | 모델이 고른 후보 번호(1부터). `prepare --pick`으로 받는다(spec FR-002) |
+| `responsibility` | 구조 뷰 `#### 요소의 책임`에서 그 노드 항목의 `책임 (추상)` 문장. 없거나 `설명에 명시되지 않음`으로 시작하면 null이다(spec FR-015e). |
 | `skip_reason` | 구체화하지 않는 이유 한 줄. 구체화하는 노드는 null이다(FR-017). |
 | `doc` | 들어갈 문서 이름 |
 

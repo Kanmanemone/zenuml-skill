@@ -18,10 +18,11 @@ Technical Context에 NEEDS CLARIFICATION은 없다. 아래는 설계를 정하�
 
 ## R2. 구조 뷰 읽기 (FR-002)
 
-- **Decision**: `stages.py`가 Dependency 코드 블록에서 세 가지를 읽는다. 003의 `view_parser.py`는 import하지 않는다.
+- **Decision**: `stages.py`가 Dependency 코드 블록에서 세 가지를, Responsibility에서 노드의 책임 문장을 읽는다. 003의 `view_parser.py`는 import하지 않는다.
   - 그룹: `subgraph Id["라벨"]` … `end`의 중첩
   - 노드 선언: 맨 이름, `Id@{ label: "…" }`, `Id["…"]`
   - 링크: `click Id "대상" "라벨"` 줄. 이동 없는 `hoverOnly` 줄은 링크 없음으로 본다.
+  - 책임: Dependency 코드 블록 밖의 `#### 요소의 책임`에서, 항목 머리의 `<strong>이름</strong>`(링크가 있으면 `<strong>[이름](…)</strong>`, 쉼표로 여럿)마다 그 항목의 `<strong>책임 (추상)</strong>:` 뒤 문장을 노드 이름으로 짝짓는다(spec FR-015e).
 - **Rationale**: 003의 파서는 그룹 소속을 기록하지 않고, hover용 본문 분석까지 들어 있다. 이 기능에 필요한 것은 노드·그룹 소속·링크뿐이다. 스킬끼리 코드를 공유하지 않는다는 관례(003 FR-014)도 따른다.
 
 ## R3. 단계 정의 파일 `stages.md` (FR-007~009, SC-006)
