@@ -162,6 +162,10 @@ shape:
   so git can parse them.
 - **Breaking change**: Put `!` before the colon and add a
   `BREAKING CHANGE: <what breaks>` trailer.
+- **Spec Kit commits**: A commit that records what one Spec Kit command
+  produced replaces `<type>(<scope>)` with `[Spec Kit] <skill name>` (e.g.
+  `[Spec Kit] speckit-tasks: …`). Base its body on the actual diff. Every
+  other rule above still applies.
 
 (Korean: 모든 커밋 메시지는 squash 커밋과 히스토리 재작성 커밋을 포함해 위
 형태를 따른다.
@@ -179,7 +183,11 @@ shape:
 - **트레일러**: 항상 맨 끝에, 한 줄에 `Token: value` 하나씩 쓴다(예:
   `Refs: #12`). 그래야 git이 파싱할 수 있다.
 - **호환성을 깨는 변경**: 콜론 앞에 `!`를 붙이고 `BREAKING CHANGE: <깨지는 것>`
-  트레일러를 추가한다.)
+  트레일러를 추가한다.
+- **Spec Kit 커밋**: Spec Kit 명령 하나가 만든 결과를 기록하는 커밋은
+  `<type>(<scope>)` 자리에 `[Spec Kit] <스킬 이름>`을 쓴다(예:
+  `[Spec Kit] speckit-tasks: …`). 본문은 실제 diff를 근거로 쓴다. 나머지 규칙은
+  위와 같다.)
 
 ### Types
 
@@ -233,6 +241,17 @@ flushed as soon as it is produced.)
 
 BREAKING CHANGE: the export file is no longer a single JSON array
 Refs: #12
+```
+
+```text
+[Spec Kit] speckit-tasks: 의존성 순서를 지킨 태스크 목록 생성
+
+구현 계획을 유저 스토리 우선순위에 따라 단계별 태스크로 분해한다.
+
+(English: generate a dependency-ordered task list
+
+Break the implementation plan into phases and tasks, ordered by user
+story priority.)
 ```
 
 ## Commit History
