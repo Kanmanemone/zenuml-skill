@@ -4,7 +4,7 @@ These examples show finished files — the Dependency diagrams are as completed 
 
 Full input→output walkthroughs, end to end. See `templates.md` for the underlying section shapes and `SKILL.md` ("Example") for the rules these follow. Each example below focuses on facets the `SKILL.md` example doesn't show.
 
-All examples below show Responsibility and Collaboration with display `plain` so the content is easy to read; under `collapsed`/`expanded` each is wrapped as in `SKILL.md` "Section display", and under `hidden` it's absent.
+All examples below show Responsibility and Collaboration with display `plain` so the content is easy to read; under `collapsed`/`expanded` each is wrapped as in `SKILL.md` "Section display", and under `hidden` it's absent. They also show `collaboration.questions` `true`; under `false` every <strong>내가 할 수 있는 질문</strong> sub-part is absent.
 
 ## Example 1 — Onboarding, two groups, local-project hyperlinks
 

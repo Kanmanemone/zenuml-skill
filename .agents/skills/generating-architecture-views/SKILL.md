@@ -30,7 +30,7 @@ Each script prints one result line, plus any `⚙️ 설정 안내: …` notice 
 Run `read_settings.py` first, fresh every run. It prints one line of JSON: `values` (every option, already validated and defaulted) and `notices`. Use `values` as this run's settings; never read `settings.jsonc` or `settings.schema.json` yourself, and never edit either.
 
 - **No Python 3.9+, or the script fails**: read only the `default` of every option in `settings.schema.json`, use those, and add `⚙️ 설정 안내: settings.jsonc — 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용` to the response.
-- **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "Responsibility도 보여줘", "elk로", "hover 빼고"): use it for this request only.
+- **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "Responsibility도 보여줘", "질문도 만들어줘", "elk로", "hover 빼고"): use it for this request only.
 
 ## Step 1 — Purpose and kind
 
@@ -130,7 +130,7 @@ An entry exists only for a pair with a **real dependency** between them:
 - **Group level** (only with 2+ groups): one entry per pair of groups with at least one edge crossing between their members. Describe each group only by what the description says about it — never a guessed role (this matters most for structural names like "app 모듈").
 - **Element level**: one entry per pair of elements joined directly by an edge, whether in the same group or not (a cross-group edge also feeds its group pair's entry). Write entries in first-appearance order — sources in Dependency order, then each source's targets in edge order — so no pair repeats.
 
-**Format** — the opening line states the real direction, with every name in `<strong>` and linked per "Hyperlink resolution" (at both levels, however many entries): <strong>A</strong>는 <strong>B</strong>에 의존한다, or <strong>A</strong>와 <strong>B</strong>는 서로 의존한다 for both directions — never "vs". Then three sub-parts, each a `<strong>` heading bullet with a **nested** list of 2–4 short, concrete points (never an inline paragraph):
+**Format** — the opening line states the real direction, with every name in `<strong>` and linked per "Hyperlink resolution" (at both levels, however many entries): <strong>A</strong>는 <strong>B</strong>에 의존한다, or <strong>A</strong>와 <strong>B</strong>는 서로 의존한다 for both directions — never "vs". Then the sub-parts below, each a `<strong>` heading bullet with a **nested** list of 2–4 short, concrete points (never an inline paragraph). Write <strong>내가 할 수 있는 질문</strong> only when `collaboration.questions` is `true`; when it is `false`, omit it and keep the other two unchanged:
 
 - <strong>책임의 경계</strong>
   - what one side is responsible for
@@ -166,7 +166,7 @@ Check the draft against every item; fix and re-check before saving. Don't narrat
 - AP-7: Group-level entries only for group pairs with a crossing edge (none with fewer than 2 groups).
 - AP-8: Element-level entries only for directly connected pairs.
 - AP-9: Multi-target consolidation only where its condition holds.
-- AP-10: Every Collaboration entry has the directional opening line, all three sub-parts as nested lists, and backticked identifiers.
+- AP-10: Every Collaboration entry has the directional opening line, its sub-parts as nested lists (내가 할 수 있는 질문 exactly when `collaboration.questions` is `true`), and backticked identifiers.
 - AP-11: No comparison of concepts that aren't identified groups/elements.
 - AP-12: Every entry self-contained, none thinner than earlier ones.
 - AP-13: Every link follows "Hyperlink resolution", none fabricated, and each name carries the same link everywhere it heads an entry or opening line — spot-check the element-level Collaboration entries.
@@ -237,7 +237,7 @@ Never summarize, analyze, or prune the log. Changing `log.directory` never moves
 
 In VS Code's Markdown preview, hovering a Dependency node shows a panel with that node's Responsibility and the collaborations it depends on — copied from the file's body by `apply_hover.py`, never written by you.
 
-**On**: `hover.enabled` is `true` and at least one of `hover.responsibility`/`hover.collaboration` is non-empty, after applying any value the request states ("hover 빼고", "질문도 넣어줘", "노드 아래에 띄워줘"). Off: don't run the script.
+**On**: `hover.enabled` is `true` and at least one of `hover.responsibility`/`hover.collaboration` is non-empty, after applying any value the request states ("hover 빼고", "노드 아래에 띄워줘"). Off: don't run the script. The panel only copies questions the body has, so with `collaboration.questions` `false` no panel shows any, whatever `hover.collaboration` says; a request for questions in the panel ("질문도 넣어줘") turns `collaboration.questions` on for that request.
 
 **Run**: `apply_hover.py <path to the file> [--enabled=…] [--responsibility=…] [--collaboration=…] [--position=…]`, adding an option only for a value the request itself states (e.g. `--collaboration=targets,boundary,rationale,questions`, `--position=node`, `--responsibility=` for none).
 
@@ -255,7 +255,7 @@ In VS Code's Markdown preview, hovering a Dependency node shows a panel with tha
 
 ## Example
 
-Input: "OrderService는 주문을 생성하고, PaymentService는 결제를 담당하며, OrderService가 PaymentService를 호출한다. 이 시스템의 구조를 보여줘." Purpose: 온보딩. No grouping signal, so no `subgraph`; no paths or URLs, so no links. What you write (both display settings `plain`; `build_diagram.py` then completes the fence):
+Input: "OrderService는 주문을 생성하고, PaymentService는 결제를 담당하며, OrderService가 PaymentService를 호출한다. 이 시스템의 구조를 보여줘." Purpose: 온보딩. No grouping signal, so no `subgraph`; no paths or URLs, so no links. What you write (both display settings `plain`, `collaboration.questions` `true`; `build_diagram.py` then completes the fence):
 
 ````markdown
 ### Dependency

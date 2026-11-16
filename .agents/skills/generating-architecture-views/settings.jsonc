@@ -15,7 +15,12 @@
     //   plain     [0] 상자 없이 그대로
     //   collapsed [0] 접은 글 상자, 처음엔 접힘
     //   expanded  [0] 접은 글 상자, 처음엔 펼침
-    "display": "collapsed"
+    "display": "collapsed",
+
+    // 협력마다 "내가 할 수 있는 질문"을 만들지 (초기 기본값: false)
+    //   true  [+] 만듦
+    //   false [0] 만들지 않음(hover에도 질문이 뜨지 않음)
+    "questions": false
   },
   "dependency": {
     // Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진 (초기 기본값: elk)
@@ -47,7 +52,7 @@
     //   targets   [0] 의존 대상과 관계(빼도 협력 구분용으로 항상 붙음)
     //   boundary  [0] 책임의 경계
     //   rationale [0] 분리 이유 & 합리성 평가
-    //   questions [0] 내가 할 수 있는 질문
+    //   questions [0] 내가 할 수 있는 질문(위 collaboration.questions가 false면 뜨지 않음)
     "collaboration": ["targets", "boundary", "rationale"],
 
     // 창의 위치 (초기 기본값: bottom)
