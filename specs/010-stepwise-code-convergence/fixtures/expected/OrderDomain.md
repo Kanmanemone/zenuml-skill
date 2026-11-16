@@ -668,9 +668,9 @@ class InventoryRepository {
 .stages .code > pre.diff { position: absolute; top: 0; left: 0; background: transparent; pointer-events: none; color: transparent; }
 .stages pre.diff code { color: transparent; background: transparent; min-width: 100%; }
 .stages pre.diff span { display: inline-block; width: 100%; min-height: 1lh; vertical-align: top; position: relative; margin-left: -.6em; padding-left: .6em; }
-.stages pre.diff .add { background: color-mix(in srgb, var(--vscode-editorGutter-addedBackground, #2ea043) 22%, transparent); box-shadow: inset 3px 0 0 var(--vscode-editorGutter-addedBackground, #2ea043); }
-.stages pre.diff .mod { background: color-mix(in srgb, var(--vscode-editorGutter-modifiedBackground, #1b81a8) 22%, transparent); box-shadow: inset 3px 0 0 var(--vscode-editorGutter-modifiedBackground, #1b81a8); }
-.stages pre.diff .del::before, .stages pre.diff .del-after::after { content: ""; position: absolute; left: 0; border: 5px solid transparent; border-left-color: var(--vscode-editorGutter-deletedBackground, #f85149); }
+.stages pre.diff .add { background: oklch(0.7 0.13 150 / 10%); box-shadow: inset 4px 0 0 oklch(0.74 0.13 152); }
+.stages pre.diff .mod { background: oklch(0.7 0.13 245 / 10%); box-shadow: inset 4px 0 0 oklch(0.52 0.19 260); }
+.stages pre.diff .del::before, .stages pre.diff .del-after::after { content: ""; position: absolute; left: 0; border: 5px solid transparent; border-left-color: oklch(0.65 0.19 25); }
 .stages pre.diff .del::before { top: -5px; }
 .stages pre.diff .del-after::after { bottom: -5px; }
 </style>
