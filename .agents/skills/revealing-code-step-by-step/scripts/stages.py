@@ -633,6 +633,8 @@ def analyse(text):
     for i in range(body_open + 1, body_close):
         line, m = lines[i], masked[i]
         if not line.strip():
+            if cur is not None and (nest > 0 or continues):
+                cur["lines"].append(i)
             continue
         if nest == 0 and not continues and COMMENT_LINE.match(line):
             comments.append(i)

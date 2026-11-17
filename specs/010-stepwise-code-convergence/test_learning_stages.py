@@ -49,6 +49,21 @@ REPO = '''interface Repo {
     fun sell(id: String)
 }
 '''
+MENU = '''@Composable
+fun Menu(onClick: () -> Unit) {
+    Box {
+        Icon()
+
+        DropdownMenu(onClick = onClick)
+    }
+
+    fun close() {
+        val x = 1
+
+        log(x)
+    }
+}
+'''
 
 
 def run(fn, **args):
@@ -97,7 +112,7 @@ class Units(unittest.TestCase):
         self.assertEqual(units_of('fun f(x: Int) =\n    x + 1\n')[1], [])
 
     def test_every_fixture_and_sample_unfolds_back_to_the_source(self):
-        texts = [SHOP, REPO] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
+        texts = [SHOP, REPO, MENU] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
         for text in texts:
             info, units = units_of(text)
             if units:
