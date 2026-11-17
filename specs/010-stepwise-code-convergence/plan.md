@@ -1,12 +1,25 @@
 # Implementation Plan: 꾸며낸 최소 코드에서 원본 코드까지 단계별로 구체화해 보여 주기
 
-**Branch**: `010-stepwise-code-convergence` | **Date**: 2026-11-17 | **Spec**: [spec.md](spec.md)
+**Branch**: `010-stepwise-code-convergence` | **Date**: 2026-11-18 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/010-stepwise-code-convergence/spec.md`
 
 ## Summary
 
-### 스코프 트리 정제 (2026-11-17, 아래의 모든 앞선 설계보다 우선)
+### 붙는 선언 좁히기 (2026-11-18, 아래의 모든 앞선 설계보다 우선)
+
+붙는 선언을 **한 줄 선언**으로 좁힌다(spec FR-005a(4), SC-012). 결정과 근거는 [research.md](research.md) S9에 있다.
+
+- **`build_tree`**: 루트 항목 가운데 비공개 멤버를 붙는 선언으로 돌리는 조건에 "선언 줄이 하나"를 더한다. 여러 줄 비공개 멤버는 공개 멤버와 같은 루트 자식이 되어, 이미 있는 영역 나누기·외길 병합·묶음·펼치기가 그대로 적용된다. 한 줄 판정은 항목의 코드 줄 수다. 주석과 따로 선 어노테이션은 이미 `split_items`에서 코드 줄과 따로 모이므로 새 규칙이 필요 없다.
+- **바뀌지 않는 것**: `outline.json` 형식, 검사, 단계 순서, 장면 그리기, 붙는 선언을 처음 쓰이는 단계에 두는 `attach_steps`, 설정, 1단계 프롬프트. 여러 줄 비공개 멤버가 없는 노드는 스코프 트리와 결과가 글자까지 같다.
+- **바꾸는 파일**: `scripts/stages.py`(조건 한 줄), `stages.md`·`SKILL.md`(붙는 선언 설명에 "한 줄"), `test_learning_stages.py`(여러 줄 비공개 멤버 시험), 이 Spec의 research·data-model·계약·quickstart.
+
+**Constitution Check (이 개편)**
+- I. 통과: 새 개념·설정·의존성이 없다. 예외(붙는 선언)의 범위를 줄일 뿐이다. 붙는 선언에 따로 펼치기 단계를 주는 방식은 새 개념을 들이므로 기각했다(S9).
+- II. 통과: 010 Spec의 갱신이다.
+- III. 해당 없음: 요구 변경이다(FR-005a(4), SC-012).
+
+### 스코프 트리 정제 (2026-11-17)
 
 펼치기 단위를 "본문의 최상위 문장"에서 **스코프 트리의 묶음**으로 바꾼다. 설계 전체의 기준은 구조에서 오는 최적화다. 원본 크기에 비례하는 비용은 그대로 두고, 같은 줄을 두 번 보이기, 다시 읽기, 기계적으로 정할 일을 모델에게 맡기기, 호출 추가, 전부 다시 쓰기 같은 구조적 낭비를 없앤다(spec SC-009). 결정과 근거는 [research.md](research.md) S1~S8에 있다.
 
