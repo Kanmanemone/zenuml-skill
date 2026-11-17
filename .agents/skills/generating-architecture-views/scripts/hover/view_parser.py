@@ -133,7 +133,10 @@ def _parse_fence(lines, start, end):
             continue
         m = _EDGE.match(raw)
         if m:
-            edges.append(Edge(m.group(1), m.group(3), m.group(2).strip()))
+            label = m.group(2).strip()
+            if len(label) >= 2 and label[0] == label[-1] == '"':
+                label = label[1:-1]  # build_diagram quotes a label that starts with `@`
+            edges.append(Edge(m.group(1), m.group(3), label))
             continue
         m = _CLASS.match(raw)
         if m and not m.group(2).startswith("crud"):

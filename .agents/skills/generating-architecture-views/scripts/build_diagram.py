@@ -95,6 +95,8 @@ def build(fence_lines, layout):
     out += declarations + ["", "  %% ---- 엣지 ----"]
     by_source = {}
     for i, (indent, source, label, target) in enumerate(edges):
+        if label.strip().startswith("@"):
+            label = '"' + label.strip() + '"'  # mermaid 12.2 cannot parse an edge text that starts with `@`
         out.append("  " + source + " e" + str(i) + "@-->|" + label + "| " + target)
         by_source.setdefault(source, []).append(i)
     out += ["", "  %% ---- 노드 스타일 ----"]
