@@ -98,6 +98,21 @@ class Definition(unittest.TestCase):
         self.assertEqual(len(notices), 2)
 
 
+class Declarations(unittest.TestCase):
+    def test_extension_declarations_are_found_by_name_not_receiver(self):
+        text = '''private fun DrawScope.drawBullets(
+    a: Int,
+) {
+    x()
+}
+
+fun <T> List<T>.second(): T = this[1]
+'''
+        self.assertEqual(s.find_declaration(text, ['drawBullets'])[0], (1, 5))
+        self.assertEqual(s.find_declaration(text, ['second'])[0], (7, 7))
+        self.assertIsNone(s.find_declaration(text, ['DrawScope'])[0])
+
+
 class Units(unittest.TestCase):
     def test_attachments_and_cap(self):
         _, units = units_of(SHOP)

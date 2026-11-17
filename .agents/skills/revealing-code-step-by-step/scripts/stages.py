@@ -510,7 +510,7 @@ def mask_code(text):
     return "".join(out)
 
 
-HEADER = r"\b(?:class|interface|object|fun|typealias|val|var)\b[\w\s<>,.?*]*?(?<![\w.])%s(?![\w])"
+HEADER = r"\b(?:class|interface|object|fun|typealias|val|var)\b[\w\s<>,.?*]*?(?<!\w)%s(?![\w])"
 CONTINUE_END = ("=", ",", ":", "(", "[", "->", ".", "+", "-", "*", "/", "&&", "||", "?:")
 CONTINUE_START = (".", "?.", "?:", "&&", "||", ":", "=", "{", "where ")
 
