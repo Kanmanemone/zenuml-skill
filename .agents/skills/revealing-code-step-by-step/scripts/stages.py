@@ -722,6 +722,7 @@ def build_tree(text):
     {"root": [own line, ...], "root_children": [node id, ...], "body_open": n,
      "nodes": [{"lines": [...], "children": [...], "parent": id or -1, "first": n}, ...],   # preorder ids; first = subtree's first line
      "attached": [{"name", "kind": "param"|"member", "lines": [...]}, ...]}     # lines 0-based
+    Attached: parameters, and root members that are private or state with one code line.
     """
     info = analyse(text)
     if info["body_open"] is None:
@@ -818,7 +819,9 @@ def build_tree(text):
         return {"lines": own, "children": kids}
 
     items = info["items"]
-    anchors = [it for it in items if not it["private"] and not it["state"]] or items[:1]
+    # Only one-line private members and one-line state attach; a multi-line member is a root child.
+    attaches = [(it["private"] or it["state"]) and len(it["lines"]) == 1 for it in items]
+    anchors = [it for it, a in zip(items, attaches) if not a] or items[:1]
     groups = []
     for it in anchors:
         prev = groups[-1] if groups else None

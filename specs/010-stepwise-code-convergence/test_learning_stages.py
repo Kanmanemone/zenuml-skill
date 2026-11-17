@@ -211,7 +211,29 @@ def scenes_of(text, entry=None):
     return tree, steps, [s.render_steps_scene(tree, lines, steps, at, k) for k in range(len(steps) + 1)]
 
 
-SAMPLES = [NESTED, FIVE, SHOP, REPO, MENU, RAW, ANNOTATED]
+VM = '''class Vm(private val repo: Repo) {
+    private val selected = MutableStateFlow(0)
+
+    // the items of the selected id
+    private val items: Flow<List<Item>> =
+        selected
+            .flatMapLatest { id ->
+                if (id == 0) {
+                    flowOf(emptyList())
+                } else {
+                    repo.items(id)
+                }
+            }
+            .stateIn(scope, started, emptyList())
+
+    val state = combine(items, selected) { items, selected ->
+        State(items, selected)
+    }
+}
+'''
+
+
+SAMPLES = [NESTED, FIVE, SHOP, REPO, MENU, RAW, ANNOTATED, VM]
 
 
 def all_texts():
@@ -289,14 +311,14 @@ class Scenes(unittest.TestCase):
         self.assertNotIn('Basic(', outline)
 
     def test_one_layer_per_scene(self):
-        for text in [NESTED, SHOP, MENU]:
+        for text in [NESTED, SHOP, MENU, VM]:
             _, steps, scenes = scenes_of(text)
             for k, scene in enumerate(scenes):
                 left = {int(n) for n in re.findall(r'⟨(\d+)\. ', scene)}
                 self.assertEqual(left, set(range(k + 1, len(steps) + 1)), (text[:20], k))
 
     def test_no_blank_left_above_a_closing_line_by_hidden_members(self):
-        text = 'class T {\n    fun a() {\n        x()\n        h()\n    }\n\n    private fun h() {\n        z()\n    }\n}\n'
+        text = 'class T {\n    fun a() {\n        x()\n        y(h)\n    }\n\n    private val h = 1\n}\n'
         _, _, scenes = scenes_of(text)
         self.assertTrue(scenes[0].endswith('    }\n}\n'), scenes[0])
         self.assertEqual(scenes[-1], text)
@@ -308,6 +330,27 @@ class Scenes(unittest.TestCase):
         self.assertNotIn('var layout', scenes[first - 1])
         self.assertIn('    style: Style = Style(),', scenes[1])  # used by the first step
         self.assertNotIn('onLayout: (', scenes[1])
+
+    def test_only_one_line_members_attach_and_multiline_ones_unfold_in_layers(self):
+        for text in all_texts():
+            tree = tree_of(text)
+            if tree:
+                lines = text.split('\n')
+                for a in tree['attached']:
+                    code = [j for j in a['lines'] if not s.COMMENT_LINE.match(lines[j]) and not s.ANNOTATION_LINE.match(lines[j])]
+                    self.assertEqual(len(code), 1, (text[:20], a['name']))
+        tree, steps, scenes = scenes_of(VM)
+        self.assertEqual([a['name'] for a in tree['attached']], ['selected'])  # constructor properties stay in the head
+        lines = VM.split('\n')
+        items = next(n for n in tree['root_children'] 
+                     if any('private val items' in lines[j] for j in tree['nodes'][n]['lines']))
+        self.assertTrue(tree['nodes'][items]['children'])
+        self.assertIn('// the items of the selected id', scenes[1])
+        self.assertIn('private val items', scenes[1])
+        self.assertNotIn('flowOf', scenes[1])  # the inner layers stay for later steps
+        self.assertIn('private val selected', scenes[1])  # first used by items
+        self.assertNotIn('private val selected', scenes[0])
+        self.assertEqual(scenes[-1], VM)
 
     def test_one_group_in_two_places_shares_number_and_sentence(self):
         tree = tree_of(NESTED)
