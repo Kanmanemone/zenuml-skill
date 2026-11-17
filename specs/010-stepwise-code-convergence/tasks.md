@@ -379,3 +379,22 @@ Phase 10의 펼치기 단위(최상위 문장, 4개 합치기, 접기)를 대체
 
 - [X] T055 `test_learning_stages.py`에 깊이 1 노드(안쪽 블록이 없는 본문)의 장면 종류·순서가 사용 상황 → 윤곽 → 묶음 수(4개 이하)만큼의 펼치기이고 원본 장면이 따로 없음을 확인하는 테스트를 추가한다 per quickstart 1, spec Edge Cases "안쪽 블록이 없는 본문" (partial)
 - [X] T056 `SK/scripts/stages.py`의 `build_tree`가 manifest에 남기는 트리 노드에 data-model의 `first`(노드 첫 줄, 자리표시자 들여쓰기와 형제 순서의 기준)를 기록하고, `plan_steps`·`render_steps_scene`의 첫 줄 계산이 그 값을 쓰게 한다 per data-model TreeNode, T048 (partial)
+
+## Phase 13: 붙는 선언 좁히기 (2026-11-18)
+
+붙는 선언을 한 줄 선언으로 좁힌다(spec FR-005a(4), SC-012). SK는 `.agents/skills/revealing-code-step-by-step`이다. 근거는 [research.md](research.md) S9, 데이터는 [data-model.md](data-model.md)의 Attached, 출력 표시는 [contracts/stages-contract.md](contracts/stages-contract.md) 맨 위 절에 있다. 바꾸는 것은 분류 조건 하나이고, 트리·목록·검사·단계·장면 코드는 그대로 쓴다.
+
+- [ ] T057 [US2] `SK/scripts/stages.py`의 `build_tree`에서 루트 항목을 붙는 선언으로 돌리는 조건을 "(비공개이거나 한 줄 가변 상태) 그리고 항목의 `lines`(코드 줄, 주석·따로 선 어노테이션 제외)가 하나"로 바꾼다. 나머지 항목은 모두 루트 자식이 된다. docstring의 `attached` 설명도 맞춘다 — FR-005a(4), research S9
+- [ ] T058 [P] [US3] 붙는 선언 설명을 "한 줄 선언"으로 맞춘다 — FR-007, SC-006
+  - `SK/stages.md` `## 펼치기`의 "처음 쓰이는 비공개 멤버·상태·매개변수"
+  - `SK/SKILL.md` 1단계 prepare 출력의 `=` 설명
+- [ ] T059 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 여러 줄 비공개 멤버 시험을 더한다 — SC-012, quickstart 1
+  - 합성 Kotlin 클래스(여러 줄 비공개 흐름 하나는 안에 람다·갈림길이 든 여러 겹, 한 줄 비공개 상태 하나, 그 둘을 쓰는 공개 멤버 하나)
+  - 확인: 여러 줄 비공개 멤버가 `attached`에 없고 루트 자식 스코프이며 그 안의 겹이 따로 펼쳐짐, `attached`의 모든 선언이 코드 한 줄, 한 줄 상태는 처음 쓰는 단계에 붙음, 모두 연 장면이 원본과 같음
+  - 기존 `fixtures/expected/*.md`가 다시 만들지 않아도 그대로 통과함(여러 줄 비공개 멤버가 없는 노드는 결과가 같음)
+- [ ] T060 [US2] 실제 예제로 다시 실행하고 기록한다 — SC-003, SC-008, SC-012, quickstart 2
+  - 바꾸기 전 `.zenuml/swemo-ui-bulleted-list-testbed.stages/`의 문서를 scratchpad에 복사해 두고, 같은 구조 뷰로 prepare를 다시 실행한다. MemoViewModel 외 노드의 `outline.json` 항목은 그대로 쓰고, MemoViewModel 항목만 새 스코프 목록에 맞춰 다시 쓴 뒤 build한다(1단계 파일은 보존).
+  - 확인: `verified`, 구조 뷰 SHA256 전후, MemoViewModel의 장면별 새 줄 수와 붙는 선언이 모두 한 줄인지, MemoViewModel 외 노드의 상자는 바꾸기 전과 글자까지 같음
+  - 결과를 research S9 끝에 바꾸기 전 MemoViewModel 기록(64, 11, 5, 36, 5, 28, 17)과 나란히 적는다.
+
+실행 순서: T057 → T059 → T060. T058은 T057과 함께 진행할 수 있다. 끝나면 converge로 남은 요구를 점검한다.
