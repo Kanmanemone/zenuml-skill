@@ -629,9 +629,29 @@ def analyse(text):
     if body_open is None or not lines[-1].strip().startswith("}"):
         return {"lines": lines, "body_open": None, "params": [], "items": []}
     body_close = len(lines) - 1
+    # lines that start / end inside a multi-line raw string (a `"""` that mask_code turned into `_`)
+    in_raw, starts_in_raw, ends_in_raw = False, [], []
+    for line, m in zip(lines, masked):
+        starts_in_raw.append(in_raw)
+        k = line.find('"""')
+        while k >= 0:
+            if m[k] == "_":
+                in_raw = not in_raw
+                k += 3
+                while k < len(line) and line[k] == '"':
+                    k += 1
+            else:
+                k += 3
+            k = line.find('"""', k)
+        ends_in_raw.append(in_raw)
     items, cur, nest, comments, continues = [], None, 0, [], False
     for i in range(body_open + 1, body_close):
         line, m = lines[i], masked[i]
+        if starts_in_raw[i] and cur is not None:
+            cur["lines"].append(i)
+            nest += _nesting(m)
+            continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
+            continue
         if not line.strip():
             if cur is not None and (nest > 0 or continues):
                 cur["lines"].append(i)
@@ -645,7 +665,7 @@ def analyse(text):
             items.append(cur)
         cur["lines"].append(i)
         nest += _nesting(m)
-        continues = nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
+        continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
     if comments and items:
         items[-1]["trailing"] = comments
     for it in items:

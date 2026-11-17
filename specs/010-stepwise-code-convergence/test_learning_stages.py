@@ -113,7 +113,22 @@ fun <T> List<T>.second(): T = this[1]
         self.assertIsNone(s.find_declaration(text, ['DrawScope'])[0])
 
 
+RAW = '''object Key : EntryKey {
+    override val title = "t"
+    override val description = """
+        body line
+    """.trimIndent()
+    override val screen = { Screen() }
+}
+'''
+
+
 class Units(unittest.TestCase):
+    def test_multiline_raw_string_stays_in_one_item(self):
+        info, _ = units_of(RAW)
+        self.assertEqual([(it['name'], it['lines']) for it in info['items']],
+                         [('title', [1]), ('description', [2, 3, 4]), ('screen', [5])])
+
     def test_attachments_and_cap(self):
         _, units = units_of(SHOP)
         self.assertEqual([s.unit_label(u) for u in units],
@@ -127,7 +142,7 @@ class Units(unittest.TestCase):
         self.assertEqual(units_of('fun f(x: Int) =\n    x + 1\n')[1], [])
 
     def test_every_fixture_and_sample_unfolds_back_to_the_source(self):
-        texts = [SHOP, REPO, MENU] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
+        texts = [SHOP, REPO, MENU, RAW] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
         for text in texts:
             info, units = units_of(text)
             if units:
