@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import tempfile
@@ -74,9 +75,9 @@ def run(fn, **args):
     return json.loads(first), rest
 
 
-def units_of(text):
-    info = s.analyse(text)
-    return info, s.make_units(info)
+def parsed_outline(result, manifest):
+    outline = json.loads((result / 'work/outline.json').read_text(encoding='utf-8'))
+    return {n['id']: s.check_outline(n, n['tree'], outline[n['id']])[1] for n in manifest['nodes'] if n['id'] in outline}
 
 
 def exit_code(argv):
@@ -136,87 +137,216 @@ ANNOTATED = '''object Module {
 '''
 
 
-class Units(unittest.TestCase):
+NESTED = '''@Composable
+fun Field(
+    state: State,
+    style: Style = Style(),
+    onLayout: (() -> Unit)? = null,
+) {
+    /** One bullet's width. */
+    val gutter = measure(style)
+
+    var layout: Layout? by remember { mutableStateOf(null) }
+
+    Basic(
+        state = state,
+        style = style,
+        onLayout = { result ->
+            layout = result
+            onLayout?.invoke()
+        },
+        decorator = { inner ->
+            val field = @Composable {
+                Box(
+                    Modifier
+                        .clip()
+                        .drawBehind {
+                            layout?.let { l ->
+                                val offset = scroll(l)
+                                drawBullets(l, offset)
+                            }
+                        }
+                        .padding(gutter),
+                ) {
+                    inner()
+                }
+            }
+            field()
+        },
+    )
+}
+'''
+FIVE = '''fun five() {
+    a()
+    b()
+    c()
+    d()
+    e()
+}
+'''
+
+
+def tree_of(text):
+    return s.build_tree(text)
+
+
+def auto_entry(tree, sentence='할 일을 마친다.'):
+    """An outline entry keeping every child separate (at most four groups per scope)."""
+    entry = []
+    for scope in s.tree_scopes(tree):
+        kids = list(range(1, len(s.tree_children(tree, scope)) + 1))
+        size = -(-len(kids) // s.MAX_SEP)
+        groups = [{'ids': kids[i:i + size], 's': sentence} for i in range(0, len(kids), size)]
+        entry.append({'sep': groups} if scope == 'R' else {'s': sentence, 'sep': groups})
+    return entry
+
+
+def scenes_of(text, entry=None):
+    tree = tree_of(text)
+    errors, parsed = s.check_outline({'id': 'X'}, tree, entry or auto_entry(tree))
+    assert not errors, errors
+    steps = s.plan_steps(tree, parsed)
+    lines = text.rstrip('\n').split('\n')
+    at = s.attach_steps(tree, steps, lines, s.mask_code(text).rstrip('\n').split('\n'))
+    return tree, steps, [s.render_steps_scene(tree, lines, steps, at, k) for k in range(len(steps) + 1)]
+
+
+SAMPLES = [NESTED, FIVE, SHOP, REPO, MENU, RAW, ANNOTATED]
+
+
+def all_texts():
+    return SAMPLES + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
+
+
+class Tree(unittest.TestCase):
     def test_own_line_annotations_attach_to_the_next_declaration(self):
-        info, units = units_of(ANNOTATED)
+        info = s.analyse(ANNOTATED)
         self.assertEqual([(it['name'], it['comments'], it['lines']) for it in info['items']],
                          [('provide', [1, 2], [3]), ('onCreate', [5], [6, 7, 8])])
-        self.assertEqual([s.unit_label(u) for u in units], ['provide', 'onCreate'])
 
     def test_multiline_raw_string_stays_in_one_item(self):
-        info, _ = units_of(RAW)
+        info = s.analyse(RAW)
         self.assertEqual([(it['name'], it['lines']) for it in info['items']],
                          [('title', [1]), ('description', [2, 3, 4]), ('screen', [5])])
 
-    def test_attachments_and_cap(self):
-        _, units = units_of(SHOP)
-        self.assertEqual([s.unit_label(u) for u in units],
-                         ['items (+ repo)', 'buy (+ busy, last, clock)', 'a, b', 'c'])
+    def test_nested_scopes_split_by_block_arguments_and_chain(self):
+        tree = tree_of(NESTED)
+        self.assertEqual(len(s.tree_scopes(tree)), 7)
+        lines = NESTED.split('\n')
+        texts = [[lines[j].strip() for j in s.subtree_lines(tree, n)] for n in range(len(tree['nodes']))]
+        self.assertIn(['state = state,', 'style = style,'], texts)  # one-line arguments merge
+        chain = next(n for n, t in enumerate(texts) if t and t[0] == 'Modifier')
+        self.assertEqual([lines[min(s.subtree_lines(tree, c))].strip()[:6] for c in tree['nodes'][chain]['children']],
+                         ['.clip(', '.drawB', '.paddi'])
+        self.assertEqual([a['name'] for a in tree['attached']], ['state', 'style', 'onLayout', 'layout'])
+
+    def test_single_child_layers_merge_including_the_root(self):
+        for text in all_texts():
+            tree = tree_of(text)
+            if tree:
+                self.assertTrue(all(len(n['children']) != 1 for n in tree['nodes']))
+                self.assertNotEqual(len(tree['root_children']), 1)
+        menu = tree_of(MENU)  # Box { … } is the only statement besides close(); the root keeps both
+        self.assertEqual(len(menu['root_children']), 2)
 
     def test_bodyless_signatures_of_one_kind_merge(self):
-        _, units = units_of(REPO)
-        self.assertEqual([s.unit_label(u) for u in units], ['items', 'buy, sell'])
+        tree = tree_of(REPO)
+        self.assertEqual(len(tree['root_children']), 2)
+        lines = REPO.split('\n')
+        self.assertEqual([lines[j].strip() for j in tree['nodes'][tree['root_children'][1]]['lines']],
+                         ['fun buy(id: String)', 'fun sell(id: String)'])
 
-    def test_expression_body_has_no_units(self):
-        self.assertEqual(units_of('fun f(x: Int) =\n    x + 1\n')[1], [])
+    def test_expression_body_has_no_tree(self):
+        self.assertIsNone(tree_of('fun f(x: Int) =\n    x + 1\n'))
 
-    def test_every_fixture_and_sample_unfolds_back_to_the_source(self):
-        texts = [SHOP, REPO, MENU, RAW, ANNOTATED] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
-        for text in texts:
-            info, units = units_of(text)
-            if units:
-                full = s.render_scene(info, units, ['x'] * len(units), [], len(units))
-                self.assertEqual(full.rstrip('\n'), text.rstrip('\n'))
+    def test_scope_list_shows_every_line_once_and_is_deterministic(self):
+        for text in all_texts():
+            tree = tree_of(text)
+            if tree and tree['root_children']:
+                listing = s.scope_listing({'id': 'X'}, text, tree)
+                self.assertEqual(listing, s.scope_listing({'id': 'X'}, text, tree_of(text)))
+                rows = [line for line in listing.split('\n') if '| ' in line[:4] and '⟨#' not in line]
+                self.assertEqual(len(rows), len(text.rstrip('\n').split('\n')))
 
 
 class Scenes(unittest.TestCase):
-    def setUp(self):
-        self.info, self.units = units_of(SHOP)
-        self.ph = ['목록을 내보낸다', '하나를 사고 기억한다', '보조 일 둘', '보조 일 하나']
+    def test_every_fixture_and_sample_unfolds_back_to_the_source(self):
+        for text in all_texts():
+            tree = tree_of(text)
+            if tree and tree['root_children']:
+                self.assertEqual(scenes_of(text)[2][-1].rstrip('\n'), text.rstrip('\n'))
 
-    def test_outline_folds_unused_parameters_and_lists_every_job(self):
-        outline = s.render_scene(self.info, self.units, self.ph, [], 0)
-        self.assertIn(') : Base() {', outline)
+    def test_outline_shows_every_step_nested_and_folds_unused_parameters(self):
+        _, steps, scenes = scenes_of(NESTED)
+        outline = scenes[0]
+        marks = [line for line in outline.split('\n') if line.strip().startswith('⟨')]
+        self.assertEqual([int(re.search(r'⟨(\d+)\.', m).group(1)) for m in marks], list(range(1, len(steps) + 1)))
+        depth = {k + 1: st['depth'] for k, st in enumerate(steps)}
+        indent = {int(re.search(r'⟨(\d+)\.', m).group(1)): len(m) - len(m.lstrip()) for m in marks}
+        for k in indent:
+            self.assertEqual(indent[k] - indent[1], 4 * depth[k])
         self.assertIn('    ...\n', outline)
-        self.assertNotIn('repo', outline)
-        self.assertEqual([line.strip() for line in outline.split('\n') if line.strip().startswith('⟨')],
-                         ['⟨%s⟩' % p for p in self.ph])
+        self.assertNotIn('Basic(', outline)
 
-    def test_each_unfold_reveals_exactly_one_more_unit_with_its_comment(self):
-        prev = s.render_scene(self.info, self.units, self.ph, [], 0)
-        for k in range(1, len(self.units) + 1):
-            cur = s.render_scene(self.info, self.units, self.ph, [], k)
-            self.assertEqual(prev.count('⟨') - cur.count('⟨'), 1)
-            prev = cur
-        second = s.render_scene(self.info, self.units, self.ph, [], 2)
-        self.assertIn('    /** Buys one item. */\n    fun buy', second)
-        self.assertIn('    private val repo: Repo,\n    clock: Clock,', second)
+    def test_one_layer_per_scene(self):
+        for text in [NESTED, SHOP, MENU]:
+            _, steps, scenes = scenes_of(text)
+            for k, scene in enumerate(scenes):
+                left = {int(n) for n in re.findall(r'⟨(\d+)\. ', scene)}
+                self.assertEqual(left, set(range(k + 1, len(steps) + 1)), (text[:20], k))
 
-    def test_fold_shows_until_source(self):
-        folds = [(10, 10, '처음엔 빈 목록')]
-        first = s.render_scene(self.info, self.units, self.ph, folds, 1)
-        self.assertIn('            ⟨처음엔 빈 목록⟩\n', first)
-        self.assertNotIn('onStart', first)
+    def test_no_blank_left_above_a_closing_line_by_hidden_members(self):
+        text = 'class T {\n    fun a() {\n        x()\n        h()\n    }\n\n    private fun h() {\n        z()\n    }\n}\n'
+        _, _, scenes = scenes_of(text)
+        self.assertTrue(scenes[0].endswith('    }\n}\n'), scenes[0])
+        self.assertEqual(scenes[-1], text)
+
+    def test_attached_state_and_parameters_appear_where_first_used(self):
+        _, steps, scenes = scenes_of(NESTED)
+        first = next(k for k, sc in enumerate(scenes) if 'var layout' in sc)
+        self.assertIn('layout = result', scenes[first])
+        self.assertNotIn('var layout', scenes[first - 1])
+        self.assertIn('    style: Style = Style(),', scenes[1])  # used by the first step
+        self.assertNotIn('onLayout: (', scenes[1])
+
+    def test_one_group_in_two_places_shares_number_and_sentence(self):
+        tree = tree_of(NESTED)
+        entry = auto_entry(tree)
+        basic = s.tree_scopes(tree).index(tree['root_children'][1])
+        entry[basic] = {'s': '필드를 띄운다.', 'sep': [{'ids': [1, 3], 's': '바깥에서 받은 값을 넘긴다.'}, {'ids': [2]}]}
+        _, _, scenes = scenes_of(NESTED, entry)
+        self.assertEqual(scenes[2].count('⟨3. 바깥에서 받은 값을 넘긴다.⟩'), 2)
+        self.assertIn('state = state,', scenes[3])
+        self.assertIn('decorator = { inner ->', scenes[3])
 
 
 class Outline(unittest.TestCase):
-    def check(self, entry, band='상품을 판다.'):
-        info, units = units_of(SHOP)
-        return s.check_outline({'id': 'Shop', 'responsibility': band}, units, info, entry)
+    def check(self, text, entry, band='필드를 그린다.'):
+        return s.check_outline({'id': 'X', 'responsibility': band}, tree_of(text), entry)
 
-    def test_rejections(self):
-        good = ['가', '나', '다', '라']
-        bad = [None, {'placeholders': good[:3]}, {'placeholders': ['', '나', '다', '라']},
-               {'placeholders': ['상품을 판다', '나', '다', '라']},
-               {'placeholders': good, 'folds': [{'from': 8, 'to': 9, 'text': '첫 줄 포함'}]},
-               {'placeholders': good, 'folds': [{'from': 9, 'to': 13, 'text': '두 멤버에 걸침'}]},
-               {'placeholders': good, 'folds': [{'from': 9, 'to': 10, 'text': 'a'}, {'from': 10, 'to': 10, 'text': 'b'}]},
-               {'placeholders': good, 'folds': [{'from': 10, 'to': 10, 'text': ' '}]}]
-        for entry in bad:
-            with self.assertRaises(s.InputError, msg=entry):
-                self.check(entry)
-        self.assertEqual(self.check({'placeholders': good, 'folds': [{'from': 10, 'to': 10, 'text': '접음'}]})[1],
-                         [(10, 10, '접음')])
+    def test_rejections_name_every_bad_scope_at_once(self):
+        tree = tree_of(NESTED)
+        good = auto_entry(tree)
+        self.assertEqual(self.check(NESTED, good)[0], [])
+        cases = [
+            ('s', 'A를 구하고, B를 그린다.'), ('s', '값을 구하고 그린다.'), ('s', '가' * 46), ('s', '⟨x⟩를 한다.'),
+            ('s', '필드를 그린다'), ('s', ''), ('with', [1]), ('sep', [{'ids': [1]}]), ('sep', [{'ids': [1, 1, 2]}]),
+            ('sep', [{'ids': ['1']}]), ('sep', [{'ids': [1, 2]}]),
+        ]
+        for key, value in cases:
+            bad = json.loads(json.dumps(good))
+            bad[0][key] = value
+            errors = self.check(NESTED, bad)[0]
+            self.assertEqual(len(errors), 1, (key, value, errors))
+            self.assertTrue(errors[0].startswith('X 스코프 #1: '), errors)
+        root = json.loads(json.dumps(good))
+        root[-1]['s'] = '루트에 쓴 문장이다.'
+        root[0]['s'] = ''
+        self.assertEqual(len(self.check(NESTED, root)[0]), 2)
+        self.assertTrue(self.check(NESTED, good[:-1])[0])
+        five = auto_entry(tree_of(FIVE))
+        five[-1] = {'sep': [{'ids': [i], 's': '할 일을 마친다.'} for i in range(1, 6)]}
+        self.assertIn('4개를 넘음', self.check(FIVE, five)[0][0])
 
 
 class Workflow(unittest.TestCase):
@@ -241,17 +371,20 @@ class Workflow(unittest.TestCase):
                 actual = result / 'work/original' / expected.name
                 if actual.exists():
                     self.assertEqual(actual.read_bytes(), expected.read_bytes())
-            self.assertIn('===== OrderService · 책임: 주문을 받아 처리한다. · 단위 2개 =====', listing)
-            self.assertIn(' 10 1|         require(', listing)
+            self.assertIn('===== OrderService · 책임: 주문을 받아 처리한다. · 스코프 2개 =====', listing)
+            self.assertIn(' 1|         require(', listing)
+            self.assertNotIn('===== Validator', listing)  # one statement inside one member: nothing to unfold
             prompt = Path(meta['stage1_prompt']).read_text(encoding='utf-8')
             self.assertFalse(any(line.strip().startswith('click ') for line in prompt.split('\n')))
             self.assertIn('#### 요소의 책임', prompt)
             built, _ = run(s.cmd_build, dir=str(result))
             self.assertEqual(built['verified'], 4)
             self.assertEqual(len(built['skipped']), 3)
+            first = {doc: Path(doc).read_bytes() for doc in built['docs']}
+            run(s.cmd_build, dir=str(result))
+            self.assertEqual({doc: Path(doc).read_bytes() for doc in built['docs']}, first)  # same input, same documents
             manifest = s.load_manifest(result)
-            outline = json.loads((result / 'work/outline.json').read_text(encoding='utf-8'))
-            base, _, _ = s.build_documents(result, manifest, outline, with_diff=False)
+            base, _, _ = s.build_documents(result, manifest, parsed_outline(result, manifest), with_diff=False)
             for doc in built['docs']:
                 actual = Path(doc)
                 expected = FIXTURE / 'expected' / actual.name
@@ -263,8 +396,10 @@ class Workflow(unittest.TestCase):
                                  expected.with_suffix('.base.md').read_text(encoding='utf-8'))
             text = (result / 'OrderDomain.md').read_text(encoding='utf-8')
             self.assertIn('<div class="resp"><span class="label">책임</span> 주문을 받아 처리한다.</div>', text)
-            self.assertIn('펼치기 1/2 — 주문을 확인하고 재고와 결제를 거쳐 영수증을 낸다', text)
-            self.assertIn('5단계: 원본 (5/5)', text)  # the fold opens in the source scene
+            self.assertIn('3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)', text)
+            self.assertIn('⟨3. 처리한 주문을 감사 기록에 남긴다.⟩', text)
+            self.assertNotIn('단계: 원본', text.split('### Validator')[0])  # OrderService: the last unfold is the source
+            self.assertIn('2단계: 원본 (2/2)', text.split('### Validator')[1])  # nothing to unfold: situation, then source
             self.assertEqual({p: p.read_bytes() for p in before}, before)
             (root / 'src/Order.kt').write_text((root / 'src/Order.kt').read_text(encoding='utf-8').replace('reserve(order.id)', 'reserve(order.key)'), encoding='utf-8')
             self.assertEqual(exit_code(['build', str(result)]), 3)
@@ -277,19 +412,39 @@ class Workflow(unittest.TestCase):
             scenes = s.node_scenes(result, manifest, node, {})
             self.assertEqual([kind for _, kind, _ in scenes], ['prose'])
 
+    def test_depth_one_node_unfolds_its_groups_without_a_source_scene(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, _, _, result = self.prepare(Path(tmp), 'view.architecture.md', 'unfold')
+            manifest = s.load_manifest(result)
+            node = next(n for n in manifest['nodes'] if n['id'] == 'InventoryRepository')
+            tree = node['tree']
+            self.assertTrue(all(not tree['nodes'][c]['children'] for c in tree['root_children']))  # depth 1
+            scenes = s.node_scenes(result, manifest, node, parsed_outline(result, manifest))
+            self.assertEqual([name.split(' ')[0] for name, _, _ in scenes], ['사용', '윤곽', '펼치기', '펼치기'])
+            self.assertEqual(scenes[-1][2].rstrip('\n'), (result / 'work/original/InventoryRepository.kt').read_text(encoding='utf-8').rstrip('\n'))
+
     def test_hidden_unfold_goes_from_outline_to_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             _, _, _, result = self.prepare(Path(tmp), 'view.architecture.md', 'unfold', hide='펼치기')
             manifest = s.load_manifest(result)
-            outline = json.loads((result / 'work/outline.json').read_text(encoding='utf-8'))
             node = next(n for n in manifest['nodes'] if n['id'] == 'OrderService')
-            self.assertEqual([name for name, _, _ in s.node_scenes(result, manifest, node, outline)], ['사용 상황', '윤곽', '원본'])
+            self.assertEqual([name for name, _, _ in s.node_scenes(result, manifest, node, parsed_outline(result, manifest))],
+                             ['사용 상황', '윤곽', '원본'])
 
     def test_bad_outline_and_missing_files_exit_2(self):
         with tempfile.TemporaryDirectory() as tmp:
             _, _, _, result = self.prepare(Path(tmp), 'view.architecture.md', 'unfold')
-            (result / 'work/outline.json').write_text('{"OrderService": {"placeholders": ["하나"]}}', encoding='utf-8')
-            self.assertEqual(exit_code(['build', str(result)]), 2)
+            good = (result / 'work/outline.json').read_text(encoding='utf-8')
+            bad = good.replace('"s": "주문 하나를 처리해 영수증을 돌려준다."', '"s": "주문을 받고, 처리한다."').replace('"ids": [3]', '"ids": [9]')
+            (result / 'work/outline.json').write_text(bad, encoding='utf-8')
+            err = io.StringIO()
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as failed:
+                s.main(['build', str(result)])
+            self.assertEqual(failed.exception.code, 2)
+            self.assertEqual([line.split(':')[0] for line in err.getvalue().strip().splitlines()],
+                             ['OrderService 스코프 #1', 'InventoryRepository 스코프 #1'])  # every bad scope, one line each
+            (result / 'work/outline.json').write_text(good, encoding='utf-8')
+            run(s.cmd_build, dir=str(result))
             (result / 'work/outline.json').unlink()
             self.assertEqual(exit_code(['build', str(result)]), 2)
             self.assertEqual(exit_code(['begin', str(result), '2']), 2)

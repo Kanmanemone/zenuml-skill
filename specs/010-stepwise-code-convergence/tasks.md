@@ -320,7 +320,7 @@
 
 Phase 10의 펼치기 단위(최상위 문장, 4개 합치기, 접기)를 대체한다. SK는 `.agents/skills/revealing-code-step-by-step`이다. 근거와 세부 규칙은 [research.md](research.md) S1~S8, 형식은 [contracts/stages-contract.md](contracts/stages-contract.md) 맨 위 절, 데이터는 [data-model.md](data-model.md) 맨 위 절에 있다. 설계 기준은 구조에서 오는 최적화다. 원본 크기에 비례하는 비용은 그대로 두고 구조적 낭비만 없앤다(spec SC-009). 장면 그리기 규칙은 research S6에 모두 적혀 있으며, 손으로 만든 트리의 시제품으로 사용자와 확인했다. 시제품 코드는 저장소에 없으므로 기대지 않는다.
 
-- [ ] T048 [US2] `SK/scripts/stages.py`에 스코프 트리 만들기를 넣는다 — FR-005a, research S1
+- [X] T048 [US2] `SK/scripts/stages.py`에 스코프 트리 만들기를 넣는다 — FR-005a, research S1
   - 기존 `analyse`의 본문 항목 나누기를 "영역 하나(시작·끝 줄, 종류)를 나누는 함수"로 일반화하고, 여러 줄 항목마다 재귀로 적용한다.
   - 영역 종류별 나누기:
     - `{`: 문장. 주석·어노테이션은 다음 문장에 붙고, 여러 줄 raw string과 줄 끝·줄 머리 이어짐 규칙은 지금 그대로다.
@@ -333,17 +333,17 @@ Phase 10의 펼치기 단위(최상위 문장, 4개 합치기, 접기)를 대체
   - 본문 없는 선언(시그니처·추상 프로퍼티)이 같은 종류로 이어지면 지금의 `bodyless`·`kind` 판단으로 한 노드로 묶는다 — FR-005a(5).
   - 불변식: 원본 범위의 모든 줄이 루트 머리·어떤 노드의 자기 줄·붙는 선언 중 정확히 한 곳에 속한다. 어기면 `SourceMismatch`(종료 코드 3)다.
   - 노드 필드는 data-model의 `lines`·`children`·`first`다.
-- [ ] T049 [US2] `SK/scripts/stages.py`의 `prepare`가 단위 목록 대신 스코프 목록을 출력하고, 트리를 manifest에 두게 한다 — FR-005b, SC-009(a)·(d)
+- [X] T049 [US2] `SK/scripts/stages.py`의 `prepare`가 단위 목록 대신 스코프 목록을 출력하고, 트리를 manifest에 두게 한다 — FR-005b, SC-009(a)·(d)
   - 출력 형식은 contract 맨 위 절 그대로다: `===== <id> · 책임: … · 스코프 <k>개 =====`, `--- #<n> (부모 #<m> | 루트)`, 줄 표시 `-`·자식 번호·빈칸·`=`, 스코프 자식은 `⟨#<스코프 번호>⟩` 한 줄.
   - 스코프는 후위 순서로 1부터 매기고 루트가 마지막이다. 자식이 없는 루트는 블록을 내지 않는다.
   - 출력 전체에서 원본의 각 줄이 정확히 한 번 나오는지 스스로 확인한다(어기면 종료 코드 3).
-- [ ] T050 [US2] `SK/scripts/stages.py`의 `build`가 새 `work/outline.json`을 검사하게 한다 — FR-005b, SC-009(f), SC-011, research S4·S5
+- [X] T050 [US2] `SK/scripts/stages.py`의 `build`가 새 `work/outline.json`을 검사하게 한다 — FR-005b, SC-009(f), SC-011, research S4·S5
   - 형식: `{"<node id>": [{"s", "with", "sep": [{"ids", "s"}]}, …]}`, 스코프 순서 배열, 루트 항목에는 `s`·`with`가 없음
   - 거부(종료 코드 2): contract의 목록 전부. 틀린 곳마다 `<id> 스코프 #<n>: <이유>` 한 줄씩을 표준 오류로 모두 낸다(첫 오류에서 멈추지 않음).
   - 문장 규칙(research S5, 그대로 옮김): "빈 문장, 45자 초과, `⟨`·`⟩` 포함, 책임 한 줄과 같은 문장(앞뒤 공백·마침표 무시). 나열 표지: 쉼표, `하고`·`이고`·`되고`·`며` 뒤에 공백이 오는 연결"
   - `sep`은 4개 이하. 모든 자식 번호가 `with`·`sep`에 정확히 한 번씩 나와야 한다.
   - 기존 `check_outline`의 단위·접기 검사를 지운다.
-- [ ] T051 [US2] `SK/scripts/stages.py`에 단계와 장면 만들기를 넣고 Phase 10의 단위·접기 코드를 지운다 — FR-004, FR-005, FR-005c, FR-013, SC-010, research S6·S7
+- [X] T051 [US2] `SK/scripts/stages.py`에 단계와 장면 만들기를 넣고 Phase 10의 단위·접기 코드를 지운다 — FR-004, FR-005, FR-005c, FR-013, SC-010, research S6·S7
   - 단계: `sep` 묶음마다 하나. 노드는 묶음 노드와 그 "함께 보임" 자손이다. 부모 단계는 묶음을 가진 스코프가 드러나는 단계다. 전위 순서이고, 형제끼리는 첫 줄이 위에 있는 순서다. 그 순서가 번호다.
   - 장면:
     - 숨은 노드 가운데 가장 바깥 것마다 `⟨번호. 문장⟩`을 그 노드 첫 줄의 들여쓰기로 둔다.
@@ -354,7 +354,7 @@ Phase 10의 펼치기 단위(최상위 문장, 4개 합치기, 접기)를 대체
   - 제목: `<k>단계: <별명> <n>/<N> — <묶음 문장> (<k>/<전체>)`
   - 모든 단계를 연 장면이 원본과 같지 않으면 종료 코드 3이다. 원본 장면은 마지막으로 보이는 코드 장면이 원본과 같을 때만 두지 않는다(기존 `node_scenes` 규칙 그대로). 그래서 설정으로 펼치기를 끄면 윤곽 다음에 원본이 나온다.
   - `MAX_UNFOLDS`·`make_units`·접기 렌더링·단위 목록 출력을 지운다. 설정 로더, 1단계 프롬프트, 상자·diff·책임 줄 렌더링은 바꾸지 않는다.
-- [ ] T052 [P] [US3] 지침과 설명을 새 흐름에 맞춘다 — FR-007, FR-008, SC-006
+- [X] T052 [P] [US3] 지침과 설명을 새 흐름에 맞춘다 — FR-007, FR-008, SC-006
   - `SK/stages.md`의 `## 펼치기` 정의: 스코프 트리, 묶음, 순서, 번호 자리표시자, 한 장면에 한 겹. "단계를 고칠 때" 원칙의 `work/outline.json` 설명도 함께 맞춘다.
   - `SK/SKILL.md`:
     - frontmatter description과 첫 문단
@@ -362,15 +362,20 @@ Phase 10의 펼치기 단위(최상위 문장, 4개 합치기, 접기)를 대체
     - 3단계 Outline input: 형식, 한 스코프 한 줄, 후위 순서로 한 스코프씩 쓰기, 목적 수준 문장 규칙과 나쁜 예·좋은 예, 두 가지를 잇지 않기, 45자
     - 4단계 Build의 거부 설명(보고된 스코프 줄만 고치기)
   - `README.md`, `README.ko.md`의 이 스킬 항목: "일마다 자리표시자 한 문장" → 스코프마다 목적 문장과 묶음, 한 겹씩 펼치기
-- [ ] T053 [US2] `test_learning_stages.py`를 새 흐름의 회귀 검증으로 바꾸고 fixture를 새로 만든다 — SC-001, SC-003~005, SC-009(a)·(f), SC-010, quickstart 1
+- [X] T053 [US2] `test_learning_stages.py`를 새 흐름의 회귀 검증으로 바꾸고 fixture를 새로 만든다 — SC-001, SC-003~005, SC-009(a)·(f), SC-010, quickstart 1
   - quickstart 1의 항목을 모두 테스트로 둔다.
   - 여러 겹 샘플은 테스트 안의 합성 Kotlin이다(호출 인자 목록 → 람다 → 체인 → 그리기 블록). 사용자 프로젝트 코드는 복사하지 않는다.
   - 본문 없는 선언 묶기, 루트의 외길 병합, 결정성(같은 원본의 `prepare` 출력 두 번, 같은 입력의 `build` 문서 두 번이 글자까지 같음 — SC-004), 펼치기를 끈 경우의 원본 장면을 테스트한다.
   - 접기·4개 상한 테스트를 지운다.
   - `fixtures/unfold*/outline.json`은 새 형식으로 다시 쓰고, `fixtures/expected/*.md`는 `REGENERATE=1`로 다시 만든 뒤 diff를 읽어 확인한다.
-- [ ] T054 [US2] 실제 예제로 끝까지 실행하고 비교 기록을 남긴다 — SC-003, SC-008, SC-009, SC-010, quickstart 2·3
+- [X] T054 [US2] 실제 예제로 끝까지 실행하고 비교 기록을 남긴다 — SC-003, SC-008, SC-009, SC-010, quickstart 2·3
   - `.zenuml/swemo-ui-bulleted-list-testbed.architecture.md`로 prepare → 격리된 상황 작성 → 메인 에이전트의 `outline.json` → build를 실행한다.
   - 확인할 것: `verified`, 구조 뷰 SHA256 전후, 읽기·쓰기 글자 수, BulletedListTextField의 장면별 새 줄 수, 작업자 호출 수
   - 결과를 research S8의 "바꾼 뒤"에 바꾸기 전 testbed 기록(원본 14,022자, `outline.json` 2,412자, 장면별 3, 4, 3, 60, 14)과 나란히 적는다. 비교 예제는 testbed 하나다(spec SC-009).
 
 실행 순서: T048 → T049 → T050 → T051(같은 파일) → T053 → T054. T052는 contract만 기대므로 T048과 함께 진행할 수 있다. 끝나면 converge로 남은 요구를 점검한다.
+
+## Phase 12: Convergence
+
+- [X] T055 `test_learning_stages.py`에 깊이 1 노드(안쪽 블록이 없는 본문)의 장면 종류·순서가 사용 상황 → 윤곽 → 묶음 수(4개 이하)만큼의 펼치기이고 원본 장면이 따로 없음을 확인하는 테스트를 추가한다 per quickstart 1, spec Edge Cases "안쪽 블록이 없는 본문" (partial)
+- [X] T056 `SK/scripts/stages.py`의 `build_tree`가 manifest에 남기는 트리 노드에 data-model의 `first`(노드 첫 줄, 자리표시자 들여쓰기와 형제 순서의 기준)를 기록하고, `plan_steps`·`render_steps_scene`의 첫 줄 계산이 그 값을 쓰게 한다 per data-model TreeNode, T048 (partial)

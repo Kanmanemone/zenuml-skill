@@ -106,6 +106,7 @@ fun formatTotal(total: BigDecimal): String =
 .stages > input.s3:checked ~ .stage.s3 { display: block; }
 .stages > input.s4:checked ~ .stage.s4 { display: block; }
 .stages > input.s5:checked ~ .stage.s5 { display: block; }
+.stages > input.s6:checked ~ .stage.s6 { display: block; }
 .stages .head { display: flex; align-items: center; gap: .4em; padding: .5em 0 .2em; font-weight: 600; }
 .stages .head .name { flex: 1; }
 .stages .nav { display: inline-block; width: 2.2em; height: 1.8em; line-height: 1.8em; text-align: center; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; font-weight: 400; cursor: pointer; user-select: none; }

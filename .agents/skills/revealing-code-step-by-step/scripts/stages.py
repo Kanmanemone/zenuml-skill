@@ -587,20 +587,86 @@ def _declaration_end(masked, mlines, pos):
     return masked.count("\n")
 
 
-# ---- unfold units and scenes (spec FR-004~005b) ----------------------------------
+# ---- scope tree, steps and scenes (spec FR-004~005c, research S1~S6) --------------
 
-MAX_UNFOLDS = 4
 DECL_HEAD = re.compile(r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:private|protected|internal|public|override|open|abstract|"
                        r"suspend|const|lateinit|inline|operator|data|sealed|enum|inner)\s+)*(val|var|fun)\b")
 ENDS_OPEN = re.compile(r"([=,(\[{.+\-*/:]|->|&&|\|\||\?:)\s*$")
 STARTS_CLOSED = re.compile(r"^\s*(\.|\?\.|\?:|&&|\|\||\)|\]|->)")
+CHAIN_LINK = re.compile(r"^\s*\??\.(?!\.)")
 COMMENT_LINE = re.compile(r"^\s*(/\*|\*|//)")
 ANNOTATION_LINE = re.compile(r"^\s*@[\w.:]+(\(.*\))?\s*$")
 PARAM_HEAD = re.compile(r"^\s+(?:@\w+\s+)*(?:(?:private|protected|internal|public|override|open)\s+)*(?:val\s+|var\s+)?(\w+)\s*:")
+LISTING_MARK = re.compile(r"(?:하고|이고|되고|며)\s")
+MAX_SENTENCE = 45
+MAX_SEP = 4
 
 
 def _nesting(masked_line):
     return sum(masked_line.count(c) for c in "({[") - sum(masked_line.count(c) for c in ")}]")
+
+
+def _raw_string_flags(lines, masked):
+    """Per line: does it start / end inside a multi-line raw string (a `\"\"\"` that mask_code turned into `_`)."""
+    in_raw, starts, ends = False, [], []
+    for line, m in zip(lines, masked):
+        starts.append(in_raw)
+        k = line.find('"""')
+        while k >= 0:
+            if m[k] == "_":
+                in_raw = not in_raw
+                k += 3
+                while k < len(line) and line[k] == '"':
+                    k += 1
+            else:
+                k += 3
+            k = line.find('"""', k)
+        ends.append(in_raw)
+    return starts, ends
+
+
+def split_items(lines, masked, lo, hi, raw):
+    """Statements or members of the block lines lo..hi-1. Leading comments and own-line annotations
+    belong to the next item; blank lines between items belong to no item."""
+    starts_in_raw, ends_in_raw = raw
+    items, cur, nest, comments, continues = [], None, 0, [], False
+    for i in range(lo, hi):
+        line, m = lines[i], masked[i]
+        if starts_in_raw[i] and cur is not None:
+            cur["lines"].append(i)
+            nest += _nesting(m)
+            continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
+            continue
+        if not line.strip():
+            if cur is not None and (nest > 0 or continues):
+                cur["lines"].append(i)
+            continue
+        if nest == 0 and not continues and (COMMENT_LINE.match(line)
+                                            or (ANNOTATION_LINE.match(m) and _nesting(m) == 0)):
+            comments.append(i)
+            continue
+        if cur is None or (nest == 0 and not continues and not STARTS_CLOSED.match(line)):
+            cur = {"first": i, "lines": [], "comments": comments}
+            comments = []
+            items.append(cur)
+        cur["lines"].append(i)
+        nest += _nesting(m)
+        continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
+    if comments and items:
+        items[-1]["trailing"] = comments
+    for it in items:
+        head, code = lines[it["first"]], "\n".join(masked[j] for j in it["lines"])
+        name = re.search(r"\b(?:val|var|fun|class|interface|object)\s+(?:<[^>]*>\s*)?(?:\w+\.)?(\w+)", head) or re.search(r"(\w+)", head)
+        it["name"] = name.group(1) if name else "?"
+        it["private"] = bool(re.search(r"\bprivate\b", head))
+        it["state"] = bool(re.match(r"^\s*(?:private\s+)?var\b", head)) and len(it["lines"]) == 1
+        flat = code
+        for _ in range(4):
+            flat = re.sub(r"\([^()]*\)", "", flat)
+        it["bodyless"] = bool(DECL_HEAD.match(head)) and "{" not in code and "=" not in flat
+        it["kind"] = "fun" if re.search(r"\bfun\b", head) else "prop"
+        it.setdefault("trailing", [])
+    return items
 
 
 def analyse(text):
@@ -628,204 +694,435 @@ def analyse(text):
         elif start_depth > 1 and params and params[-1]["lines"][-1] == i - 1:
             params[-1]["lines"].append(i)
     if body_open is None or not lines[-1].strip().startswith("}"):
-        return {"lines": lines, "body_open": None, "params": [], "items": []}
-    body_close = len(lines) - 1
-    # lines that start / end inside a multi-line raw string (a `"""` that mask_code turned into `_`)
-    in_raw, starts_in_raw, ends_in_raw = False, [], []
-    for line, m in zip(lines, masked):
-        starts_in_raw.append(in_raw)
-        k = line.find('"""')
-        while k >= 0:
-            if m[k] == "_":
-                in_raw = not in_raw
-                k += 3
-                while k < len(line) and line[k] == '"':
-                    k += 1
+        return {"lines": lines, "masked": masked, "body_open": None, "params": [], "items": []}
+    raw = _raw_string_flags(lines, masked)
+    items = split_items(lines, masked, body_open + 1, len(lines) - 1, raw)
+    return {"lines": lines, "masked": masked, "body_open": body_open, "params": params, "items": items, "raw": raw}
+
+
+def _depth_profile(masked):
+    """Per line: bracket depth at its start, and the lowest depth it reaches."""
+    start, low, d = [], [], 0
+    for m in masked:
+        start.append(d)
+        lo = d
+        for ch in m:
+            if ch in "({[":
+                d += 1
+            elif ch in ")}]":
+                d -= 1
+                lo = min(lo, d)
+        low.append(lo)
+    return start, low
+
+
+def build_tree(text):
+    """The scope tree of one source range (research S1), or None when the declaration has no body.
+
+    {"root": [own line, ...], "root_children": [node id, ...], "body_open": n,
+     "nodes": [{"lines": [...], "children": [...], "parent": id or -1, "first": n}, ...],   # preorder ids; first = subtree's first line
+     "attached": [{"name", "kind": "param"|"member", "lines": [...]}, ...]}     # lines 0-based
+    """
+    info = analyse(text)
+    if info["body_open"] is None:
+        return None
+    lines, masked, raw = info["lines"], info["masked"], info["raw"]
+    start, low = _depth_profile(masked)
+
+    def opener(p, base):
+        """The last bracket that line p leaves open at depth `base`."""
+        d, last = start[p], None
+        for ch in masked[p]:
+            if ch in "({[":
+                if d == base:
+                    last = ch
+                d += 1
+            elif ch in ")}]":
+                d -= 1
+        return last
+
+    def split_args(lo, hi):
+        level = start[lo]
+        args, cur, pending, after_comma = [], None, [], True
+        for j in range(lo, hi):
+            line = lines[j]
+            if not line.strip():
+                if cur is not None and start[j] > level:
+                    cur["lines"].append(j)
+                continue
+            if start[j] == level and (cur is None or after_comma):
+                if COMMENT_LINE.match(line):
+                    pending.append(j)
+                    continue
+                cur = {"first": j, "lines": [j], "comments": pending, "trailing": []}
+                pending = []
+                args.append(cur)
+            elif cur is None:
+                cur = {"first": j, "lines": [j], "comments": pending, "trailing": []}
+                pending = []
+                args.append(cur)
             else:
-                k += 3
-            k = line.find('"""', k)
-        ends_in_raw.append(in_raw)
-    items, cur, nest, comments, continues = [], None, 0, [], False
-    for i in range(body_open + 1, body_close):
-        line, m = lines[i], masked[i]
-        if starts_in_raw[i] and cur is not None:
-            cur["lines"].append(i)
-            nest += _nesting(m)
-            continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
-            continue
-        if not line.strip():
-            if cur is not None and (nest > 0 or continues):
-                cur["lines"].append(i)
-            continue
-        if nest == 0 and not continues and (COMMENT_LINE.match(line)
-                                            or (ANNOTATION_LINE.match(m) and _nesting(m) == 0)):
-            comments.append(i)  # leading lines of the next item
-            continue
-        if cur is None or (nest == 0 and not continues and not STARTS_CLOSED.match(line)):
-            cur = {"first": i, "lines": [], "comments": comments}
-            comments = []
-            items.append(cur)
-        cur["lines"].append(i)
-        nest += _nesting(m)
-        continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
-    if comments and items:
-        items[-1]["trailing"] = comments
-    for it in items:
-        head, code = lines[it["first"]], "\n".join(masked[j] for j in it["lines"])
-        name = re.search(r"\b(?:val|var|fun|class|interface|object)\s+(?:<[^>]*>\s*)?(?:\w+\.)?(\w+)", head) or re.search(r"(\w+)", head)
-        it["name"] = name.group(1) if name else "?"
-        it["private"] = bool(re.search(r"\bprivate\b", head))
-        it["state"] = bool(re.match(r"^\s*(?:private\s+)?var\b", head)) and len(it["lines"]) == 1
-        flat = code
-        for _ in range(4):
-            flat = re.sub(r"\([^()]*\)", "", flat)
-        it["bodyless"] = bool(DECL_HEAD.match(head)) and "{" not in code and "=" not in flat
-        it["kind"] = "fun" if re.search(r"\bfun\b", head) else "prop"
-        it.setdefault("trailing", [])
-    return {"lines": lines, "body_open": body_open, "params": params, "items": items}
+                cur["lines"].append(j)
+            end = start[j + 1] if j + 1 < len(start) else 0
+            after_comma = end == level and masked[j].rstrip().endswith(",")
+        if pending and args:
+            args[-1]["trailing"] = pending
+        merged = []
+        for a in args:  # consecutive one-line arguments are one node
+            one = len([j for j in a["lines"] if lines[j].strip()]) == 1
+            if one and merged and merged[-1]["one"]:
+                m = merged[-1]
+                m["lines"] += a["lines"]
+                m["comments"] += a["comments"] + m["trailing"]
+                m["trailing"] = a["trailing"]
+            else:
+                merged.append(dict(a, one=one))
+        return merged
 
+    def subtree(n):
+        out = set(n["lines"])
+        for c in n["children"]:
+            out |= subtree(c)
+        return out
 
-def make_units(info):
-    """Unfold units (spec FR-005a): public members or statements in source order, the rest attached."""
-    lines, items = info["lines"], info["items"]
-    if not items:
-        return []
+    def children_of(code, first):
+        base = start[first]
+        links = [j for j in code if j != first and start[j] == base and low[j] <= base and CHAIN_LINK.match(lines[j])]
+        if links:
+            ends = links[1:] + [code[-1] + 1]
+            return [make([j for j in code if a <= j < b], [], a) for a, b in zip(links, ends)]
+        kids, j = [], code[0]
+        while j <= code[-1]:
+            if low[j] > base and j != first:
+                k = j
+                while k + 1 <= code[-1] and low[k + 1] > base:
+                    k += 1
+                if opener(j - 1, base) == "{":
+                    kids += [make(it["lines"], it["comments"] + it["trailing"], it["first"])
+                             for it in split_items(lines, masked, j, k + 1, raw)]
+                else:
+                    kids += [make(a["lines"], a["comments"] + a["trailing"], a["first"]) for a in split_args(j, k + 1)]
+                j = k + 1
+            else:
+                j += 1
+        return kids
 
-    def uses(unit, name):
-        return any(re.search(r"\b%s\b" % re.escape(name), lines[j]) for it in unit["members"] + unit["attached"]
-                   for j in it["lines"])
+    def make(code, extra, first):
+        code = sorted(code)
+        kids = children_of(code, first) if len(code) > 1 else []
+        covered = set().union(*[subtree(k) for k in kids]) if kids else set()
+        own = (set(code) | set(extra)) - covered
+        if len(kids) == 1:  # single-child chain: no layer of its own
+            own |= kids[0]["lines"]
+            kids = kids[0]["children"]
+        return {"lines": own, "children": kids}
+
+    items = info["items"]
     anchors = [it for it in items if not it["private"] and not it["state"]] or items[:1]
-    units = []
+    groups = []
     for it in anchors:
-        prev = units[-1] if units else None
-        if (prev and it["bodyless"] and prev["bodyless"] and prev["kind"] == it["kind"]
-                and items.index(prev["members"][-1]) == items.index(it) - 1):
-            prev["members"].append(it)
-            continue
-        units.append({"members": [it], "attached": [], "params": [], "bodyless": it["bodyless"], "kind": it["kind"]})
-    placed = {id(m) for u in units for m in u["members"]}
-    for it in items:
-        if id(it) not in placed:
-            owner = next((u for u in units if uses(u, it["name"])), units[0])
-            owner["attached"].append(it)
-    for p in info["params"]:
-        owner = next((u for u in units if uses(u, p["name"])), units[0])
-        owner["params"].append(p)
+        prev = groups[-1] if groups else None
+        if (prev and it["bodyless"] and prev[-1]["bodyless"] and prev[-1]["kind"] == it["kind"]
+                and items.index(prev[-1]) == items.index(it) - 1):
+            prev.append(it)
+        else:
+            groups.append([it])
+    root_children = []
+    for g in groups:
+        if len(g) == 1:
+            it = g[0]
+            root_children.append(make(it["lines"], it["comments"] + it["trailing"], it["first"]))
+        else:
+            root_children.append({"lines": set(j for it in g for j in it["comments"] + it["lines"] + it["trailing"]),
+                                  "children": []})
+    attached = [{"name": p["name"], "kind": "param", "lines": list(p["lines"])} for p in info["params"]]
+    anchored = {id(it) for g in groups for it in g}
+    attached += [{"name": it["name"], "kind": "member", "lines": sorted(it["comments"] + it["lines"] + it["trailing"])}
+                 for it in items if id(it) not in anchored]
+    covered = set().union(*[subtree(k) for k in root_children]) if root_children else set()
+    taken = covered | {j for a in attached for j in a["lines"]}
+    root = set(range(len(lines))) - taken
+    if len(root_children) == 1:
+        root |= root_children[0]["lines"]
+        root_children = root_children[0]["children"]
 
-    def size(u):
-        return sum(len(it["lines"]) for it in u["members"] + u["attached"])
-    while len(units) > MAX_UNFOLDS:
-        k = min(range(len(units) - 1), key=lambda i: size(units[i]) + size(units[i + 1]))
-        a, b = units[k], units.pop(k + 1)
-        for key in ("members", "attached", "params"):
-            a[key] += b[key]
-    return units
+    nodes = []
+
+    def flatten(n, parent):
+        nid = len(nodes)
+        nodes.append({"lines": sorted(n["lines"]), "children": [], "parent": parent, "first": min(subtree(n))})
+        nodes[nid]["children"] = [flatten(c, nid) for c in n["children"]]
+        return nid
+    tree = {"root": sorted(root), "root_children": [flatten(c, -1) for c in root_children],
+            "body_open": info["body_open"], "nodes": nodes, "attached": attached}
+    owners = tree["root"] + [j for n in nodes for j in n["lines"]] + [j for a in attached for j in a["lines"]]
+    if sorted(owners) != list(range(len(lines))):
+        raise SourceMismatch("스코프 트리가 원본 범위의 줄을 정확히 한 번씩 덮지 않음(스크립트 버그)")
+    return tree
 
 
-def unit_lines(unit):
-    """1-based range lines that belong to a unit (members, attached members, parameters, their comments)."""
-    out = set()
-    for it in unit["members"] + unit["attached"]:
-        out.update(j + 1 for j in it["comments"] + it["lines"] + it["trailing"])
-    for p in unit["params"]:
-        out.update(j + 1 for j in p["lines"])
-    return sorted(out)
+def tree_children(tree, scope):
+    return tree["root_children"] if scope == "R" else tree["nodes"][scope]["children"]
 
 
-def unit_label(unit):
-    names = [it["name"] for it in unit["members"]]
-    extra = [it["name"] for it in unit["attached"]] + [p["name"] for p in unit["params"]]
-    return ", ".join(names) + (" (+ " + ", ".join(extra) + ")" if extra else "")
+def tree_scopes(tree):
+    """Scopes in post-order; the root ("R") is last."""
+    out = []
+
+    def walk(n):
+        for c in tree["nodes"][n]["children"]:
+            walk(c)
+        if tree["nodes"][n]["children"]:
+            out.append(n)
+    for c in tree["root_children"]:
+        walk(c)
+    return out + ["R"] if tree["root_children"] else []
 
 
-def render_scene(info, units, placeholders, folds, revealed):
-    """Code of the outline (revealed=0) or of the revealed-th unfold. Folds are 1-based (from, to, text)."""
-    lines, items, body_open = info["lines"], info["items"], info["body_open"]
-    shown = {id(it) for u in units[:revealed] for it in u["members"] + u["attached"]}
-    shown_params = {p["lines"][0] for u in units[:revealed] for p in u["params"]}
-    param_line = {j: p for p in info["params"] for j in p["lines"]}
-    anchor = {id(u["members"][0]): n for n, u in enumerate(units)}
-    out, hidden_run = [], False
-    for i in range(body_open + 1):
-        p = param_line.get(i)
-        if p and p["lines"][0] not in shown_params:
-            if not hidden_run:
-                out.append(re.match(r"^\s*", lines[i]).group(0) + "..." + ("," if shown_params else ""))
-                hidden_run = True
-            continue
-        hidden_run = False if not p or i == p["lines"][0] else hidden_run
-        out.append(lines[i])
-    fold_at = {f[0] - 1: f for f in folds}
-    prev_kind, prev_end = "header", body_open
+def subtree_lines(tree, n):
+    out = list(tree["nodes"][n]["lines"])
+    for c in tree["nodes"][n]["children"]:
+        out += subtree_lines(tree, c)
+    return out
 
-    def gap(first):
-        return any(not lines[j].strip() for j in range(prev_end + 1, first))
-    for it in items:
-        if id(it) in shown:
-            block = it["comments"] + it["lines"] + it["trailing"]
-            if prev_kind == "placeholder" or gap(min(block)):
-                out.append("")
-            skip_to = -1
-            for j in it["comments"] + it["lines"]:
-                if j <= skip_to:
-                    continue
-                if j in fold_at:
-                    out.append(re.match(r"^\s*", lines[j]).group(0) + "⟨" + fold_at[j][2] + "⟩")
-                    skip_to = fold_at[j][1] - 1
-                    continue
-                out.append(lines[j])
-            out += [lines[j] for j in it["trailing"]]
-            prev_kind, prev_end = "code", max(block)
-        elif id(it) in anchor:
-            if prev_kind == "code":
-                out.append("")
-            out.append(re.match(r"^\s*", lines[it["first"]]).group(0) + "⟨" + placeholders[anchor[id(it)]] + "⟩")
-            prev_kind, prev_end = "placeholder", it["lines"][-1]
-    if prev_kind == "code" and gap(len(lines) - 1):
-        out.append("")
-    out.append(lines[-1])
-    return "\n".join(out) + "\n"
+
+def scope_listing(node, code, tree):
+    """The node's source once, scope by scope in post-order (contract: scope list)."""
+    lines = code.rstrip("\n").split("\n")
+    scopes = tree_scopes(tree)
+    number = {s: k for k, s in enumerate(scopes, 1)}
+    out = ["===== %s · 책임: %s · 스코프 %d개 =====" % (node["id"], node.get("responsibility") or "없음", len(scopes))]
+    shown = []
+    for s in scopes:
+        parent = "루트" if s == "R" else ("부모 #%d" % number[tree["nodes"][s]["parent"]] if tree["nodes"][s]["parent"] >= 0 else "부모 #%d" % number["R"])
+        out.append("--- #%d (%s)" % (number[s], parent))
+        rows = {}
+        for k, c in enumerate(tree_children(tree, s), 1):
+            if tree["nodes"][c]["children"]:
+                first = tree["nodes"][c]["first"]
+                rows[first] = (str(k), re.match(r"^\s*", lines[first]).group(0) + "⟨#%d⟩" % number[c])
+            else:
+                for i, j in enumerate(sorted(tree["nodes"][c]["lines"])):
+                    rows[j] = (str(k) if i == 0 else "", lines[j])
+                    shown.append(j)
+        own = tree["root"] if s == "R" else tree["nodes"][s]["lines"]
+        for j in own:
+            rows[j] = ("-", lines[j])
+            shown.append(j)
+        if s == "R":
+            for a in tree["attached"]:
+                for j in a["lines"]:
+                    rows[j] = ("=", lines[j])
+                    shown.append(j)
+        out += ["%2s| %s" % rows[j] for j in sorted(rows)]
+    if sorted(shown) != list(range(len(lines))):
+        raise SourceMismatch("%s: 스코프 목록이 원본의 줄을 정확히 한 번씩 보이지 않음(스크립트 버그)" % node["id"])
+    return "\n".join(out)
 
 
 def same_sentence(a, b):
     return re.sub(r"[\s.]", "", a or "") == re.sub(r"[\s.]", "", b or "")
 
 
-def check_outline(node, units, info, entry):
-    """Reject bad model input for one node (spec FR-005b). Returns (placeholders, folds as tuples)."""
-    nid = node["id"]
-    if not isinstance(entry, dict):
-        raise InputError("%s에 %s 항목이 없음" % (OUTLINE_FILE, nid))
-    placeholders = entry.get("placeholders")
-    if not isinstance(placeholders, list) or len(placeholders) != len(units):
-        raise InputError("%s의 자리표시자는 단위 수와 같은 %d개여야 함" % (nid, len(units)))
-    for n, text in enumerate(placeholders, 1):
-        if not isinstance(text, str) or not text.strip() or "⟨" in text or "⟩" in text or "\n" in text:
-            raise InputError("%s의 %d번째 자리표시자가 비었거나 한 줄 문장이 아님" % (nid, n))
-        if same_sentence(text, node.get("responsibility")):
-            raise InputError("%s의 %d번째 자리표시자가 책임 한 줄과 같음" % (nid, n))
-    folds, used = [], set()
-    owner = {}
-    for u, unit in enumerate(units):
-        for it in unit["members"] + unit["attached"]:
-            for j in it["lines"]:
-                owner[j + 1] = (u, id(it), it["lines"][0] + 1)
-    for f in entry.get("folds") or []:
-        try:
-            a, b, text = int(f["from"]), int(f["to"]), f["text"]
-        except (TypeError, KeyError, ValueError):
-            raise InputError("%s의 접기는 {from, to, text} 형식이어야 함" % nid)
-        if not isinstance(text, str) or not text.strip() or "\n" in text:
-            raise InputError("%s의 %d~%d줄 접기 문장이 비었음" % (nid, a, b))
-        span = range(a, b + 1)
-        homes = {owner.get(j, (None, None, None))[:2] for j in span}
-        if a > b or len(homes) != 1 or None in next(iter(homes)) or a == owner[a][2]:
-            raise InputError("%s의 %d~%d줄 접기가 한 멤버의 본문 안에 있지 않음" % (nid, a, b))
-        if used & set(span):
-            raise InputError("%s의 %d~%d줄 접기가 다른 접기와 겹침" % (nid, a, b))
-        used |= set(span)
-        folds.append((a, b, text.strip()))
-    return [p.strip() for p in placeholders], folds
+def sentence_problem(text, responsibility):
+    if not isinstance(text, str) or not text.strip() or "\n" in text:
+        return "문장이 비었거나 한 줄이 아님"
+    text = text.strip()
+    if len(text) > MAX_SENTENCE:
+        return "문장이 %d자를 넘음(%d자): %s" % (MAX_SENTENCE, len(text), text)
+    if "⟨" in text or "⟩" in text:
+        return "문장에 ⟨⟩가 있음: " + text
+    if "," in text or LISTING_MARK.search(text):
+        return "두 가지 이상을 잇거나 나열함(쉼표·~하고·~며): " + text
+    if same_sentence(text, responsibility):
+        return "책임 한 줄과 같음: " + text
+    return None
+
+
+def check_outline(node, tree, entry):
+    """Errors (one line each) and the parsed scope entries of one node (spec FR-005b, research S4·S5)."""
+    nid, scopes = node["id"], tree_scopes(tree)
+    if not isinstance(entry, list) or len(entry) != len(scopes):
+        return ["%s: %s 항목은 스코프 %d개의 배열이어야 함" % (nid, OUTLINE_FILE, len(scopes))], None
+    errors, parsed = [], {}
+    for k, (s, e) in enumerate(zip(scopes, entry), 1):
+        where = "%s 스코프 #%d" % (nid, k)
+        kids = tree_children(tree, s)
+        if not isinstance(e, dict):
+            errors.append(where + ": 객체가 아님")
+            continue
+        if s == "R" and ("s" in e or "with" in e):
+            errors.append(where + ": 루트에는 s·with를 쓰지 않음")
+        sentence = e.get("s")
+        if s != "R":
+            problem = sentence_problem(sentence, node.get("responsibility"))
+            if problem:
+                errors.append(where + ": " + problem)
+        with_ids, seps = e.get("with") or [], e.get("sep") or []
+        if not isinstance(with_ids, list) or not isinstance(seps, list) or not all(isinstance(g, dict) for g in seps):
+            errors.append(where + ": with는 번호 배열, sep은 {ids, s} 배열이어야 함")
+            continue
+        if len(seps) > MAX_SEP:
+            errors.append(where + ": 따로 남기는 묶음이 %d개를 넘음(%d개)" % (MAX_SEP, len(seps)))
+        used = list(with_ids) + [i for g in seps for i in (g.get("ids") or [])]
+        if not all(isinstance(i, int) and not isinstance(i, bool) for i in used):
+            errors.append(where + ": 자식 번호는 정수여야 함")
+            continue
+        missing = [i for i in range(1, len(kids) + 1) if i not in used]
+        extra = sorted({i for i in used if used.count(i) > 1 or not 1 <= i <= len(kids)})
+        if missing or extra:
+            errors.append(where + ": 자식 1~%d을 정확히 한 번씩 덮어야 함(빠짐 %s, 중복·없는 번호 %s)" % (len(kids), missing, extra))
+            continue
+        groups = []
+        for g in seps:
+            ids = [kids[i - 1] for i in g.get("ids") or []]
+            if not ids:
+                errors.append(where + ": 빈 묶음")
+                continue
+            text = g.get("s")
+            if text is None and len(ids) == 1 and tree["nodes"][ids[0]]["children"]:
+                groups.append((ids, None))
+                continue
+            problem = sentence_problem(text, node.get("responsibility"))
+            if problem:
+                errors.append(where + ": 묶음 %s의 %s" % (g.get("ids"), problem))
+                continue
+            groups.append((ids, text.strip()))
+        parsed[s] = {"s": (sentence or "").strip(), "with": [kids[i - 1] for i in with_ids], "sep": groups}
+    return errors, parsed
+
+
+def plan_steps(tree, parsed):
+    """Steps in unfold order (research S6): [{"nodes", "title", "parent", "depth"}]."""
+    def first(n):
+        return tree["nodes"][n]["first"]
+
+    def closure(ids):
+        out = []
+        for x in ids:
+            out.append(x)
+            if x in parsed:
+                out += closure(parsed[x]["with"])
+        return out
+    steps = []
+
+    def visit(owners, parent, depth):
+        pending = [g for x in owners if x in parsed for g in parsed[x]["sep"]]
+        pending.sort(key=lambda g: min(first(n) for n in g[0]))
+        for ids, title in pending:
+            steps.append({"nodes": closure(ids), "title": title or parsed[ids[0]]["s"], "parent": parent, "depth": depth})
+            visit(steps[-1]["nodes"], len(steps) - 1, depth + 1)
+    visit(["R"], None, 0)
+    return steps
+
+
+def attach_steps(tree, steps, lines, masked):
+    """Step index where each attached declaration first appears (-1 = already in the outline)."""
+    body_open = tree["body_open"]
+    texts = [" ".join(masked[j] for n in st["nodes"] for j in tree["nodes"][n]["lines"]) for st in steps]
+    root_text = " ".join(masked[j] for j in tree["root"] if j > body_open)
+    found = []
+    for a in tree["attached"]:
+        pat = re.compile(r"\b%s\b" % re.escape(a["name"]))
+        k = -1 if pat.search(root_text) else next((i for i, t in enumerate(texts) if pat.search(t)), None)
+        found.append(k)
+    for _ in tree["attached"]:  # a member used only by other members follows its first user
+        for i, a in enumerate(tree["attached"]):
+            pat = re.compile(r"\b%s\b" % re.escape(a["name"]))
+            users = [found[o] for o, b in enumerate(tree["attached"]) if o != i and found[o] is not None
+                     and pat.search(" ".join(masked[j] for j in b["lines"]))]
+            if users and (found[i] is None or min(users) < found[i]):
+                found[i] = min(users)
+    return [0 if k is None else k for k in found]
+
+
+def render_steps_scene(tree, lines, steps, attached_at, upto):
+    """Code of the outline (upto=0) or of the upto-th unfold."""
+    nodes = tree["nodes"]
+    step_of = {n: i for i, st in enumerate(steps) for n in st["nodes"]}
+    revealed = {n for st in steps[:upto] for n in st["nodes"]}
+    owner = {j: ("R", None) for j in tree["root"]}
+    for i, a in enumerate(tree["attached"]):
+        for j in a["lines"]:
+            owner[j] = (a["kind"], i)
+    for n, nd in enumerate(nodes):
+        for j in nd["lines"]:
+            owner[j] = ("N", n)
+    shown_params = any(a["kind"] == "param" and attached_at[i] < upto for i, a in enumerate(tree["attached"]))
+
+    def chain(n):
+        out = []
+        while n >= 0:
+            out.append(n)
+            n = nodes[n]["parent"]
+        return out[::-1]
+    items, last_top, hidden_params = [], None, False
+    for j, line in enumerate(lines):
+        kind, ref = owner[j]
+        if kind == "param":
+            if attached_at[ref] < upto:
+                items.append(("line", line, j))
+                hidden_params = False
+            elif not hidden_params:
+                items.append(("line", re.match(r"^\s*", line).group(0) + "..." + ("," if shown_params else ""), None))
+                hidden_params = True
+            last_top = None
+            continue
+        hidden_params = False
+        if kind == "member":
+            if attached_at[ref] < upto:
+                items.append(("line", line, j))
+            last_top = None
+            continue
+        top = None if kind == "R" else next((x for x in chain(ref) if x not in revealed), None)
+        if top is None:
+            items.append(("line", line, j))
+            last_top = None
+            continue
+        if top == last_top:
+            continue
+        last_top = top
+        k = len(items) - 1
+        while k >= 0 and items[k][0] == "line" and not items[k][1].strip():
+            k -= 1
+        prev = items[k] if k >= 0 else None
+        if prev and prev[0] == "ph" and nodes[prev[1][0]]["parent"] == nodes[top]["parent"] and step_of[prev[1][0]] == step_of[top]:
+            del items[k + 1:]
+            prev[1].append(top)
+            continue
+        first = nodes[top]["first"]
+        items.append(("ph", [top], re.match(r"^\s*", lines[first]).group(0)))
+    out = []
+    for it in items:
+        if it[0] == "line":
+            out.append((it[1], it[2]))
+            continue
+        group, indent = it[1], it[2]
+        n = step_of[group[0]]
+        out.append((indent + "⟨%d. %s⟩" % (n + 1, steps[n]["title"]), None))
+        inside = set()
+        for g in group:
+            inside |= set(subtree_lines(tree, g))
+        for k in range(n + 1, len(steps)):
+            if min(j for x in steps[k]["nodes"] for j in nodes[x]["lines"]) in inside:
+                pad = "    " * (steps[k]["depth"] - steps[n]["depth"])
+                out.append((indent + pad + "⟨%d. %s⟩" % (k + 1, steps[k]["title"]), None))
+    clean = []
+    for idx, (text, src) in enumerate(out):  # drop blank lines left over by hidden code
+        if not text.strip() and src is not None:
+            prev = clean[-1] if clean else None
+            nxt = out[idx + 1] if idx + 1 < len(out) else None
+            if prev and not prev[0].strip() and prev[1] != src - 1:
+                continue
+            if nxt and nxt[0].strip()[:1] in ("}", ")") and nxt[1] != src + 1:
+                continue
+            if prev and prev[0].rstrip()[-1:] in ("{", "(") and prev[1] != src - 1:
+                continue
+        clean.append((text, src))
+    kept = [(t, src) for i, (t, src) in enumerate(clean)  # a blank left right above a closing line by hidden code
+            if t.strip() or src is None or i + 1 >= len(clean)
+            or not (clean[i + 1][0].strip()[:1] in ("}", ")") and clean[i + 1][1] != src + 1)]
+    return "\n".join(t for t, _ in kept) + "\n"
 
 
 # ---- prepare ---------------------------------------------------------------------
@@ -889,7 +1186,7 @@ def cmd_prepare(args):
     for node in nodes:
         node["stage1"] = rel(result_dir / "work" / "01" / (node["id"] + ".kt"))
         node["original"] = node["range"] = node["skip_reason"] = None
-        node["candidates"], node["units"] = [], []
+        node["candidates"], node["tree"] = [], None
         node["pick"] = picks.get(node["id"])
         text, reason = read_source(node["link"], view_dir)
         if text is not None:
@@ -900,9 +1197,9 @@ def cmd_prepare(args):
                 write_text(original, code)
                 node["original"] = rel(original)
                 node["range"] = {"source": node["link"], "start_line": span[0], "end_line": span[1]}
-                units = make_units(analyse(code))
-                node["units"] = [{"names": unit_label(u), "lines": unit_lines(u)} for u in units]
-                listing.append(source_listing(node, code))
+                node["tree"] = build_tree(code)
+                if node["tree"] and node["tree"]["root_children"]:
+                    listing.append(scope_listing(node, code, node["tree"]))
         node["skip_reason"] = reason
 
     manifest = {"view": rel(view), "slug": slug, "dir": rel(result_dir), "docs": docs,
@@ -917,15 +1214,6 @@ def cmd_prepare(args):
           "stages": [{"nickname": s["nickname"], "kind": s["kind"], "visible": s["visible"]} for s in planned]})
     if listing and not pick:
         print("\n" + "\n\n".join(listing))
-
-
-def source_listing(node, code):
-    """The node's source once, each line tagged with its unit number (`-` = outline header or blank)."""
-    tag = {j: str(n) for n, u in enumerate(node["units"], 1) for j in u["lines"]}
-    head = "===== %s · 책임: %s · 단위 %d개 =====" % (node["id"], node.get("responsibility") or "없음", len(node["units"]))
-    units = ["--- 단위 %d: %s" % (n, u["names"]) for n, u in enumerate(node["units"], 1)]
-    body = ["%3d %s| %s" % (j, tag.get(j, "-"), line) for j, line in enumerate(code.split("\n"), 1)]
-    return "\n".join([head] + units + body)
 
 
 def write_stage1_prompt(result_dir, view_text, stage, nodes):
@@ -1051,25 +1339,28 @@ def strip_diff_layer(doc):
 
 # ---- build -----------------------------------------------------------------------
 
-def node_scenes(result_dir, manifest, node, outline):
+def node_scenes(result_dir, manifest, node, parsed):
     """[(title, kind, content)] of one node's pager, numbered per node (spec FR-015)."""
     stages = {s["kind"]: s for s in manifest["stages"]}
     prose = read_text(work_dir(result_dir, 1) / (node["id"] + ".kt")).strip()
     scenes = [(stages["prose"]["nickname"], "prose", prose)] if stages["prose"]["visible"] else []
     if not node["skip_reason"]:
         original = read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt"))
-        info = analyse(original)
-        units = make_units(info)
-        if units:
-            placeholders, folds = check_outline(node, units, info, outline.get(node["id"]))
-            if render_scene(info, units, placeholders, [], len(units)).rstrip("\n") != original.rstrip("\n"):
-                raise SourceMismatch("%s: 모든 단위를 펼친 장면이 원본 범위와 다름" % node["id"])
+        tree = build_tree(original)
+        if tree != node.get("tree"):
+            raise SourceMismatch("%s: prepare 뒤에 원본 범위가 바뀜" % node["id"])
+        if tree and tree["root_children"]:
+            steps = plan_steps(tree, parsed[node["id"]])
+            lines = original.rstrip("\n").split("\n")
+            at = attach_steps(tree, steps, lines, mask_code(original).rstrip("\n").split("\n"))
+            if render_steps_scene(tree, lines, steps, at, len(steps)).rstrip("\n") != original.rstrip("\n"):
+                raise SourceMismatch("%s: 모든 단계를 연 장면이 원본 범위와 다름" % node["id"])
             if stages["outline"]["visible"]:
-                scenes.append((stages["outline"]["nickname"], "code", render_scene(info, units, placeholders, folds, 0)))
+                scenes.append((stages["outline"]["nickname"], "code", render_steps_scene(tree, lines, steps, at, 0)))
             if stages["unfold"]["visible"]:
-                for k in range(1, len(units) + 1):
-                    title = "%s %d/%d — %s" % (stages["unfold"]["nickname"], k, len(units), placeholders[k - 1])
-                    scenes.append((title, "code", render_scene(info, units, placeholders, folds, k)))
+                for k in range(1, len(steps) + 1):
+                    title = "%s %d/%d — %s" % (stages["unfold"]["nickname"], k, len(steps), steps[k - 1]["title"])
+                    scenes.append((title, "code", render_steps_scene(tree, lines, steps, at, k)))
         last_code = next((c for _, kind, c in reversed(scenes) if kind == "code"), None)
         if last_code is None or last_code.rstrip("\n") != original.rstrip("\n"):
             scenes.append((stages["source"]["nickname"], "code", original))
@@ -1080,7 +1371,7 @@ class SourceMismatch(Exception):
     """The scenes cannot reach the source: exit code 3."""
 
 
-def build_documents(result_dir, manifest, outline, with_diff=True):
+def build_documents(result_dir, manifest, parsed, with_diff=True):
     unchanged, docs_text, counts = {}, {}, {}
     max_slides = 1
     for doc, title in manifest["docs"]:
@@ -1096,7 +1387,7 @@ def build_documents(result_dir, manifest, outline, with_diff=True):
                 parts += ['<div class="resp"><span class="label">책임</span> %s</div>' % html.escape(node["responsibility"], quote=False), ""]
             if node["skip_reason"]:
                 parts += ["⚠️ " + node["skip_reason"], ""]
-            scenes = node_scenes(result_dir, manifest, node, outline)
+            scenes = node_scenes(result_dir, manifest, node, parsed)
             slides, layers, kinds, prev = [], [], [], None
             for number, (name, kind, content) in enumerate(scenes, start=1):
                 changed = kind != "code" or prev is None or content != prev
@@ -1132,7 +1423,7 @@ def load_outline(result_dir, manifest):
     if missing:
         raise InputError("1단계 파일이 없음: " + ", ".join(missing))
     path = Path(result_dir) / "work" / OUTLINE_FILE
-    if not any(n["units"] for n in manifest["nodes"] if not n["skip_reason"]):
+    if not any(n.get("tree") and n["tree"]["root_children"] for n in manifest["nodes"] if not n["skip_reason"]):
         return {}
     if not path.is_file():
         raise InputError("펼치기 입력이 없음: " + rel(path))
@@ -1149,8 +1440,19 @@ def cmd_build(args):
     result_dir = Path(args.dir)
     manifest = load_manifest(result_dir)
     outline = load_outline(result_dir, manifest)
+    errors, parsed = [], {}
+    for node in manifest["nodes"]:
+        if node["skip_reason"] or not (node.get("tree") and node["tree"]["root_children"]):
+            continue
+        if node["id"] not in outline:
+            errors.append("%s: %s에 항목이 없음" % (node["id"], OUTLINE_FILE))
+            continue
+        node_errors, parsed[node["id"]] = check_outline(node, node["tree"], outline[node["id"]])
+        errors += node_errors
+    if errors:
+        raise InputError("\n".join(errors))
     try:
-        docs_text, unchanged, counts = build_documents(result_dir, manifest, outline)
+        docs_text, unchanged, counts = build_documents(result_dir, manifest, parsed)
     except SourceMismatch as e:
         print(str(e), file=sys.stderr)
         sys.exit(3)
@@ -1212,6 +1514,9 @@ def main(argv=None):
     except InputError as e:
         print(str(e), file=sys.stderr)
         sys.exit(2)
+    except SourceMismatch as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(3)
 
 
 if __name__ == "__main__":
