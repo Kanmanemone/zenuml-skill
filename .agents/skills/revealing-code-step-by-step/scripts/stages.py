@@ -595,6 +595,7 @@ DECL_HEAD = re.compile(r"^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:private|protected|i
 ENDS_OPEN = re.compile(r"([=,(\[{.+\-*/:]|->|&&|\|\||\?:)\s*$")
 STARTS_CLOSED = re.compile(r"^\s*(\.|\?\.|\?:|&&|\|\||\)|\]|->)")
 COMMENT_LINE = re.compile(r"^\s*(/\*|\*|//)")
+ANNOTATION_LINE = re.compile(r"^\s*@[\w.:]+(\(.*\))?\s*$")
 PARAM_HEAD = re.compile(r"^\s+(?:@\w+\s+)*(?:(?:private|protected|internal|public|override|open)\s+)*(?:val\s+|var\s+)?(\w+)\s*:")
 
 
@@ -656,8 +657,9 @@ def analyse(text):
             if cur is not None and (nest > 0 or continues):
                 cur["lines"].append(i)
             continue
-        if nest == 0 and not continues and COMMENT_LINE.match(line):
-            comments.append(i)
+        if nest == 0 and not continues and (COMMENT_LINE.match(line)
+                                            or (ANNOTATION_LINE.match(m) and _nesting(m) == 0)):
+            comments.append(i)  # leading lines of the next item
             continue
         if cur is None or (nest == 0 and not continues and not STARTS_CLOSED.match(line)):
             cur = {"first": i, "lines": [], "comments": comments}

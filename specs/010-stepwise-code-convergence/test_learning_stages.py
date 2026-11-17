@@ -123,7 +123,26 @@ RAW = '''object Key : EntryKey {
 '''
 
 
+ANNOTATED = '''object Module {
+    @Provides
+    @IntoSet
+    fun provide(): EntryKey = Key
+
+    @OptIn(ExperimentalApi::class)
+    override fun onCreate() {
+        run()
+    }
+}
+'''
+
+
 class Units(unittest.TestCase):
+    def test_own_line_annotations_attach_to_the_next_declaration(self):
+        info, units = units_of(ANNOTATED)
+        self.assertEqual([(it['name'], it['comments'], it['lines']) for it in info['items']],
+                         [('provide', [1, 2], [3]), ('onCreate', [5], [6, 7, 8])])
+        self.assertEqual([s.unit_label(u) for u in units], ['provide', 'onCreate'])
+
     def test_multiline_raw_string_stays_in_one_item(self):
         info, _ = units_of(RAW)
         self.assertEqual([(it['name'], it['lines']) for it in info['items']],
@@ -142,7 +161,7 @@ class Units(unittest.TestCase):
         self.assertEqual(units_of('fun f(x: Int) =\n    x + 1\n')[1], [])
 
     def test_every_fixture_and_sample_unfolds_back_to_the_source(self):
-        texts = [SHOP, REPO, MENU, RAW] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
+        texts = [SHOP, REPO, MENU, RAW, ANNOTATED] + [p.read_text(encoding='utf-8') for p in (FIXTURE / 'expected/original').glob('*.kt')]
         for text in texts:
             info, units = units_of(text)
             if units:
