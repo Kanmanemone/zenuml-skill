@@ -20,10 +20,122 @@ A Claude Code project containing `generating-zenuml-diagrams`, a skill that turn
 ## How to use
 
 > [!CAUTION]
-> **Copy only the [`.agents/skills/generating-zenuml-diagrams/`](.agents/skills/generating-zenuml-diagrams/) folder — do NOT copy this whole project.**
+> **Install only the skill folders under [`.agents/skills/`](.agents/skills/) — do NOT copy this whole project.**
 
-1. Copy the [`.agents/skills/generating-zenuml-diagrams/`](.agents/skills/generating-zenuml-diagrams/) folder into your project's `.claude/skills/` directory (Claude Code), or `.agents/skills/` for Codex and other agents that read the [Agent Skills](https://agentskills.io) folder. In this repository the skills live in `.agents/skills/`, and `.claude/skills/<name>` are symlinks to them.
-2. In Claude Code, run `/generating-zenuml-diagrams <describe your process>`.
+There are four skills; each works on its own, except that `revealing-code-step-by-step` reads the views `generating-architecture-views` makes. "Optional add-ons" below explains them in detail.
+
+- **[`generating-zenuml-diagrams`](.agents/skills/generating-zenuml-diagrams/)** — Turns a process you describe in plain words into a [ZenUML](https://github.com/mermaid-js/zenuml-core) sequence diagram, without inventing participants or messages you didn't mention. Needs nothing else.
+- **[`generating-architecture-views`](.agents/skills/generating-architecture-views/)** — Draws a structural view of a system — components, groups, dependencies — with each component's responsibility and links to its source. Uses Python 3.9+ (optional) for hover panels.
+- **[`exporting-markdown-diagrams`](.agents/skills/exporting-markdown-diagrams/)** — Turns a diagram in a Markdown file into SVG/PNG, or the whole file into PDF/PNG, through bundled scripts. Needs Node.js: run `npm install` once in its `scripts/` folder.
+- **[`revealing-code-step-by-step`](.agents/skills/revealing-code-step-by-step/)** — Walks through the code behind a structural view one layer at a time, from a plain-language situation to the original source. Needs Python 3.9+ and a view made by `generating-architecture-views`.
+
+Install them either way below, then run one (see "Running a skill").
+
+### Install by downloading and copying
+
+1. Download [the repository as a ZIP](https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.zip) (or **Code → Download ZIP** on GitHub) and unzip it.
+2. In the unzipped folder, open `.agents/skills/` and copy the folder of each skill you want — all four for everything — into your project's `.claude/skills/` (Claude Code) or `.agents/skills/` (Codex and other agents that read the [Agent Skills](https://agentskills.io) folder).
+   - Folders whose names start with `.` are hidden in macOS Finder; press `Cmd+Shift+.` to show them.
+   - Copy from `.agents/skills/`, not `.claude/skills/`: in this repository `.claude/skills/<name>` are links, which a ZIP doesn't keep.
+
+### Install from the terminal
+
+Paste one of the commands below in your project's root folder. Each downloads its skill(s) into `.agents/skills/` and links each from `.claude/skills/<name>`, so Claude Code and other agents read the same files — the same layout as this repository.
+
+#### 1. All skills
+
+**macOS / Linux**
+
+```bash
+t=; curl -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz && mkdir -p .agents && t=$(mktemp -d .agents/zenuml-tmp.XXXXXX) && { tar -xzf z.tgz -C "$t" --strip-components=3 zenuml-skill-main/.agents/skills || { rm -rf "$t"; t=; }; }; rm -f z.tgz
+if [ -n "$t" ]; then mkdir -p .agents/skills .claude/skills; for s in $(ls "$t"); do if [ -d .agents/skills/$s ]; then mkdir -p .agents/skills-backup && mv .agents/skills/$s .agents/skills-backup/$s-$(date +%Y%m%d%H%M%S); fi; mv "$t/$s" .agents/skills/$s && ln -sfn ../../.agents/skills/$s .claude/skills/$s; done; rm -rf "$t"; fi
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$t = $null; curl.exe -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz; if ($?) { $t = (mkdir ".agents\zenuml-tmp-$(New-Guid)").FullName; tar -xzf z.tgz -C $t --strip-components=3 zenuml-skill-main/.agents/skills; if (!$?) { rmdir -Recurse $t; $t = $null }; del z.tgz }
+if ($t) { mkdir -Force .agents\skills, .claude\skills >$null; foreach ($s in (dir $t -Directory).Name) { if (Test-Path .agents\skills\$s) { mkdir -Force .agents\skills-backup >$null; move .agents\skills\$s .agents\skills-backup\$s-$(Get-Date -f yyyyMMddHHmmss) }; move $t\$s .agents\skills\$s; cmd /c "rmdir .claude\skills\$s 2>nul & (mklink /D .claude\skills\$s ..\..\.agents\skills\$s 2>nul || mklink /J .claude\skills\$s .agents\skills\$s) >nul" }; rmdir -Recurse $t }
+```
+
+#### 2. `generating-zenuml-diagrams`
+
+**macOS / Linux**
+
+```bash
+t=; curl -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz && mkdir -p .agents && t=$(mktemp -d .agents/zenuml-tmp.XXXXXX) && { tar -xzf z.tgz -C "$t" --strip-components=3 zenuml-skill-main/.agents/skills/generating-zenuml-diagrams || { rm -rf "$t"; t=; }; }; rm -f z.tgz
+if [ -n "$t" ]; then mkdir -p .agents/skills .claude/skills; for s in $(ls "$t"); do if [ -d .agents/skills/$s ]; then mkdir -p .agents/skills-backup && mv .agents/skills/$s .agents/skills-backup/$s-$(date +%Y%m%d%H%M%S); fi; mv "$t/$s" .agents/skills/$s && ln -sfn ../../.agents/skills/$s .claude/skills/$s; done; rm -rf "$t"; fi
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$t = $null; curl.exe -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz; if ($?) { $t = (mkdir ".agents\zenuml-tmp-$(New-Guid)").FullName; tar -xzf z.tgz -C $t --strip-components=3 zenuml-skill-main/.agents/skills/generating-zenuml-diagrams; if (!$?) { rmdir -Recurse $t; $t = $null }; del z.tgz }
+if ($t) { mkdir -Force .agents\skills, .claude\skills >$null; foreach ($s in (dir $t -Directory).Name) { if (Test-Path .agents\skills\$s) { mkdir -Force .agents\skills-backup >$null; move .agents\skills\$s .agents\skills-backup\$s-$(Get-Date -f yyyyMMddHHmmss) }; move $t\$s .agents\skills\$s; cmd /c "rmdir .claude\skills\$s 2>nul & (mklink /D .claude\skills\$s ..\..\.agents\skills\$s 2>nul || mklink /J .claude\skills\$s .agents\skills\$s) >nul" }; rmdir -Recurse $t }
+```
+
+#### 3. `generating-architecture-views`
+
+**macOS / Linux**
+
+```bash
+t=; curl -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz && mkdir -p .agents && t=$(mktemp -d .agents/zenuml-tmp.XXXXXX) && { tar -xzf z.tgz -C "$t" --strip-components=3 zenuml-skill-main/.agents/skills/generating-architecture-views || { rm -rf "$t"; t=; }; }; rm -f z.tgz
+if [ -n "$t" ]; then mkdir -p .agents/skills .claude/skills; for s in $(ls "$t"); do if [ -d .agents/skills/$s ]; then mkdir -p .agents/skills-backup && mv .agents/skills/$s .agents/skills-backup/$s-$(date +%Y%m%d%H%M%S); fi; mv "$t/$s" .agents/skills/$s && ln -sfn ../../.agents/skills/$s .claude/skills/$s; done; rm -rf "$t"; fi
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$t = $null; curl.exe -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz; if ($?) { $t = (mkdir ".agents\zenuml-tmp-$(New-Guid)").FullName; tar -xzf z.tgz -C $t --strip-components=3 zenuml-skill-main/.agents/skills/generating-architecture-views; if (!$?) { rmdir -Recurse $t; $t = $null }; del z.tgz }
+if ($t) { mkdir -Force .agents\skills, .claude\skills >$null; foreach ($s in (dir $t -Directory).Name) { if (Test-Path .agents\skills\$s) { mkdir -Force .agents\skills-backup >$null; move .agents\skills\$s .agents\skills-backup\$s-$(Get-Date -f yyyyMMddHHmmss) }; move $t\$s .agents\skills\$s; cmd /c "rmdir .claude\skills\$s 2>nul & (mklink /D .claude\skills\$s ..\..\.agents\skills\$s 2>nul || mklink /J .claude\skills\$s .agents\skills\$s) >nul" }; rmdir -Recurse $t }
+```
+
+#### 4. `exporting-markdown-diagrams`
+
+**macOS / Linux**
+
+```bash
+t=; curl -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz && mkdir -p .agents && t=$(mktemp -d .agents/zenuml-tmp.XXXXXX) && { tar -xzf z.tgz -C "$t" --strip-components=3 zenuml-skill-main/.agents/skills/exporting-markdown-diagrams || { rm -rf "$t"; t=; }; }; rm -f z.tgz
+if [ -n "$t" ]; then mkdir -p .agents/skills .claude/skills; for s in $(ls "$t"); do if [ -d .agents/skills/$s ]; then mkdir -p .agents/skills-backup && mv .agents/skills/$s .agents/skills-backup/$s-$(date +%Y%m%d%H%M%S); fi; mv "$t/$s" .agents/skills/$s && ln -sfn ../../.agents/skills/$s .claude/skills/$s; done; rm -rf "$t"; fi
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$t = $null; curl.exe -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz; if ($?) { $t = (mkdir ".agents\zenuml-tmp-$(New-Guid)").FullName; tar -xzf z.tgz -C $t --strip-components=3 zenuml-skill-main/.agents/skills/exporting-markdown-diagrams; if (!$?) { rmdir -Recurse $t; $t = $null }; del z.tgz }
+if ($t) { mkdir -Force .agents\skills, .claude\skills >$null; foreach ($s in (dir $t -Directory).Name) { if (Test-Path .agents\skills\$s) { mkdir -Force .agents\skills-backup >$null; move .agents\skills\$s .agents\skills-backup\$s-$(Get-Date -f yyyyMMddHHmmss) }; move $t\$s .agents\skills\$s; cmd /c "rmdir .claude\skills\$s 2>nul & (mklink /D .claude\skills\$s ..\..\.agents\skills\$s 2>nul || mklink /J .claude\skills\$s .agents\skills\$s) >nul" }; rmdir -Recurse $t }
+```
+
+#### 5. `revealing-code-step-by-step`
+
+**macOS / Linux**
+
+```bash
+t=; curl -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz && mkdir -p .agents && t=$(mktemp -d .agents/zenuml-tmp.XXXXXX) && { tar -xzf z.tgz -C "$t" --strip-components=3 zenuml-skill-main/.agents/skills/revealing-code-step-by-step || { rm -rf "$t"; t=; }; }; rm -f z.tgz
+if [ -n "$t" ]; then mkdir -p .agents/skills .claude/skills; for s in $(ls "$t"); do if [ -d .agents/skills/$s ]; then mkdir -p .agents/skills-backup && mv .agents/skills/$s .agents/skills-backup/$s-$(date +%Y%m%d%H%M%S); fi; mv "$t/$s" .agents/skills/$s && ln -sfn ../../.agents/skills/$s .claude/skills/$s; done; rm -rf "$t"; fi
+```
+
+**Windows (PowerShell)**
+
+```powershell
+$t = $null; curl.exe -fsSL -o z.tgz https://github.com/Kanmanemone/zenuml-skill/archive/refs/heads/main.tar.gz; if ($?) { $t = (mkdir ".agents\zenuml-tmp-$(New-Guid)").FullName; tar -xzf z.tgz -C $t --strip-components=3 zenuml-skill-main/.agents/skills/revealing-code-step-by-step; if (!$?) { rmdir -Recurse $t; $t = $null }; del z.tgz }
+if ($t) { mkdir -Force .agents\skills, .claude\skills >$null; foreach ($s in (dir $t -Directory).Name) { if (Test-Path .agents\skills\$s) { mkdir -Force .agents\skills-backup >$null; move .agents\skills\$s .agents\skills-backup\$s-$(Get-Date -f yyyyMMddHHmmss) }; move $t\$s .agents\skills\$s; cmd /c "rmdir .claude\skills\$s 2>nul & (mklink /D .claude\skills\$s ..\..\.agents\skills\$s 2>nul || mklink /J .claude\skills\$s .agents\skills\$s) >nul" }; rmdir -Recurse $t }
+```
+
+Each command does three things, so pasting it again is also how you update a skill:
+
+1. It downloads the latest version and unpacks it into a temporary folder under `.agents/`. If either step fails, it stops without changing anything.
+2. It moves the skill's current folder, if there is one, to `.agents/skills-backup/<name>-<date-time>`, then moves the fresh skill into `.agents/skills/<name>`, so files removed from this repository don't linger. Nothing is deleted: files you added to the skill folder and your `settings.jsonc` edits stay in that backup.
+3. It links `.claude/skills/<name>` to that folder again.
+
+- The all-skills command installs every skill the repository has at that moment, so a skill added later comes with the next update, while a skill later removed from this repository stays in your project until you delete it.
+- After an update, copy any settings you changed back from the backup, and delete backups you no longer need. They sit outside `.agents/skills/`, so agents don't load them as duplicate skills.
+- After updating `exporting-markdown-diagrams`, run `npm install` in its `scripts/` folder again: its `node_modules` moved to the backup too.
+- On Windows the command first tries a relative symbolic link (`mklink /D`), which needs Developer Mode or administrator rights. If that fails, it creates a directory junction (`mklink /J`) instead, which needs no permission but stores an absolute path, so after moving the project folder, paste the command again.
+
+### Running a skill
+
+In Claude Code, run `/generating-zenuml-diagrams <describe your process>`.
 
 **Example:**
 
@@ -35,7 +147,7 @@ If a newly added skill doesn't show up under `/`, restart Claude Code, or run "R
 
 ## Optional add-ons
 
-Each of these is a standalone skill — copy whichever you need into your `.claude/skills/` directory. Every skill (including the core one) reads a `settings.jsonc` in its own folder; edit it to change how that skill behaves — each option is explained in Korean comments right above it:
+Each of these is a standalone skill with its own install command in "How to use" (command 1 there installs them all). Every skill (including the core one) reads a `settings.jsonc` in its own folder; edit it to change how that skill behaves — each option is explained in Korean comments right above it:
 
 - **[`generating-architecture-views`](.agents/skills/generating-architecture-views/)** — adds a structural view (components, groups, dependencies). Want a specific Mermaid renderer (e.g. `elk`) for its Dependency diagrams? Say so in your request and it's added as `layout` in the diagram's YAML `config` (or set `dependency.renderer` in the skill's `settings.jsonc`); leave it unspecified and it won't be. In VS Code's Markdown preview, hovering a node in the Dependency diagram shows that node's Responsibility and the collaborations it depends on in a panel — no scrolling back and forth. A bundled Python script fills these panels from the view's own text after it's saved, so this costs no extra tokens; choose what goes in the panel and where it appears (bottom of the preview or right under the node) with the `hover` group in `settings.jsonc`, or turn it off with `hover.enabled`. GitHub and other viewers don't support it.
 - **[`exporting-markdown-diagrams`](.agents/skills/exporting-markdown-diagrams/)** — converts a diagram to SVG/PNG, or a whole Markdown file to PDF (diagrams embedded as selectable-text vectors) or PNG, always through bundled scripts (mermaid-cli) — never LLM reasoning. Run `npm install` once inside its `scripts/` folder to fetch the dependencies those scripts use. Output lands in an `exports/` subdirectory next to the source file, created automatically.
@@ -71,7 +183,7 @@ git checkout -- .claude/skills
 
 Check: each skill name under `.claude/skills/` should open as a folder (a link) containing `SKILL.md`.
 
-> You don't need any of this to use a single skill as described in "How to use": copying a folder from `.agents/skills/<name>` copies the real files.
+> You don't need any of this to use the skills as described in "How to use": its command downloads the real files, and on Windows, when it can't create a symbolic link, it falls back to a directory junction, which needs no permission.
 
 ## Requirements
 
