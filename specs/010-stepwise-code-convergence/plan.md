@@ -6,7 +6,23 @@
 
 ## Summary
 
-### 붙는 선언 좁히기 (2026-11-18, 아래의 모든 앞선 설계보다 우선)
+### 원본 언어와 파일 단위 노드 (2026-11-18, 아래의 모든 앞선 설계보다 우선)
+
+Kotlin만 받던 제한을 없애고, 노드가 파일 자체를 가리키면 파일 전체를 원본 범위로 삼는다(spec FR-001a·002·006·017·017a, SC-013). 결정과 근거는 [research.md](research.md) S10에 있다.
+
+- **`read_source`**: `.kt`·`.kts`가 아니면 멈추던 검사를 없앤다.
+- **`locate_range`**(새 함수, prepare와 build의 확인이 함께 씀): Kotlin이면 지금처럼 선언을 찾는다. 선언이 없거나 Kotlin이 아니면, 노드 Id나 표시 이름이 파일 이름·확장자 뺀 이름·Kotlin 파일 클래스 이름(`ColorKt`)과 같은지 본다. 같으면 파일 전체를 원본 범위로 하고 `range.whole_file`을 참으로 둔다. 둘 다 아니면 이유를 표시한다.
+- **`analyse`/`build_tree`**: `whole_file` 인자를 더한다. Kotlin 파일 단위 노드는 맨 앞의 빈 줄·주석·`@file:`·`package`·`import`를 루트의 자기 줄로 두고, 나머지를 최상위 항목으로 나눈다. Kotlin이 아닌 원본은 트리를 만들지 않아 사용 상황 → 원본이 된다.
+- **`fence`/`extract_last_stage`**: 코드 블록 언어를 원본에 맞춘다(Kotlin은 `kotlin`, 그 밖은 소문자 확장자). 마지막 단계를 꺼내는 정규식은 언어 이름을 가리지 않는다.
+- **바뀌지 않는 것**: 노드 이름과 같은 Kotlin 선언을 찾는 노드의 원본 범위·트리·문서, `outline.json` 형식과 검사, 단계 정의, 설정, 내부 작업 파일 이름(`.kt`), 상자 형식.
+- **바꾸는 파일**: `scripts/stages.py`, `SKILL.md`(설명과 본문의 Kotlin 전용 문구), `stage1-prompt.md`(Kotlin 전용 문구가 있으면), `README.md`·`README.ko.md`(이 스킬 소개에 Kotlin 전용 문구가 있으면), `test_learning_stages.py`(XML 파일 단위 노드, Kotlin 파일 단위 노드, Kotlin이 아닌 선언 노드 시험), 이 Spec의 research·data-model·계약·quickstart.
+
+**Constitution Check (이 개편)**
+- I. 통과: 새 설정·의존성·장면 종류가 없다. 언어별 문법 규칙을 더하지 않는다. 모든 언어에 두는 규칙은 "이름이 파일을 가리키면 파일 전체" 하나다. 다른 언어로 스캐너를 넓히는 방법과 언어별 대응표는 기각했다(S10).
+- II. 통과: 010 Spec의 갱신이다.
+- III. 해당 없음: 요구 변경이다(FR-017, SC-013).
+
+### 붙는 선언 좁히기 (2026-11-18)
 
 붙는 선언을 **한 줄 선언**으로 좁힌다(spec FR-005a(4), SC-012). 결정과 근거는 [research.md](research.md) S9에 있다.
 
@@ -78,13 +94,13 @@
 
 > 아래 Technical Context와 Project Structure는 초기 설계 때의 기록이다. 현재 동작은 Summary 맨 위 절(스코프 트리 정제)이 우선한다.
 
-**Language/Version**: Python 3.9 이상에서 동작하는 스크립트와 Markdown 지침 문서(SKILL.md, `stages.md`)로 이뤄진다. 스크립트는 표준 라이브러리만 쓰고 3.10 이상 전용 문법을 쓰지 않는다. 003 스킬과 같은 조건이다. 산출물의 코드는 Kotlin이다(spec FR-006).
+**Language/Version**: Python 3.9 이상에서 동작하는 스크립트와 Markdown 지침 문서(SKILL.md, `stages.md`)로 이뤄진다. 스크립트는 표준 라이브러리만 쓰고 3.10 이상 전용 문법을 쓰지 않는다. 003 스킬과 같은 조건이다. 산출물의 코드는 노드 원본의 언어다(spec FR-006, 2026-11-18 전에는 Kotlin).
 
 **Primary Dependencies**: 없음. 표준 라이브러리(`argparse`, `json`, `re`, `pathlib`, `shutil`, `difflib`, `html`, `urllib.request`)만 쓴다. 003 스킬의 코드는 import하지 않는다(스킬 독립성, research R2).
 
 **Storage**: 파일만 쓴다. 스킬 폴더의 `settings.jsonc`·`settings.schema.json`은 읽기만 한다.
 
-- 입력(읽기만): `.zenuml/<slug>.architecture.md`와, 그 링크가 가리키는 원본 Kotlin 파일
+- 입력(읽기만): `.zenuml/<slug>.architecture.md`와, 그 링크가 가리키는 원본 파일(언어 제한 없음, 2026-11-18)
 - 산출물: `<output.directory>/<slug>.stages/` 아래의 문서(`*.md`)와 작업 폴더(`work/`). 기본값으로는 `.zenuml/<slug>.stages/`
 
 **Testing**: 자동화 테스트 프레임워크는 없다(기존 스킬과 같다). [quickstart.md](quickstart.md)에 다음 세 가지 확인을 둔다.

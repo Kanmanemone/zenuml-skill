@@ -62,7 +62,7 @@ Stage: `kind`(`prose`/`code`, 기본 code), `repeat`(`dependency` 또는 없음)
 | `order` | 선언 순서 |
 | `group_path` | 소속 subgraph들의 `(Id, 라벨)` 목록. 최상위부터 적고, 그룹이 없으면 빈 목록이다. |
 | `link` | `click` 대상 문자열. 없으면 null이다. |
-| `range` | 원본 범위(R5). `{source, start_line, end_line}` 형태이고, 구체화하지 않는 노드는 null이다. |
+| `range` | 원본 범위(R5, S10). `{source, start_line, end_line}` 형태이고, 파일 단위 노드는 `whole_file: true`가 더해진다(시작 1, 끝은 파일의 마지막 줄). 구체화하지 않는 노드는 null이다. |
 | `candidates` | 같은 이름의 선언이 여럿일 때의 후보 `{pick, start_line, end_line, header}` 목록. 하나뿐이면 빈 목록 |
 | `pick` | 모델이 고른 후보 번호(1부터). `prepare --pick`으로 받는다(spec FR-002) |
 | `responsibility` | 구조 뷰 `#### 요소의 책임`에서 그 노드 항목의 `책임 (추상)` 문장. 없거나 `설명에 명시되지 않음`으로 시작하면 null이다(spec FR-015e). |

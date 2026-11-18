@@ -1,5 +1,16 @@
 # Quickstart: 정제 단계 코드 구체화 확인
 
+## 원본 언어와 파일 단위 노드 검증 (2026-11-18, 아래의 모든 앞선 절차보다 우선)
+
+`python specs/010-stepwise-code-convergence/test_learning_stages.py`로 확인한다. 시험은 임시 폴더에 작은 구조 뷰와 원본을 만들어 돌린다. 기대 결과는 다음과 같다.
+
+- **XML 파일 단위 노드**(노드 `ColorsXml`, 표시 이름 `colors.xml`, 원본 `colors.xml`): `skip_reason` 없음, `range.whole_file` 참, `tree` null. 문서에 `⚠️` 줄이 없다. 장면은 사용 상황과 원본 둘이고, 원본 장면의 코드 블록은 `xml`이며 파일 전체와 같다. `build`의 `verified`에 든다.
+- **Kotlin 파일 단위 노드**(노드 `ColorKt`, 표시 이름 `Color.kt`, 원본은 `package`·`import`와 최상위 `val` 여럿): 원본 범위가 파일 전체이고, 스코프 목록에서 `package`·`import` 줄은 루트의 자기 줄(`-`)이며, 최상위 `val`들이 루트 자식이다. 윤곽 장면에 `package`·`import`가 보이고, 마지막 장면은 파일 전체와 같다.
+- **Kotlin이 아닌 선언 노드**(Java 파일 `Shapes.java` 안의 노드 `Circle`): `skip_reason`은 `Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음`이다.
+- **Kotlin 파일 이름 노드인데 같은 이름의 선언도 있음**(`Order.kt` 안 `class Order`, 노드 `Order`): 지금처럼 선언 범위다(`whole_file` 없음).
+- **기존 결과 불변**: 저장소 fixture로 만든 문서가 바꾸기 전과 글자까지 같다(기존 시험 전부 통과, SC-013).
+- swemo 구조 뷰(Color.kt·Theme.kt·colors.xml이 든 designsystem 그룹)를 사용자 환경에서 다시 만들면 `colors.xml`과 `ColorKt`에 `⚠️` 줄이 없다. `colors.xml`이 이미 지워졌으면 `원본을 읽을 수 없어 구체화하지 않음`이 나오는 것이 맞다.
+
 ## 스코프 트리 정제 검증 (2026-11-17, 아래의 모든 앞선 절차보다 우선)
 
 1. **자동 테스트**: 저장소 루트에서 `python specs/010-stepwise-code-convergence/test_learning_stages.py`를 실행한다. 확인하는 것은 다음과 같다.
