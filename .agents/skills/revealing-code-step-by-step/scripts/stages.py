@@ -380,10 +380,8 @@ def read_source(link, view_dir):
     if link.endswith("/"):
         return None, "링크가 파일 하나를 가리키지 않아 구체화하지 않음"
     path_part = link.split("#")[0].split("?")[0]
-    if not (path_part.endswith(".kt") or path_part.endswith(".kts")):
-        if "." not in path_part.rsplit("/", 1)[-1]:
-            return None, "링크가 파일 하나를 가리키지 않아 구체화하지 않음"
-        return None, "원본이 Kotlin이 아니어서 구체화하지 않음"
+    if "." not in path_part.rsplit("/", 1)[-1]:
+        return None, "링크가 파일 하나를 가리키지 않아 구체화하지 않음"
     try:
         if link.startswith("http://") or link.startswith("https://"):
             m = GITHUB_BLOB.match(path_part)
@@ -404,6 +402,36 @@ def read_source(link, view_dir):
     if text.startswith("﻿"):
         text = text[1:]
     return text.replace("\r\n", "\n"), None
+
+
+def link_file(link):
+    """(file name, name without extension, is Kotlin) of the file a link points at (research S10)."""
+    name = link.split("#")[0].split("?")[0].rsplit("/", 1)[-1]
+    stem, _, ext = name.rpartition(".")
+    return name, stem, ext in ("kt", "kts")
+
+
+def source_lang(link):
+    """Info string of the code fences for a node's source (research S10)."""
+    name, _, kotlin = link_file(link)
+    return "kotlin" if kotlin else name.rpartition(".")[2].lower()
+
+
+def locate_range(text, node, pick=None):
+    """(span, reason, candidates, whole_file): the node's original range (research R5, S10).
+    Kotlin: the declaration named like the node first. Any language: the whole file when the node
+    names the file itself."""
+    name, stem, kotlin = link_file(node["link"])
+    span, reason, candidates = None, None, []
+    if kotlin:
+        span, reason, candidates = find_declaration(text, declaration_names(node), pick)
+        if span or candidates:
+            return span, reason, candidates, False
+    if {node["id"], node["name"]} & ({name, stem} | ({stem + "Kt"} if kotlin else set())):
+        return (1, len(text.rstrip("\n").split("\n"))), None, [], True
+    if not kotlin:
+        reason = "Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음"
+    return None, reason, [], False
 
 
 # ---- declaration spans (research R5) ---------------------------------------------
@@ -669,10 +697,26 @@ def split_items(lines, masked, lo, hi, raw):
     return items
 
 
-def analyse(text):
-    """Header end, parameter spans and the body's top-level items of one source range."""
+FILE_HEAD_LINE = re.compile(r"^\s*(?:$|//|/\*|\*|@file:|package\b|import\b)")
+
+
+def analyse(text, whole_file=False):
+    """Header end, parameter spans and the body's top-level items of one source range.
+    whole_file: the range is a whole Kotlin file; its leading blank/comment/@file:/package/import
+    lines are the header and every following line is body (research S10)."""
     lines = text.rstrip("\n").split("\n")
     masked = mask_code(text).rstrip("\n").split("\n")
+    if whole_file:
+        head = 0
+        while head < len(lines) and FILE_HEAD_LINE.match(lines[head]):
+            head += 1
+        while head > 0 and COMMENT_LINE.match(lines[head - 1]):  # a comment right above the first item is its own
+            head -= 1
+        raw = _raw_string_flags(lines, masked)
+        items = split_items(lines, masked, head, len(lines), raw)
+        if not items:
+            return {"lines": lines, "masked": masked, "body_open": None, "params": [], "items": []}
+        return {"lines": lines, "masked": masked, "body_open": head - 1, "params": [], "items": items, "raw": raw}
     depth, body_open, params = 0, None, []
     for i, m in enumerate(masked):
         start_depth = depth
@@ -716,7 +760,7 @@ def _depth_profile(masked):
     return start, low
 
 
-def build_tree(text):
+def build_tree(text, whole_file=False):
     """The scope tree of one source range (research S1), or None when the declaration has no body.
 
     {"root": [own line, ...], "root_children": [node id, ...], "body_open": n,
@@ -724,7 +768,7 @@ def build_tree(text):
      "attached": [{"name", "kind": "param"|"member", "lines": [...]}, ...]}     # lines 0-based
     Attached: parameters, and root members that are private or state with one code line.
     """
-    info = analyse(text)
+    info = analyse(text, whole_file)
     if info["body_open"] is None:
         return None
     lines, masked, raw = info["lines"], info["masked"], info["raw"]
@@ -1153,6 +1197,13 @@ def declaration_names(node):
     return names
 
 
+def node_tree(node, code):
+    """Scope tree of a node's original range; none for a source that is not Kotlin (FR-017a)."""
+    if not link_file(node["link"])[2]:
+        return None
+    return build_tree(code, whole_file=bool(node["range"].get("whole_file")))
+
+
 def cmd_prepare(args):
     view = Path(args.view)
     if not view.name.endswith(".architecture.md") or not view.is_file():
@@ -1193,14 +1244,16 @@ def cmd_prepare(args):
         node["pick"] = picks.get(node["id"])
         text, reason = read_source(node["link"], view_dir)
         if text is not None:
-            span, reason, node["candidates"] = find_declaration(text, declaration_names(node), node["pick"])
+            span, reason, node["candidates"], whole = locate_range(text, node, node["pick"])
             if span:
                 code = "\n".join(text.split("\n")[span[0] - 1: span[1]])
                 original = result_dir / "work" / "original" / (node["id"] + ".kt")
                 write_text(original, code)
                 node["original"] = rel(original)
                 node["range"] = {"source": node["link"], "start_line": span[0], "end_line": span[1]}
-                node["tree"] = build_tree(code)
+                if whole:
+                    node["range"]["whole_file"] = True
+                node["tree"] = node_tree(node, code)
                 if node["tree"] and node["tree"]["root_children"]:
                     listing.append(scope_listing(node, code, node["tree"]))
         node["skip_reason"] = reason
@@ -1266,17 +1319,17 @@ DIFF_CSS = """.stages .code { position: relative; }
 .stages pre.diff .del-after::after { bottom: -5px; }"""
 
 
-def fence(code):
+def fence(code, lang="kotlin"):
     longest = max((len(m) for m in re.findall(r"`+", code)), default=0)
     ticks = "`" * max(3, longest + 1)
-    return ticks + "kotlin\n" + code.rstrip("\n") + "\n" + ticks
+    return ticks + lang + "\n" + code.rstrip("\n") + "\n" + ticks
 
 
 def note_for(changed):
     return "" if changed else "이 단계에서는 달라진 것이 없음"
 
 
-def render_box(node_id, slides, diff_layers, kinds=None):
+def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin"):
     """Base box. slides: [(title, note, code)]; diff_layers: [markup or None] (added after the code)."""
     n = len(slides)
     kinds = kinds or ["code"] * n
@@ -1293,7 +1346,7 @@ def render_box(node_id, slides, diff_layers, kinds=None):
         if kinds[k - 1] == "prose":
             out += ['<div class="scene"><p>%s</p></div>' % html.escape(code.strip(), quote=False).replace("\n", "<br>"), "", "</div>", ""]
             continue
-        out += ['<div class="code">', "", fence(code), ""]
+        out += ['<div class="code">', "", fence(code, lang), ""]
         if diff_layers[k - 1]:
             out += [diff_layers[k - 1], ""]
         out += ["</div>", "", "</div>", ""]
@@ -1349,7 +1402,7 @@ def node_scenes(result_dir, manifest, node, parsed):
     scenes = [(stages["prose"]["nickname"], "prose", prose)] if stages["prose"]["visible"] else []
     if not node["skip_reason"]:
         original = read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt"))
-        tree = build_tree(original)
+        tree = node_tree(node, original)
         if tree != node.get("tree"):
             raise SourceMismatch("%s: prepare 뒤에 원본 범위가 바뀜" % node["id"])
         if tree and tree["root_children"]:
@@ -1403,7 +1456,7 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
                 prev = content if kind == "code" else prev
             counts[node["id"]] = len(scenes)
             max_slides = max(max_slides, len(slides))
-            parts += [render_box(node["id"], slides, layers, kinds), ""]
+            parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin"), ""]
         rules = "\n".join(".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k) for k in range(1, max_slides + 1))
         parts += ["<style>", BASE_CSS.replace("{STAGE_RULES}", rules), "</style>", ""]
         if with_diff:
@@ -1416,7 +1469,7 @@ def extract_last_stage(doc_text, node_id, last):
     m = re.search(r'<input type="radio" name="%s" id="%s-1"' % (re.escape(node_id), re.escape(node_id)), doc_text)
     if not m:
         return None
-    m2 = re.compile(r'<div class="stage s%d">.*?<div class="code">\n\n(`{3,})kotlin\n(.*?)\n\1\n' % last, re.S).search(doc_text, m.end())
+    m2 = re.compile(r'<div class="stage s%d">.*?<div class="code">\n\n(`{3,})[\w+.#-]*\n(.*?)\n\1\n' % last, re.S).search(doc_text, m.end())
     return m2.group(2) if m2 else None
 
 
@@ -1475,7 +1528,7 @@ def cmd_build(args):
         text, reason = read_source(node["link"], view_dir)
         expected = None
         if text is not None:
-            span, reason, _ = find_declaration(text, declaration_names(node), node.get("pick"))
+            span, reason, _, _ = locate_range(text, node, node.get("pick"))
             if span:
                 expected = "\n".join(text.split("\n")[span[0] - 1: span[1]])
         if written is None or expected is None or written.rstrip("\n") != expected.rstrip("\n"):

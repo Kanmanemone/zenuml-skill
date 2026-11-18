@@ -24,7 +24,7 @@
 
 ### LegacyBridge(java)
 
-⚠️ 원본이 Kotlin이 아니어서 구체화하지 않음
+⚠️ Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음
 
 <div class="stages">
 

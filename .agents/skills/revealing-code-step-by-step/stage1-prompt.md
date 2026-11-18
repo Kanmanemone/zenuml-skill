@@ -2,7 +2,7 @@ Write the first scene of a gradual code walkthrough. You have never seen the rea
 
 Read only this file, in as many parts as needed. Write only the listed paths. Do not read other
 files, search the project, or browse. Internal paths end in .kt for workflow compatibility;
-their content at this scene is ordinary Korean prose, never Kotlin code.
+their content at this scene is ordinary Korean prose, never code.
 
 For each node, write ONE short paragraph: the user/caller situation supported by the view, in 1–2
 sentences without implementation identifiers. The document already shows the node's "책임 (추상)" sentence

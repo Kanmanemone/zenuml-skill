@@ -1,6 +1,6 @@
 ---
 name: revealing-code-step-by-step
-description: Builds a gradual Kotlin walkthrough from an architecture view — a plain-language situation under a fixed responsibility line, then an outline showing every step as a numbered placeholder nested by scope, then the source unfolded one layer at a time. Use to understand the implementation behind a structural view step by step. Not for creating architecture views, sequence diagrams, or non-Kotlin source.
+description: Builds a gradual source-code walkthrough from an architecture view — a plain-language situation under a fixed responsibility line, then an outline showing every step as a numbered placeholder nested by scope, then the source unfolded one layer at a time. Use to understand the implementation behind a structural view step by step. Not for creating architecture views or sequence diagrams.
 ---
 
 # Revealing Code Step by Step

@@ -403,27 +403,33 @@ Phase 10의 펼치기 단위(최상위 문장, 4개 합치기, 접기)를 대체
 
 Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리키면 파일 전체를 원본 범위로 삼는다(spec FR-001a·002·006·017·017a, SC-013). SK는 `.agents/skills/revealing-code-step-by-step`이다. 근거는 [research.md](research.md) S10, 데이터는 [data-model.md](data-model.md)의 Node `range`(`whole_file: true`), 이유 문구는 [contracts/stages-contract.md](contracts/stages-contract.md) `prepare` 5번 표에 있다. 노드 이름과 같은 Kotlin 선언을 찾는 노드의 결과는 글자까지 같아야 한다.
 
-- [ ] T061 [US2] `SK/scripts/stages.py`에서 원본 범위 정하기를 한 함수로 모은다 — FR-002, FR-017, research S10
+- [X] T061 [US2] `SK/scripts/stages.py`에서 원본 범위 정하기를 한 함수로 모은다 — FR-002, FR-017, research S10
   - `read_source`: `.kt`·`.kts`가 아니면 `원본이 Kotlin이 아니어서 구체화하지 않음`을 돌려주던 검사를 지운다. 마지막 경로 조각에 `.`이 없으면 `링크가 파일 하나를 가리키지 않아 구체화하지 않음`, 폴더·읽기·UTF-8 검사는 그대로 둔다.
   - 새 `locate_range(text, node, link)` → `(span, reason, candidates, whole_file)`: 원본이 `.kt`·`.kts`이면 `find_declaration(text, declaration_names(node), node["pick"])`을 먼저 쓴다. span이 있거나 후보가 여럿이면 그 결과를 그대로 돌려준다. 그렇지 않으면 링크의 마지막 경로 조각(`#`·`?` 앞)에서 파일 이름 `f`, 확장자 뺀 이름 `stem`을 얻고, 노드 Id나 표시 이름이 `f`·`stem`·(Kotlin이면) `stem + "Kt"` 가운데 하나와 대소문자까지 같으면 span `(1, 파일 줄 수)`와 `whole_file=True`를 돌려준다. 둘 다 아니면 Kotlin은 `find_declaration`의 이유를 그대로, Kotlin이 아니면 `Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음`을 돌려준다.
   - `cmd_prepare`와 `cmd_build`의 마지막 단계 확인이 둘 다 `locate_range`를 쓰게 한다. prepare는 `range`에 `whole_file`이 참일 때만 `"whole_file": true`를 더한다(거짓이면 키를 두지 않아 기존 manifest와 같다).
-- [ ] T062 [US2] `SK/scripts/stages.py`의 `analyse`·`build_tree`에 `whole_file`(기본 False) 인자를 더한다 — FR-005a, FR-017a, research S10
+- [X] T062 [US2] `SK/scripts/stages.py`의 `analyse`·`build_tree`에 `whole_file`(기본 False) 인자를 더한다 — FR-005a, FR-017a, research S10
   - Kotlin 파일 단위 노드: 맨 앞에서 빈 줄·주석 줄·`@file:` 어노테이션·`package`·`import` 줄이 이어지는 구간을 머리로 보고, `body_open`을 그 마지막 줄 번호(머리가 없으면 -1)로 둔다. 매개변수는 없고, 항목은 `split_items(lines, masked, body_open + 1, len(lines), raw)`다. 마지막 줄이 `}`인지 보는 검사는 이 경우 하지 않는다. 항목이 없으면 지금처럼 트리가 없다.
   - Kotlin이 아닌 원본은 `cmd_prepare`에서 `build_tree`를 부르지 않고 `tree`를 null로 둔다.
   - `node_scenes`가 트리를 다시 만들 때 `node["range"].get("whole_file")`과 원본 언어를 prepare와 똑같이 넘기게 한다.
-- [ ] T063 [US2] `SK/scripts/stages.py`의 코드 블록 언어를 원본에 맞춘다 — FR-006, research S10
+- [X] T063 [US2] `SK/scripts/stages.py`의 코드 블록 언어를 원본에 맞춘다 — FR-006, research S10
   - `fence(code, lang)`: Kotlin(`.kt`·`.kts`) 원본은 `kotlin`, 그 밖은 링크의 마지막 경로 조각에서 얻은 확장자를 소문자로 쓴다. `render_box`까지 노드의 언어를 넘긴다.
   - `extract_last_stage`의 정규식이 `kotlin` 대신 아무 언어 이름(`[\w+.#-]*`)이나 받게 한다.
-- [ ] T064 [P] [US3] Kotlin 전용·비Kotlin 제외 문구를 고친다 — FR-001a
+- [X] T064 [P] [US3] Kotlin 전용·비Kotlin 제외 문구를 고친다 — FR-001a
   - `SK/SKILL.md` frontmatter `description`: "gradual Kotlin walkthrough" → 언어를 말하지 않는 표현, "or non-Kotlin source" 제외 문구 삭제. 본문에 Kotlin 전용이라는 설명이 있으면 함께 고친다.
   - `SK/stage1-prompt.md`: "never Kotlin code" → "never code".
   - `README.md` 42·81행, `README.ko.md` 42·81행: "each node's Kotlin code"/"노드마다 Kotlin 코드", "Kotlin syntax highlighting stays"/"Kotlin 구문 색칠은 그대로", "It works on Kotlin sources…"/"Kotlin 원본만 다룹니다"를 원본 언어 기준으로 고치고, 파일 전체를 가리키는 노드는 파일 전체를 보인다는 점과 Kotlin이 아닌 원본은 상황 → 원본으로 보인다는 점을 한 문장으로 적는다.
-- [ ] T065 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 시험을 더한다 — SC-003, SC-013, quickstart 맨 위 절
+- [X] T065 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 시험을 더한다 — SC-003, SC-013, quickstart 맨 위 절
   - 임시 폴더에 구조 뷰 하나와 원본을 만든다: `colors.xml`(노드 `ColorsXml`, 표시 이름 `colors.xml`), `Color.kt`(`package`·`import`와 최상위 `val` 셋, 노드 `ColorKt`, 표시 이름 `Color.kt`), `Shapes.java`(클래스 `Circle`, 노드 `Circle`), `Order.kt`(`class Order`, 노드 `Order`).
   - 확인: `ColorsXml`은 `skip_reason` 없음·`range.whole_file` 참·`tree` null이고, 문서에 `⚠️` 줄이 없으며 장면이 사용 상황·원본 둘이고 원본 장면 fence가 `xml`이며 파일 전체와 같다. `ColorKt`는 원본 범위가 파일 전체이고 스코프 목록의 `package`·`import` 줄이 `-`이며 최상위 `val`이 루트 자식이다. 윤곽에 `package` 줄이 보이고 마지막 장면이 파일 전체와 같다. `Circle`의 `skip_reason`이 contract 문구와 같다. `Order`는 `whole_file` 키가 없다. `build`의 `verified`가 3이다.
   - 기존 `fixtures/expected/*.md`가 다시 만들지 않아도 그대로 통과한다(SC-013 호환).
-- [ ] T066 [US2] 시험 전체를 실행하고, 사용자 예제가 저장소 안에 있으면 다시 만들어 확인한다 — SC-003, SC-008, SC-013
+  - 결과: 시험 26개 통과. 기존 fixture의 `LegacyBridge`(`src/Legacy.java`, 파일 이름과 다른 선언 노드)는 이유 줄이 새 contract 문구로 바뀌는 것이 의도된 변경이라 `fixtures/expected/others.md`·`others.base.md`에서 그 한 줄만 고쳤다. 나머지 기대 문서는 글자까지 같다.
+- [X] T066 [US2] 시험 전체를 실행하고, 사용자 예제가 저장소 안에 있으면 다시 만들어 확인한다 — SC-003, SC-008, SC-013
   - `python specs/010-stepwise-code-convergence/test_learning_stages.py`가 모두 통과한다.
   - Color.kt·Theme.kt·colors.xml이 든 swemo 구조 뷰는 저장소에 없으면 다시 만들지 않고, 사용자 환경에서 확인할 일로 보고한다.
+  - 결과: `.zenuml/`에 `colors.xml`을 링크한 구조 뷰가 없어 다시 만들지 않았다(사용자 환경에서 확인).
 
 실행 순서: T061 → T062 → T063 → T065 → T066. T064는 T061과 함께 진행할 수 있다. 끝나면 converge로 남은 요구를 점검한다.
+
+## Phase 15: Convergence
+
+- [X] T067 `specs/010-stepwise-code-convergence/quickstart.md` 맨 위 절의 "기존 결과 불변" 항목을, 노드 이름과 같은 Kotlin 선언을 찾는 노드의 상자는 바꾸기 전과 글자까지 같고 Kotlin이 아닌 선언 노드 `LegacyBridge`(`src/Legacy.java`)의 이유 줄만 새 contract 문구로 바뀐다고 고친다 per SC-013 (partial)

@@ -506,6 +506,84 @@ class Workflow(unittest.TestCase):
             self.assertEqual(built['verified'], 1)
 
 
+LANG_VIEW = '''### Dependency
+
+```mermaid
+flowchart LR
+  ColorsXml@{ label: "colors.xml" }
+  ColorKt@{ label: "Color.kt" }
+  Circle
+  Order
+
+  click ColorsXml "res/colors.xml" "colors.xml"
+  click ColorKt "src/Color.kt" "Color.kt"
+  click Circle "src/Shapes.java" "Shapes.java"
+  click Order "src/Order.kt" "Order.kt"
+```
+'''
+LANG_SOURCES = {
+    'res/colors.xml': '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="black">#FF000000</color>\n</resources>\n',
+    'src/Color.kt': ('package demo.ui\n\nimport androidx.compose.ui.graphics.Color\n\n/** Brand blue. */\n'
+                     'val Blue = Color(0xFF0000FF)\nval Red = Color(0xFFFF0000)\nval Green = Color(0xFF00FF00)\n'),
+    'src/Shapes.java': 'class Circle {\n}\n\nclass Square {\n}\n',
+    'src/Order.kt': 'package demo\n\nclass Order {\n    fun a() {\n        x()\n    }\n\n    fun b() = 1\n}\n',
+}
+
+
+class Languages(unittest.TestCase):
+    """Sources in any language and nodes that name their file (spec FR-002, FR-017, FR-017a, SC-013)."""
+
+    def test_file_level_nodes_and_sources_that_are_not_kotlin(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for rel_path, text in LANG_SOURCES.items():
+                (root / rel_path).parent.mkdir(parents=True, exist_ok=True)
+                (root / rel_path).write_text(text, encoding='utf-8', newline='\n')
+            view = root / 'lang.architecture.md'
+            view.write_text(LANG_VIEW, encoding='utf-8', newline='\n')
+            meta, listing = run(s.cmd_prepare, view=str(view), show=None, hide=None, output_dir=None, pick=None)
+            result = Path(meta['dir'])
+            manifest = s.load_manifest(result)
+            nodes = {n['id']: n for n in manifest['nodes']}
+
+            xml = nodes['ColorsXml']
+            self.assertIsNone(xml['skip_reason'])
+            self.assertTrue(xml['range']['whole_file'])
+            self.assertIsNone(xml['tree'])
+
+            color = nodes['ColorKt']
+            self.assertIsNone(color['skip_reason'])
+            self.assertTrue(color['range']['whole_file'])
+            self.assertEqual(len(color['tree']['root_children']), 3)  # Blue (with its comment), Red, Green
+            self.assertIn(' -| package demo.ui', listing)
+            self.assertIn(' -| import androidx.compose.ui.graphics.Color', listing)
+            self.assertIn(' 1| /** Brand blue. */', listing)
+
+            self.assertEqual(nodes['Circle']['skip_reason'],
+                             'Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음')
+            self.assertNotIn('whole_file', nodes['Order']['range'])  # the declaration comes first
+            self.assertEqual(nodes['Order']['range']['start_line'], 3)
+
+            (result / 'work/01').mkdir(parents=True)
+            for n in manifest['nodes']:
+                (result / 'work/01' / (n['id'] + '.kt')).write_text('필요한 사람이 쓴다.', encoding='utf-8')
+            outline = {n['id']: auto_entry(n['tree']) for n in manifest['nodes'] if n['tree'] and n['tree']['root_children']}
+            (result / 'work/outline.json').write_text(json.dumps(outline, ensure_ascii=False), encoding='utf-8')
+            built, _ = run(s.cmd_build, dir=str(result))
+            self.assertEqual(built['verified'], 3)
+            self.assertEqual([x['node'] for x in built['skipped']], ['Circle'])
+            doc = Path(built['docs'][0]).read_text(encoding='utf-8')
+            self.assertNotIn('⚠️', doc.split('### Circle')[0])
+
+            box = doc.split('### colors.xml')[1].split('### ')[0]
+            self.assertIn('2단계: 원본 (2/2)', box)
+            self.assertIn('```xml\n' + LANG_SOURCES['res/colors.xml'], box)
+
+            scenes = s.node_scenes(result, manifest, color, parsed_outline(result, manifest))
+            self.assertIn('package demo.ui', scenes[1][2])  # the outline shows the file header
+            self.assertEqual(scenes[-1][2].rstrip('\n'), LANG_SOURCES['src/Color.kt'].rstrip('\n'))
+
+
 class Render(unittest.TestCase):
     def test_prose_is_escaped_not_syntax_highlighted(self):
         box = s.render_box('A', [('Situation', '', '<script>x</script> & text'), ('Code', '', 'class A')], [None, None], ['prose', 'code'])
