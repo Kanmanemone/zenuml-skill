@@ -433,3 +433,33 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 ## Phase 15: Convergence
 
 - [X] T067 `specs/010-stepwise-code-convergence/quickstart.md` 맨 위 절의 "기존 결과 불변" 항목을, 노드 이름과 같은 Kotlin 선언을 찾는 노드의 상자는 바꾸기 전과 글자까지 같고 Kotlin이 아닌 선언 노드 `LegacyBridge`(`src/Legacy.java`)의 이유 줄만 새 contract 문구로 바뀐다고 고친다 per SC-013 (partial)
+
+## Phase 16: 블록 구조를 아는 언어로 넓히기 (2026-11-18)
+
+선언 찾기와 한 겹씩 펼치기를 블록 구조를 아는 프로그래밍 언어 전부로 넓힌다(spec FR-002·017a, SC-014). SK는 `.agents/skills/revealing-code-step-by-step`이다. 근거와 프로필 항목·언어 목록·범위 확인 규칙은 [research.md](research.md) S11, 이유 문구는 [contracts/stages-contract.md](contracts/stages-contract.md) `prepare` 5번 표에 있다. Kotlin 결과는 글자까지 같아야 한다.
+
+- [ ] T068 [US2] `SK/scripts/stages.py`에 언어 프로필 표 `LANGS`와 `lang_of(link)`를 둔다 — research S11
+  - Kotlin 프로필은 지금 상수(`HEADER`, `CONTINUE_END`, `CONTINUE_START`, `DECL_HEAD`, `PARAM_HEAD`, `COMMENT_LINE`, `ANNOTATION_LINE`)와 지금 문자열·주석 규칙을 그대로 가리킨다.
+  - 중괄호 계열: Java, Scala, Groovy, Swift, C#, Go, Rust, Dart, JavaScript, TypeScript, C, C++. 들여쓰기 계열: Python. 확장자는 research S11 목록대로.
+- [ ] T069 [US2] `mask_code`·여러 줄 문자열 판정이 프로필을 받게 한다 — research S11
+  - 문자열 목록(긴 구분자 먼저, 여러 줄 허용, `\` 이스케이프, `${…}` 템플릿), 줄 주석 표기, 블록 주석 중첩 여부, 문자 리터럴(Kotlin 밖은 같은 줄 12글자 안에서 닫힐 때만)을 프로필에서 읽는다.
+  - `_raw_string_flags`를 `mask_code`가 기록한 여러 줄 문자열 구간으로 판정하게 바꾼다. Kotlin fixture 결과가 같아야 한다.
+- [ ] T070 [US2] 선언 찾기와 선언 끝을 프로필로 한다 — FR-002, research S11
+  - `find_declaration(text, names, pick, lang)`: 프로필의 선언 머리 정규식, 없으면(허용 언어만) 키워드 없는 함수 선언 후보(이름 뒤 `(`, 짝 `)` 다음 `;`보다 먼저 깊이 0의 `{`, `new`·`return`·`throw`·`await`·`=`·`.` 뒤가 아님). 다른 후보 범위 안에 든 후보는 버린다. 위로 넓히는 주석·어노테이션 판정도 프로필로 한다.
+  - `_declaration_end`: `;` 계열은 깊이 0의 `;`, 그 밖은 지금 규칙. 들여쓰기 계열은 `:` 머리 뒤 더 깊은 줄과 사이 빈 줄까지, 할당문은 괄호·`\` 이어짐 끝까지.
+  - 범위 확인(Kotlin 밖): 괄호가 음수 없이 0으로 끝남, 머리 줄에 이름, 범위 다음 첫 비지 않은 줄이 머리 줄보다 깊지 않음, 들여쓰기 계열이면 머리 뒤 줄이 비었거나 더 깊음. 어기면 찾지 못한 것으로 보고 contract의 "블록 구조로 확인하지 못해" 이유를 쓴다.
+- [ ] T071 [US2] 스코프 트리를 프로필로 한다 — FR-005a, FR-017a, research S11
+  - `analyse`·`split_items`·`build_tree`가 프로필을 받는다. 항목 이름·비공개·한 줄 가변 상태·본문 없는 선언·매개변수 이름 판정을 프로필로 한다.
+  - 들여쓰기 계열: `split_items_indent`(기준 들여쓰기, 더 깊은 줄·괄호 안·`\` 이어짐·`elif`/`else`/`except`/`finally`는 앞 항목, `#`·`@`는 다음 항목), `analyse`의 머리 끝은 괄호 깊이 0에서 `:`로 끝나는 줄, `children_of`의 안쪽 영역은 괄호가 더 깊거나 항목 첫 줄보다 깊게 들여 쓴 줄이며 앞 줄이 `:`로 끝나면 문장 블록, 아니면 인자 목록.
+  - 파일 단위 노드의 머리는 최상위 항목 가운데 맨 앞의 프로필 머리 정규식에 맞는 항목들이다.
+  - 붙는 선언의 이름 찾기를 `(?<!\w)이름(?!\w)`로 한다.
+- [ ] T072 [US2] `locate_range`·`node_tree`·`source_lang`·`node_scenes`가 "프로필이 있는가"로 가르고 프로필을 넘기게 한다. 프로필이 없는 원본의 이유를 contract 문구로 바꾼다 — FR-002, FR-006, FR-017
+- [ ] T073 [P] [US3] `SK/SKILL.md`에 언어 범위 문장이 있으면, `README.md`·`README.ko.md` 81행의 언어 범위 문장을 블록 구조를 아는 언어(중괄호·들여쓰기 계열) 기준으로 고친다 — FR-001a
+- [ ] T074 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 언어별 시험을 더하고 기존 시험을 새 동작에 맞춘다 — SC-013, SC-014, quickstart 맨 위 절
+  - Java·TypeScript·JavaScript·Go·Rust·C#·Swift·C++·Python마다 머리와 선언 둘 이상이 든 원본: 노드 이름의 원본 범위가 기대 범위와 같음, 블록이 든 선언은 트리가 있고 `auto_entry`로 모두 연 장면이 원본 범위와 같음.
+  - JavaScript 함수 안의 정규식 리터럴 `/}/`: "블록 구조로 확인하지 못해" 이유.
+  - `Languages` 시험의 `Circle`(Shapes.java)은 이제 `class Circle` 범위다. `fixtures/expected/others*.md`의 `LegacyBridge`도 선언을 찾으므로 `REGENERATE=1`로 다시 만들고 diff가 그 상자뿐인지 확인한다.
+  - 기존 Kotlin 시험과 기대 문서는 그대로 통과한다.
+- [ ] T075 [US2] 시험 전체를 실행한다 — SC-003, SC-013, SC-014
+
+실행 순서: T068 → T069 → T070 → T071 → T072 → T074 → T075. T073은 T068과 함께 진행할 수 있다. 끝나면 converge로 남은 요구를 점검한다.
