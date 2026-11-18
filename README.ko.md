@@ -78,5 +78,5 @@ git checkout -- .claude/skills
 - [Claude Code](https://claude.com/product/claude-code)
 - `generating-zenuml-diagrams`는 그 외 별도 의존성 없음 — 실행 코드가 없는 순수 Markdown 번들입니다.
 - `generating-architecture-views`는 노드 hover 패널에 PC에 이미 있는 [Python](https://www.python.org/) 3.9 이상(`python3`, `python`, `py -3` 순으로 찾음)을 씁니다. 번들 스크립트(`.agents/skills/generating-architecture-views/scripts/`)는 표준 라이브러리만 써서 따로 설치할 것이 없습니다. Python이 없어도 구조 뷰는 만들어지고, hover 패널만 빠집니다.
-- `revealing-code-step-by-step`은 번들 스크립트에 PC에 있는 [Python](https://www.python.org/) 3.9 이상을 씁니다(표준 라이브러리만 사용). 없으면 문서를 만들지 않습니다. Kotlin 원본은 한 겹씩 펼칩니다. 언어와 관계없이 파일 자체를 가리키는 노드(예: `colors.xml`)는 파일 전체가 원본이며, Kotlin이 아니면 사용 상황 다음에 바로 보입니다.
+- `revealing-code-step-by-step`은 번들 스크립트에 PC에 있는 [Python](https://www.python.org/) 3.9 이상을 씁니다(표준 라이브러리만 사용). 없으면 문서를 만들지 않습니다. 스크립트가 블록 구조를 아는 언어 — 중괄호 계열(Kotlin, Java, Scala, Groovy, Swift, C#, Go, Rust, Dart, JavaScript, TypeScript, C, C++)과 Python — 는 한 겹씩 펼칩니다. 파일 자체를 가리키는 노드(예: `colors.xml`)는 파일 전체가 원본이며, 마크업·데이터 파일과 그 밖의 언어는 사용 상황 다음에 바로 보입니다.
 - `exporting-markdown-diagrams`는 [Node.js](https://nodejs.org/)가 필요합니다 — 번들 스크립트(`.agents/skills/exporting-markdown-diagrams/scripts/`)에서 `npm install`을 한 번 실행해야 합니다.

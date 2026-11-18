@@ -24,17 +24,32 @@
 
 ### LegacyBridge(java)
 
-⚠️ Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음
-
 <div class="stages">
 
 <input type="radio" name="LegacyBridge" id="LegacyBridge-1" class="s1" checked>
+<input type="radio" name="LegacyBridge" id="LegacyBridge-2" class="s2">
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
+<div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="LegacyBridge-2">→</label></div>
 
 <div class="scene"><p>구조 뷰에 사용 상황이 명시되지 않음</p></div>
+
+</div>
+
+<div class="stage s2">
+
+<div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="LegacyBridge-1">←</label><span class="nav">→</span></div>
+
+<div class="code">
+
+```java
+class LegacyBridge {
+    void send(String id) {}
+}
+```
+
+</div>
 
 </div>
 

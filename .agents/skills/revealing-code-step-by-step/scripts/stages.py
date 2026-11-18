@@ -405,67 +405,81 @@ def read_source(link, view_dir):
 
 
 def link_file(link):
-    """(file name, name without extension, is Kotlin) of the file a link points at (research S10)."""
+    """(file name, name without extension, language profile or None) of a link's file (research S10, S11)."""
     name = link.split("#")[0].split("?")[0].rsplit("/", 1)[-1]
     stem, _, ext = name.rpartition(".")
-    return name, stem, ext in ("kt", "kts")
+    return name, stem, LANG_BY_EXT.get(ext.lower())
 
 
 def source_lang(link):
-    """Info string of the code fences for a node's source (research S10)."""
-    name, _, kotlin = link_file(link)
-    return "kotlin" if kotlin else name.rpartition(".")[2].lower()
+    """Info string of the code fences for a node's source (research S10, S11)."""
+    name, _, lang = link_file(link)
+    return lang["fence"] if lang else name.rpartition(".")[2].lower()
 
 
 def locate_range(text, node, pick=None):
-    """(span, reason, candidates, whole_file): the node's original range (research R5, S10).
-    Kotlin: the declaration named like the node first. Any language: the whole file when the node
-    names the file itself."""
-    name, stem, kotlin = link_file(node["link"])
+    """(span, reason, candidates, whole_file): the node's original range (research R5, S10, S11).
+    A language with a profile: the declaration named like the node first. Any file: the whole file
+    when the node names the file itself."""
+    name, stem, lang = link_file(node["link"])
     span, reason, candidates = None, None, []
-    if kotlin:
-        span, reason, candidates = find_declaration(text, declaration_names(node), pick)
+    if lang:
+        span, reason, candidates = find_declaration(text, declaration_names(node), pick, lang)
         if span or candidates:
             return span, reason, candidates, False
+    kotlin = lang is LANGS["kotlin"]
     if {node["id"], node["name"]} & ({name, stem} | ({stem + "Kt"} if kotlin else set())):
         return (1, len(text.rstrip("\n").split("\n"))), None, [], True
-    if not kotlin:
-        reason = "Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음"
+    if not lang:
+        reason = "블록 구조를 모르는 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음"
     return None, reason, [], False
 
 
 # ---- declaration spans (research R5) ---------------------------------------------
 
-def mask_code(text):
-    """Same-length copy of Kotlin source: strings and chars filled with `_` (so a line that ends in
-    a string still ends in a token), comments blanked to spaces; newlines kept."""
+def mask_code(text, lang=None, spans=None):
+    """Same-length copy of source: strings and chars filled with `_` (so a line that ends in a string
+    still ends in a token), comments blanked to spaces; newlines kept. `lang` is a language profile
+    (research S11, default Kotlin); `spans`, when given, collects (start, end) of every string."""
+    lang = lang or LANGS["kotlin"]
     out = list(text)
     n = len(text)
+    quotes = lang["strings"]
+    line_marks = lang["line"]
+    block = lang["block"]
 
     def blank(a, b, fill=" "):
         for k in range(a, b):
             if out[k] != "\n":
                 out[k] = fill
 
-    def skip_string(i):
-        """i at opening quote(s); return index after the string, handling ${...} templates."""
-        raw = text.startswith('"""', i)
-        j = i + (3 if raw else 1)
+    def string_at(i):
+        for q in quotes:
+            if text.startswith(q[0], i):
+                return q
+        return None
+
+    def comment_at(i):
+        return any(text.startswith(m, i) for m in line_marks) or bool(block and text.startswith(block[0], i))
+
+    def skip_string(i, q):
+        """i at the opening delimiter; return index after the string, handling ${...} templates."""
+        delim, close, multi, escape, template = q
+        j = i + len(delim)
         while j < n:
-            if raw and text.startswith('"""', j):
-                j += 3
-                while j < n and text[j] == '"':
-                    j += 1
-                return j
             ch = text[j]
-            if not raw and ch == "\\":
+            if escape and ch == "\\":
                 j += 2
                 continue
-            if not raw and ch == '"':
-                return j + 1
-            if not raw and ch == "\n":
+            if text.startswith(close, j):
+                j += len(close)
+                if len(close) == 3:
+                    while j < n and text[j] == close[0]:
+                        j += 1
                 return j
-            if ch == "$" and j + 1 < n and text[j + 1] == "{":
+            if not multi and ch == "\n":
+                return j
+            if template and ch == "$" and j + 1 < n and text[j + 1] == "{":
                 j = skip_code(j + 2, "}")
                 continue
             j += 1
@@ -476,13 +490,14 @@ def mask_code(text):
         depth = 0
         while i < n:
             ch = text[i]
-            if ch == '"':
-                i = skip_string(i)
+            q = string_at(i)
+            if q:
+                i = skip_string(i, q)
                 continue
-            if ch == "'":
+            if ch == "'" and lang["char"]:
                 i = skip_char(i)
                 continue
-            if text.startswith("//", i) or text.startswith("/*", i):
+            if comment_at(i):
                 i = skip_comment(i)
                 continue
             if ch == "{":
@@ -498,38 +513,76 @@ def mask_code(text):
         j = i + 1
         while j < n and text[j] != "'" and text[j] != "\n":
             j += 2 if text[j] == "\\" else 1
+        if lang["char"] == "guarded" and (j >= n or text[j] != "'" or not (j == i + 2 or (text[i + 1] == "\\" and j - i <= 12))):
+            return i + 1  # not a char literal (Rust lifetime, Scala symbol): leave it as code
         return min(j + 1, n)
 
     def skip_comment(i):
-        if text.startswith("//", i):
+        if any(text.startswith(m, i) for m in line_marks):
             j = text.find("\n", i)
             return n if j < 0 else j
+        opener, closer = block
         depth, j = 0, i
         while j < n:
-            if text.startswith("/*", j):
+            if text.startswith(opener, j) and (lang["nest"] or depth == 0):
                 depth += 1
-                j += 2
-            elif text.startswith("*/", j):
+                j += len(opener)
+            elif text.startswith(closer, j):
                 depth -= 1
-                j += 2
+                j += len(closer)
                 if depth == 0:
                     return j
             else:
                 j += 1
         return n
 
+    def regex_end(i):
+        """JavaScript-like regex literal at i (a `/` where a value may start): index after it, or None."""
+        k = i - 1
+        while k >= 0 and text[k] in " \t":
+            k -= 1
+        word = re.search(r"(\w+)$", text[max(0, k - 10):k + 1]) if k >= 0 else None
+        if not (k < 0 or text[k] in "(,=:[!&|?{};+-*%<>~^\n"
+                or (word and word.group(1) in ("return", "typeof", "case", "do", "else", "in", "of", "void", "yield", "await"))):
+            return None
+        j, in_class = i + 1, False
+        while j < n and text[j] != "\n":
+            ch = text[j]
+            if ch == "\\":
+                j += 2
+                continue
+            if ch == "[":
+                in_class = True
+            elif ch == "]":
+                in_class = False
+            elif ch == "/" and not in_class:
+                j += 1
+                while j < n and (text[j].isalnum() or text[j] == "_"):
+                    j += 1
+                return j
+            j += 1
+        return None
+
     i = 0
     while i < n:
         ch = text[i]
-        if ch == '"':
-            j = skip_string(i)
+        q = string_at(i)
+        if q:
+            j = skip_string(i, q)
+            blank(i, j, "_")
+            if spans is not None:
+                spans.append((i, j))
+            i = j
+        elif ch == "/" and lang.get("regex") and not comment_at(i) and regex_end(i):
+            j = regex_end(i)
             blank(i, j, "_")
             i = j
-        elif ch == "'":
+        elif ch == "'" and lang["char"]:
             j = skip_char(i)
-            blank(i, j, "_")
+            if j > i + 1 or lang["char"] != "guarded":
+                blank(i, j, "_")
             i = j
-        elif text.startswith("//", i) or text.startswith("/*", i):
+        elif comment_at(i):
             j = skip_comment(i)
             blank(i, j)
             i = j
@@ -543,42 +596,63 @@ CONTINUE_END = ("=", ",", ":", "(", "[", "->", ".", "+", "-", "*", "/", "&&", "|
 CONTINUE_START = (".", "?.", "?:", "&&", "||", ":", "=", "{", "where ")
 
 
-def find_declaration(text, names, pick=None):
+def find_declaration(text, names, pick=None, lang=None):
     """(span, reason, candidates). span is (start_line, end_line), 1-based inclusive, or None.
     When the name is declared more than once (overloads), `pick` (1-based) chooses one; without it
     span is None and `candidates` lists them so the model can choose the semantically main one
-    (spec FR-002). research R5."""
-    masked = mask_code(text)
+    (spec FR-002). research R5; other languages than Kotlin through their profile, with the range
+    check of research S11."""
+    lang = lang or LANGS["kotlin"]
+    kotlin = lang is LANGS["kotlin"]
+    spans_of_strings = []
+    masked = mask_code(text, lang, spans_of_strings)
     lines = text.split("\n")
     mlines = masked.split("\n")
+    inside = None if kotlin else _line_starts_in_string(text, spans_of_strings)
 
-    def span_of(m):
-        pos = m.start()
+    def lead(prev):
+        if kotlin:
+            return (prev.startswith("@") or prev.startswith("//") or prev.startswith("/*")
+                    or prev.startswith("*") or prev.endswith("*/"))
+        return bool(lang["lead"].search(prev))
+
+    def span_at(pos):
         start = masked.count("\n", 0, pos)
         while start > 0:
             prev = lines[start - 1].strip()
-            if prev and (prev.startswith("@") or prev.startswith("//") or prev.startswith("/*")
-                         or prev.startswith("*") or prev.endswith("*/")):
+            if prev and lead(prev):
                 start -= 1
             else:
                 break
-        return start + 1, _declaration_end(masked, mlines, pos) + 1
+        end = _declaration_end(masked, mlines, pos, lang, inside)
+        return None if end is None else (start + 1, end + 1)
 
     for name in names:
-        pattern = re.compile(HEADER % re.escape(name))
         hits = []
-        for m in pattern.finditer(masked):
-            after = masked[m.end():m.end() + 40].lstrip(" ")
-            if after.startswith("."):
-                continue  # receiver type, not the declared name
-            hits.append(m)
+        for header in lang["headers"]:  # a later header (Rust impl, Swift extension) only when none before it
+            for m in re.compile(header % re.escape(name), re.M).finditer(masked):
+                after = masked[m.end():m.end() + 40].lstrip(" ")
+                if kotlin and after.startswith("."):
+                    continue  # receiver type, not the declared name
+                hits.append(m.start())
+            if hits:
+                break
+        if not hits and lang["bare_fn"]:
+            hits = _bare_function_hits(masked, name)
         if not hits:
             continue
-        spans = [span_of(m) for m in hits]
+        spans = [span_at(p) for p in hits]
+        if not kotlin:
+            kept = [(p, s) for p, s in zip(hits, spans) if s and _range_confirmed(lines, mlines, s, p, masked)]
+            if not kept:
+                return None, "원본 파일에서 " + name + " 선언 범위를 블록 구조로 확인하지 못해 구체화하지 않음", []
+            kept = [(p, s) for i, (p, s) in enumerate(kept)  # a hit inside another hit's range is part of it
+                    if not any(k != i and o[0] <= s[0] and s[1] <= o[1] and o != s for k, (_, o) in enumerate(kept))]
+            hits, spans = [p for p, _ in kept], [s for _, s in kept]
         if len(spans) == 1:
             return spans[0], None, []
         candidates = [{"pick": i + 1, "start_line": a, "end_line": b,
-                       "header": lines[masked.count("\n", 0, hits[i].start())].strip()}
+                       "header": lines[masked.count("\n", 0, hits[i])].strip()}
                       for i, (a, b) in enumerate(spans)]
         if pick is not None and 1 <= pick <= len(spans):
             return spans[pick - 1], None, candidates
@@ -586,8 +660,75 @@ def find_declaration(text, names, pick=None):
     return None, "원본 파일에서 " + names[0] + " 선언을 찾지 못해 구체화하지 않음", []
 
 
-def _declaration_end(masked, mlines, pos):
-    """0-based line where the declaration that starts at `pos` ends."""
+BARE_FUNCTION = r"(?m)^[ \t]*([^\n;{}=()]*?)(?<![\w.$#])%s[ \t]*\("
+NOT_A_DECLARATION = re.compile(r"(?:^|\s)(?:new|return|throw|await|yield|else|case|goto|delete)$")
+BODY_AFTER_PARAMS = re.compile(r"[^;{}\n()=]*(?:\n[ \t]*)?\{")
+
+
+def _bare_function_hits(masked, name):
+    """Line starts of keyword-less function declarations (C-family methods, constructors): the name,
+    its parameters, then a body `{` before any `;` (research S11). Calls never have that body."""
+    hits = []
+    for m in re.compile(BARE_FUNCTION % re.escape(name)).finditer(masked):
+        if NOT_A_DECLARATION.search(m.group(1).strip()):
+            continue
+        j, depth = m.end() - 1, 0
+        while j < len(masked):
+            if masked[j] in "([":
+                depth += 1
+            elif masked[j] in ")]":
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        if j < len(masked) and BODY_AFTER_PARAMS.match(masked, j + 1):
+            hits.append(m.start())
+    return hits
+
+
+def _line_starts_in_string(text, spans):
+    """Per line: does it start inside a multi-line string (research S11)."""
+    flags, offset, k = [], 0, 0
+    for line in text.split("\n"):
+        while k < len(spans) and spans[k][1] <= offset:
+            k += 1
+        flags.append(k < len(spans) and spans[k][0] < offset < spans[k][1])
+        offset += len(line) + 1
+    return flags
+
+
+def _indent(line):
+    return len(line) - len(line.lstrip())
+
+
+def _range_confirmed(lines, mlines, span, pos, masked):
+    """Outside Kotlin a found range is used only when the block structure confirms it (research S11):
+    brackets balance without going negative, and the next code line is not deeper than the head."""
+    a, b = span[0] - 1, span[1] - 1
+    depth = 0
+    for i in range(a, b + 1):
+        for ch in mlines[i]:
+            if ch in "([{":
+                depth += 1
+            elif ch in ")]}":
+                depth -= 1
+                if depth < 0:
+                    return False
+    if depth:
+        return False
+    head = masked.count("\n", 0, pos)
+    following = next((m for m in mlines[b + 1:] if m.strip()), None)
+    return following is None or _indent(following) <= _indent(mlines[head])
+
+
+def _declaration_end(masked, mlines, pos, lang=None, inside=None):
+    """0-based line where the declaration that starts at `pos` ends; None (outside Kotlin) when the
+    end cannot be found."""
+    lang = lang or LANGS["kotlin"]
+    if lang["family"] == "indent":
+        return _indent_declaration_end(mlines, masked.count("\n", 0, pos), inside)
+    kotlin = lang is LANGS["kotlin"]
+    cont_end, cont_start, semi = lang["cont_end"], lang["cont_start"], lang["semi"]
     depth = brace = 0
     body = False
     i, n = pos, len(masked)
@@ -605,14 +746,44 @@ def _declaration_end(masked, mlines, pos):
             brace -= 1
             if body and brace == 0:
                 return masked.count("\n", 0, i)
-        elif ch == "\n" and depth == 0 and brace == 0 and not body:
+        elif ch == ";" and semi and depth == 0 and brace == 0 and not body:
+            return masked.count("\n", 0, i)
+        elif ch == "\n" and depth == 0 and brace == 0 and not body and not semi:
             line_no = masked.count("\n", 0, i)
             current = mlines[line_no].rstrip()
             following = next((l.strip() for l in mlines[line_no + 1:] if l.strip()), "")
-            if not current.endswith(CONTINUE_END) and not following.startswith(CONTINUE_START):
+            if not current.endswith(cont_end) and not following.startswith(cont_start):
                 return line_no
         i += 1
-    return masked.count("\n")
+    if kotlin or (not semi and not body and depth == 0 and brace == 0):
+        return masked.count("\n")
+    return None
+
+
+def _indent_declaration_end(mlines, head, inside):
+    """Indentation languages: the head statement (to a line ending in `:` at bracket depth 0, or the
+    end of an assignment), then every deeper or blank line after it (research S11)."""
+    depth, end = 0, None
+    for i in range(head, len(mlines)):
+        depth += _nesting(mlines[i])
+        if depth <= 0 and not mlines[i].rstrip().endswith("\\"):
+            end = i
+            break
+    if end is None:
+        return None
+    if not mlines[end].rstrip().endswith(":"):
+        return end
+    base, last = _indent(mlines[head]), end
+    for i in range(end + 1, len(mlines)):
+        if inside and inside[i]:
+            last = i
+            continue
+        if not mlines[i].strip():
+            continue
+        if _indent(mlines[i]) <= base:
+            break
+        last = i
+    return last
 
 
 # ---- scope tree, steps and scenes (spec FR-004~005c, research S1~S6) --------------
@@ -630,32 +801,190 @@ MAX_SENTENCE = 45
 MAX_SEP = 4
 
 
+# ---- language profiles (research S11) ----------------------------------------------
+# One scanner, many languages: every syntax fact the scanner needs is a value here. Kotlin points at
+# the constants above, so Kotlin results do not change.
+
+def _private_keyword(head, name):
+    return bool(re.search(r"\bprivate\b", head))
+
+
+def _private_swift(head, name):
+    return bool(re.search(r"\b(?:private|fileprivate)\b", head))
+
+
+# Name-based rules apply to declarations only: a statement inside a function body is never a member.
+def _private_python(head, name):
+    declared = re.match(r"^\s*(?:(?:async\s+)?(?:def|class)\s+\w|\w+\s*(?::[^=]*)?=(?!=))", head)
+    return bool(declared) and name.startswith("_") and not (name.startswith("__") and name.endswith("__"))
+
+
+def _private_dart(head, name):
+    return name.startswith("_") and not head.lstrip().startswith(name)
+
+
+def _private_go(head, name):
+    return bool(re.match(r"^\s*(?:func|var|const|type)\b", head)) and name[:1].islower()
+
+
+def _private_rust(head, name):
+    return bool(re.match(r"^\s*(?:(?:async|unsafe|const|extern)\s+)*(?:fn|struct|enum|static|type|trait|mod|union)\b", head))
+
+
+def _private_js(head, name):
+    return head.lstrip().startswith("#") or bool(re.search(r"\bprivate\b", head))
+
+
+def _never(head, name):
+    return False
+
+
+DQ = ('"', '"', False, True, False)          # (open, close, multi-line, backslash escapes, ${} templates)
+SQ = ("'", "'", False, True, False)
+TDQ = ('"""', '"""', True, True, False)
+TSQ = ("'''", "'''", True, True, False)
+KEYWORD_NAME = (r"\b(?:class|interface|enum|struct|record|object|trait|protocol|extension|actor|fun|fn|func|function|def|"
+                r"val|var|let|const|type|typealias|mod|namespace)\s+(?:\([^)]*\)\s*)?(?:<[^>]*>\s*)?(?:\w+\.)?(\w+)")
+GENERIC_NAMES = [KEYWORD_NAME, r"(\w+)\s*\(", r"(\w+)\s*(?:[=;:]|$)"]
+PARAM_FIRST = re.compile(r"^\s+(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:private|protected|public|internal|readonly|override|open|mut|"
+                         r"ref|out|in|inout|final|const|let|var|val|required)\s+|this\.)*[*&]{0,2}(\w+)")
+PARAM_LAST = re.compile(r"^\s+.*?(\w+)\s*(?:=[^,]*)?,?\s*$")
+BRACE_LEAD = re.compile(r"^(?:@|//|/\*|\*)|\*/$")
+GENERIC_FN = re.compile(r"\b(?:fun|fn|func|function|def)\b|\w\s*\(")
+GENERIC_SIGNATURE = re.compile(r"^[^=]*\w\s*\(")
+NO_ANNOTATION = re.compile(r"(?!)")
+
+
+def _brace(fence, exts, headers, strings, **extra):
+    profile = {"fence": fence, "exts": exts, "family": "brace", "headers": headers, "strings": strings,
+               "line": ("//",), "block": ("/*", "*/"), "nest": False, "char": "guarded", "bare_fn": False,
+               "semi": False, "cont_end": CONTINUE_END + ("=>", "|", "&"),
+               "cont_start": CONTINUE_START + ("extends ", "implements ", "|", "&"),
+               "lead": BRACE_LEAD, "comment_line": COMMENT_LINE, "annotation_line": ANNOTATION_LINE,
+               "param": PARAM_FIRST, "names": GENERIC_NAMES, "private": _private_keyword, "state": None,
+               "fn": GENERIC_FN, "decl_head": GENERIC_SIGNATURE,
+               "file_head": re.compile(r"^\s*(?:package|import)\b")}
+    profile.update(extra)
+    return profile
+
+
+def _kw(words, filler=r"\s+"):
+    return r"\b(?:%s)\b%s(?<![\w])%%s(?![\w])" % (words, filler)
+
+
+C_FAMILY_FILLER = r"[\w\s<>,.?*\[\]&:]*?"
+JS_HEAD = re.compile(r"""^\s*(?:import\b|export\s*(?:\*|\{)|['"]use [\w ]+['"];?\s*$)""")
+LANGS = {
+    "kotlin": {"fence": "kotlin", "exts": ("kt", "kts"), "family": "brace", "headers": [HEADER],
+               "strings": [('"""', '"""', True, False, True), ('"', '"', False, True, True)],
+               "line": ("//",), "block": ("/*", "*/"), "nest": True, "char": "kotlin", "bare_fn": False,
+               "semi": False, "cont_end": CONTINUE_END, "cont_start": CONTINUE_START, "lead": None,
+               "comment_line": COMMENT_LINE, "annotation_line": ANNOTATION_LINE, "param": PARAM_HEAD,
+               "names": [r"\b(?:val|var|fun|class|interface|object)\s+(?:<[^>]*>\s*)?(?:\w+\.)?(\w+)"],
+               "private": _private_keyword, "state": re.compile(r"^\s*(?:private\s+)?var\b"),
+               "fn": re.compile(r"\bfun\b"), "decl_head": DECL_HEAD,
+               "file_head": re.compile(r"^\s*(?:package|import)\b")},
+    "java": _brace("java", ("java",), [_kw("class|interface|enum|record|@interface")], [TDQ, DQ],
+                   bare_fn=True, semi=True, param=PARAM_LAST),
+    "scala": _brace("scala", ("scala", "sc"), [_kw("class|object|trait|def|val|var|type|enum|given")],
+                    [('"""', '"""', True, False, False), DQ], nest=True, state=re.compile(r"^\s*(?:private\s+)?var\b")),
+    "groovy": _brace("groovy", ("groovy", "gradle"), [_kw("class|interface|enum|trait|def")],
+                     [TSQ, ('"""', '"""', True, True, True), ('"', '"', False, True, True), SQ], char=None,
+                     bare_fn=True, param=PARAM_LAST),
+    "swift": _brace("swift", ("swift",), [_kw("class|struct|enum|protocol|actor|func|var|let|typealias"), _kw("extension")],
+                    [TDQ, DQ], nest=True, char=None, private=_private_swift,
+                    state=re.compile(r"^\s*(?:(?:private|fileprivate)\s+)?var\b"),
+                    file_head=re.compile(r"^\s*(?:@testable\s+)?import\b")),
+    "csharp": _brace("csharp", ("cs",), [_kw("class|interface|struct|enum|record|delegate|namespace|event", r"[\w\s<>,.?\[\]]*?")],
+                     [('"""', '"""', True, False, False), ('@"', '"', True, False, False), DQ], bare_fn=True,
+                     semi=True, param=PARAM_LAST, lead=re.compile(r"^(?:\[|//|/\*|\*)|\*/$"),
+                     annotation_line=re.compile(r"^\s*\[[^\]]*\]\s*$"),
+                     file_head=re.compile(r"^\s*(?:(?:global\s+)?using\b(?!\s*\()|namespace\s+[\w.]+\s*;)")),
+    "go": _brace("go", ("go",), [_kw("type|func|var|const", r"\s+(?:\([^)\n]*\)\s*)?")],
+                 [("`", "`", True, False, False), DQ], private=_private_go, annotation_line=NO_ANNOTATION,
+                 names=[r"\bfunc\s+(?:\([^)]*\)\s*)?(\w+)"] + GENERIC_NAMES),
+    "rust": _brace("rust", ("rs",), [_kw("struct|enum|trait|fn|type|const|static|mod|union|macro_rules!", r"[\w\s<>,.?*&:'!]*?"),
+                                    _kw("impl", r"[\w\s<>,.?*&:'!]*?")],
+                   [('"', '"', True, True, False)], nest=True, semi=True, private=_private_rust,
+                   lead=re.compile(r"^(?:#!?\[|//|/\*|\*)|\*/$"), annotation_line=re.compile(r"^\s*#!?\[.*\]\s*$"),
+                   file_head=re.compile(r"^\s*(?:pub(?:\([^)]*\))?\s+)?(?:use\b|extern\s+crate\b|mod\s+\w+\s*;)")),
+    "dart": _brace("dart", ("dart",), [_kw("class|mixin|enum|extension|typedef")],
+                   [('"""', '"""', True, True, True), ("'''", "'''", True, True, True), ('"', '"', False, True, True),
+                    ("'", "'", False, True, True)], nest=True, char=None, bare_fn=True, semi=True,
+                   param=PARAM_LAST, private=_private_dart,
+                   file_head=re.compile(r"^\s*(?:import|export|library|part)\b")),
+    "javascript": _brace("javascript", ("js", "jsx", "mjs", "cjs"), [_kw(r"class|function\*?|const|let|var")],
+                         [("`", "`", True, True, True), DQ, SQ], char=None, bare_fn=True, private=_private_js,
+                         file_head=JS_HEAD, regex=True),
+    "typescript": _brace("typescript", ("ts", "tsx", "mts", "cts"),
+                         [_kw(r"class|interface|enum|type|namespace|module|function\*?|const|let|var")],
+                         [("`", "`", True, True, True), DQ, SQ], char=None, bare_fn=True, private=_private_js,
+                         file_head=JS_HEAD, regex=True),
+    "c": _brace("c", ("c", "h"), [_kw("struct|enum|union|typedef", r"[\w\s*]*?")], [DQ], bare_fn=True, semi=True,
+                param=PARAM_LAST, private=_never, annotation_line=NO_ANNOTATION,
+                file_head=re.compile(r"^\s*#\s*(?:include|import|pragma)\b")),
+    "cpp": _brace("cpp", ("cpp", "cc", "cxx", "hpp", "hh", "hxx"), [_kw("class|struct|enum|union|namespace", r"\s+(?:class\s+)?")],
+                  [DQ], bare_fn=True, semi=True, param=PARAM_LAST, private=_never, annotation_line=NO_ANNOTATION,
+                  lead=re.compile(r"^(?:template\b|//|/\*|\*)|\*/$"),
+                  file_head=re.compile(r"^\s*(?:#\s*(?:include|import|pragma)\b|using\s+namespace\b)")),
+    "python": {"fence": "python", "exts": ("py", "pyi"), "family": "indent",
+               "headers": [r"^[ \t]*(?:async[ \t]+)?(?:def|class)[ \t]+%s(?![\w])", r"^%s[ \t]*(?::[^=\n]*)?=(?!=)"],
+               "strings": [TDQ, TSQ, DQ, SQ], "line": ("#",), "block": None, "nest": False, "char": None,
+               "bare_fn": False, "semi": False, "cont_end": (), "cont_start": (),
+               "lead": re.compile(r"^(?:@|#)"), "comment_line": re.compile(r"^\s*#"),
+               "annotation_line": re.compile(r"^\s*@[\w.]+(\(.*\))?\s*$"), "param": PARAM_FIRST,
+               "names": [r"^\s*(?:async\s+)?(?:def|class)\s+(\w+)", r"^\s*(\w+)\s*(?::[^=]*)?="],
+               "private": _private_python, "state": None, "fn": re.compile(r"\bdef\b"), "decl_head": None,
+               "file_head": re.compile(r"^\s*(?:import|from)\b")},
+}
+LANG_BY_EXT = {ext: profile for profile in LANGS.values() for ext in profile["exts"]}
+
+
 def _nesting(masked_line):
     return sum(masked_line.count(c) for c in "({[") - sum(masked_line.count(c) for c in ")}]")
 
 
-def _raw_string_flags(lines, masked):
-    """Per line: does it start / end inside a multi-line raw string (a `\"\"\"` that mask_code turned into `_`)."""
-    in_raw, starts, ends = False, [], []
-    for line, m in zip(lines, masked):
-        starts.append(in_raw)
-        k = line.find('"""')
-        while k >= 0:
-            if m[k] == "_":
-                in_raw = not in_raw
-                k += 3
-                while k < len(line) and line[k] == '"':
-                    k += 1
-            else:
-                k += 3
-            k = line.find('"""', k)
-        ends.append(in_raw)
+def _string_flags(text, lang):
+    """Per line: does it start / end inside a multi-line string (mask_code's string spans, research S11)."""
+    spans = []
+    mask_code(text, lang, spans)
+    starts, ends, offset, k = [], [], 0, 0
+    for line in text.rstrip("\n").split("\n"):
+        end = offset + len(line)
+        while k < len(spans) and spans[k][1] <= offset:
+            k += 1
+        starts.append(k < len(spans) and spans[k][0] < offset < spans[k][1])
+        j = k
+        while j < len(spans) and spans[j][1] <= end:
+            j += 1
+        ends.append(j < len(spans) and spans[j][0] < end < spans[j][1])
+        offset = end + 1
     return starts, ends
 
 
-def split_items(lines, masked, lo, hi, raw):
+def _item_facts(items, lines, masked, lang):
+    for it in items:
+        head, code = lines[it["first"]], "\n".join(masked[j] for j in it["lines"])
+        name = next((m for m in (re.search(p, head) for p in lang["names"]) if m), None) or re.search(r"(\w+)", head)
+        it["name"] = name.group(1) if name else "?"
+        it["private"] = lang["private"](head, it["name"])
+        it["state"] = bool(lang["state"] and lang["state"].match(head)) and len(it["lines"]) == 1
+        flat = code
+        for _ in range(4):
+            flat = re.sub(r"\([^()]*\)", "", flat)
+        it["bodyless"] = bool(lang["decl_head"] and lang["decl_head"].match(head)) and "{" not in code and "=" not in flat
+        it["kind"] = "fun" if lang["fn"].search(head) else "prop"
+        it.setdefault("trailing", [])
+    return items
+
+
+def split_items(lines, masked, lo, hi, raw, lang=None):
     """Statements or members of the block lines lo..hi-1. Leading comments and own-line annotations
     belong to the next item; blank lines between items belong to no item."""
+    lang = lang or LANGS["kotlin"]
+    if lang["family"] == "indent":
+        return split_items_indent(lines, masked, lo, hi, raw, lang)
+    comment_line, annotation_line = lang["comment_line"], lang["annotation_line"]
     starts_in_raw, ends_in_raw = raw
     items, cur, nest, comments, continues = [], None, 0, [], False
     for i in range(lo, hi):
@@ -669,8 +998,8 @@ def split_items(lines, masked, lo, hi, raw):
             if cur is not None and (nest > 0 or continues):
                 cur["lines"].append(i)
             continue
-        if nest == 0 and not continues and (COMMENT_LINE.match(line)
-                                            or (ANNOTATION_LINE.match(m) and _nesting(m) == 0)):
+        if nest == 0 and not continues and (comment_line.match(line)
+                                            or (annotation_line.match(m) and _nesting(m) == 0)):
             comments.append(i)
             continue
         if cur is None or (nest == 0 and not continues and not STARTS_CLOSED.match(line)):
@@ -682,65 +1011,108 @@ def split_items(lines, masked, lo, hi, raw):
         continues = ends_in_raw[i] or nest > 0 or bool(ENDS_OPEN.search(m.rstrip()))
     if comments and items:
         items[-1]["trailing"] = comments
-    for it in items:
-        head, code = lines[it["first"]], "\n".join(masked[j] for j in it["lines"])
-        name = re.search(r"\b(?:val|var|fun|class|interface|object)\s+(?:<[^>]*>\s*)?(?:\w+\.)?(\w+)", head) or re.search(r"(\w+)", head)
-        it["name"] = name.group(1) if name else "?"
-        it["private"] = bool(re.search(r"\bprivate\b", head))
-        it["state"] = bool(re.match(r"^\s*(?:private\s+)?var\b", head)) and len(it["lines"]) == 1
-        flat = code
-        for _ in range(4):
-            flat = re.sub(r"\([^()]*\)", "", flat)
-        it["bodyless"] = bool(DECL_HEAD.match(head)) and "{" not in code and "=" not in flat
-        it["kind"] = "fun" if re.search(r"\bfun\b", head) else "prop"
-        it.setdefault("trailing", [])
-    return items
+    return _item_facts(items, lines, masked, lang)
 
 
-FILE_HEAD_LINE = re.compile(r"^\s*(?:$|//|/\*|\*|@file:|package\b|import\b)")
+CLAUSE_LINE = re.compile(r"^\s*(?:elif|else|except|finally)\b")
 
 
-def analyse(text, whole_file=False):
+def split_items_indent(lines, masked, lo, hi, raw, lang):
+    """Indentation languages (research S11): statements of the block lines lo..hi-1 at the block's
+    indentation. Deeper lines, lines inside brackets or after `\\`, and `elif`/`else`/`except`/
+    `finally` belong to the item above; `#` comments and `@` decorators to the item below."""
+    starts_in_raw, ends_in_raw = raw
+    items, cur, nest, comments, pending, continues, base, deco = [], None, 0, [], [], False, None, 0
+    for i in range(lo, hi):
+        line, m = lines[i], masked[i]
+        if not line.strip():
+            if cur is not None:
+                pending.append(i)
+            continue
+        if base is None:
+            base = _indent(line)
+        if deco > 0:  # inside a multi-line decorator
+            comments.append(i)
+            deco += _nesting(m)
+            continue
+        if cur is not None and (starts_in_raw[i] or nest > 0 or continues or _indent(line) > base
+                                or CLAUSE_LINE.match(line)):
+            cur["lines"] += pending + [i]
+        elif lang["comment_line"].match(line) or m.lstrip().startswith("@"):
+            comments.append(i)
+            deco = max(0, _nesting(m)) if m.lstrip().startswith("@") else 0
+            pending = []
+            continue
+        else:
+            cur = {"first": i, "lines": [i], "comments": comments}
+            comments, nest = [], 0
+            items.append(cur)
+        pending = []
+        nest += _nesting(m)
+        continues = ends_in_raw[i] or nest > 0 or m.rstrip().endswith("\\")
+    if comments and items:
+        items[-1]["trailing"] = comments
+    return _item_facts(items, lines, masked, lang)
+
+
+def analyse(text, whole_file=False, lang=None):
     """Header end, parameter spans and the body's top-level items of one source range.
-    whole_file: the range is a whole Kotlin file; its leading blank/comment/@file:/package/import
-    lines are the header and every following line is body (research S10)."""
+    whole_file: the range is a whole file; its leading items that are file head (package, import, …)
+    are the header and every later item is body (research S10, S11)."""
+    lang = lang or LANGS["kotlin"]
     lines = text.rstrip("\n").split("\n")
-    masked = mask_code(text).rstrip("\n").split("\n")
+    masked = mask_code(text, lang).rstrip("\n").split("\n")
+    raw = _string_flags(text, lang)
+    empty = {"lines": lines, "masked": masked, "body_open": None, "params": [], "items": []}
     if whole_file:
-        head = 0
-        while head < len(lines) and FILE_HEAD_LINE.match(lines[head]):
-            head += 1
-        while head > 0 and COMMENT_LINE.match(lines[head - 1]):  # a comment right above the first item is its own
-            head -= 1
-        raw = _raw_string_flags(lines, masked)
-        items = split_items(lines, masked, head, len(lines), raw)
-        if not items:
-            return {"lines": lines, "masked": masked, "body_open": None, "params": [], "items": []}
-        return {"lines": lines, "masked": masked, "body_open": head - 1, "params": [], "items": items, "raw": raw}
-    depth, body_open, params = 0, None, []
+        items = split_items(lines, masked, 0, len(lines), raw, lang)
+        k = 0
+        while k < len(items) and lang["file_head"].match(lines[items[k]["first"]]):
+            k += 1
+        if k == len(items):
+            return empty
+        head_end = max([j for it in items[:k] for j in it["lines"] + it["comments"] + it["trailing"]], default=-1)
+        return {"lines": lines, "masked": masked, "body_open": head_end, "params": [], "items": items[k:], "raw": raw}
+    indent = lang["family"] == "indent"
+    depth, body_open, params, deco = 0, None, [], 0
     for i, m in enumerate(masked):
         start_depth = depth
-        if COMMENT_LINE.match(lines[i]) and depth == 0:
+        if lang["comment_line"].match(lines[i]) and depth == 0:
             continue
-        for ch in m:
-            if ch in "([":
-                depth += 1
-            elif ch in ")]":
-                depth -= 1
-            elif ch == "{" and depth == 0:
+        if indent:
+            if depth == 0 and (deco or m.lstrip().startswith("@")):
+                deco = 1
+            depth += _nesting(m)
+            if deco:
+                deco = 0 if depth == 0 else 1
+                continue
+            if depth == 0 and m.rstrip().endswith(":") and not m.rstrip().endswith("\\"):
                 body_open = i
                 break
-        if body_open is not None:
-            break
-        p = PARAM_HEAD.match(lines[i]) if start_depth == 1 else None
+        else:
+            for ch in m:
+                if ch in "([":
+                    depth += 1
+                elif ch in ")]":
+                    depth -= 1
+                elif ch == "{" and depth == 0:
+                    body_open = i
+                    break
+            if body_open is not None:
+                break
+        p = lang["param"].match(lines[i]) if start_depth == 1 else None
         if p:
             params.append({"name": p.group(1), "lines": [i]})
         elif start_depth > 1 and params and params[-1]["lines"][-1] == i - 1:
             params[-1]["lines"].append(i)
-    if body_open is None or not lines[-1].strip().startswith("}"):
-        return {"lines": lines, "masked": masked, "body_open": None, "params": [], "items": []}
-    raw = _raw_string_flags(lines, masked)
-    items = split_items(lines, masked, body_open + 1, len(lines) - 1, raw)
+    if indent:
+        if body_open is None or body_open == len(lines) - 1:
+            return empty
+        items = split_items(lines, masked, body_open + 1, len(lines), raw, lang)
+    else:
+        if body_open is None or not lines[-1].strip().startswith("}"):
+            return empty
+        items = split_items(lines, masked, body_open + 1, len(lines) - 1, raw, lang)
     return {"lines": lines, "masked": masked, "body_open": body_open, "params": params, "items": items, "raw": raw}
 
 
@@ -760,7 +1132,7 @@ def _depth_profile(masked):
     return start, low
 
 
-def build_tree(text, whole_file=False):
+def build_tree(text, whole_file=False, lang=None):
     """The scope tree of one source range (research S1), or None when the declaration has no body.
 
     {"root": [own line, ...], "root_children": [node id, ...], "body_open": n,
@@ -768,7 +1140,9 @@ def build_tree(text, whole_file=False):
      "attached": [{"name", "kind": "param"|"member", "lines": [...]}, ...]}     # lines 0-based
     Attached: parameters, and root members that are private or state with one code line.
     """
-    info = analyse(text, whole_file)
+    lang = lang or LANGS["kotlin"]
+    indent_family = lang["family"] == "indent"
+    info = analyse(text, whole_file, lang)
     if info["body_open"] is None:
         return None
     lines, masked, raw = info["lines"], info["masked"], info["raw"]
@@ -796,7 +1170,7 @@ def build_tree(text, whole_file=False):
                     cur["lines"].append(j)
                 continue
             if start[j] == level and (cur is None or after_comma):
-                if COMMENT_LINE.match(line):
+                if lang["comment_line"].match(line):
                     pending.append(j)
                     continue
                 cur = {"first": j, "lines": [j], "comments": pending, "trailing": []}
@@ -836,15 +1210,21 @@ def build_tree(text, whole_file=False):
         if links:
             ends = links[1:] + [code[-1] + 1]
             return [make([j for j in code if a <= j < b], [], a) for a, b in zip(links, ends)]
+        def inner(j):
+            if low[j] > base:
+                return True
+            return indent_family and (not lines[j].strip() or _indent(lines[j]) > _indent(lines[first]))
+
         kids, j = [], code[0]
         while j <= code[-1]:
-            if low[j] > base and j != first:
+            if j != first and inner(j):
                 k = j
-                while k + 1 <= code[-1] and low[k + 1] > base:
+                while k + 1 <= code[-1] and inner(k + 1):
                     k += 1
-                if opener(j - 1, base) == "{":
+                block = masked[j - 1].rstrip().endswith(":") if indent_family else opener(j - 1, base) == "{"
+                if block:
                     kids += [make(it["lines"], it["comments"] + it["trailing"], it["first"])
-                             for it in split_items(lines, masked, j, k + 1, raw)]
+                             for it in split_items(lines, masked, j, k + 1, raw, lang)]
                 else:
                     kids += [make(a["lines"], a["comments"] + a["trailing"], a["first"]) for a in split_args(j, k + 1)]
                 j = k + 1
@@ -1070,12 +1450,12 @@ def attach_steps(tree, steps, lines, masked):
     root_text = " ".join(masked[j] for j in tree["root"] if j > body_open)
     found = []
     for a in tree["attached"]:
-        pat = re.compile(r"\b%s\b" % re.escape(a["name"]))
+        pat = re.compile(r"(?<!\w)%s(?!\w)" % re.escape(a["name"]))
         k = -1 if pat.search(root_text) else next((i for i, t in enumerate(texts) if pat.search(t)), None)
         found.append(k)
     for _ in tree["attached"]:  # a member used only by other members follows its first user
         for i, a in enumerate(tree["attached"]):
-            pat = re.compile(r"\b%s\b" % re.escape(a["name"]))
+            pat = re.compile(r"(?<!\w)%s(?!\w)" % re.escape(a["name"]))
             users = [found[o] for o, b in enumerate(tree["attached"]) if o != i and found[o] is not None
                      and pat.search(" ".join(masked[j] for j in b["lines"]))]
             if users and (found[i] is None or min(users) < found[i]):
@@ -1198,10 +1578,11 @@ def declaration_names(node):
 
 
 def node_tree(node, code):
-    """Scope tree of a node's original range; none for a source that is not Kotlin (FR-017a)."""
-    if not link_file(node["link"])[2]:
+    """Scope tree of a node's original range; none for a source without a language profile (FR-017a)."""
+    lang = link_file(node["link"])[2]
+    if not lang:
         return None
-    return build_tree(code, whole_file=bool(node["range"].get("whole_file")))
+    return build_tree(code, whole_file=bool(node["range"].get("whole_file")), lang=lang)
 
 
 def cmd_prepare(args):
@@ -1408,7 +1789,7 @@ def node_scenes(result_dir, manifest, node, parsed):
         if tree and tree["root_children"]:
             steps = plan_steps(tree, parsed[node["id"]])
             lines = original.rstrip("\n").split("\n")
-            at = attach_steps(tree, steps, lines, mask_code(original).rstrip("\n").split("\n"))
+            at = attach_steps(tree, steps, lines, mask_code(original, link_file(node["link"])[2]).rstrip("\n").split("\n"))
             if render_steps_scene(tree, lines, steps, at, len(steps)).rstrip("\n") != original.rstrip("\n"):
                 raise SourceMismatch("%s: 모든 단계를 연 장면이 원본 범위와 다름" % node["id"])
             if stages["outline"]["visible"]:

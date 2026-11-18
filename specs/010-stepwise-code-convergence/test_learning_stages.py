@@ -421,8 +421,8 @@ class Workflow(unittest.TestCase):
             self.assertFalse(any(line.strip().startswith('click ') for line in prompt.split('\n')))
             self.assertIn('#### 요소의 책임', prompt)
             built, _ = run(s.cmd_build, dir=str(result))
-            self.assertEqual(built['verified'], 4)
-            self.assertEqual(len(built['skipped']), 3)
+            self.assertEqual(built['verified'], 5)  # LegacyBridge (Java) has a range too since research S11
+            self.assertEqual(len(built['skipped']), 2)
             first = {doc: Path(doc).read_bytes() for doc in built['docs']}
             run(s.cmd_build, dir=str(result))
             self.assertEqual({doc: Path(doc).read_bytes() for doc in built['docs']}, first)  # same input, same documents
@@ -559,8 +559,8 @@ class Languages(unittest.TestCase):
             self.assertIn(' -| import androidx.compose.ui.graphics.Color', listing)
             self.assertIn(' 1| /** Brand blue. */', listing)
 
-            self.assertEqual(nodes['Circle']['skip_reason'],
-                             'Kotlin이 아닌 원본은 파일 단위 노드만 원본 범위를 정할 수 있어 구체화하지 않음')
+            self.assertIsNone(nodes['Circle']['skip_reason'])  # Java declarations are found (research S11)
+            self.assertEqual((nodes['Circle']['range']['start_line'], nodes['Circle']['range']['end_line']), (1, 2))
             self.assertNotIn('whole_file', nodes['Order']['range'])  # the declaration comes first
             self.assertEqual(nodes['Order']['range']['start_line'], 3)
 
@@ -570,10 +570,11 @@ class Languages(unittest.TestCase):
             outline = {n['id']: auto_entry(n['tree']) for n in manifest['nodes'] if n['tree'] and n['tree']['root_children']}
             (result / 'work/outline.json').write_text(json.dumps(outline, ensure_ascii=False), encoding='utf-8')
             built, _ = run(s.cmd_build, dir=str(result))
-            self.assertEqual(built['verified'], 3)
-            self.assertEqual([x['node'] for x in built['skipped']], ['Circle'])
+            self.assertEqual(built['verified'], 4)
+            self.assertEqual(built['skipped'], [])
             doc = Path(built['docs'][0]).read_text(encoding='utf-8')
-            self.assertNotIn('⚠️', doc.split('### Circle')[0])
+            self.assertNotIn('⚠️', doc)
+            self.assertIn('```java\nclass Circle {\n}\n```', doc)
 
             box = doc.split('### colors.xml')[1].split('### ')[0]
             self.assertIn('2단계: 원본 (2/2)', box)
@@ -582,6 +583,287 @@ class Languages(unittest.TestCase):
             scenes = s.node_scenes(result, manifest, color, parsed_outline(result, manifest))
             self.assertIn('package demo.ui', scenes[1][2])  # the outline shows the file header
             self.assertEqual(scenes[-1][2].rstrip('\n'), LANG_SOURCES['src/Color.kt'].rstrip('\n'))
+
+
+SOURCES_BY_LANGUAGE = {
+    'java': ('OrderService', 5, 18, True, """package demo;
+
+import java.util.List;
+
+/** Orders. */
+public class OrderService {
+    private final Repo repo;
+
+    public OrderService(Repo repo) {
+        this.repo = repo;
+    }
+
+    public void place(Order order) {
+        if (order.ok()) {
+            repo.save(order);
+        }
+    }
+}
+
+class Helper {
+    void run() {}
+}
+"""),
+    'ts': ('Cart', 3, 13, True, """import { Repo } from "./repo";
+
+export class Cart {
+  private items: string[] = [];
+
+  add(id: string): void {
+    this.items.push(`${id}}`);
+  }
+
+  clear(): void {
+    this.items = [];
+  }
+}
+
+export function total(cart: Cart): number {
+  return cart.size();
+}
+"""),
+    'js': ('Store', 7, 15, True, """const api = {
+  get(id) {
+    return fetch(id);
+  },
+};
+
+class Store {
+  constructor(api) {
+    this.api = api;
+  }
+
+  load(id) {
+    return this.api.get(id) || '}';
+  }
+}
+"""),
+    'go': ('Add', 11, 16, True, """package shop
+
+import (
+\t"fmt"
+)
+
+type Repo struct {
+\titems []string
+}
+
+func (r *Repo) Add(id string) {
+\tif id != "" {
+\t\tr.items = append(r.items, id)
+\t}
+\tfmt.Println(`}`)
+}
+"""),
+    'rs': ('helper', 14, 18, True, """use std::fmt;
+
+#[derive(Debug)]
+pub struct Point {
+    x: i32,
+}
+
+impl Point {
+    pub fn new(x: i32) -> Self {
+        Point { x }
+    }
+}
+
+fn helper<'a>(s: &'a str) -> &'a str {
+    let c = '}';
+    if s.is_empty() { return s; }
+    s
+}
+"""),
+    'cs': ('Basket', 5, 14, True, """using System;
+
+namespace Shop;
+
+[Serializable]
+public class Basket
+{
+    private readonly string path = @"C:\\data\\";
+
+    public void Add(string id)
+    {
+        Console.WriteLine(id);
+    }
+}
+"""),
+    'swift': ('Counter', 3, 13, True, """import Foundation
+
+final class Counter {
+    private var count = 0
+
+    func increment() {
+        count += 1
+    }
+
+    func reset() {
+        count = 0
+    }
+}
+
+extension Counter {
+    func log() {}
+}
+"""),
+    'cpp': ('Stack', 3, 11, True, """#include <vector>
+
+template <typename T>
+class Stack {
+public:
+    void push(T v) {
+        items.push_back(v);
+    }
+private:
+    std::vector<T> items;
+};
+
+int size() { return 0; }
+"""),
+    'py': ('Store', 5, 17, True, 'import os\nfrom typing import List\n\n\n@dataclass\nclass Store:\n'
+           '    """Keeps items: {"a": 1}."""\n\n    def __init__(self, root):\n        self.root = root\n\n'
+           '    def load(self, name):\n        path = os.path.join(self.root, name)\n'
+           '        if os.path.exists(path):\n            return open(path).read()\n        else:\n'
+           '            return None\n\n\ndef helper():\n    return 1\n'),
+    'scala': ('Cart', 3, 11, True, """import scala.collection.mutable
+
+class Cart(repo: Repo) {
+  private val items = mutable.Buffer[String]()
+
+  def add(id: String): Unit = {
+    items += s"${id}}"
+  }
+
+  def clear(): Unit = items.clear()
+}
+
+object CartOps
+"""),
+    'groovy': ('Builder', 3, 11, True, """import groovy.transform.CompileStatic
+
+class Builder {
+    def steps = []
+
+    void step(String name) {
+        steps << "${name}}"
+    }
+
+    def run() { steps.each { println it } }
+}
+"""),
+    'dart': ('Counter', 3, 13, True, """import 'package:flutter/material.dart';
+
+class Counter {
+  int _count = 0;
+
+  void increment() {
+    _count++;
+  }
+
+  void reset() {
+    _count = 0;
+  }
+}
+"""),
+    'c': ('add_item', 9, 14, True, """#include <stdio.h>
+
+struct Cart {
+    int count;
+};
+
+static int helper(void);
+
+int add_item(struct Cart *cart, const char *id)
+{
+    if (id[0] == '}') return 0;
+    cart->count++;
+    return cart->count;
+}
+"""),
+}
+
+
+def unfold_all(code, lang):
+    """Every scene of a range with an outline that keeps each child apart; the last must be the range."""
+    tree = s.build_tree(code, lang=lang)
+    if tree is None or not tree['root_children']:
+        return tree, None
+    errors, parsed = s.check_outline({'id': 'X'}, tree, auto_entry(tree))
+    assert not errors, errors
+    steps = s.plan_steps(tree, parsed)
+    lines = code.rstrip('\n').split('\n')
+    at = s.attach_steps(tree, steps, lines, s.mask_code(code, lang).rstrip('\n').split('\n'))
+    return tree, s.render_steps_scene(tree, lines, steps, at, len(steps))
+
+
+class OtherLanguages(unittest.TestCase):
+    """Languages whose block structure the scanner knows (spec FR-002, FR-017a, SC-014, research S11)."""
+
+    def test_declarations_are_cut_and_unfold_back_to_the_range(self):
+        for ext, (name, first, last, nested, text) in SOURCES_BY_LANGUAGE.items():
+            with self.subTest(ext):
+                lang = s.LANG_BY_EXT[ext]
+                span, reason, candidates = s.find_declaration(text, [name], None, lang)
+                self.assertEqual((span, reason, candidates), ((first, last), None, []))
+                code = '\n'.join(text.split('\n')[first - 1:last])
+                tree, unfolded = unfold_all(code, lang)
+                self.assertEqual(bool(tree and tree['root_children']), nested)
+                if unfolded is not None:
+                    self.assertEqual(unfolded.rstrip('\n'), code.rstrip('\n'))
+
+    def test_python_blocks_follow_indentation(self):
+        lang = s.LANG_BY_EXT['py']
+        text = SOURCES_BY_LANGUAGE['py'][4]
+        code = '\n'.join(text.split('\n')[4:17])
+        tree = s.build_tree(code, lang=lang)
+        kids = [tree['nodes'][c] for c in tree['root_children']]
+        self.assertEqual(len(kids), 3)  # docstring, __init__, load
+        load = kids[2]
+        self.assertTrue(load['children'])  # its body is a scope
+        self.assertEqual(tree['attached'], [])  # __init__ is not private: dunder names are public
+
+    def test_file_level_nodes_outside_kotlin_keep_the_head_in_the_root(self):
+        cases = {
+            'java': 'package demo;\n\nimport java.util.List;\n\nclass A {\n    void f() {}\n}\n\nclass B {\n    void g() {}\n}\n',
+            'py': 'import os\nfrom typing import List\n\n\ndef a():\n    return 1\n\n\ndef b():\n    return 2\n',
+        }
+        for ext, text in cases.items():
+            with self.subTest(ext):
+                lang = s.LANG_BY_EXT[ext]
+                tree = s.build_tree(text, whole_file=True, lang=lang)
+                lines = text.rstrip('\n').split('\n')
+                head = [j for j, line in enumerate(lines) if line.startswith(('package', 'import', 'from'))]
+                self.assertTrue(set(head) <= set(tree['root']))
+                self.assertEqual(len(tree['root_children']), 2)
+                errors, parsed = s.check_outline({'id': 'X'}, tree, auto_entry(tree))
+                self.assertEqual(errors, [])
+                steps = s.plan_steps(tree, parsed)
+                at = s.attach_steps(tree, steps, lines, s.mask_code(text, lang).rstrip('\n').split('\n'))
+                self.assertEqual(s.render_steps_scene(tree, lines, steps, at, len(steps)).rstrip('\n'), text.rstrip('\n'))
+                self.assertIn(lines[0], s.render_steps_scene(tree, lines, steps, at, 0))  # the outline shows the head
+
+    def test_regex_literals_are_masked(self):
+        text = 'function parse(text) {\n  const re = /}"/;\n  return re.test(text);\n}\n'
+        self.assertEqual(s.find_declaration(text, ['parse'], None, s.LANG_BY_EXT['js'])[0], (1, 4))
+
+    def test_a_range_the_block_structure_does_not_confirm_is_not_used(self):
+        # a regex right after `)` reads as division to the scanner, so its `}` closes the body early
+        text = 'function parse(text, ok) {\n  if (ok) /}/.test(text);\n  return text;\n}\n'
+        span, reason, _ = s.find_declaration(text, ['parse'], None, s.LANG_BY_EXT['js'])
+        self.assertIsNone(span)
+        self.assertEqual(reason, '원본 파일에서 parse 선언 범위를 블록 구조로 확인하지 못해 구체화하지 않음')
+
+    def test_calls_and_constructors_are_not_separate_declarations(self):
+        lang = s.LANG_BY_EXT['java']
+        text = SOURCES_BY_LANGUAGE['java'][4]
+        self.assertEqual(s.find_declaration(text, ['place'], None, lang)[0], (13, 17))
+        self.assertEqual(s.find_declaration(text + 'class X { void f() { place(o); } }\n', ['place'], None, lang)[0], (13, 17))
 
 
 class Render(unittest.TestCase):
