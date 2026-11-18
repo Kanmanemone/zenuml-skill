@@ -1,6 +1,15 @@
 # Quickstart: 정제 단계 코드 구체화 확인
 
-## 원본 언어와 파일 단위 노드 검증 (2026-11-18, 아래의 모든 앞선 절차보다 우선)
+## 블록 구조를 아는 언어 검증 (2026-11-18, 아래의 모든 앞선 절차보다 우선)
+
+`python specs/010-stepwise-code-convergence/test_learning_stages.py`로 확인한다.
+
+- **언어별 시험 원본**: Java·TypeScript·JavaScript·Go·Rust·C#·Swift·C++·Python마다 한 파일에 머리(`import` 등)와 선언 둘 이상이 든 원본을 둔다. 노드 이름과 같은 선언의 원본 범위가 기대 범위와 글자까지 같다. 안에 블록이 든 선언은 트리가 있고, 자동 입력으로 만든 모든 장면을 연 결과가 원본 범위와 같다.
+- **잘못 자르지 않음**: 짝이 맞지 않는 범위가 나오는 원본(예: `)` 뒤라 나눗셈으로 읽히는 JavaScript 정규식 `if (ok) /}/.test(text)`가 함수 안에 든 원본. 값 자리의 정규식 `const re = /}"/`는 가려지므로 범위가 맞게 잘린다)에서는 그 노드가 `원본 파일에서 <이름> 선언 범위를 블록 구조로 확인하지 못해 구체화하지 않음`이 된다.
+- **Java 선언 노드**: 이전 절의 `Shapes.java` 안 `Circle`은 이제 `class Circle` 범위를 원본으로 갖는다. 기존 fixture의 `LegacyBridge`(`src/Legacy.java`)도 `class LegacyBridge` 범위가 원본이 된다.
+- **Kotlin 불변**: Kotlin 노드의 상자는 바꾸기 전과 글자까지 같다.
+
+## 원본 언어와 파일 단위 노드 검증 (2026-11-18)
 
 `python specs/010-stepwise-code-convergence/test_learning_stages.py`로 확인한다. 시험은 임시 폴더에 작은 구조 뷰와 원본을 만들어 돌린다. 기대 결과는 다음과 같다.
 

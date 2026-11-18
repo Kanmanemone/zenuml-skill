@@ -6,7 +6,23 @@
 
 ## Summary
 
-### 원본 언어와 파일 단위 노드 (2026-11-18, 아래의 모든 앞선 설계보다 우선)
+### 블록 구조를 아는 언어로 넓히기 (2026-11-18, 아래의 모든 앞선 설계보다 우선)
+
+선언 찾기와 한 겹씩 펼치기를 Kotlin에서 **블록 구조를 아는 프로그래밍 언어 전부**로 넓힌다(spec FR-002·017a, SC-014). 결정과 근거는 [research.md](research.md) S11에 있다. 바로 아래 절(S10)의 "선언 찾기·트리는 Kotlin만"을 대체하고, 파일 단위 노드 규칙은 그대로 쓴다.
+
+- **`LANGS`**(`scripts/stages.py` 안의 표): 확장자 → 언어 프로필. 중괄호 계열 Kotlin·Java·Scala·Groovy·Swift·C#·Go·Rust·Dart·JavaScript·TypeScript·C·C++, 들여쓰기 계열 Python. Kotlin 프로필은 지금 상수를 그대로 가리킨다.
+- **언어를 받는 함수**: `mask_code`, `find_declaration`, `_declaration_end`, `analyse`, `split_items`, `build_tree`, 여러 줄 문자열 판정이 프로필을 인자로 받는다(기본값 Kotlin). 들여쓰기 계열만 항목 나누기(`split_items_indent`)와 선언 끝을 따로 둔다.
+- **범위 확인**: Kotlin 밖의 언어에서 찾은 선언 범위는 괄호 짝·머리 줄의 이름·들여쓰기로 확인하고, 아니면 찾지 못한 것으로 본다.
+- **`locate_range`·`node_tree`·`source_lang`**: "Kotlin인가" 대신 "프로필이 있는가"로 가른다. 코드 블록 이름은 프로필의 `fence`(`java`, `typescript`, `python` …), 프로필이 없으면 지금처럼 소문자 확장자다.
+- **바뀌지 않는 것**: Kotlin 노드의 원본 범위·트리·문서(시험 기대 결과 그대로), `outline.json` 형식과 검사, 장면 그리기, 단계 정의, 설정, 내부 작업 파일 이름.
+- **바꾸는 파일**: `scripts/stages.py`, `SKILL.md`·README 두 벌의 언어 범위 문장, `test_learning_stages.py`(언어별 시험 원본), `fixtures/expected/others*.md`(Java 노드 `LegacyBridge`가 이제 선언을 찾음), 이 Spec의 research·계약·quickstart.
+
+**Constitution Check (이 개편)**
+- I. 통과: 새 의존성·설정이 없다. 언어마다 스캐너를 새로 쓰지 않고 값의 표 하나와 들여쓰기 계열의 두 함수만 더한다. 파서 라이브러리는 설치 단계 때문에 기각했다(S11). 아래 Complexity Tracking을 보라.
+- II. 통과: 010 Spec의 갱신이다.
+- III. 해당 없음: 요구 변경이다(FR-002, SC-014).
+
+### 원본 언어와 파일 단위 노드 (2026-11-18)
 
 Kotlin만 받던 제한을 없애고, 노드가 파일 자체를 가리키면 파일 전체를 원본 범위로 삼는다(spec FR-001a·002·006·017·017a, SC-013). 결정과 근거는 [research.md](research.md) S10에 있다.
 
@@ -195,3 +211,4 @@ specs/010-stepwise-code-convergence/fixtures/   # 신규 — quickstart용 입�
 |---|---|---|
 | 스코프 트리(영역 나누기의 재귀) | 여러 겹이 한 장면에 열리지 않게 한다(SC-010) | 최상위 문장 단위에 문장 지침만 더하는 방법은 BulletedListTextField에서 60줄 장면을 막지 못했다. 원본 순서의 연속 구간으로 자르는 방법은 시험에서 상관없는 것을 한 단계로 묶었다. |
 | 단계 트리와 들여 쓴 번호 자리표시자 | 윤곽에서 모든 단계를 보인다(FR-004) | 별도 목차는 사용자가 자리표시자 안의 번호를 원해 취소했다. |
+| 언어 프로필 표와 들여쓰기 계열의 항목 나누기·선언 끝 | Kotlin 밖의 언어에서도 선언을 찾고 펼친다(FR-002, SC-014) | Kotlin만 받는 방법은 근거 없는 제한이었다. 파일 단위 노드만 받는 방법은 Java·Python의 선언 노드를 멈추게 한다. 언어마다 스캐너를 따로 쓰면 같은 코드가 언어 수만큼 생긴다. |
