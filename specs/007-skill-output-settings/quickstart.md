@@ -18,6 +18,19 @@
 
 `dependency.renderer`를 `elk`로 바꿔 생성 → YAML 설정의 `config` 바로 아래에 `layout: elk`가 있다. 같은 설정에서 요청에 다른 렌더러를 밝히면 그 값이 쓰인다.
 
+## 시나리오 3b — 노드 이름 스타일 (FR-012d, SC-010)
+
+원본에서 `class aaa`, 함수 `fun bbb`, 값 `val ccc`, 파일 `ddd.kt`임을 확인할 수 있는 같은 입력으로 아래 네 조합을 각각 생성한다.
+
+| `nodeMarkers` | `functionParentheses` | Dependency 라벨 |
+|---|---|---|
+| `true` | `true` | `class aaa`, `fun bbb()`, `val ccc`, `ddd.kt` |
+| `false` | `true` | `aaa`, `bbb()`, `ccc`, `ddd` |
+| `true` | `false` | `class aaa`, `fun bbb`, `val ccc`, `ddd.kt` |
+| `false` | `false` | `aaa`, `bbb`, `ccc`, `ddd` |
+
+배포본과 두 키가 빠진 설정에서는 `nodeMarkers=false`, `functionParentheses=true`로 해석되는지 `scripts/read_settings.py` 출력으로 확인한다. 모든 조합에서 Responsibility·Collaboration 이름, 노드 ID, 링크와 hover 내용은 같아야 하며, 함수 판단은 특정 키워드 목록이 아니라 원본 근거를 따라야 한다.
+
 ## 시나리오 4 — zenuml 로그 위치 (US3, FR-015c)
 
 `log.directory`를 `./tmp/diagram-logs`로 바꿔 다이어그램을 생성·재생성 → `tmp/diagram-logs/<slug>.md`가 만들어지고 이어 쓰인다.

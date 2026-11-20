@@ -11,7 +11,7 @@
 
 | 필드 | 필수 | 설명 |
 |------|------|------|
-| description | 필수 | 구조 뷰로 표현할 프로세스/시스템에 대한 자연어 설명 |
+| description | 필수 | 구조 뷰로 표현할 프로세스/시스템에 대한 자연어 설명. 실제 코드가 있으면 스킬이 먼저 읽어 이 설명으로 옮기며, 그때 노드마다 확인한 선언 키워드와 파일 이름도 근거로 담는다(spec.md FR-022, FR-036) |
 | purpose | 선택 | 사용자가 이미 목적(온보딩/특정 문제 진단/기타)을 밝혔거나 설명·맥락에서 명확히 추론 가능한 경우. 스스로 판단하기 어려울 만큼 실제로 불분명할 때만 skill이 확인 질문을 한다 |
 | location_evidence | 선택 | 그룹·요소의 실제 위치에 대한 근거(로컬 루트 프로젝트 안 파일/폴더 경로, 웹 레포지토리 URL) — 있으면 하이퍼링크(Dependency의 `click`, Responsibility/Collaboration의 Markdown 링크)의 유일한 근거가 되고, 없으면 링크가 붙지 않는다(spec.md FR-027c) |
 
@@ -26,7 +26,7 @@
 ```
 
 - 채팅 응답에는 구조 뷰 코드를 직접 노출하지 않는다 — Checked 상태에 도달한 구조 뷰(data-model.md 참조)를 `.zenuml/<slug>.architecture.md`에 저장하고, 그 파일을 가리키는 상대 경로 링크만 응답에 남긴다(spec.md FR-021, FR-014).
-- 파일에는 Dependency → Responsibility → Collaboration 세 섹션이 이 순서로 온다(spec.md FR-005). Dependency는 헤딩 바로 다음에 요청 키워드 기반 한 줄 캡션(FR-033)을 두고, 그 뒤 다이어그램에 관계 성격 레이블·색상 클래스·(근거가 있으면) `click` 하이퍼링크를 포함한다(FR-007~FR-008b). Responsibility는 그룹·요소별 책임(추상)/역할(구체)을, Collaboration은 실제 의존관계가 있는 쌍(다수 대상은 조건에 따라 통합)에 대한 3필드 항목을 담는다(FR-009~FR-010, FR-025~FR-027b).
+- 파일에는 Dependency → Responsibility → Collaboration 세 섹션이 이 순서로 온다(spec.md FR-005). Dependency는 헤딩 바로 다음에 요청 키워드 기반 한 줄 캡션(FR-033)을 두고, 그 뒤 다이어그램에 관계 성격 레이블·색상 클래스·(근거가 있으면) `click` 하이퍼링크를 포함한다(FR-007~FR-008b). 확인된 원본 선언 키워드·파일 확장자와 함수 `()`는 007의 `dependency.nodeMarkers`·`dependency.functionParentheses`를 독립적으로 적용하며 기본값은 각각 `false`·`true`다(FR-036). Responsibility는 그룹·요소별 책임(추상)/역할(구체)을, Collaboration은 실제 의존관계가 있는 쌍(다수 대상은 조건에 따라 통합)에 대한 3필드 항목을 담는다(FR-009~FR-010, FR-025~FR-027b).
 - 설명에 없는 컴포넌트·의존관계·관계 성격·그룹·책임·링크를 포함해서는 안 된다(spec.md FR-004, FR-006, FR-009, FR-010, FR-022).
 - 파일과 채팅 응답에는 실제 내용 외의 메타 코멘트(클릭 이동 안내, 길이 안내, 렌더러 호환성 경고, 레이아웃·생성 과정 설명 등)를 넣지 않는다 — 채팅 응답은 파일 링크만 담는다(spec.md FR-012, FR-027d, FR-032).
 

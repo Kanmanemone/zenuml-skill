@@ -24,6 +24,7 @@
 | Q6 | Responsibility 섹션을 지운 입력에 `AH tmp.md` | 패널에 Responsibility 부분 없음, 안내 줄 없음 | FR-010 |
 | Q7 | 설정 파일의 `hover.collaboration`을 `["targets", "targets"]`로 바꾸고 `AH tmp.md` | 기본값으로 동작 + `⚙️ 설정 안내` 한 줄 | FR-009a |
 | Q8 | `### Dependency`가 없는 Markdown에 `AH x.md` | 종료 코드 `2`, 파일 그대로 | 계약 |
+| Q9 | 입력의 한 노드를 `NiaNavHost@{ label: "♻️&nbsp;fun&nbsp;NiaNavHost" }`로 바꾸고 본문 이름은 `NiaNavHost`로 둔 뒤 `AH tmp.md` | 패널 머리글이 `NiaNavHost`이고 본문 책임·협력이 연결되며 두 번째 실행은 변경 없음 | FR-021, SC-008 |
 
 모든 시나리오에서 `### Responsibility`·`### Collaboration` 아래 줄은 입력과 바이트 단위로 같아야 한다(FR-002). 기대 출력의 툴팁 안에는 `"`가 없어야 한다.
 

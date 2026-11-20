@@ -8,17 +8,17 @@
 
 ## Summary
 
-자연어 프로세스 설명으로부터, 목적(온보딩/특정 문제 진단/기타, 실제로 불분명할 때만 확인)을 판단한 뒤 세 섹션으로 구성된 구조 뷰를 생성하는 Claude Code Skill(`generating-architecture-views`)을 만든다: **Dependency**(컴포넌트·근거 있는 그룹·관계 성격 레이블·색상 구분이 있는 Mermaid `flowchart LR` 다이어그램), **Responsibility**(각 그룹·요소의 책임을 책임(추상)/역할(구체) 두 단계로 서술), **Collaboration**(실제 의존관계가 있는 그룹·요소 쌍에 대해 책임의 경계/분리 이유&합리성 평가/내가 할 수 있는 질문을 담은 항목 — 다수 대상은 조건에 따라 하나의 서술로 통합). 그룹·요소 이름에는 분석 대상 성격에 맞는 하이퍼링크(로컬 상대 경로/웹 URL/링크 없음)가 붙는다. 이 스킬은 구조 뷰만 만드는 독립 스킬이다. 기술적 접근: 실행 코드가 아니라 `.claude/skills/generating-architecture-views/`에 번들링되는 지침 문서로 구현하며, 산출물은 `.zenuml/<slug>.architecture.md`에 저장한다.
+자연어 프로세스 설명으로부터, 목적(온보딩/특정 문제 진단/기타, 실제로 불분명할 때만 확인)을 판단한 뒤 세 섹션으로 구성된 구조 뷰를 생성하는 Claude Code Skill(`generating-architecture-views`)을 만든다: **Dependency**(컴포넌트·근거 있는 그룹·관계 성격 레이블·색상 구분이 있는 Mermaid `flowchart LR` 다이어그램), **Responsibility**(각 그룹·요소의 책임을 책임(추상)/역할(구체) 두 단계로 서술), **Collaboration**(실제 의존관계가 있는 그룹·요소 쌍에 대해 책임의 경계/분리 이유&합리성 평가/내가 할 수 있는 질문을 담은 항목 — 다수 대상은 조건에 따라 하나의 서술로 통합). 그룹·요소 이름에는 분석 대상 성격에 맞는 하이퍼링크(로컬 상대 경로/웹 URL/링크 없음)가 붙는다. 이 스킬은 구조 뷰만 만드는 독립 스킬이다. 기술적 접근: `.agents/skills/generating-architecture-views/`(`.claude/skills/`는 링크)에 번들링되는 지침 문서와, 규칙만으로 정해지는 일을 맡는 Python 표준 라이브러리 스크립트로 구현하며, 산출물은 `.zenuml/<slug>.architecture.md`에 저장한다.
 
 ## Technical Context
 
-**Language/Version**: N/A — 실행 코드가 없는 Markdown 기반 Skill(지침 + 참조 문서 번들). Claude Code Skill 포맷(YAML frontmatter + Markdown 본문)을 사용한다.
+**Language/Version**: Markdown 기반 Skill(지침 + 참조 문서 번들, Claude Code Skill 포맷 — YAML frontmatter + Markdown 본문)과, 규칙만으로 정해지는 일을 맡는 Python 3.9+ 스크립트(`scripts/`: 설정 읽기, 다이어그램 고정 부분, hover 패널).
 
-**Primary Dependencies**: 없음(외부 라이브러리/런타임 의존성 없음). 다른 스킬에도 의존하지 않는 독립 스킬이다(spec.md FR-014).
+**Primary Dependencies**: 없음(스크립트는 표준 라이브러리만 쓴다). 다른 스킬에도 의존하지 않는 독립 스킬이다(spec.md FR-014).
 
 **Storage**: 영속 데이터베이스는 없음. FR-021에 따라 구조 뷰 출력 파일을 프로젝트 루트의 `.zenuml/`에 저장한다 — 이미 `.gitignore`에 포함된 기존 디렉터리를 그대로 재사용한다.
 
-**Testing**: 자동화된 테스트 프레임워크 없음(코드가 없으므로). spec.md의 User Story 1~3과 Edge Case를 커버하는 대표 프롬프트 시나리오를 `quickstart.md`에 정의하고 수동으로 실행해 성공 기준(SC-001~SC-011) 충족 여부를 검증한다.
+**Testing**: 이 기능에는 자동화된 테스트가 없다(hover 스크립트는 `specs/009-hover-detail-panel/fixtures/`로 확인한다). spec.md의 User Story 1~3과 Edge Case를 커버하는 대표 프롬프트 시나리오를 `quickstart.md`에 정의하고 수동으로 실행해 성공 기준(SC-001~SC-011) 충족 여부를 검증한다.
 
 **Target Platform**: Claude Code (CLI/IDE) — 이 저장소의 기존 `.claude/skills/*`와 동일한 실행 환경.
 
@@ -30,7 +30,8 @@
 - 목적(Purpose)이 실제로 불분명할 때만 확인 질문을 거쳐야 하며, 이미 명시됐거나 추론 가능하면 되묻지 않고 그 목적으로 바로 구조 뷰를 생성해야 한다(spec.md FR-001~003).
 - Dependency, Responsibility, Collaboration 세 섹션을 항상 이 순서로 생성해야 한다(FR-005).
 - Dependency는 `flowchart LR` + 그룹별 `direction TB` + 코드펜스 맨 앞의 고정 YAML frontmatter `config` 스타일 블록을 쓰고(엣지는 `eN@` ID와 엣지 클래스로 색칠, 라벨이 ID와 다른 노드는 `@{ label }`), 각 화살표에 관계 성격 레이블을, 각 노드·그 노드발 화살표에 일관된 색상을 부여해야 한다(FR-007~008b). 사용자가 요청에서 명시적으로 렌더러(예: "elk")를 지정한 경우에 한해 YAML `config` 바로 아래에 `layout`을 그 값 그대로 추가해야 하며, 명시하지 않은 요청(재생성 포함)에서는 이전 라운드 값을 이어받지 않고 생략해야 한다 — 렌더러 이름은 관계 성격 레이블과 동일하게 열린 어휘이고 검증·매핑 로직을 두지 않는다(FR-007b).
-- 요청은 매번 구조(정적)와 구조 변화(동적) 중 하나로 분류하고(실제로 판단할 수 없을 때만 질문), 동적이면 설명이 밝힌 추가·변경·삭제 노드에만 라벨 접두(✨<b>/♻️/🗑️<s>)와 CRUD 클래스를 붙인다. 라벨 규칙 주석(`%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`)과 CRUD classDef 세 줄은 정적·동적 모두 항상 고정 구역에 두고, 테두리 색은 건드리지 않으며, 범례는 Mermaid의 절대 위치 지정 불가로 두지 않는다(FR-034, FR-035).
+- 요청은 매번 구조(정적)와 구조 변화(동적) 중 하나로 분류하고(실제로 판단할 수 없을 때만 질문), 동적이면 설명이 밝힌 추가·변경·삭제 노드에만 라벨 접두(`✨<b>`/`♻️`/`🗑️<s>`)와 CRUD 클래스를 붙인다. 라벨 규칙 주석(`%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`)과 CRUD classDef 세 줄은 정적·동적 모두 항상 고정 구역에 두고, 테두리 색은 건드리지 않으며, 범례는 Mermaid의 절대 위치 지정 불가로 두지 않는다(FR-034, FR-035).
+- 원본 코드의 선언 하나나 파일 하나에 대응하고 실제로 확인한 노드의 Dependency 라벨은 007 설정 두 개를 독립적으로 따른다. `dependency.nodeMarkers=true`면 원본 선언 키워드와 파일의 마지막 확장자를 보이고, `dependency.functionParentheses=true`면 확인된 함수 이름 끝에 `()`를 정확히 한 번 붙인다. 기본값은 각각 `false`, `true`다. 확인하지 못했거나 선언도 파일도 아닌 노드는 이름만 두고, 라벨에 부가 설명을 넣지 않으며, 본문의 굵은 이름·노드 ID·링크·hover 내용에는 적용하지 않는다. 표시어와 괄호는 스킬이 쓰고 `build_diagram.py`는 바꾸지 않으며 기존 schema 기반 boolean 로더를 재사용한다(FR-036, 007 FR-012d, research.md "노드 규격 표시어").
 - Responsibility는 더 이상 쌍을 비교하지 않는다 — 그룹·요소마다 책임(추상)/역할(구체)을 서술해야 한다(FR-009~010). 다만 같은 그룹·같은 관계 성격에서 병렬적 구조적 역할만 수행하는 요소가 3개 이상이면(종류가 다른 역할을 가진 대상은 제외), 각각 대신 "A, B, C" 이름을 모두 나열한 하나의 통합 항목으로 서술할 수 있다(FR-009b).
 - Collaboration은 실제 의존관계가 있는 그룹·요소 쌍에만 항목을 만들고, 각 항목에 책임의 경계/분리 이유&합리성 평가/내가 할 수 있는 질문 세 하위 항목을 담아야 하며, 다수 대상 통합 조건(같은 그룹·같은 관계 성격·3개 이상·병렬적 구조적 역할 — 개별 이름/구현 차이나 개별 엣지가 있어도 무방하며, 종류가 다른 역할을 가진 대상만 제외)을 만족하면 서술적 표현으로 압축해야 한다(FR-025~027b). Responsibility(FR-009b)와 Collaboration(FR-027b)은 동일한 통합 판단 기준을 재사용한다.
 - 그룹·요소 이름에는 분석 대상에 맞는 하이퍼링크(로컬 상대 경로/URL/링크 없음)를 붙여야 하며, 로컬 경로 `click`을 쓰더라도 클릭 이동 제약 같은 안내는 덧붙이지 않는다(FR-027c~027d). 산출 파일은 세 섹션의 실제 내용과 Dependency의 요청 키워드 기반 한 줄 캡션만 담고, 메타 코멘트는 넣지 않는다(FR-032, FR-033).
@@ -45,9 +46,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-`.specify/memory/constitution.md`는 아직 `[PROJECT_NAME]` 등 템플릿 placeholder 상태이며 비준된(ratified) 원칙이 없다 — 대조할 공식 게이트가 존재하지 않는다. 따라서 이번 계획 단계에서는 Constitution Check를 **적용 불가(N/A)** 로 처리하고 위반 사항 없음으로 진행한다.
+기준: `.specify/memory/constitution.md` v1.1.1(2026-11-15 비준). 이 절을 처음 쓸 때(2026-07-31)는 헌법이 placeholder라 N/A였고, 아래는 2026-11-20 FR-036 계획에서 다시 점검한 결과다.
 
-**Post-Phase 1 재확인**: Phase 1 설계(data-model.md, contracts/, quickstart.md) 완료 후에도 constitution이 여전히 placeholder 상태임을 재확인함 — 상태 변화 없음, 게이트 여전히 N/A.
+| 원칙 | 점검 | 결과 |
+|------|------|------|
+| I. 오버엔지니어링 금지 | 007의 기존 설정 로더를 재사용하고 스크립트·언어별 키워드 목록을 새로 두지 않는다. 라벨 규칙만 조건화한다 | 통과 |
+| II. 요청은 해당 Spec에서 진행 | 노드 출력 계약은 003, 사용자 설정 계약은 기존 007에서 고친다 | 통과 |
+| III. 출력 변동성 수정에 Spec Kit 미사용 | 라벨 형식이라는 요구사항 변화라 해당 없음 | 해당 없음 |
+
+**Post-Phase 1 재확인**: research.md·data-model.md·contracts·quickstart 반영 뒤에도 새 실행 파일·의존성·언어별 목록이 없다. 위반 없음.
 
 ## Project Structure
 
@@ -69,16 +76,22 @@ specs/003-architecture-view-skill/
 ### Source Code (repository root)
 
 ```text
-.claude/skills/generating-architecture-views/
+.agents/skills/generating-architecture-views/   # 원본 (.claude/skills/generating-architecture-views는 이 폴더로의 링크)
+├── settings.jsonc / settings.schema.json       # 출력 설정과 그 스키마(007)
 ├── SKILL.md              # 워크플로: 목적 판단(필요시만 확인) → Dependency 생성(자동 그룹핑, 관계 레이블, 색상) → Responsibility 생성(그룹/요소별 책임(추상)/역할(구체)) → Collaboration 생성(의존관계 있는 쌍만, 3필드, 다수 대상 통합) → 하이퍼링크 결정 → 안티패턴 자기검증 → .zenuml/<slug>.architecture.md 저장 → 파일 링크 제시
 ├── scripts/
-│   └── build_diagram.py  # Dependency 다이어그램의 고정 부분을 채움(FR-008d)
+│   ├── read_settings.py  # 설정 읽기·검증(007)
+│   ├── build_diagram.py  # Dependency 다이어그램의 고정 부분을 채움(FR-008d)
+│   ├── apply_hover.py    # hover 패널 적용(009)
+│   └── hover/            # hover 스크립트 모듈(009)
 └── references/
     ├── templates.md      # Dependency/Responsibility/Collaboration 섹션의 Mermaid/서식 템플릿과 표기 규칙(색상 팔레트, click 규칙 포함)
     └── examples.md       # 완성된 구조 뷰 예시(온보딩·특정 문제 진단 목적, 하이퍼링크 3가지 모드, 다수 대상 통합 포함)
 ```
 
-**Structure Decision**: 이 기능은 전통적인 애플리케이션이 아니라 Claude Code Skill이므로 "Option 1/2/3" 소스 구조가 적용되지 않는다. 실제 산출물은 이 저장소가 이미 사용 중인 `SKILL.md` + `references/` 패턴과 동일하게 구성되는 단일 skill 모듈이다(research.md, Decision: 참조 파일 구조 참고). 별도의 `src/`, `tests/`, 백엔드/프론트엔드 분리는 필요하지 않다.
+함수 라벨 호환성 때문에 기존 이름 정규화 두 곳만 함께 수정한다: `scripts/hover/view_parser.py`와 `.agents/skills/revealing-code-step-by-step/scripts/stages.py`. 새 공용 모듈이나 언어별 함수 키워드 목록은 만들지 않는다.
+
+**Structure Decision**: 이 기능은 전통적인 애플리케이션이 아니라 Claude Code Skill이므로 "Option 1/2/3" 소스 구조가 적용되지 않는다. 실제 산출물은 이 저장소가 이미 사용 중인 `SKILL.md` + `references/` + `scripts/` 패턴으로 구성되는 단일 skill 모듈이다(research.md, Decision: 참조 파일 구조 참고). 별도의 `src/`, `tests/`, 백엔드/프론트엔드 분리는 필요하지 않다.
 
 **다이어그램 고정 부분 스크립트 (FR-008d)**: `scripts/build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<값>]`. Python 3.9 이상, 표준 라이브러리만(009 hover 스크립트와 같은 실행 방식, 설정은 `scripts/hover/settings.py`로 읽음).
 - 입력: `### Dependency` 아래 첫 `mermaid` 펜스. 스킬이 쓴 기본 모양은 `flowchart LR` → 노드·그룹 선언(`subgraph`/`direction TB`/`end` 포함) → `Source -->|관계| Target` 엣지 → (동적이면) `class <Id> crud*` 줄 → `click` 줄이다. 이미 엣지 ID(`eN@`)가 있으면 손대지 않고 0이 아닌 코드로 끝난다.
@@ -88,4 +101,4 @@ specs/003-architecture-view-skill/
 
 ## Complexity Tracking
 
-*No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*
+*No constitution violations to justify. This section is intentionally empty.*

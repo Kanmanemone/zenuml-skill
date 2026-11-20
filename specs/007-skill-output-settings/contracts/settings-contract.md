@@ -34,6 +34,14 @@
 - 인터프리터는 `python3` → `python` → `py -3` 순으로 찾되 Windows에서는 `python` → `py -3` → `python3` 순으로 찾아(Windows의 `python3`은 Microsoft Store 안내만 띄우는 경우가 많음) `<인터프리터> scripts/read_settings.py`로 실행한다. 출력은 exporting의 `read-settings.js`와 같은 한 줄 JSON `{"values": {...}, "notices": ["..."]}`이고 종료 코드는 0이다.
 - 인터프리터를 찾지 못하거나 실행이 실패하면 스킬은 옵션 정의(`settings.schema.json`)의 `default`만 읽어 쓰고(`settings.jsonc`는 읽지 않음) `⚙️ 설정 안내: settings.jsonc — 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용` 한 줄을 남긴다.
 
+### architecture 노드 이름 적용 계약 (FR-012d)
+
+- `dependency.nodeMarkers = true`: 실제 원본에서 확인한 선언 키워드를 이름 앞에 보이고 파일 노드의 마지막 확장자를 보인다. `false`: 선언 키워드와 마지막 확장자를 감춘다.
+- `dependency.functionParentheses = true`: 실제 원본에서 함수임을 확인한 노드 이름 끝에 `()`를 정확히 한 번 붙인다. `false`: 붙이지 않는다.
+- 두 값은 독립적으로 적용한다. 함수 종류를 `fun`, `def` 같은 목록으로 판별하지 않고 입력 근거로 확인한다.
+- 적용 범위는 Dependency 라벨뿐이다. Responsibility·Collaboration 이름, Mermaid ID, 링크 대상과 hover 내용은 바꾸지 않는다.
+- 요청이 표시 방식을 직접 밝히면 그 요청에서만 해당 값보다 우선한다.
+
 ## exporting 스크립트 계약
 
 - `node scripts/read-settings.js` → 표준 출력에 `{"values": {...}, "notices": ["..."]}` 한 줄 JSON. 종료 코드 0(설정 문제로 실패하지 않음).

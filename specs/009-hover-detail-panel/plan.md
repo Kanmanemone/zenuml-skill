@@ -73,6 +73,10 @@ specs/009-hover-detail-panel/fixtures/   # 신규 — quickstart의 바이트 �
 
 **Structure Decision**: 스크립트는 이 스킬 디렉터리 안 `scripts/`에 둔다. 다른 스킬의 코드를 import하지 않는다(003 FR-014) — 설정 로더는 Python으로 옮겨 들고 온다. 언어는 외부 라이브러리가 필요 없는 텍스트 변환이라, Agent Skills 스크립트에서 가장 흔한 Python 표준 라이브러리로 쓴다(research R1). `<style>` 블록 원본은 VS Code에서 확인을 마친 테스트 키트의 CSS를 그대로 옮긴다.
 
+### 2026-11-20 호환성 보완
+
+003 FR-036의 규격 표시어 라벨은 기존 `hover/view_parser.py`의 `clean_name`에서 처리한다. 변화 표시와 HTML 태그를 제거한 뒤 원본 라벨의 마지막 `&nbsp;` 뒤 토큰을 실제 이름으로 반환한다. 새 파서나 공용 모듈은 만들지 않고, 기존 009 fixture 한 노드에 표시어를 넣어 `apply_hover.py`의 본문 연결·패널 머리글·멱등 회귀를 함께 검증한다.
+
 ## Complexity Tracking
 
 위반 없음 — 비워 둔다.

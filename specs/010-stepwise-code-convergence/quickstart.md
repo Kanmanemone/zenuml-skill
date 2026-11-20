@@ -4,6 +4,8 @@
 
 `python specs/010-stepwise-code-convergence/test_learning_stages.py`로 확인한다.
 
+- **규격 표시 노드**: `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost` 라벨을 각각 실제 이름으로 읽고, 같은 이름의 선언 범위와 마지막 장면이 일치한다. 표시어 없는 기존 라벨도 그대로 읽는다(FR-021, SC-015).
+
 - **언어별 시험 원본**: Java·TypeScript·JavaScript·Go·Rust·C#·Swift·C++·Python마다 한 파일에 머리(`import` 등)와 선언 둘 이상이 든 원본을 둔다. 노드 이름과 같은 선언의 원본 범위가 기대 범위와 글자까지 같다. 안에 블록이 든 선언은 트리가 있고, 자동 입력으로 만든 모든 장면을 연 결과가 원본 범위와 같다.
 - **잘못 자르지 않음**: 짝이 맞지 않는 범위가 나오는 원본(예: `)` 뒤라 나눗셈으로 읽히는 JavaScript 정규식 `if (ok) /}/.test(text)`가 함수 안에 든 원본. 값 자리의 정규식 `const re = /}"/`는 가려지므로 범위가 맞게 잘린다)에서는 그 노드가 `원본 파일에서 <이름> 선언 범위를 블록 구조로 확인하지 못해 구체화하지 않음`이 된다.
 - **Java 선언 노드**: 이전 절의 `Shapes.java` 안 `Circle`은 이제 `class Circle` 범위를 원본으로 갖는다. 기존 fixture의 `LegacyBridge`(`src/Legacy.java`)도 `class LegacyBridge` 범위가 원본이 된다.

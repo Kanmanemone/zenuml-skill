@@ -85,3 +85,28 @@
 - **Decision**: 목적이 불분명하면 추측하지 않고 되묻는다(FR-001). 그룹 신호나 개별 컴포넌트의 책임이 설명에 없으면, 되묻지 않고 조용히 생략한다(그룹은 나누지 않음, 책임/차이는 "명시되지 않음"으로 표시, FR-010). 시퀀스 다이어그램 생성 동의 여부가 불분명하면(애매한 답변, 무응답), 동의로 간주하지 않고 실행하지 않는다(FR-016) — 목적 확인과 달리 "기본값을 적용해 진행"하지 않고 "기본값은 실행하지 않음"이다.
 - **Rationale**: 목적은 이후 전체 산출물의 모양을 바꾸는 상위 결정이라 잘못 추측하면 산출물 전체가 쓸모없어지므로 반드시 확인해야 한다. 반면 위임 동의는 "확실한 동의가 없으면 하지 않는다"는 보수적 기본값이 안전하다 — 사용자가 원치 않는 스킬을 실행시키는 것이 사용자가 원하는 실행을 놓치는 것보다 더 나쁘다.
 - **Alternatives considered**: 위임 동의가 애매하면 목적 확인처럼 기본값(예: "실행함")을 적용(사용자가 원치 않는 `generating-zenuml-diagrams` 실행을 유발할 위험이 있어 기각).
+
+## Decision: 노드 규격 표시어 (FR-036, 2026-11-20)
+
+- **Decision — 누가 쓰나**: 스킬(에이전트)이 007 설정을 읽고 노드 라벨에 직접 쓴다. `dependency.nodeMarkers=true`면 `Foo@{ label: "class&nbsp;Foo" }`나 파일의 `Foo@{ label: "Foo.kt" }`처럼 표시하고, `false`면 기본 이름만 쓴다. `build_diagram.py`는 바꾸지 않는다.
+- **Rationale**: 표시어는 원본 코드를 읽고 옮겨 오는 판단이라 FR-008d의 "판단이 필요한 부분은 스킬이 쓴다"에 속한다. `build_diagram.py`는 노드 선언 줄을 해석하지 않고 그대로 옮기므로 라벨이 달라져도 영향이 없다. 표시어가 붙은 노드만 `@{ label }` 형식이 되어 늘어나는 토큰은 그 노드 수만큼이다.
+- **Alternatives considered**: 스크립트가 붙이기(스크립트가 종류를 알려면 에이전트가 종류를 따로 넘겨야 해서 쓰는 양이 줄지 않고 인터페이스만 늘어 기각).
+
+- **Decision — 근거**: 실제 코드가 있으면 코드를 읽어 설명을 만들 때 노드마다 선언 키워드(원본에 쓰인 그대로, 예: `data class`, `sealed interface`, `fun`, `def`)와 파일 이름(확장자 포함)을 근거로 함께 적는다. 표시어는 그 근거에서만 가져온다. 근거에 없으면 붙이지 않는다. 표시어는 그것이 무엇인지(규격)를 정하는 키워드(`class`, `enum class`, `interface`, `object`, `fun` …)이며, 어떻게 동작하는지(기능)를 정하는 수식어(`suspend`, `async`, `inline`), 접근 제한자(`private`), 어노테이션(`@Composable`)은 넣지 않는다 — `suspend fun foo`는 `fun foo`, `async def foo`는 `def foo`.
+- **Rationale**: FR-022에 따라 구조 뷰 생성 단계는 설명만 쓴다. 표시어도 경로·식별자처럼 설명에 담긴 근거여야 같은 원칙이 지켜진다(SKILL.md의 코드베이스 입력 안내에 "선언 종류"를 근거 목록에 더한다).
+- **Alternatives considered**: 이름 관례로 짐작(`I` 접두 → interface 등 — FR-036이 금지해 기각).
+
+- **Decision — 붙이는 모양**: `dependency.nodeMarkers=true`일 때 표시어와 이름 사이, 여러 단어 표시어의 단어 사이는 `&nbsp;`로 잇는다(`data&nbsp;class&nbsp;Foo`). 파일 노드는 마지막 확장자까지 보이며, `false`면 선언 키워드와 마지막 확장자를 감춘다. `dependency.functionParentheses=true`일 때만 함수 노드 이름 끝에 `()`를 정확히 한 번 붙인다. 두 설정은 독립이고 기본값은 각각 `false`, `true`다. 변화 표시와 함께 쓰면 설정 적용 뒤의 표시어·이름·함수 괄호를 함께 `<b>`/`<s>` 안에 둔다.
+- **Rationale**: 변화 표시 이모지에 `&nbsp;`를 쓴 이유(FR-035)와 같이, 긴 라벨이 줄바꿈될 때 `class`만 윗줄에 남지 않게 한다. 함수의 `()`는 언어별 표시어와 무관한 단일 접미 규칙이라 별도 키워드 목록이 필요 없다. 공백이 든 이름(`Now in Android 앱`)은 `&nbsp;`가 없으므로 그대로 남는다.
+- **Alternatives considered**: 보통 공백으로 잇기(줄바꿈 문제, 그리고 공백 든 이름과 구분할 수 없어 기각). 언어별 키워드 목록으로 함수 여부를 다시 판별하기(기존 근거를 중복하고 열린 어휘라 빠짐이 생겨 기각).
+
+- **Decision — 다른 기능에 미치는 영향**: 표시 설정은 Dependency 라벨에만 적용한다. Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상과 hover 내용은 바꾸지 않는다. 009·010은 기존처럼 노드 ID와 마지막 `&nbsp;` 뒤의 기본 이름을 사용하고 끝 `()`를 제거하므로 새 정규화가 필요 없다.
+- **Rationale**: 두 기능 모두 이미 표시 라벨을 기본 이름으로 정규화하는 책임이 있다. 접미사 한 쌍만 제거하면 기존 표시어 열린 어휘 규칙을 유지하면서 함수 노드의 hover와 선언 찾기가 깨지지 않는다.
+- **Alternatives considered**: 언어별 함수 표시어 목록으로 괄호 제거 여부를 판단(하드코딩과 중복이라 기각). 소비자가 `foo()`를 기본 이름으로 사용(Responsibility·Collaboration과 실제 선언 이름 `foo`의 연결이 끊겨 기각).
+
+- **Decision — 예시 정리**: SKILL.md와 `references/templates.md`의 `ComponentB@{ label: "ComponentB(state)" }` 예시를 FR-036에 맞는 `ComponentB@{ label: "class&nbsp;ComponentB" }`로 바꾼다.
+- **Rationale**: FR-036은 라벨에 부가 설명을 넣지 않는다. 예시가 괄호 설명을 보여 주면 에이전트가 그대로 따라 써서 원본 표기 `foo()`와 헷갈린다.
+
+- **Decision — 라벨 형식은 하나**: 라벨이 Id와 다른 노드는 표시어든 변화 표시든 모두 FR-007의 `Id@{ label: "…" }`로 쓴다. SKILL.md "Change marks" 표의 `Id["✨&nbsp;<b>Name</b>"]` 같은 대괄호 형식도 `Id@{ label: "✨&nbsp;<b>Name</b>" }`로 맞춘다(그룹의 `subgraph Id["라벨"]`은 그대로).
+- **Rationale**: 같은 일에 형식이 두 가지면 에이전트가 두 규칙을 배워야 한다. `@{ label }`은 2026-11-13 clarify에서 사용자가 고른 형식이다. `build_diagram.py`는 줄 맨 앞의 Id만 읽고 009·010 파서는 두 형식을 다 읽으므로, 이미 만들어진 산출물도 그대로 동작한다.
+- **Alternatives considered**: 노드 라벨을 모두 대괄호 `Id["…"]`로 통일(노드당 약 5토큰, 노드 11개 파일에서 약 50토큰 — 파일의 1% 남짓 — 를 아끼지만 사용자의 형식 결정을 뒤집어 기각).

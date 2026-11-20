@@ -235,6 +235,19 @@
 
 **검증**: 두 산출물의 CRUD 구역·`class` 줄·라벨 접두를 대조하고, 미리보기에서 굵은 테두리·대시 테두리·점선+회색 글자가 테두리 색과 함께 보이는지 확인한다.
 
+## 시나리오 26 — 노드 규격 표시어 (FR-036, SC-015)
+
+**입력 예시**: Now in Android처럼 실제 코드가 있는 프로젝트에서 "`NiaAppState`와 `NiaNavHost`, 그리고 `core` 모듈의 구조를 보여줘". 코드에서 `NiaAppState`는 `class`, `NiaNavHost`는 `@Composable fun`, `TopLevelDestination`은 `enum class`로 선언되어 있고, `colors.xml` 같은 파일 하나를 가리키는 노드도 섞는다. 비교용으로 같은 구성의 동적 요청("이 커밋에서 `NiaNavHost`가 바뀌었다")도 낸다.
+
+**기대 결과**:
+- 기본 설정(`nodeMarkers=false`, `functionParentheses=true`)에서는 `NiaAppState`, `NiaNavHost()`, `TopLevelDestination`, `colors`로 표시된다.
+- 두 설정을 각각 true/false로 바꾼 네 조합에서 선언 키워드·파일의 마지막 확장자와 함수 `()`가 서로 독립적으로 나타나거나 사라진다. 둘 다 true면 `class&nbsp;NiaAppState`, `fun&nbsp;NiaNavHost()`, `enum&nbsp;class&nbsp;TopLevelDestination`, `colors.xml`이다.
+- `core` 모듈 노드처럼 선언도 파일도 아닌 노드는 이름만 있다.
+- 동적 요청에서는 변화 표시가 설정 적용 뒤 라벨 앞에 온다(둘 다 true면 `♻️&nbsp;fun&nbsp;NiaNavHost()`).
+- 어떤 라벨에도 `Foo(state)` 같은 괄호 설명이 없고, Responsibility·Collaboration의 굵은 이름에는 표시어가 없다.
+
+**검증**: 각 노드 라벨을 원본 선언과 대조해 지어낸 표시어가 없는지 보고, 네 조합과 기본값을 확인한다. 함수 종류를 특정 키워드로 하드코딩하지 않고도 함수에만 `()`가 정확히 한 번 붙는지, 009 hover 패널과 010 단계별 펼치기가 같은 기본 이름을 찾는지 확인한다.
+
 ## 결과 기록
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.

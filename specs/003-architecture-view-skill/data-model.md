@@ -85,7 +85,23 @@ Dependency 다이어그램에서 노드를 시각적으로 구분하는 색상 �
 | node_classes | Node Color Class 목록 |
 | hyperlinks | 노드별 Hyperlink Target |
 
-**표현 형식**: Mermaid `flowchart LR`, 그룹별 `direction TB`, 코드펜스 맨 앞 YAML frontmatter `config` 스타일 블록(curve: basis, nodeSpacing 45, rankSpacing 70, titleTopMargin 25, cluster-label 20px/weight 700) — 그룹은 `subgraph Id["라벨"]`, 의존관계는 `eN@` ID와 성격 레이블이 붙은 화살표, 각 노드는 `classDef`+`class`(라벨이 ID와 다르면 `@{ label }`), 각 엣지는 출발 노드 색의 엣지 클래스(`class eN …`), 구역 주석 순서 고정, 항상 두는 CRUD 구역(라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`와 `crudCreate`/`crudUpdate`/`crudDelete` classDef), 하이퍼링크가 있는 노드는 `click`(spec.md FR-007, FR-008, FR-008b, FR-027c). 요청이 구조 변화(동적)이면 설명이 추가·변경·삭제라고 밝힌 노드만 ✨<b>/♻️/🗑️<s> 라벨 접두와 `class <Id> crud*`를 받으며, 테두리 색 클래스는 그대로 둔다(FR-034, FR-035).
+**표현 형식**: Mermaid `flowchart LR`, 그룹별 `direction TB`, 코드펜스 맨 앞 YAML frontmatter `config` 스타일 블록(curve: basis, nodeSpacing 45, rankSpacing 70, titleTopMargin 25, cluster-label 20px/weight 700) — 그룹은 `subgraph Id["라벨"]`, 의존관계는 `eN@` ID와 성격 레이블이 붙은 화살표, 각 노드는 `classDef`+`class`(라벨이 ID와 다르면 `@{ label }`), 각 엣지는 출발 노드 색의 엣지 클래스(`class eN …`), 구역 주석 순서 고정, 항상 두는 CRUD 구역(라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`와 `crudCreate`/`crudUpdate`/`crudDelete` classDef), 하이퍼링크가 있는 노드는 `click`(spec.md FR-007, FR-008, FR-008b, FR-027c). 요청이 구조 변화(동적)이면 설명이 추가·변경·삭제라고 밝힌 노드만 `✨<b>`/`♻️`/`🗑️<s>` 라벨 접두와 `class <Id> crud*`를 받으며, 테두리 색 클래스는 그대로 둔다(FR-034, FR-035).
+
+## Node Display Name (노드 표시 이름)
+
+Dependency 노드 라벨에 보이는 이름(spec.md FR-036, research.md "노드 규격 표시어").
+
+| 속성 | 설명 |
+|------|------|
+| name | 본문·ID와 연결하는 기본 노드 이름. 파일 노드면 마지막 확장자를 뺀 이름(`Foo`) |
+| marker | 원본에 쓰인 선언 키워드(`class`, `data class`, `fun` …). 선언 하나에 대응하고 실제로 확인한 노드에만 있고, 그 밖에는 없음 |
+| file_extension | 파일 노드에서 실제로 확인한 마지막 확장자(`.kt` 등), 그 밖에는 빈 값 |
+| function_suffix | 함수 선언임을 확인했고 `dependency.functionParentheses=true`면 `()`, 그 밖에는 빈 값. 언어별 `marker` 값과 무관 |
+| change_mark | FR-035의 ✨/♻️/🗑️ (동적 요청에서 해당 노드만) |
+
+**표현**: `[change_mark&nbsp;][<b>|<s>][marker&nbsp;]name[file_extension][function_suffix][</b>|</s>]`. `dependency.nodeMarkers=false`면 `marker`와 `file_extension`을 비우고, `dependency.functionParentheses=false`면 `function_suffix`를 비운다. `marker`의 단어 사이와 `marker`·`name` 사이는 `&nbsp;`다. 함수 라벨을 기본 이름으로 연결하는 소비자는 마지막 `&nbsp;` 뒤 값의 끝 `()`만 제거한다. 설정 적용 결과 라벨이 Id와 다르면 `Id@{ label: "…" }`로 선언한다.
+
+**검증 규칙**: 두 설정의 네 조합이 독립적으로 적용된다. 켜진 함수 괄호는 정확히 한 번만 나타나며 함수가 아닌 노드에는 없다. 표시어는 원본 근거를 복사하고 언어별 목록으로 판별하지 않는다. 라벨에 `marker`·`name`·`file_extension`·`function_suffix`·`change_mark` 외의 부가 설명(예: `Foo(state)`)이 없다. Responsibility·Collaboration 본문의 굵은 이름은 설정에 영향을 받지 않는다(FR-036, SC-015).
 
 ## Responsibility Entry (책임 서술)
 
