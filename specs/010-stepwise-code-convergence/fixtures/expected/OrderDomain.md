@@ -409,7 +409,11 @@ class InventoryRepository {
 
 </div>
 
+<details class="zenuml-stepwise-style">
+<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+
 <style>
+.zenuml-stepwise-style { display: none; }
 .resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
 .resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
@@ -443,3 +447,5 @@ class InventoryRepository {
 .stages pre.diff .del::before { top: -5px; }
 .stages pre.diff .del-after::after { bottom: -5px; }
 </style>
+
+</details>

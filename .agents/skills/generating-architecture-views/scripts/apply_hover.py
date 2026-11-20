@@ -4,7 +4,7 @@
 Deterministic: copies each node's Responsibility and its own Collaboration entries from
 the file's body into the Dependency diagram's `click` tooltips, adds a non-navigating
 `click Id hoverOnly "..."` line for nodes without a link (plus `,cursor:auto` on that
-node's color class), and appends the fixed panel-shaping <style> block for hover.position.
+node's color class), and appends the fixed wrapped panel style for hover.position.
 When hover is off (or no node has content), it restores the pre-feature form instead.
 The body itself is never changed. Running it twice with the same settings changes nothing.
 

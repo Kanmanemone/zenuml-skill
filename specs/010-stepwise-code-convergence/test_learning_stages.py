@@ -448,6 +448,10 @@ class Workflow(unittest.TestCase):
                 self.assertEqual(s.strip_diff_layer(actual.read_text(encoding='utf-8')),
                                  expected.with_suffix('.base.md').read_text(encoding='utf-8'))
             text = (result / 'OrderDomain.md').read_text(encoding='utf-8')
+            self.assertEqual(text.count('<details class="zenuml-stepwise-style">'), 1)
+            self.assertEqual(text.count('<style>'), 2)
+            self.assertIn('관련 GFM 공식 문서</a>)</summary>', text)
+            self.assertIn('.zenuml-stepwise-style { display: none; }', text)
             self.assertIn('<div class="resp"><span class="label">책임</span> 주문을 받아 처리한다.</div>', text)
             self.assertIn('3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)', text)
             self.assertIn('⟨3. 처리한 주문을 감사 기록에 남긴다.⟩', text)

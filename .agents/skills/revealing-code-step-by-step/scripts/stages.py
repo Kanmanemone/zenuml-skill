@@ -1673,7 +1673,10 @@ def work_dir(result_dir, k):
 
 # ---- build: base box (research R6) -----------------------------------------------
 
-BASE_CSS = """.resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
+STYLE_SUMMARY = '이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)'
+
+BASE_CSS = """.zenuml-stepwise-style { display: none; }
+.resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
 .resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
@@ -1839,9 +1842,11 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
             max_slides = max(max_slides, len(slides))
             parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin"), ""]
         rules = "\n".join(".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k) for k in range(1, max_slides + 1))
-        parts += ["<style>", BASE_CSS.replace("{STAGE_RULES}", rules), "</style>", ""]
+        parts += ['<details class="zenuml-stepwise-style">', "<summary>" + STYLE_SUMMARY + "</summary>", "",
+                  "<style>", BASE_CSS.replace("{STAGE_RULES}", rules), "</style>", ""]
         if with_diff:
             parts += ["<style>", DIFF_CSS, "</style>", ""]
+        parts += ["</details>", ""]
         docs_text[doc] = "\n".join(parts)
     return docs_text, unchanged, counts
 

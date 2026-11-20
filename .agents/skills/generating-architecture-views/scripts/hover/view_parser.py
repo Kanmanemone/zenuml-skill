@@ -257,16 +257,23 @@ def _parse_collaborations(lines, rng):
 # ---- Panel-shaping block at the end of the file -------------------------------------
 
 def find_style_block(lines):
-    """(start, end) inclusive indexes of the trailing hover <style> block, or None."""
+    """Inclusive range of the trailing wrapped or legacy hover style block."""
     k = len(lines) - 1
     while k >= 0 and lines[k].strip() == "":
         k -= 1
-    if k < 0 or lines[k].strip() != "</style>":
+    if k < 0:
         return None
-    for s in range(k, -1, -1):
-        if lines[s].strip() == "<style>":
-            body = "\n".join(lines[s:k + 1])
-            return (s, k) if "div.mermaidTooltip" in body else None
+    if lines[k].strip() == "</details>":
+        for s in range(k, -1, -1):
+            if lines[s].strip() == '<details class="zenuml-hover-style">':
+                body = "\n".join(lines[s:k + 1])
+                return (s, k) if "div.mermaidTooltip" in body else None
+        return None
+    if lines[k].strip() == "</style>":
+        for s in range(k, -1, -1):
+            if lines[s].strip() == "<style>":
+                body = "\n".join(lines[s:k + 1])
+                return (s, k) if "div.mermaidTooltip" in body else None
     return None
 
 

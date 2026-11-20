@@ -321,11 +321,19 @@ Every example above is what you write. When hover is on, `scripts/apply_hover.py
 ```text
 …the last line of the Collaboration section…
 
+<details class="zenuml-hover-style">
+<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+
 <style>
+.zenuml-hover-style {
+  display: none;
+}
 div.mermaidTooltip {
   …
 }
 </style>
+
+</details>
 ```
 
 You never write these forms yourself; the body above them stays exactly as you wrote it.

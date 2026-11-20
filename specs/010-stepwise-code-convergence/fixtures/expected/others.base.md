@@ -110,7 +110,11 @@ fun formatTotal(total: BigDecimal): String =
 
 </div>
 
+<details class="zenuml-stepwise-style">
+<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+
 <style>
+.zenuml-stepwise-style { display: none; }
 .resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
 .resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
@@ -132,3 +136,5 @@ fun formatTotal(total: BigDecimal): String =
 .stages .code pre { margin: 0; overflow: visible; width: max-content; min-width: 100%; box-sizing: border-box; }
 .stages .code pre, .stages .code pre code { white-space: pre; word-break: normal; }
 </style>
+
+</details>

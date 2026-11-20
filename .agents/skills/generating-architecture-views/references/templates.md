@@ -86,7 +86,7 @@ You write only the shape above (`label` = file name, no `click` for a node witho
   click AuditLog hoverOnly "<b>AuditLog</b><br/><b>책임 (추상)</b>: …"
 ```
 
-…and appends the fixed panel-shaping `<style>…</style>` block, after one blank line, at the very end of the file.
+…and appends the fixed panel-shaping `<style>` inside a hidden-in-preview `<details>` block, after one blank line, at the very end of the file. GitHub initially shows only why the unapplied CSS is present; expanding it reveals the source.
 
 ## Responsibility template
 

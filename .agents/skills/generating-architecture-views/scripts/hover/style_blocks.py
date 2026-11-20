@@ -1,12 +1,23 @@
 """The fixed hover-panel <style> blocks, one per hover.position value.
 
 Source of truth: the verified test documents in docs/hover-tooltip-test/ —
-  bottom -> inline-style.md, node -> node-25em.md.
+  wrapper/bottom -> details-wrapped-style.md, node -> node-25em.md.
 If the CSS changes, change it there and here together. Stored with "\n" line endings;
 the caller converts to the target file's line ending.
 """
 
-BOTTOM = """<style>
+OPEN = """<details class="zenuml-hover-style">
+<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+
+<style>"""
+CLOSE = """</style>
+
+</details>"""
+
+BOTTOM = OPEN + """
+.zenuml-hover-style {
+  display: none;
+}
 div.mermaidTooltip {
   position: fixed !important;
   top: auto !important;
@@ -30,9 +41,12 @@ div.mermaidTooltip::before {
 .node.clickable:hover .nodeLabel {
   text-decoration: underline;
 }
-</style>"""
+""" + CLOSE
 
-NODE = """<style>
+NODE = OPEN + """
+.zenuml-hover-style {
+  display: none;
+}
 div.mermaidTooltip {
   max-width: 25em !important;
   width: max-content;
@@ -52,7 +66,7 @@ html:not(:has(g.node.hover)) div.mermaidTooltip {
 .node.clickable:hover .nodeLabel {
   text-decoration: underline;
 }
-</style>"""
+""" + CLOSE
 
 _BLOCKS = {"bottom": BOTTOM, "node": NODE}
 

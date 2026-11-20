@@ -262,7 +262,13 @@ flowchart LR
 
 </details>
 
+<details class="zenuml-hover-style">
+<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+
 <style>
+.zenuml-hover-style {
+  display: none;
+}
 div.mermaidTooltip {
   max-width: 25em !important;
   width: max-content;
@@ -283,3 +289,5 @@ html:not(:has(g.node.hover)) div.mermaidTooltip {
   text-decoration: underline;
 }
 </style>
+
+</details>
