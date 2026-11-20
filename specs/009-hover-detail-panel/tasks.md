@@ -151,3 +151,14 @@ T008(panel_text.py) 진행 중에 동시에:
 
 - [X] T030 Change the `hover.collaboration` default to `["targets", "boundary", "rationale", "questions"]` in `.agents/skills/generating-architecture-views/settings.schema.json` and `settings.jsonc`, and note FR-009b in its jsonc comment per FR-009, FR-009b (contradicts)
 - [X] T031 Regenerate `specs/009-hover-detail-panel/fixtures/view.default.expected.md` for the new default and confirm quickstart Q1–Q4 still pass per FR-009, SC-003 (contradicts)
+
+## Phase 9: 규격 표시 노드 hover 연결 (FR-021, SC-008)
+
+**Purpose**: 003 FR-036의 규격 표시어가 Dependency 라벨에 붙어도 이름만 쓰는 본문과 hover 패널을 연결한다.
+
+**Independent Test**: quickstart Q1–Q4와 Q9를 실행해 기존 기대 출력, 멱등, 끄기 복원, 규격 표시 노드 연결을 확인한다.
+
+- [ ] T032 [US1] `specs/009-hover-detail-panel/fixtures/view.input.md`의 `CartStore` 라벨을 `class&nbsp;CartStore` 규격 표시 사례로 바꾸고 `view.default.expected.md`·`view.custom.expected.md`의 대응 선언을 맞춘 뒤, 현재 `apply_hover.py` 결과가 기대 출력과 달라지는지 확인한다 per FR-021
+- [ ] T033 [US1] `.agents/skills/generating-architecture-views/scripts/hover/view_parser.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 quickstart Q1–Q4·Q9를 실행한다 per FR-021, SC-003, SC-004, SC-005, SC-008
+
+**Dependencies**: T032 → T033.

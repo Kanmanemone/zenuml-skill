@@ -472,3 +472,14 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 - [X] T076 `specs/010-stepwise-code-convergence/test_learning_stages.py`의 `SOURCES_BY_LANGUAGE`에 Scala(`scala`)·Groovy(`groovy`)·Dart(`dart`)·C(`c`) 원본을 더해, 머리와 선언 둘 이상이 든 파일에서 노드 이름의 원본 범위가 기대 범위와 같고 블록이 든 선언이 모두 연 장면에서 원본 범위로 돌아오는지 확인한다 per SC-014 (partial)
 - [X] T077 `specs/010-stepwise-code-convergence/test_learning_stages.py`에 Kotlin 밖 언어의 파일 단위 노드 시험을 더한다 — Java 파일(`package`·`import`와 최상위 클래스 둘)과 Python 파일(`import`·`from`과 최상위 함수 둘)을 `whole_file`로 트리로 만들 때 머리 항목 줄이 루트의 자기 줄이고 최상위 선언이 루트 자식이며 모두 연 장면이 파일과 같다 per research S11 "파일 단위 노드의 머리", FR-005a (partial)
   - 결과: 시험 32개 통과. Scala 원본의 동반 객체 이름은 클래스와 겹치면 FR-002대로 `--pick` 후보가 나오므로, 범위 시험에서는 `object CartOps`로 두었다.
+
+## Phase 18: 규격 표시 노드 원본 연결 (FR-021, SC-015)
+
+**Purpose**: 003 FR-036의 규격 표시어가 Dependency 라벨에 붙어도 실제 이름의 선언·파일을 찾아 단계별로 펼친다.
+
+**Independent Test**: 표준 라이브러리 테스트 전체가 통과하고, 복합 표시어·변화 표시 라벨이 실제 이름으로 정규화되며 마지막 장면이 해당 원본 범위와 일치한다.
+
+- [ ] T078 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost`, 표시어 없는 이름을 실제 이름으로 읽는 회귀 테스트를 추가하고 현재 실패를 확인한다 per FR-021, SC-015
+- [ ] T079 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 전체 `test_learning_stages.py`를 실행한다 per FR-021, SC-003, SC-015
+
+**Dependencies**: T078 → T079.

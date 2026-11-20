@@ -458,3 +458,38 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 - [X] T124 Add `scripts/build_diagram.py` that turns the skill-written basic diagram into the full template form per FR-008d, plan: diagram script (missing)
 - [X] T125 Update SKILL.md and `references/templates.md` so the skill writes only the basic diagram and runs `build_diagram.py` before the log and hover steps per FR-008d (missing)
+
+---
+
+## Phase 36: 노드 규격 표시어 (FR-036, SC-015)
+
+**Purpose**: 원본 코드의 선언 하나나 파일 하나에 대응하고 실제로 확인한 노드의 라벨에 원본에 쓰인 규격 표시어를 붙이게 한다(research.md "노드 규격 표시어"). 바꾸는 파일은 `.agents/skills/generating-architecture-views/`의 `SKILL.md`와 `references/templates.md` 두 개뿐이다. `build_diagram.py`와 `references/examples.md`(라벨이 Id와 다른 노드가 없음)는 바꾸지 않는다.
+
+**Independent Test**: quickstart.md 시나리오 26(그리고 회귀 확인으로 시나리오 25)을 실행해 라벨이 data-model.md `Node Display Name`의 표현·검증 규칙을 따르는지 본다.
+
+- [ ] T126 [US1] `.agents/skills/generating-architecture-views/SKILL.md` Step 2 "Nodes" 규칙에 FR-036을 넣는다: 선언 하나·파일 하나에 대응하고 실제로 확인한 노드만 표시어를 갖고(data-model.md `Node Display Name.marker`, `Node Display Name.name`), 규격 키워드만 원본 그대로 쓰며(기능 수식어·접근 제한자·어노테이션 제외), 표시어와 이름 사이와 표시어 단어 사이는 `&nbsp;`, 라벨이 Id와 다르면 `Id@{ label: "…" }`, 라벨에 부가 설명 없음, Responsibility·Collaboration의 굵은 이름에는 붙이지 않음. 같은 파일 "Diagram" 예시의 `ComponentB@{ label: "ComponentB(state)" }`를 `ComponentB@{ label: "class&nbsp;ComponentB" }`로 바꾼다 per FR-036, FR-007
+- [ ] T127 [US1] 같은 `SKILL.md`의 "Change marks" 표 세 라벨을 `Id@{ label: "✨&nbsp;<b>Name</b>" }`·`Id@{ label: "♻️&nbsp;Name" }`·`Id@{ label: "🗑️&nbsp;<s>Name</s>" }`로 바꾸고, 표시어가 있으면 `<b>`/`<s>` 안 이름 앞에 둔다는 한 줄을 더한다(예: `✨&nbsp;<b>class&nbsp;Foo</b>`, data-model.md `Node Display Name.change_mark`) per FR-035, FR-036, research.md "라벨 형식은 하나"
+- [ ] T128 [US1] 같은 `SKILL.md` "Out-of-scope requests"의 "Building the view from an actual codebase" 항목의 근거 목록(file paths, identifiers, …)에 노드마다 확인한 선언 키워드와 확장자까지 쓴 파일 이름을 더한다 per FR-022, FR-036, contracts/skill-interface.md Input Contract `description`
+- [ ] T129 [US1] 같은 `SKILL.md` Self-check에 AP-5d를 더한다: 표시어는 확인한 선언·파일 노드에만, 원본 그대로의 규격 키워드만, 라벨에 부가 설명 없음, 본문 굵은 이름에는 없음 per SC-015
+- [ ] T130 [P] [US1] `.agents/skills/generating-architecture-views/references/templates.md`를 T126·T127과 맞춘다: Dependency 템플릿 예시(`ComponentB(state)` → `class&nbsp;ComponentB`), 노드 선언 규칙 줄(괄호 설명 대신 FR-036 표시어), "Change marking" 블록의 세 대괄호 라벨을 `@{ label }` 형식으로 per FR-036, FR-035
+- [ ] T131 quickstart.md 시나리오 26과 시나리오 25를 실행하고 결과를 quickstart.md "결과 기록"에 남긴다. 009·010 반영 전이므로 시나리오 26의 hover·단계별 펼치기 확인은 보류로 적는다 per SC-014, SC-015
+
+**Dependencies**: T126 → T127 → T128 → T129는 같은 파일이라 순서대로. T130은 다른 파일이라 T126과 함께 진행할 수 있다. T131은 T126~T130 뒤.
+
+**배포 조건**: research.md "다른 기능에 미치는 영향"에 따라, 이 Phase는 `009-hover-detail-panel`과 `010-stepwise-code-convergence`가 "마지막 `&nbsp;` 뒤 = 이름" 규칙을 반영한 뒤 함께 push한다.
+
+---
+
+## Phase 37: 함수 노드 호출 괄호 (FR-036, SC-015)
+
+**Goal**: 원본에서 함수 선언임을 확인한 Dependency 노드 이름 끝에 `()`를 정확히 한 번 표시하고, 기존 hover·단계별 펼치기가 그 표시를 기본 함수 이름으로 연결한다.
+
+**Independent Test**: quickstart.md 시나리오 26에서 함수·비함수·동적 함수 라벨을 대조하고, 같은 함수 라벨을 009 hover 파서와 010 단계별 펼치기 파서에 넣어 모두 괄호 없는 기본 이름을 반환하는지 확인한다.
+
+- [ ] T132 [US1] `.agents/skills/generating-architecture-views/SKILL.md`의 Nodes 규칙과 AP-5d에 함수 노드 이름 끝의 `()`를 정확히 한 번 붙이되 기존 원본 표시어 판별과 열린 어휘를 유지하도록 반영 per FR-036, data-model.md `Node Display Name.function_suffix`
+- [ ] T133 [P] [US1] `.agents/skills/generating-architecture-views/references/templates.md`의 노드 선언 규칙과 변화 표시 예시에 함수 라벨 `name()` 규칙을 반영하고 언어별 키워드 목록은 추가하지 않음 per FR-036, data-model.md `Node Display Name.function_suffix`
+- [ ] T134 [P] [US1] `.agents/skills/generating-architecture-views/scripts/hover/view_parser.py`의 `clean_name`이 마지막 `&nbsp;` 뒤 값의 끝 `()`만 제거해 함수 라벨을 Responsibility·Collaboration의 기본 이름으로 연결하도록 수정 per plan: 함수 라벨 호환성
+- [ ] T135 [P] [US1] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `clean_name`에 같은 끝 `()` 정규화를 적용하고 `specs/010-stepwise-code-convergence/test_learning_stages.py`에 함수·비함수·변화 표시 회귀 사례를 추가 per plan: 함수 라벨 호환성
+- [ ] T136 [US1] `specs/003-architecture-view-skill/quickstart.md` 시나리오 26과 hover·단계별 펼치기 이름 정규화 검증을 실행해 함수에만 `()`가 한 번 표시되고 두 소비자가 기본 이름을 반환하는 결과를 기록 per SC-015
+
+**Dependencies**: T132와 T133은 표시 규칙을 함께 정의한다. T134와 T135는 서로 다른 파일이라 병렬 가능하다. T136은 T132~T135 뒤에 실행한다.

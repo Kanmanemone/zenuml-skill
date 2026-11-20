@@ -142,3 +142,27 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 - [X] T037 Add `collaboration.questions` (boolean, default `false`, tokenImpact `false` `[0]` / `true` `[+]`) to `.agents/skills/generating-architecture-views/settings.schema.json` and the matching commented key to `settings.jsonc` per FR-012c, FR-018, FR-020 (missing)
 - [X] T038 Make Step 4, the self-check (AP-10), the request-override examples, and the hover section of `.agents/skills/generating-architecture-views/SKILL.md` follow `collaboration.questions`, and mark the questions sub-part as conditional in `references/templates.md` per FR-012c (missing)
+
+## Phase 14: User Story 1 - Dependency 노드 이름 스타일 선택 (Priority: P1)
+
+**Goal**: 사용자가 원본 표시어와 함수 괄호를 독립적으로 켜고 끄며, 기본값으로 이름과 함수 괄호만 본다.
+
+**Independent Test**: `scripts/read_settings.py`가 기본값 `nodeMarkers=false`, `functionParentheses=true`를 반환하고, quickstart 시나리오 3b의 네 조합이 지정된 라벨을 만들며 본문·ID·링크·hover 내용은 바뀌지 않는다.
+
+- [ ] T039 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`의 `dependency`에 `nodeMarkers`(boolean, default `false`, false `[0]`/true `[+]`)와 `functionParentheses`(boolean, default `true`, 양쪽 `[0]`)를 추가 per FR-012d, `specs/007-skill-output-settings/data-model.md` `Option Definition.options[].key/type/default/tokenImpact`
+- [ ] T040 [US1] `.agents/skills/generating-architecture-views/SKILL.md`와 `references/templates.md`의 노드 라벨 규칙을 두 해석값의 네 조합, 원본 근거 기반 함수 판별, 요청 우선, Dependency 한정 적용으로 바꿈 per FR-012d, `specs/007-skill-output-settings/contracts/settings-contract.md`
+- [ ] T041 [US1] `.agents/skills/generating-architecture-views/scripts/read_settings.py`로 배포본·키 누락·유효/무효 boolean 기본값 처리를 확인하고, `specs/007-skill-output-settings/quickstart.md` 시나리오 3b의 네 조합 및 009·010 회귀 검증 결과를 같은 파일에 기록 per SC-001, SC-003, SC-010
+
+**Checkpoint**: 두 설정의 네 조합과 기본값이 독립적으로 동작하고 기존 구조 뷰 소비자가 같은 기본 이름을 사용한다.
+
+### Phase 14 Dependencies
+
+- T039 → T040 → T041
+
+### Phase 14 Parallel Opportunities
+
+- 없음. 설정 키를 먼저 확정하고 생성 지침을 반영한 뒤 같은 계약을 검증해야 한다.
+
+### Phase 14 Implementation Strategy
+
+T039와 T040으로 P1 변경을 완성한 뒤 T041에서 기본값·네 조합·기존 소비자 회귀를 한 번에 검증한다.
