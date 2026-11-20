@@ -38,6 +38,10 @@
 
 - Q: 003이 Dependency 라벨에 원본 규격 표시어(`class`, `enum class`, `fun`, 파일 확장자)를 붙인 뒤 hover는 어떤 이름으로 본문과 연결하는가? → A: 변화 표시와 HTML 태그를 제거한 뒤 마지막 `&nbsp;` 뒤의 실제 노드 이름만 사용한다. 표시어는 패널 머리글과 본문 연결 키가 아니며, 표시어 없는 기존 라벨은 그대로 동작한다(FR-021).
 
+### Session 2026-11-21
+
+- Q: GitHub에서 적용되지 않는 `<style>` 원문을 그대로 노출할 것인가? → A: 검증한 `docs/hover-tooltip-test/details-wrapped-style.md`처럼 고정 `<details>` 안에 넣는다. VS Code에서는 CSS가 `<details>` 자체를 숨기고 기존 hover 모양을 그대로 적용하며, GitHub에서는 설명 한 줄만 보이고 CSS 원문은 사용자가 펼칠 때만 보인다(FR-022).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - 노드에 마우스를 올려 책임과 협력을 그 자리에서 보기 (Priority: P1)
@@ -147,11 +151,12 @@
 - **FR-019**: `hover.position` 값은 `bottom`(미리보기 아래쪽에 넓게 고정된 패널)과 `node`(노드 바로 아래, Mermaid 기본 위치) 중 하나이며 기본값은 `bottom`이다. 이 값은 FR-005 블록의 내용만 바꾸고, 툴팁 내용·밑줄·링크 없는 노드 처리(FR-013)에는 영향을 주지 않는다. 두 hover 목록이 모두 빈 것으로 동작하면(`hover.enabled`가 `false`인 경우 포함) 이 값은 쓰이지 않는다.
 - **FR-020**: `hover.enabled` 값은 `true`와 `false` 중 하나이며 기본값은 `true`다. `false`이면 hover 기능 전체가 꺼져, `hover.responsibility`·`hover.collaboration`·`hover.position` 값과 상관없이 FR-006의 상태(이 기능 도입 전과 같은 산출물)가 된다. 이 값을 바꿔도 다른 hover 값은 그대로 남아, 다시 `true`로 바꾸면 이전 항목 설정대로 동작한다. 요청 문장에서 hover를 켜거나 끄라고 하면 그 요청에 한해 따른다(FR-014).
 - **FR-021**: Dependency 노드 라벨에 003 FR-036의 원본 규격 표시어가 있으면, 도구는 변화 표시와 HTML 태그를 제거한 뒤 마지막 `&nbsp;` 뒤의 실제 노드 이름으로 Responsibility·Collaboration 본문을 연결하고 패널 머리글을 만들어야 한다. `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost`는 각각 `NiaAppState`, `TopLevelDestination`, `NiaNavHost`로 연결된다. 표시어가 없는 기존 라벨과 ID는 이전과 같아야 한다.
+- **FR-022**: FR-005의 `<style>`은 `docs/hover-tooltip-test/details-wrapped-style.md`에서 검증한 고정 `<details>` 안에 있어야 한다. 설명은 "이 문서에 적용되지 못한 `<style>` 코드"와 관련 GFM 공식 문서 링크를 보여준다. VS Code에서는 이 접은 글 자체가 보이지 않고 CSS가 종전과 같이 적용되어야 하며, GitHub에서는 접힌 설명 한 줄만 먼저 보여 CSS 원문이 본문에 그대로 펼쳐지지 않아야 한다. 도구는 기존의 맨 끝 생 `<style>` 블록도 찾아 새 형식으로 교체하거나 제거해야 한다.
 
 ### Key Entities
 
 - **노드 패널 내용**: 노드 하나에 대한 툴팁 문자열(링크 유무와 무관). Responsibility 부분(`hover.responsibility` 목록의 항목)과 Collaboration 부분(그 노드가 의존하는 협력마다 `hover.collaboration` 목록의 항목)으로 이뤄진다. 원본은 같은 파일의 본문이다.
-- **패널 모양 블록**: 파일 맨 아래에 놓이는 고정 `<style>` 블록. 패널 내용이 있는 노드가 하나라도 있을 때만 존재한다.
+- **패널 모양 블록**: 파일 맨 아래에 놓이는 고정 `<details>`와 그 안의 `<style>` 블록. 패널 내용이 있는 노드가 하나라도 있을 때만 존재한다.
 - **hover 설정**: `hover.enabled`, `hover.responsibility`, `hover.collaboration`, `hover.position`. 설정 최상위 `hover` 그룹에 모여 있다. `hover.enabled`가 `false`이면 나머지 값과 상관없이 기능이 꺼진다. 앞의 둘은 각 섹션의 `display`와 독립적으로 정하되, `display`가 `hidden`이면 빈 목록으로 동작한다. `hover.position`은 패널 모양 블록의 내용을 정한다.
 
 ## Success Criteria *(mandatory)*
@@ -166,13 +171,14 @@
 - **SC-006**: 같은 파일을 PNG/PDF로 내보냈을 때 패널 모양 블록의 내용이 글자로 드러나는 경우가 0건이다.
 - **SC-007**: 이 기능을 켜도 구조 뷰 한 번 생성에 드는 모델 출력 분량이 늘지 않는다(패널 내용은 도구가 만든다).
 - **SC-008**: 대표 구조 뷰에서 원본 규격 표시어가 붙은 모든 노드의 hover 패널이 이름만 쓴 본문 항목과 100% 연결되고, 패널 머리글에는 표시어가 나타나지 않는다.
+- **SC-009**: GitHub에서 구조 뷰를 처음 열었을 때 CSS 원문은 0줄 노출되고, 설명 한 줄을 펼친 뒤에만 원문이 보인다. 같은 파일의 VS Code 미리보기에서는 설명 줄이 보이지 않고 hover 스타일이 종전과 같이 적용된다.
 
 ## Assumptions
 
 - 대상 미리보기는 VS Code 내장 Markdown 미리보기(Mermaid 12)다. 다른 미리보기에서의 동작은 보장하지 않는다.
 - **선행 확인 결과(2026-11-14, VS Code 1.146 내장 Mermaid 미리보기)**: `docs/hover-tooltip-test/`로 다음을 확인했다 — (1) 노드 툴팁이 뜬다, (2) md 맨 아래 `<style>`이 적용된다(`bottom` 패널, `node` 툴팁 모두), (3) 링크 없는 노드의 이동 없는 `click` 줄도 툴팁이 뜨고 클릭해도 이동·오류가 없다, (4) hover 중 밑줄이 링크 유무와 상관없이 생긴다, (5) `node`에서 오른쪽 끝 노드의 툴팁이 같은 폭으로 오른쪽 끝에 붙고, 이어서 왼쪽 노드를 hover해도 제자리에 뜬다.
-- **GitHub 확인 결과(2026-11-14)**: md 안 `<style>` 블록은 GitHub에서 태그째 글자로 드러난다(GFM 태그 필터). 노드 툴팁은 GitHub에서도 뜨지만, CSS가 적용되지 않아 Mermaid 기본 모양(폭 200px)으로 뜨고 다이어그램 영역 경계에서 잘린다. GitHub에서 이를 고칠 방법은 없다. 이 결과로 GitHub는 대상에서 뺐다(Clarifications 2026-11-14). 맨 끝 `<style>`과 접힌 `<details>` 안 `<style>`도 GitHub에서 확인했지만 받아들일 만하지 않았다.
-- **대상 범위 밖**: GitHub를 비롯한 VS Code 미리보기 밖의 Markdown 뷰어. 이런 곳에서는 FR-005 블록이 글자로 드러날 수 있다.
+- **GitHub 확인 결과(2026-11-21)**: md 안 `<style>`은 GitHub에서 적용되지 않고 글자로 드러나지만, `docs/hover-tooltip-test/details-wrapped-style.md`의 고정 `<details>` 안에 두면 설명 한 줄만 먼저 보이고 CSS 원문은 펼칠 때만 보인다. VS Code에서는 같은 CSS가 적용되어 `<details>` 자체가 숨고 hover 모양도 유지된다. GitHub hover의 모양 자체는 여전히 지원 범위 밖이다.
+- **대상 범위 밖**: GitHub를 비롯한 VS Code 미리보기 밖의 Markdown 뷰어에서 hover 모양을 맞추는 일. GitHub에서는 FR-022의 CSS 원문 접기만 보장한다.
 - **다이어그램 안 `themeCSS`로는 툴팁 모양을 바꿀 수 없다**: Mermaid 12가 `themeCSS`의 모든 규칙을 다이어그램 범위로 묶기 때문에, 다이어그램 바깥에 그려지는 툴팁에는 적용되지 않는다(코드와 브라우저 테스트로 확인).
 - `node` 모드의 최대 폭 `25em`은 한 줄 글자 수 기준으로 정했다. em은 글자 크기 기준 단위이고 한글 한 글자는 약 1em이라, 글자 크기가 바뀌어도 한 줄에 한글 약 25자가 유지된다. WCAG 2.x 1.4.8(AAA)의 한중일 문자 한 줄 40자 상한 안에 있다. em 단위로 폭을 정한 국제 규격은 없다.
 - `node` 모드의 넘침 처리 근거: Mermaid(VS Code 내장 포함)는 툴팁의 왼쪽 위치를 노드 가로 중앙으로 직접 정하므로, 폭을 정하지 않으면 툴팁이 오른쪽 남은 공간만큼 좁아진다. CSS는 이 위치 값을 읽을 수 없고, SVG 안의 노드는 CSS 앵커가 될 수 없음을 확인했다. 그래서 넘칠 때 대안 위치를 시도하는 CSS 기능을 쓴다. 이 기능은 (a) 넘침 판단 기준이 첫 화면 크기라 다이어그램이 첫 화면 아래에 있으면 동작하지 않고, (b) 마지막에 쓴 대안 위치를 툴팁이 화면에서 빠질 때까지 기억한다. Mermaid는 툴팁을 투명하게만 숨기므로 (a)·(b)를 각각 기준을 문서 전체로 바꾸는 규칙과 hover 중이 아닐 때 툴팁을 화면에서 빼는 규칙으로 막는다(Chrome 157과 VS Code에서 확인).
