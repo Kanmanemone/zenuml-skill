@@ -149,9 +149,9 @@ MVP는 US1(사용자가 처음 요청한 구조 뷰 접기). 이후 US2, US3, Po
 
 **Independent Test**: `scripts/read_settings.py`가 기본값 `nodeMarkers=false`, `functionParentheses=true`를 반환하고, quickstart 시나리오 3b의 네 조합이 지정된 라벨을 만들며 본문·ID·링크·hover 내용은 바뀌지 않는다.
 
-- [ ] T039 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`의 `dependency`에 `nodeMarkers`(boolean, default `false`, false `[0]`/true `[+]`)와 `functionParentheses`(boolean, default `true`, 양쪽 `[0]`)를 추가 per FR-012d, `specs/007-skill-output-settings/data-model.md` `Option Definition.options[].key/type/default/tokenImpact`
-- [ ] T040 [US1] `.agents/skills/generating-architecture-views/SKILL.md`와 `references/templates.md`의 노드 라벨 규칙을 두 해석값의 네 조합, 원본 근거 기반 함수 판별, 요청 우선, Dependency 한정 적용으로 바꿈 per FR-012d, `specs/007-skill-output-settings/contracts/settings-contract.md`
-- [ ] T041 [US1] `.agents/skills/generating-architecture-views/scripts/read_settings.py`로 배포본·키 누락·유효/무효 boolean 기본값 처리를 확인하고, `specs/007-skill-output-settings/quickstart.md` 시나리오 3b의 네 조합 및 009·010 회귀 검증 결과를 같은 파일에 기록 per SC-001, SC-003, SC-010
+- [X] T039 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`의 `dependency`에 `nodeMarkers`(boolean, default `false`, false `[0]`/true `[+]`)와 `functionParentheses`(boolean, default `true`, 양쪽 `[0]`)를 추가 per FR-012d, `specs/007-skill-output-settings/data-model.md` `Option Definition.options[].key/type/default/tokenImpact`
+- [X] T040 [US1] `.agents/skills/generating-architecture-views/SKILL.md`와 `references/templates.md`의 노드 라벨 규칙을 두 해석값의 네 조합, 원본 근거 기반 함수 판별, 요청 우선, Dependency 한정 적용으로 바꿈 per FR-012d, `specs/007-skill-output-settings/contracts/settings-contract.md`
+- [X] T041 [US1] `.agents/skills/generating-architecture-views/scripts/read_settings.py`로 배포본·키 누락·유효/무효 boolean 기본값 처리를 확인하고, `specs/007-skill-output-settings/quickstart.md` 시나리오 3b의 네 조합 및 009·010 회귀 검증 결과를 같은 파일에 기록 per SC-001, SC-003, SC-010
 
 **Checkpoint**: 두 설정의 네 조합과 기본값이 독립적으로 동작하고 기존 구조 뷰 소비자가 같은 기본 이름을 사용한다.
 

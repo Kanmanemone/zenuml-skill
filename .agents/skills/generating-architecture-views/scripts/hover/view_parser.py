@@ -77,11 +77,11 @@ _NOT_NODES = {"end"}
 
 def clean_name(label):
     """Display name from a node label: drop change-mark prefixes and inline markup."""
-    text = label.replace("&nbsp;", " ")
-    text = re.sub(r"</?(b|s|strong)>", "", text)
+    text = re.sub(r"</?(b|s|strong)>", "", label)
     for mark in ("✨", "♻️", "♻", "🗑️", "🗑", "️"):
         text = text.replace(mark, "")
-    return text.strip()
+    name = text.split("&nbsp;")[-1].strip()
+    return name[:-2] if name.endswith("()") else name
 
 
 def find_fence(lines):

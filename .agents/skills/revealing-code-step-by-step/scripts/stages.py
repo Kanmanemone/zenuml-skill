@@ -246,11 +246,11 @@ NOT_NODES = {"end", "direction", "flowchart", "graph"}
 
 
 def clean_name(label):
-    text = label.replace("&nbsp;", " ")
-    text = re.sub(r"</?(b|s|strong)>", "", text)
+    text = re.sub(r"</?(b|s|strong)>", "", label)
     for mark in ("✨", "♻️", "♻", "🗑️", "🗑", "️"):
         text = text.replace(mark, "")
-    return text.strip()
+    name = text.split("&nbsp;")[-1].strip()
+    return name[:-2] if name.endswith("()") else name
 
 
 def parse_view(text):

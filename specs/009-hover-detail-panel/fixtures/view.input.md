@@ -18,7 +18,7 @@ flowchart LR
     direction TB
     OrderController
     OrderService
-    CartStore@{ label: "CartStore(state)" }
+    CartStore@{ label: "class&nbsp;CartStore" }
   end
   subgraph Payment["결제"]
     direction TB

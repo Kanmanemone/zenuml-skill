@@ -89,8 +89,10 @@
 - [X] T025 `specs/009-hover-detail-panel/fixtures/`에 기대 출력 작성 — `view.default.expected.md`(기본 설정), `view.custom.expected.md`(`--responsibility=concrete,abstract --collaboration=questions --position=node`). 스크립트 출력을 그대로 베끼지 말고 contract와 data-model 규칙으로 노드마다 직접 대조해 확정한다(SC-003)
 - [X] T026 quickstart.md 스크립트 시나리오 Q1~Q8을 Python 3.9(가능하면)와 최신 Python에서 실행해 통과 확인, 결과를 이 태스크 아래에 한 줄씩 기록
   - 결과(2026-11-14): Python 3.15·3.13에서 Q1(기본 설정 = `view.default.expected.md`)·Q2(두 번째 실행 변경 없음)·Q3(= `view.custom.expected.md`)·Q4(끄기 = `view.input.md`)·Q5(고친 노드만 바뀜)·Q6(Responsibility 없으면 그 부분 없음, 안내 없음)·Q7(중복 항목 → 기본값 + 안내 한 줄)·Q8(종료 코드 2, 파일 그대로) 통과. CRLF 입력·파일 끝 줄바꿈 없음도 왕복 통과. Python 3.9는 설치되어 있지 않아 `ast.parse(feature_version=(3,9))`로 문법 호환만 확인.
-- [ ] T027 quickstart.md 화면 시나리오 V1~V6을 VS Code 1.146 미리보기에서 확인 — 특히 V5(`&quot;`가 따옴표로 보이고 다이어그램이 깨지지 않는지). 안 되면 research R8 대안(`“ ”`)으로 `panel_text.py`를 고치고 T025·T026을 다시 한다
-- [ ] T028 quickstart.md 내보내기 시나리오 E1·E2와 스킬 전체 시나리오 S1~S4 확인(S4는 PATH에서 Python을 뺀 셸에서)
+- [X] T027 quickstart.md 화면 시나리오 V1~V6을 VS Code 1.146 미리보기에서 확인 — 특히 V5(`&quot;`가 따옴표로 보이고 다이어그램이 깨지지 않는지). 안 되면 research R8 대안(`“ ”`)으로 `panel_text.py`를 고치고 T025·T026을 다시 한다
+  - 결과(2026-11-20): VS Code 1.147에서 V1~V6 통과. 900px 미리보기의 긴 패널은 두 열로 나뉘었고, `node` 위치는 오른쪽 끝 고정과 왼쪽 노드 아래 배치에서 같은 폭을 유지했다. 링크 없는 노드는 클릭해도 이동·오류가 없고 실제 포인터 대상의 커서는 `auto`였다. `&quot;`는 따옴표로 보였으며 hover를 끄면 파일 이름 기본 툴팁만 보이고 CSS 원문은 보이지 않았다.
+- [X] T028 quickstart.md 내보내기 시나리오 E1·E2와 스킬 전체 시나리오 S1~S4 확인(S4는 PATH에서 Python을 뺀 셸에서)
+  - 결과(2026-11-20): E1은 단일 페이지 PDF로 정상 렌더링되고 CSS 원문이 없었으며, E2의 SVG·PNG에는 hover 패널이 보이지 않았다. S1~S3은 같은 사전 hover 출력을 고정해 기본 적용·끄기 복원·모델 출력 불변을 확인했고, S4는 `python`·`py`·`python3`가 모두 없는 PATH에서 기능 도입 전 출력과 `⚙️ hover 건너뜀: Python 3.9 이상을 찾지 못함` 안내를 확인했다.
 
 ---
 
@@ -158,7 +160,7 @@ T008(panel_text.py) 진행 중에 동시에:
 
 **Independent Test**: quickstart Q1–Q4와 Q9를 실행해 기존 기대 출력, 멱등, 끄기 복원, 규격 표시 노드 연결을 확인한다.
 
-- [ ] T032 [US1] `specs/009-hover-detail-panel/fixtures/view.input.md`의 `CartStore` 라벨을 `class&nbsp;CartStore` 규격 표시 사례로 바꾸고 `view.default.expected.md`·`view.custom.expected.md`의 대응 선언을 맞춘 뒤, 현재 `apply_hover.py` 결과가 기대 출력과 달라지는지 확인한다 per FR-021
-- [ ] T033 [US1] `.agents/skills/generating-architecture-views/scripts/hover/view_parser.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 quickstart Q1–Q4·Q9를 실행한다 per FR-021, SC-003, SC-004, SC-005, SC-008
+- [X] T032 [US1] `specs/009-hover-detail-panel/fixtures/view.input.md`의 `CartStore` 라벨을 `class&nbsp;CartStore` 규격 표시 사례로 바꾸고 `view.default.expected.md`·`view.custom.expected.md`의 대응 선언을 맞춘 뒤, 현재 `apply_hover.py` 결과가 기대 출력과 달라지는지 확인한다 per FR-021
+- [X] T033 [US1] `.agents/skills/generating-architecture-views/scripts/hover/view_parser.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 quickstart Q1–Q4·Q9를 실행한다 per FR-021, SC-003, SC-004, SC-005, SC-008
 
 **Dependencies**: T032 → T033.

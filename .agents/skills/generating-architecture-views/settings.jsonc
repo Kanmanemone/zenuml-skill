@@ -26,7 +26,17 @@
     // Dependency 다이어그램을 그릴 Mermaid 레이아웃 엔진 (초기 기본값: elk)
     //   default [0] 지정 안 함, 보는 곳의 기본 엔진을 따름(지금 Mermaid 12는 ELK)
     //   elk     [0] 항상 ELK
-    "renderer": "elk"
+    "renderer": "elk",
+
+    // 노드 이름에 원본 선언 키워드와 파일의 마지막 확장자를 표시할지 (초기 기본값: false)
+    //   true  [+] 표시함(class Foo, val bar, file.kt)
+    //   false [0] 표시하지 않음(Foo, bar, file)
+    "nodeMarkers": false,
+
+    // 확인된 함수 노드 이름 끝에 ()를 표시할지 (초기 기본값: true)
+    //   true  [0] 표시함(foo())
+    //   false [0] 표시하지 않음(foo)
+    "functionParentheses": true
   },
   "log": {
     // 피드백 로그(다시 만들 때마다 요청과 결과를 쌓는 기록)를 저장할 위치 (초기 기본값: ./.zenuml/log)

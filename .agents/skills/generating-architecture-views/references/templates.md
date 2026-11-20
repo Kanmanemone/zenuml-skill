@@ -31,7 +31,7 @@ flowchart LR
   subgraph GroupA["그룹A"]
     direction TB
     ComponentA
-    ComponentB@{ label: "ComponentB(state)" }
+    ComponentB
   end
   ComponentC
 
@@ -48,7 +48,7 @@ Rules:
 - Exactly one plain-text caption line sits between `### Dependency` and the Mermaid fence — built only from the request's key keywords (the system/process named and the aspect asked about), in the user's language; no blockquote/heading/bold, nothing the request didn't say, nothing about rendering or layout.
 - Nothing follows the closing fence except the next section's heading — no notes about `click` behavior, renderers, or layout.
 - `subgraph` only for evidence-based groups (a name/layer/domain signal in the description); components with no such signal sit at the top level, no `subgraph` at all.
-- Declare every node, in the order you introduce it — that order decides its color. A node whose display name can't be its ID (parentheses, spaces, etc.) is declared as `Id@{ label: "표시 이름" }`; plain names are declared bare.
+- Declare every node, in the order you introduce it — that order decides its color. Keep the source-proven base name, original declaration keyword(s) or final file extension, and function identity as separate facts; never match a language list. Apply `dependency.nodeMarkers` and `dependency.functionParentheses` independently: the four results are marker + `name()`, `name()`, marker + `name`, and `name`, with shipped defaults `false` and `true`. Join marker words and the marker to the name with `&nbsp;`; append `()` exactly once only to a verified function when enabled. Do not add behavior/access modifiers, annotations, guessed markers, copied parameters, or label commentary. These settings affect only Dependency labels, not IDs, links, hover content, or Responsibility/Collaboration names. Whenever a label differs from its ID, use `Id@{ label: "…" }`; otherwise declare the node bare.
 - Every edge is `Source -->|관계 성격| Target`, using the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
 - Draw only edges the description directly states or implies between those exact two components. A described chain (A calls B, B calls C) becomes `A --> B` and `B --> C` — never a collapsed `A --> C` shortcut.
 - After the edges come only `class <Id> crud*` lines (dynamic requests, see "Change marking" below) and `click` lines. Never write a config block, edge IDs, `classDef`/color `class` lines, `linkStyle`, or `%%` comments.
@@ -59,9 +59,9 @@ Rules:
 For a structure-change (dynamic) request, only the nodes the description names as added, changed, or removed get a label prefix and a CRUD class; every other node is written as usual. The diagram script adds the `crud*` class definitions; the node keeps its own color.
 
 ```text
-  NewNode["✨&nbsp;<b>NewNode</b>"]
-  ChangedNode["♻️&nbsp;ChangedNode"]
-  RemovedNode["🗑️&nbsp;<s>RemovedNode</s>"]
+  NewNode@{ label: "✨&nbsp;<b>NewNode</b>" }
+  ChangedNode@{ label: "♻️&nbsp;ChangedNode" }
+  RemovedNode@{ label: "🗑️&nbsp;<s>RemovedNode</s>" }
   ...
   class NewNode crudCreate
   class ChangedNode crudUpdate
@@ -69,6 +69,7 @@ For a structure-change (dynamic) request, only the nodes the description names a
 ```
 
 A removed node is still drawn with the relations the description says it had. No legend is added.
+Place the configured label inside `<b>`/`<s>`. With both options on, examples are `NewNode@{ label: "✨&nbsp;<b>class&nbsp;NewNode</b>" }` and `ChangedFn@{ label: "♻️&nbsp;fun&nbsp;changedFn()" }`; disabled parts are omitted independently.
 
 ### Hyperlink syntax
 

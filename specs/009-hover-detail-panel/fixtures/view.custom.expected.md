@@ -18,7 +18,7 @@ flowchart LR
     direction TB
     OrderController
     OrderService
-    CartStore@{ label: "CartStore(state)" }
+    CartStore@{ label: "class&nbsp;CartStore" }
   end
   subgraph Payment["결제"]
     direction TB
@@ -103,7 +103,7 @@ flowchart LR
 
   click OrderController "../app/order/OrderController.kt" "<b>OrderController</b><br/><b>역할 (구체)</b>: <code>POST /orders</code>를 받아 &quot;장바구니 확정&quot; 단계를 거친 뒤 <code>OrderService.create()</code>를 호출한다.<br/><b>책임 (추상)</b>: 주문 요청을 받아 서비스로 넘긴다.<br/><br/><b>OrderService에 의존한다 (호출)</b><br/><b>내가 할 수 있는 질문</b>: 입력 검증은 어디서 하는가? &quot;장바구니 확정&quot;은 누구의 책임인가?<br/><br/><b>CartStore에 의존한다 (상태 참조)</b><br/><b>내가 할 수 있는 질문</b>: 상태를 직접 바꾸지는 않는가?"
   click OrderService "../app/order/OrderService.kt" "<b>OrderService</b><br/><b>역할 (구체)</b>: <code>create()</code>가 <code>List&lt;OrderLine&gt;</code>을 저장하고 <code>PaymentService.pay()</code>를 호출한다.<br/><b>책임 (추상)</b>: 주문을 만들고 결제를 요청한다.<br/><br/><b>InventoryService와 서로 의존한다 (재고 확인)</b><br/><b>내가 할 수 있는 질문</b>: 통지를 이벤트로 바꿀 수 있는가?<br/><br/><b>PaymentService에 의존한다 (호출)</b><br/><b>내가 할 수 있는 질문</b>: 결제 실패 시 주문 상태는 누가 되돌리는가?<br/><br/><b>AuditLog에 의존한다 (기록)</b><br/><b>내가 할 수 있는 질문</b>: 기록 실패가 주문을 막는가?"
-  click CartStore "../app/order/CartStore.kt" "<b>CartStore(state)</b><br/><b>역할 (구체)</b>: <code>items</code> 상태를 <code>OrderController</code>에 제공한다.<br/><b>책임 (추상)</b>: 장바구니 상태를 들고 있다."
+  click CartStore "../app/order/CartStore.kt" "<b>CartStore</b><br/><b>역할 (구체)</b>: <code>items</code> 상태를 <code>OrderController</code>에 제공한다.<br/><b>책임 (추상)</b>: 장바구니 상태를 들고 있다."
   click PaymentService "https://github.com/example/shop/blob/main/payment/PaymentService.kt" "<b>PaymentService</b><br/><b>역할 (구체)</b>: <code>pay()</code>가 PG 연동 문서의 절차대로 <code>PgClient</code>를 호출하고 결과를 <code>NotificationHub</code>에 넘긴다.<br/><b>책임 (추상)</b>: 결제를 승인한다.<br/><br/><b>PgClient와 FraudChecker에 의존한다 (호출)</b><br/><b>내가 할 수 있는 질문</b>: 판정은 승인 전에만 하는가?<br/><br/><b>NotificationHub에 의존한다 (호출)</b><br/><b>내가 할 수 있는 질문</b>: 알림을 비동기로 보내는가?"
   click PgClient "../app/payment/PgClient.kt" "<b>PgClient</b><br/><b>역할 (구체)</b>: <code>approve()</code>로 승인 요청을 보낸다.<br/><b>책임 (추상)</b>: 외부 PG와 통신한다."
   click FraudChecker "../app/payment/FraudChecker.kt" "<b>FraudChecker</b><br/><b>역할 (구체)</b>: <code>check()</code>가 점수 &gt; 80이면 거절한다.<br/><b>책임 (추상)</b>: 이상 거래를 걸러 낸다."

@@ -73,3 +73,15 @@ node .claude/skills/exporting-markdown-diagrams/scripts/read-settings.js
 | 9. 옵션 추가 내구성 | exporting 옵션 정의에 시험용 `trial.flag` 추가 후 `read-settings.js` 실행 | PASS | `lib/settings.js` 수정 없이 기본값 `false`로 해석, 안내 없음. 확인 후 되돌림 |
 
 시나리오 1~4b·8은 LLM이 따르는 지침 동작이라 실제 스킬 호출로 확인해야 하며, 이번 구현 단계에서는 SKILL.md 규칙 대조까지만 했다.
+
+## Validation Results (T041, 2026-11-20)
+
+| 검증 | 결과 | 비고 |
+|------|------|------|
+| 배포 기본값 | PASS | `read_settings.py`가 `dependency.nodeMarkers=false`, `dependency.functionParentheses=true`를 반환 |
+| 키 누락·유효/무효 boolean | PASS | 누락은 `false`/`true`, 유효한 반대 조합은 `true`/`false`, 문자열·숫자는 기본값 복구와 안내 2건을 반환 |
+| 네 조합 지침 계약 | PASS | `SKILL.md`와 `references/templates.md`가 표시어와 함수 괄호를 독립 적용하는 네 결과 및 기본값을 명시하며 언어별 함수 키워드 목록을 두지 않음 |
+| 009 hover 이름 연결 | PASS | 표시어 있음/없음과 함수 괄호 있음/없음 6개 라벨이 기존 기본 이름으로 정규화됨 |
+| 010 단계별 펼치기 | PASS | `test_learning_stages.py` 33개 테스트 통과 |
+
+본문 이름·노드 ID·링크·hover 내용은 설정 비적용 대상으로 지침에 고정되어 있고 관련 스크립트는 변경하지 않았다.

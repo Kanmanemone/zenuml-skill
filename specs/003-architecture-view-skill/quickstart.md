@@ -252,6 +252,21 @@
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.
 
+## Validation Results (T136, 2026-11-20)
+
+- 시나리오 26: 임의의 원본 표시어 `sourceKeyword`를 사용한 함수 라벨 `sourceKeyword&nbsp;render()`가 `build_diagram.py` 실행 뒤에도 그대로 보존되고, 비함수 `class&nbsp;Worker`에는 괄호가 붙지 않음을 확인했다.
+- hover 이름 연결: `view_parser.clean_name`이 함수 라벨은 `render`, 비함수 라벨은 `Worker`로 반환했다.
+- 단계별 펼치기: 함수·비함수·변화 표시 사례를 포함한 `test_learning_stages.py` 33개 테스트가 모두 통과했다.
+
+## Validation Results (T131, 2026-11-20)
+
+`build_diagram.py`로 시나리오 25·26의 기본 다이어그램을 완성한 뒤 라벨과 CRUD 구역을 검사했다.
+
+| 시나리오 | 결과 | 비고 |
+|----------|------|------|
+| 25. 구조 변화 CRUD 표시 | PASS | 추가·변경·삭제 라벨이 모두 `Id@{ label: "…" }` 형식을 유지했고, CRUD class·고정 라벨 주석·세 classDef가 생성되며 미변경 노드는 표시되지 않음을 확인 |
+| 26. 노드 규격 표시어 | PASS (부분 보류) | 선언 키워드·파일 확장자·`&nbsp;`·변화 표시 조합을 보존하고, 모듈 노드는 표시어 없이 남으며 본문 굵은 이름과 라벨 부가 설명에는 표시어가 없음을 확인. 009 hover와 010 단계별 펼치기는 해당 기능이 새 라벨의 마지막 `&nbsp;` 뒤 이름 규칙을 반영할 때까지 보류 |
+
 ## Validation Results (T024, 2026-07-31) — 2섹션 구형 형식 기준, 참고용
 
 실제 대화 세션에서 `Skill` 도구로 `generating-architecture-views`를 여러 번 호출해 검증했다. 라이브 테스트 중 사용자가 직접 발견한 두 가지 결함(Components & Dependencies에 제목이 없던 점, 그룹 간 비교가 아예 빠져 있던 점)을 그 자리에서 스킬 자체에 반영해 재검증했다. **이 표는 2026-08-02 재구성 이전(Components & Dependencies + 이항대립 Responsibility 2섹션) 형식에 대한 기록이며, 현재 형식(Dependency/Responsibility/Collaboration)에는 그대로 적용되지 않는다 — 위 시나리오 1~18로 재검증이 필요하다.**

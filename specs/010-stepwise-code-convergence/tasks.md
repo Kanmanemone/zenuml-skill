@@ -479,7 +479,7 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 
 **Independent Test**: 표준 라이브러리 테스트 전체가 통과하고, 복합 표시어·변화 표시 라벨이 실제 이름으로 정규화되며 마지막 장면이 해당 원본 범위와 일치한다.
 
-- [ ] T078 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost`, 표시어 없는 이름을 실제 이름으로 읽는 회귀 테스트를 추가하고 현재 실패를 확인한다 per FR-021, SC-015
-- [ ] T079 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 전체 `test_learning_stages.py`를 실행한다 per FR-021, SC-003, SC-015
+- [X] T078 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost`, 표시어 없는 이름을 실제 이름으로 읽는 회귀 테스트를 추가하고 현재 실패를 확인한다 per FR-021, SC-015
+- [X] T079 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 전체 `test_learning_stages.py`를 실행한다 per FR-021, SC-003, SC-015
 
 **Dependencies**: T078 → T079.

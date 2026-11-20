@@ -98,6 +98,16 @@ class Definition(unittest.TestCase):
         self.assertEqual([x['visible'] for x in planned], [True, False, False, True])
         self.assertEqual(len(notices), 2)
 
+    def test_node_display_marks_are_not_part_of_the_source_name(self):
+        cases = {
+            'class&nbsp;NiaAppState': 'NiaAppState',
+            'enum&nbsp;class&nbsp;TopLevelDestination': 'TopLevelDestination',
+            '♻️&nbsp;fun&nbsp;NiaNavHost()': 'NiaNavHost',
+            'render()': 'render',
+            'PlainNode': 'PlainNode',
+        }
+        self.assertEqual({label: s.clean_name(label) for label in cases}, cases)
+
 
 class Declarations(unittest.TestCase):
     def test_extension_declarations_are_found_by_name_not_receiver(self):
