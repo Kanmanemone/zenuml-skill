@@ -231,6 +231,9 @@
 
 …노드마다 반복…
 
+<details class="zenuml-stepwise-style">
+<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+
 <style>
 …기존 상자 규칙: .resp 규칙 + 시제품의 규칙 + 단계 수만큼의 `.stages > input.sK:checked ~ .stage.sK { display: block; }` + .note·.code 규칙…
 </style>
@@ -238,6 +241,8 @@
 <style>
 …diff 층 규칙: .diff와 add·mod·del 색칠, .code를 기준점으로 삼는 규칙…
 </style>
+
+</details>
 ````
 
 - **책임 줄**(spec FR-015e): 노드 제목과 상자 사이, 상자 바깥에 둔다. 단계에 속하지 않으므로 단계마다 반복하지 않는다. 문장은 구조 뷰 `#### 요소의 책임`에서 그 노드 항목의 `책임 (추상)` 값을 글자 그대로 옮기고, HTML로 이스케이프한다. `역할 (구체)`는 옮기지 않는다. 값이 없거나 `설명에 명시되지 않음`으로 시작하면 이 줄을 두지 않는다. 여러 노드가 한 항목에 묶여 있으면 묶인 노드마다 같은 문장을 둔다. `.resp`는 왼쪽 회색 막대와 옅은 회색 배경의 띠이고, `.label`은 굵고 옅게 보인다.
@@ -253,6 +258,7 @@
   - 기존 상자의 마크업과 첫 번째 `<style>`은 diff 층을 모른다.
   - diff 층은 `pre.diff` 요소들과 두 번째 `<style>`로만 이뤄진다. 코드 위에 절대 위치로 얹히고, 자리를 차지하지 않으며, `pointer-events: none`이다.
   - 문서에서 `pre.diff` 요소와 두 번째 `<style>`을 지우면, 그 문서는 같은 단계 코드로 diff 층 없이 만든 문서와 바이트 단위로 같다.
+  - 두 `<style>`은 파일 끝의 `details.zenuml-stepwise-style` 하나 안에 있고, 첫 번째 CSS가 편집기 미리보기에서 wrapper를 숨긴다. GitHub에서는 요약 한 줄을 펼칠 때만 CSS 원문이 보인다.
 - **코드 블록**: 펜스 길이는 코드 안에서 가장 긴 백틱 연속보다 하나 더 길게 한다(최소 3).
 - **`.code` 영역**(기존 상자의 몫): 코드의 높이 상한 `min(30lh, 70vh)`과 세로·가로 스크롤을 맡는다. 코드는 `white-space: pre`로 줄바꿈하지 않는다.
 - **diff 층 CSS**(두 번째 `<style>`): `.code`를 기준점으로 삼아 `pre.diff`를 코드 위에 겹친다. 줄 위치는 `pre > code` 구조와 글자가 같아서 맞는다(research R7 원칙 4). 기존 상자의 여백·줄 높이 수치를 베끼지 않는다. 가로·세로로 스크롤해도 줄을 따라간다. 색은 `--vscode-editorGutter-addedBackground`·`modifiedBackground`·`deletedBackground` 테마 변수를 쓰고, 대체 색을 함께 적는다.

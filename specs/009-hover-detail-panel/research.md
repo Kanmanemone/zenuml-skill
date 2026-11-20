@@ -60,10 +60,10 @@ spec의 VS Code 동작 확인(선행 확인 결과, Clarifications 2026-11-14)�
 - **Decision**: `click Id hoverOnly "툴팁"` 줄을 링크 `click` 줄들 뒤에 노드 선언 순서대로 둔다. 그 노드의 색상 `classDef` 끝에 `,cursor:auto`를 붙인다. 색상 클래스는 노드마다 하나씩이므로(003 FR-008b) 이 속성은 그 노드에만 적용된다. 예외 규칙은 두지 않는다.
 - **Rationale**: strict 보안 수준에서 Mermaid는 콜백 이름을 무시하고 툴팁만 단다 — 어떤 이름이든 같으며(테스트 키트 `noHoverLink`로 확인), 뜻이 드러나는 `hoverOnly`를 고정 이름으로 쓴다. `cursor:default`는 Mermaid 예약어라 쓰지 않는다(Assumptions).
 
-## R10. `<style>` 블록 관리(FR-005, FR-006)
+## R10. `<style>` 블록 관리(FR-005, FR-006, FR-022)
 
-- **Decision**: 블록 원본은 VS Code에서 확인한 테스트 키트 CSS다 — `bottom`은 `docs/hover-tooltip-test/inline-style.md`, `node`는 `docs/hover-tooltip-test/node-25em.md`의 `<style>`(둘 다 밑줄 규칙 포함). 스크립트는 파일 끝에 있는 `<style>` 블록 중 `div.mermaidTooltip`을 담은 것을 "패널 모양 블록"으로 보고 바꾸거나 지운다. 새로 붙일 때는 본문 마지막 줄 다음에 빈 줄 하나를 두고 붙인다. 표식 주석은 넣지 않는다.
-- **Rationale**: 산출물에 메타 주석을 남기지 않는 규칙(003 AP-13c)을 지키면서도 블록을 다시 찾을 수 있다. 스킬은 이 블록 말고 `<style>`을 쓰지 않으므로 오인할 대상이 없다.
+- **Decision**: 블록 원본은 VS Code와 GitHub에서 확인한 `docs/hover-tooltip-test/details-wrapped-style.md`의 `<details>` 구조다. `bottom`과 `node` CSS를 각각 그 구조로 감싸고 wrapper 숨김 규칙을 넣는다. 스크립트는 파일 끝의 새 wrapper 전체 또는 이전 생 `<style>` 중 `div.mermaidTooltip`을 담은 것을 "패널 모양 블록"으로 보고 바꾸거나 지운다.
+- **Rationale**: VS Code의 hover 동작은 유지하면서 GitHub 첫 화면에는 CSS 원문 대신 이유를 설명하는 접힌 한 줄만 남긴다. 이전 산출물도 다시 적용하거나 끌 수 있어야 하므로 생 `<style>` 인식은 유지한다.
 
 ## R11. 끄기·되돌리기(FR-006, SC-005)
 

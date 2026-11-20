@@ -25,6 +25,7 @@
 | Q7 | 설정 파일의 `hover.collaboration`을 `["targets", "targets"]`로 바꾸고 `AH tmp.md` | 기본값으로 동작 + `⚙️ 설정 안내` 한 줄 | FR-009a |
 | Q8 | `### Dependency`가 없는 Markdown에 `AH x.md` | 종료 코드 `2`, 파일 그대로 | 계약 |
 | Q9 | 입력의 한 노드를 `NiaNavHost@{ label: "♻️&nbsp;fun&nbsp;NiaNavHost" }`로 바꾸고 본문 이름은 `NiaNavHost`로 둔 뒤 `AH tmp.md` | 패널 머리글이 `NiaNavHost`이고 본문 책임·협력이 연결되며 두 번째 실행은 변경 없음 | FR-021, SC-008 |
+| Q10 | 맨 끝 패널 블록을 이전 생 `<style>` 형식으로 바꾼 Q1 결과에 `AH tmp.md`, 이어서 `--enabled=false` | 첫 실행은 새 `<details>` wrapper 하나로 교체되고, 두 번째 실행은 wrapper와 CSS를 모두 제거 | FR-022, SC-004·005 |
 
 모든 시나리오에서 `### Responsibility`·`### Collaboration` 아래 줄은 입력과 바이트 단위로 같아야 한다(FR-002). 기대 출력의 툴팁 안에는 `"`가 없어야 한다.
 
@@ -38,6 +39,7 @@
 | V4 | Q3 결과 | 오른쪽 끝 노드 → 왼쪽 끝 노드 순서로 마우스 | 둘 다 같은 폭, 오른쪽은 미리보기 오른쪽 끝에 붙음, 왼쪽은 노드 아래 |
 | V5 | Q1 결과 | 본문 큰따옴표가 있는 항목의 노드에 마우스 | 다이어그램이 정상으로 그려지고 패널에 따옴표가 보임(research R8의 `&quot;` 확인) |
 | V6 | Q4 결과 | 노드에 마우스 | 기본 툴팁(파일 이름), 문서 맨 아래에 CSS 글자 없음 |
+| V7 | Q1 결과를 VS Code와 GitHub에서 열기 | VS Code에서는 설명 줄이 숨고 hover 스타일 유지. GitHub에서는 설명 한 줄만 보이며 펼칠 때만 CSS 원문 표시 | FR-022, SC-009 |
 
 ## 내보내기 시나리오
 
