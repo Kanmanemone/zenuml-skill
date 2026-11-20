@@ -34,6 +34,10 @@
 
 - (사용자 결정) `hover.collaboration` 기본값에 `questions`를 넣어 `["targets", "boundary", "rationale", "questions"]`로 한다. 질문 생성은 007 FR-012c의 `collaboration.questions`(기본 `false`)가 정하며, 이 값이 `false`이면 `hover.collaboration`에 `questions`가 있어도 패널에 질문이 뜨지 않는다(FR-009b).
 
+### Session 2026-11-20
+
+- Q: 003이 Dependency 라벨에 원본 규격 표시어(`class`, `enum class`, `fun`, 파일 확장자)를 붙인 뒤 hover는 어떤 이름으로 본문과 연결하는가? → A: 변화 표시와 HTML 태그를 제거한 뒤 마지막 `&nbsp;` 뒤의 실제 노드 이름만 사용한다. 표시어는 패널 머리글과 본문 연결 키가 아니며, 표시어 없는 기존 라벨은 그대로 동작한다(FR-021).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - 노드에 마우스를 올려 책임과 협력을 그 자리에서 보기 (Priority: P1)
@@ -142,6 +146,7 @@
 - **FR-018** (007 개정): 007의 설정 옵션 목록과 옵션 정의(settings.schema.json)에 `hover.enabled`, `hover.responsibility`, `hover.collaboration`, `hover.position`을 추가하고, 사용자가 고치는 설정 파일(settings.jsonc)에 기존 형식대로 설명 주석과 함께 넣는다. 네 옵션의 모든 값의 토큰 영향 표기는 `[0]`(거의 같음)이다. 잘못된 값 처리는 007 FR-005를 따른다.
 - **FR-019**: `hover.position` 값은 `bottom`(미리보기 아래쪽에 넓게 고정된 패널)과 `node`(노드 바로 아래, Mermaid 기본 위치) 중 하나이며 기본값은 `bottom`이다. 이 값은 FR-005 블록의 내용만 바꾸고, 툴팁 내용·밑줄·링크 없는 노드 처리(FR-013)에는 영향을 주지 않는다. 두 hover 목록이 모두 빈 것으로 동작하면(`hover.enabled`가 `false`인 경우 포함) 이 값은 쓰이지 않는다.
 - **FR-020**: `hover.enabled` 값은 `true`와 `false` 중 하나이며 기본값은 `true`다. `false`이면 hover 기능 전체가 꺼져, `hover.responsibility`·`hover.collaboration`·`hover.position` 값과 상관없이 FR-006의 상태(이 기능 도입 전과 같은 산출물)가 된다. 이 값을 바꿔도 다른 hover 값은 그대로 남아, 다시 `true`로 바꾸면 이전 항목 설정대로 동작한다. 요청 문장에서 hover를 켜거나 끄라고 하면 그 요청에 한해 따른다(FR-014).
+- **FR-021**: Dependency 노드 라벨에 003 FR-036의 원본 규격 표시어가 있으면, 도구는 변화 표시와 HTML 태그를 제거한 뒤 마지막 `&nbsp;` 뒤의 실제 노드 이름으로 Responsibility·Collaboration 본문을 연결하고 패널 머리글을 만들어야 한다. `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost`는 각각 `NiaAppState`, `TopLevelDestination`, `NiaNavHost`로 연결된다. 표시어가 없는 기존 라벨과 ID는 이전과 같아야 한다.
 
 ### Key Entities
 
@@ -160,6 +165,7 @@
 - **SC-005**: `hover.enabled`가 `false`이거나 두 hover 목록이 모두 `[]`인 설정으로 만든 산출 파일은 이 기능 도입 전 규칙으로 만든 파일과 같다.
 - **SC-006**: 같은 파일을 PNG/PDF로 내보냈을 때 패널 모양 블록의 내용이 글자로 드러나는 경우가 0건이다.
 - **SC-007**: 이 기능을 켜도 구조 뷰 한 번 생성에 드는 모델 출력 분량이 늘지 않는다(패널 내용은 도구가 만든다).
+- **SC-008**: 대표 구조 뷰에서 원본 규격 표시어가 붙은 모든 노드의 hover 패널이 이름만 쓴 본문 항목과 100% 연결되고, 패널 머리글에는 표시어가 나타나지 않는다.
 
 ## Assumptions
 

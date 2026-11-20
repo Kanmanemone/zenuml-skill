@@ -34,15 +34,20 @@
 
 - (사용자 결정) `generating-architecture-views`의 Collaboration 항목에서 "내가 할 수 있는 질문"을 만들지를 `collaboration.questions`(`true`/`false`, 초기 기본값 `false`)로 켜고 끈다. `false`이면 각 항목은 책임의 경계와 분리 이유 & 합리성 평가 두 하위 항목만 갖는다. 질문이 본문에 없으므로 hover 패널에도 뜨지 않는다(009 FR-009b). 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다(FR-012c).
 
+### Session 2026-11-20
+
+- (사용자 결정) `generating-architecture-views`의 Dependency 노드 이름에서 원본 종류 표시어(선언 키워드 말머리와 파일 확장자 말꼬리)를 보일지와 함수 이름 뒤 `()`를 보일지를 서로 독립적인 boolean 설정으로 둔다. 종류 표시어 기본값은 `false`, 함수 괄호 기본값은 `true`다(FR-012d).
+- (사용자 예시 확정) 두 값이 `true/true`면 `class aaa`, `fun bbb()`, `val ccc`, `ddd.kt`; `false/true`면 `aaa`, `bbb()`, `ccc`, `ddd`; `true/false`면 `class aaa`, `fun bbb`, `val ccc`, `ddd.kt`; `false/false`면 `aaa`, `bbb`, `ccc`, `ddd`로 표시한다. 언어별 키워드 목록은 만들지 않고 원본에서 확인한 표시어만 기존 규칙대로 사용한다.
+
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - 구조 뷰의 Responsibility·Collaboration 표시 방식 고르기 (Priority: P1)
+### User Story 1 - 구조 뷰의 표시 방식 고르기 (Priority: P1)
 
-사용자는 `generating-architecture-views` 스킬 디렉터리에 있는 설정 파일을 직접 열어 Responsibility와 Collaboration 각각의 표시 방식을 고른다: 그리지 않음(`hidden`), 상자 없이 지금처럼(`plain`), 접은 글 상자에 넣고 처음엔 접힘(`collapsed`), 접은 글 상자에 넣고 처음엔 펼침(`expanded`). 이후 구조 뷰를 생성·재생성하면 고른 방식대로 나온다. 긴 구조 뷰에서 Dependency를 먼저 보고 필요한 섹션만 펼쳐 보거나, 필요 없는 섹션은 아예 만들지 않게 할 수 있다.
+사용자는 `generating-architecture-views` 스킬 디렉터리에 있는 설정 파일을 직접 열어 Responsibility와 Collaboration 각각의 표시 방식뿐 아니라 Dependency 노드 이름의 종류 표시어와 함수 괄호 표시 여부를 고른다. 이후 구조 뷰를 생성·재생성하면 고른 방식대로 나온다. 긴 구조 뷰에서 필요한 섹션만 펼쳐 보고, 노드 이름은 원하는 정보 밀도로 읽을 수 있다.
 
 **Why this priority**: 사용자가 직접 요청한 핵심 옵션이며, 설정 파일을 읽어 적용하는 공통 메커니즘이 이 스토리로 처음 검증된다.
 
-**Independent Test**: 설정 파일에서 두 옵션을 각각 네 값으로 바꿔 가며 같은 설명으로 구조 뷰를 생성해, 섹션별로 고른 방식대로 나오는지, Dependency와 `plain` 섹션은 지금과 똑같이 나오는지 확인한다.
+**Independent Test**: 섹션 표시 옵션을 각각 네 값으로 바꾸고, 두 노드 이름 boolean의 네 조합으로 같은 설명을 생성해 각 설정에 해당하는 부분만 달라지는지 확인한다.
 
 **Acceptance Scenarios**:
 
@@ -53,6 +58,8 @@
 5. **Given** `dependency.renderer`를 `elk`로 정한 설정, **When** 사용자가 렌더러를 말하지 않고 구조 뷰를 요청하면, **Then** Dependency 다이어그램의 YAML 설정(`config.layout`)에 elk 렌더러 지정이 들어간다. `default`로 정하면 렌더러 지정이 들어가지 않고, 요청에서 다른 렌더러를 직접 밝히면 그 요청에서는 요청한 렌더러가 쓰인다.
 6. **Given** 이미 생성된 구조 뷰가 있는 상태에서 사용자가 설정을 바꾼 뒤, **When** 그 구조 뷰의 재생성을 요청하면, **Then** 새 산출물에 바뀐 설정이 적용된다(설정을 바꾸기만 해서는 기존 파일이 고쳐지지 않는다).
 7. **Given** 피드백 로그 저장 위치(`log.directory`)를 `./docs/architecture-logs`로 정한 설정, **When** 구조 뷰가 생성·재생성되면, **Then** 로그가 프로젝트 루트 아래 `docs/architecture-logs/<slug>.architecture.md`에 만들어지고 이어 쓰이며, 폴더가 없으면 새로 만든다. 배포된 그대로의 설정이면 로그 위치(`.zenuml/log/<slug>.architecture.md`)는 이 기능 도입 전과 같다.
+8. **Given** 클래스 `aaa`, 함수 `bbb`, 프로퍼티 `ccc`, 파일 `ddd.kt`가 확인된 설명, **When** 종류 표시어/함수 괄호 설정을 각각 `true/true`, `false/true`, `true/false`, `false/false`로 바꿔 구조 뷰를 생성하면, **Then** 노드 이름은 각각 `class aaa`·`fun bbb()`·`val ccc`·`ddd.kt`, `aaa`·`bbb()`·`ccc`·`ddd`, `class aaa`·`fun bbb`·`val ccc`·`ddd.kt`, `aaa`·`bbb`·`ccc`·`ddd`로 표시된다.
+9. **Given** 두 노드 이름 설정 키가 없는 기존 사용자 설정 파일, **When** 구조 뷰를 생성하면, **Then** 종류 표시어는 숨고 함수 이름에는 `()`가 붙으며 누락 키 안내는 나오지 않는다.
 
 ---
 
@@ -125,6 +132,7 @@
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
 - **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다(기본: `elk`, 사용자 확정 2026-11-13). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
 - **FR-012c** (003 개정): 설정은 Collaboration 항목마다 "내가 할 수 있는 질문" 하위 항목을 만들지(`collaboration.questions`)를 `true`(만듦)와 `false`(만들지 않음) 중에서 고를 수 있어야 한다(기본: `false`, 사용자 확정 2026-11-16). `false`이면 003 FR-027의 하위 항목 중 "내가 할 수 있는 질문"만 빠지고, 나머지 하위 항목과 항목의 개수·순서·형식은 그대로다. `collaboration.display`가 `hidden`이면 이 값은 쓰이지 않는다. 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다.
+- **FR-012d** (003 개정): 설정은 Dependency 노드 이름의 원본 종류 표시어를 보일지(`dependency.nodeMarkers`, 기본 `false`)와 함수 이름 뒤 빈 호출 괄호를 보일지(`dependency.functionParentheses`, 기본 `true`)를 각각 boolean으로 독립적으로 정할 수 있어야 한다. `nodeMarkers=true`이면 원본에서 확인한 선언 키워드를 이름 앞에 붙이고 파일 노드는 마지막 확장자까지 보이며, `false`이면 선언 키워드를 빼고 파일 노드는 마지막 확장자를 뺀 기본 이름만 보인다. `functionParentheses=true`이면 확인한 함수 이름 끝에 `()`를 정확히 한 번 붙이고, `false`이면 붙이지 않는다. 언어별 표시어 목록을 새로 만들지 않고 원본에서 확인한 열린 어휘를 그대로 쓴다. 두 옵션은 Dependency 라벨만 바꾸며 Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상, hover 내용에는 영향을 주지 않는다. 요청 문장이 어느 값을 직접 밝히면 FR-006을 따른다. 토큰 소모 영향은 `nodeMarkers=false` `[0]`·`true` `[+]`, `functionParentheses=true`·`false` 모두 `[0]`다.
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
 - **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다(기본: `./.zenuml/log` — 지금 위치). 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
 
@@ -153,7 +161,7 @@
 
 - **스킬 설정 파일**: 스킬마다 하나씩 그 스킬 디렉터리 안에 있는, 주석을 허용하는 JSON 문서. 섹션·기능 단위 묶음 아래 옵션 키를 둔다. 사용자가 직접 편집하며, 처음부터 모든 옵션이 기본값으로 적혀 있다. 키와 값은 영어, 각 옵션 위의 설명 주석은 한국어다(FR-020).
 - **옵션 정의**: 스킬마다 하나씩 있는, 그 스킬 옵션 전체의 유일한 기준. 옵션마다 키(소속 묶음 포함), 허용 값, 기본값, 한 줄 설명, 값별 토큰 소모 영향을 담는다(FR-016). 설정 읽기·검증·안내는 이 정의만 보고 동작한다.
-- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008), `collaboration.questions`(FR-012c), `dependency.renderer`(FR-011b), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
+- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008), `collaboration.questions`(FR-012c), `dependency.renderer`(FR-011b), `dependency.nodeMarkers`·`dependency.functionParentheses`(FR-012d), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), `generating-zenuml-diagrams`의 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
 - **설정 안내**: 설정 파일을 읽지 못했거나 일부 값을 기본값으로 대체·무시했을 때 채팅 응답에만 붙는 한 줄. 대상 파일과 키를 밝힌다.
 - **접은 글 상자**: 마크다운 미리보기에서 클릭해 접고 펼 수 있는 블록. 요약 줄(고정 문구 `Details`)과 내용으로 이뤄지며, 처음 열었을 때의 상태(접힘/펼침)가 파일 안에 적혀 있다. 클릭으로 바꾼 상태는 파일에 저장되지 않으므로 다시 열면 적힌 초기 상태로 돌아간다.
 
@@ -161,7 +169,7 @@
 
 ### Measurable Outcomes
 
-- **SC-001**: 잠정 기본값 상태에서 설정 파일을 건드리지 않았을 때 세 스킬의 산출물이 이 기능 도입 전과 달라지는 비율이 0%이고, 사용자가 확정한 초기값이 배포 설정 파일과 옵션 정의 양쪽에 똑같이 반영되는 비율이 100%다.
+- **SC-001**: 사용자가 기존 동작 유지로 확정한 초기값에서는 설정 파일을 건드리지 않았을 때 산출물이 기능 도입 전과 달라지는 비율이 0%이고, 사용자가 동작 변경을 명시해 확정한 초기값을 포함한 모든 초기값이 배포 설정 파일과 옵션 정의 양쪽에 똑같이 반영되는 비율이 100%다.
 - **SC-002**: 각 옵션을 기본값과 다른 값으로 바꿨을 때, 그 옵션에 해당하는 부분만 달라지고 나머지 산출물은 같은 비율이 100%다(옵션·값별 대표 시나리오 기준).
 - **SC-003**: 읽을 수 없는 설정 파일, 잘못된 값, 알 수 없는 키가 있는 상황에서 작업이 중단되는 비율이 0%이고, 그 사실이 채팅에 한 줄로 안내되는 비율이 100%다.
 - **SC-004**: 접은 글 상자가 있는 마크다운 파일을 문서 전체 PDF로 내보냈을 때, 상자 안 내용이 PDF에서 빠지는 비율이 0%다.
@@ -170,13 +178,14 @@
 - **SC-007**: 배포된 설정 파일만 보고, 영어를 모르는 한국어 사용자가 원하는 옵션을 찾아 허용 값 중 하나로 바꿀 수 있는 비율이 100%다(모든 옵션 위에 의미·허용 값·기본값·값별 토큰 소모 영향 주석이 있고, 그 내용이 실제 동작과 일치함).
 - **SC-008**: Responsibility나 Collaboration을 `hidden`으로 정했을 때, 그 섹션의 헤딩이나 내용이 산출 파일에 한 줄이라도 남는 비율이 0%다.
 - **SC-009**: `questions.enabled`가 `true`일 때, " (기본값)"이 설정된 기본값과 같은 선택지에만 정확히 하나 붙고(기본값이 `none`이면 하나도 없음) 설정 값을 바꾸면 붙는 위치도 따라 바뀌는 비율이 100%이며, `false`일 때 기본값이 있는 항목에 대해 질문이 뜨는 비율이 0%다.
+- **SC-010**: 대표 함수·비함수·파일 노드에서 `dependency.nodeMarkers`와 `dependency.functionParentheses`의 네 조합이 FR-012d의 이름 형태와 일치하는 비율이 100%이고, 어느 조합에서도 노드 ID·본문 이름·링크·hover 연결이 달라지는 비율은 0%다.
 
 ## Assumptions
 
 - **설정 파일 위치**: 각 스킬 디렉터리 안에 둔다. 스킬을 다른 프로젝트에 복사해 쓰면 설정도 함께 따라간다. 저장소에서는 기본값이 적힌 상태로 추적된다.
 - **접은 글 상자의 형식**: 마크다운 미리보기(VS Code 기본 미리보기, GitHub)가 접고 펼 수 있게 렌더링하는 표준 HTML 접기 블록을 쓰며, `expanded`는 그 블록의 표준 "처음부터 열림" 속성으로 표현한다. 상자 안의 마크다운이 펼쳤을 때 정상 렌더링되도록 형식을 맞추는 것과, PDF 변환 파이프라인에서 상자를 펼치는 방법은 계획 단계에서 실측으로 확정한다.
 - **Dependency는 표시 방식 옵션에서 제외**: 사용자가 Responsibility와 Collaboration만 언급했고, Dependency는 구조 뷰에서 가장 먼저 보여야 할 내용이므로 옵션을 두지 않는다.
-- **옵션 선정 기준**: 실제 SKILL.md·스크립트에 근거가 있는 것만 옵션으로 둔다 — 사용자가 직접 요청한 것(표시 방식, 렌더러, 저장 위치 — 세 스킬 모두, 질문 여부와 기본값 표시), 그리고 지금 스크립트에 고정돼 있거나(PNG 배율, 산출물 저장 위치) 매번 묻는 것(형식·범위·PDF 레이아웃)이다. 기존 동작에 켬/끔만 덧붙인 제안(피드백 로그, 다이어그램 주석, 지어낸 이름 언어, 다이어그램 표시 방식)과 근거가 없는 제안(참가자 종류 표시)은 넣지 않는다. 형식·범위 질문은 요청마다 달라지는 값이므로 설정으로 고정하지 않는다.
+- **옵션 선정 기준**: 실제 SKILL.md·스크립트에 근거가 있는 것만 옵션으로 둔다 — 사용자가 직접 요청한 것(표시 방식, 렌더러, 노드 이름 표시어·함수 괄호, 저장 위치 — 세 스킬 모두, 질문 여부와 기본값 표시), 그리고 지금 스크립트에 고정돼 있거나(PNG 배율, 산출물 저장 위치) 매번 묻는 것(형식·범위·PDF 레이아웃)이다. 근거 없는 제안은 넣지 않는다. 형식·범위 질문은 요청마다 달라지는 값이므로 설정으로 고정하지 않는다.
 - **`hidden`과 계층 구조의 선택 이유**: "그리느냐"(1단계)와 "어떻게 그리느냐"(2단계)를 별도 키로 나누면 "안 그림 + 접힘" 같은 의미 없는 조합이 생기므로, 표시 방식 값 하나에 `hidden`을 포함한다. 계층은 섹션·기능 단위로만 만들어, 이후 섹션별 옵션이 늘면 그 묶음 안에 키를 더한다.
 - **우선순위**: 요청 문장 > 설정 파일 > 기본값. 요청 문장의 지정은 그 요청에만 적용되고 저장되지 않는다(003 FR-007b의 렌더러 지정과 같은 원칙).
 - **로컬 개인 기본값과의 관계**: CLAUDE.local.md에 둔 "매 요청을 elk로 지정한 것처럼 취급" 같은 개인 지침은 이 설정 파일과 별개로 유지되며, 이 기능이 자동으로 바꾸거나 지우지 않는다. 그 지침은 요청 문장에 elk를 밝힌 것과 같은 효과를 내므로 설정보다 우선한다. 같은 효과를 설정으로 얻으려면 사용자가 `dependency.renderer`를 `elk`로 바꾸고 그 지침을 직접 정리하면 된다.
