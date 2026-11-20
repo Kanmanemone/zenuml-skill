@@ -19,7 +19,7 @@ All three sections in the output file get a `###` heading (never `##` or shallow
 
 ## Dependency template
 
-Write only this basic form; `scripts/build_diagram.py` then fills in the config block (with `layout`), edge IDs, one border-color class per node and one edge class per source node (six Okabe-Ito colors in declaration order), the four section comments, and the CRUD block — see SKILL.md, "Saving".
+Write only this basic form; `scripts/build_diagram.py` then fills in the config block (with `layout`), edge IDs, one border-color class per node and one edge class per source node (six Okabe-Ito colors in declaration order), the four section comments, the CRUD block, and its conditional change-mark explanation — see SKILL.md, "Saving".
 
 ````markdown
 ### Dependency
@@ -56,7 +56,7 @@ Rules:
 
 ### Change marking
 
-For a structure-change (dynamic) request, only the nodes the description names as added, changed, or removed get a label prefix and a CRUD class; every other node is written as usual. The diagram script adds the `crud*` class definitions; the node keeps its own color.
+For a structure-change (dynamic) request, only the nodes the description names as added, changed, or removed get a label prefix and a CRUD class; every other node is written as usual. The diagram script adds the `crud*` class definitions and, when any CRUD class exists, the text node `CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제" }`; the node keeps its own color.
 
 ```text
   NewNode@{ label: "✨&nbsp;<b>NewNode</b>" }
@@ -68,7 +68,7 @@ For a structure-change (dynamic) request, only the nodes the description names a
   class RemovedNode crudDelete
 ```
 
-A removed node is still drawn with the relations the description says it had. No legend is added.
+A removed node is still drawn with the relations the description says it had. The skill never writes the explanation node; the script adds it only when a CRUD class exists.
 Place the configured label inside `<b>`/`<s>`. With both options on, examples are `NewNode@{ label: "✨&nbsp;<b>class&nbsp;NewNode</b>" }` and `ChangedFn@{ label: "♻️&nbsp;fun&nbsp;changedFn()" }`; disabled parts are omitted independently.
 
 ### Hyperlink syntax

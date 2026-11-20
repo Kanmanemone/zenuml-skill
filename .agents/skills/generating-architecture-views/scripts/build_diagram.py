@@ -6,7 +6,8 @@ The skill writes only the basic diagram: `flowchart LR`, node/group declarations
 script adds what follows from rules alone (references/templates.md, "Dependency template"):
 the YAML config block (with `layout`), edge IDs `eN@`, one color class per node and one edge
 class per source node (six Okabe-Ito colors in node declaration order, cycling), the four
-section comments, the label-convention comment, and the three `classDef crud*` lines.
+section comments, the label-convention comment, the three `classDef crud*` lines, and the
+three-line change-mark explanation when any CRUD class is used.
 
 Usage: python3 build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<renderer>]
 --layout is a renderer the request itself names; otherwise the dependency.renderer setting
@@ -108,6 +109,8 @@ def build(fence_lines, layout):
         out.append("  classDef " + class_base(source) + "Edge stroke:" + color[source] + ",stroke-width:3.5px")
         out += ["  class e" + str(i) + " " + class_base(source) + "Edge" for i in ids]
     out += [""] + CRUD + [line.rstrip() for line in crud]
+    if crud:
+        out.append('  CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제" }')
     if clicks:
         out += [""] + [line.rstrip() for line in clicks]
     return out

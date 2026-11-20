@@ -62,7 +62,7 @@ Decide without asking; only if you genuinely can't tell, ask "현재 구조를 �
 
 **Caption**: exactly one plain-text line (no blockquote, heading, or bold) between `### Dependency` and the code fence, saying what the diagram depicts, built only from the request's key words — the system/process and the aspect asked about (e.g. "Jetpack Navigation 3에서 백스택과 화면 전환 구조를 보여줘" → `Jetpack Navigation 3의 백스택과 화면 전환 의존 구조`). Write it in the user's language. On regeneration, rewrite it to cover every request so far.
 
-**Diagram** — write only this basic form; `build_diagram.py` adds everything else (config block, edge IDs, colors, section comments, CRUD definitions):
+**Diagram** — write only this basic form; `build_diagram.py` adds everything else (config block, edge IDs, colors, section comments, CRUD definitions, and the change-mark explanation):
 
 ```mermaid
 flowchart LR
@@ -87,7 +87,7 @@ flowchart LR
   - These settings affect only Dependency labels. Never change node IDs, link targets/tooltips, hover content, or the bold names in Responsibility/Collaboration, and never add label commentary such as `Foo(state)`.
 - **Edges**: `Source -->|관계 성격| Target`. The label is the relationship's nature in the description's own words (호출, 타입 참조, 선언 참조, 화면·타입 참조 … — open vocabulary); if the description doesn't say, use "호출".
 - **After the edges**: only `class <Id> crud*` lines (dynamic) and `click` lines. Never write a config block, edge IDs, `classDef` or color `class` lines, `linkStyle`, or `%%` comments.
-- **Change marks** (dynamic only) — only nodes the description says were added, changed, or removed; never guess. A removed node keeps the relations the description says it had. No legend.
+- **Change marks** (dynamic only) — only nodes the description says were added, changed, or removed; never guess. A removed node keeps the relations the description says it had. Never write an explanation node yourself: when any CRUD class is present, `build_diagram.py` adds the titleless three-line text `✨: 추가` / `♻️: 변경` / `🗑️: 삭제`; with no CRUD class it adds nothing.
 
   | Change | Label | Line after the edges |
   |---|---|---|

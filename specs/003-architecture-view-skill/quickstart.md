@@ -253,6 +253,11 @@
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.
 
+## Validation Results (T139, 2026-11-21)
+
+- `test_build_diagram.py`: CRUD 없음과 추가·변경·삭제 각각의 조건을 포함한 2개 테스트 통과.
+- `swemo-a7f94cc-function-changes.architecture.md`: 제목 없는 3줄 이모지 설명을 Mermaid CLI로 렌더링 성공.
+
 ## Validation Results (T136, 2026-11-20)
 
 - 시나리오 26: 임의의 원본 표시어 `sourceKeyword`를 사용한 함수 라벨 `sourceKeyword&nbsp;render()`가 `build_diagram.py` 실행 뒤에도 그대로 보존되고, 비함수 `class&nbsp;Worker`에는 괄호가 붙지 않음을 확인했다.

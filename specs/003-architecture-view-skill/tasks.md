@@ -502,8 +502,8 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 **Independent Test**: `build_diagram.build()`에 CRUD class가 없는 입력과 하나 이상인 입력을 넣어 각각 설명 없음과 `✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제` 한 번을 확인한다.
 
-- [ ] T137 [US1] 조건부 3줄 이모지 설명 회귀 테스트를 `specs/003-architecture-view-skill/test_build_diagram.py`에 추가하고 구현 전 실패를 확인 per FR-035, SC-014
-- [ ] T138 [US1] 기존 `crud` 목록이 비어 있지 않을 때만 `CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제" }`를 추가하도록 `.agents/skills/generating-architecture-views/scripts/build_diagram.py` 수정 per FR-035
-- [ ] T139 [US1] 스크립트가 이모지 설명을 맡는 규칙을 `.agents/skills/generating-architecture-views/SKILL.md`, `.agents/skills/generating-architecture-views/references/templates.md`에 반영하고 quickstart 시나리오 25를 검증 per FR-008d, FR-035
+- [X] T137 [US1] 조건부 3줄 이모지 설명 회귀 테스트를 `specs/003-architecture-view-skill/test_build_diagram.py`에 추가하고 구현 전 실패를 확인 per FR-035, SC-014
+- [X] T138 [US1] 기존 `crud` 목록이 비어 있지 않을 때만 `CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제" }`를 추가하도록 `.agents/skills/generating-architecture-views/scripts/build_diagram.py` 수정 per FR-035
+- [X] T139 [US1] 스크립트가 이모지 설명을 맡는 규칙을 `.agents/skills/generating-architecture-views/SKILL.md`, `.agents/skills/generating-architecture-views/references/templates.md`에 반영하고 quickstart 시나리오 25를 검증 per FR-008d, FR-035
 
 **Dependencies**: T137 → T138 → T139.
