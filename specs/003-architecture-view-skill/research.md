@@ -110,3 +110,9 @@
 - **Decision — 라벨 형식은 하나**: 라벨이 Id와 다른 노드는 표시어든 변화 표시든 모두 FR-007의 `Id@{ label: "…" }`로 쓴다. SKILL.md "Change marks" 표의 `Id["✨&nbsp;<b>Name</b>"]` 같은 대괄호 형식도 `Id@{ label: "✨&nbsp;<b>Name</b>" }`로 맞춘다(그룹의 `subgraph Id["라벨"]`은 그대로).
 - **Rationale**: 같은 일에 형식이 두 가지면 에이전트가 두 규칙을 배워야 한다. `@{ label }`은 2026-11-13 clarify에서 사용자가 고른 형식이다. `build_diagram.py`는 줄 맨 앞의 Id만 읽고 009·010 파서는 두 형식을 다 읽으므로, 이미 만들어진 산출물도 그대로 동작한다.
 - **Alternatives considered**: 노드 라벨을 모두 대괄호 `Id["…"]`로 통일(노드당 약 5토큰, 노드 11개 파일에서 약 50토큰 — 파일의 1% 남짓 — 를 아끼지만 사용자의 형식 결정을 뒤집어 기각).
+
+## Decision: CRUD 이모지 설명 (FR-035, 2026-11-21)
+
+- **Decision**: `build_diagram.py`가 이미 모은 CRUD class가 하나 이상이면 Mermaid text node `✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제`를 추가한다.
+- **Rationale**: 조건과 문구가 모두 고정이므로 에이전트 판단, 설정, 새 의존성이 필요 없다.
+- **Alternatives considered**: 에이전트가 직접 생성(불필요한 출력 변동성과 토큰 사용).

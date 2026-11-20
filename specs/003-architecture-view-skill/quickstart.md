@@ -228,12 +228,13 @@
 **입력 예시**: "이 커밋에서 `NewNode`가 추가되고 `ChangedNode`가 바뀌고 `RemovedNode`가 삭제됐어. 변화를 설명해줘" + 관련 컴포넌트 설명. 비교용으로 같은 시스템의 "구조를 보여줘" 요청도 낸다.
 
 **기대 결과**:
-- 동적 요청: 세 노드 라벨이 `✨&nbsp;<b>NewNode</b>`, `♻️&nbsp;ChangedNode`, `🗑️&nbsp;<s>RemovedNode</s>`이고 CRUD 구역에 `class NewNode crudCreate`·`class ChangedNode crudUpdate`·`class RemovedNode crudDelete`가 있다. 세 노드는 각자의 테두리 색 클래스를 유지하며, 언급되지 않은 노드에는 표시가 없다. 범례는 없다.
+- 동적 요청: CRUD class가 하나 이상이면 도식 안에 제목 없이 `✨: 추가`, `♻️: 변경`, `🗑️: 삭제`가 3줄 text로 정확히 한 번 보인다.
 - 두 요청 모두 CRUD 구역 주석 바로 다음 줄에 라벨 규칙 주석 `%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`이 있다.
-- 정적 요청: CRUD 구역과 세 `classDef crud*`는 있지만 `class … crud*` 줄과 이모지 접두가 없다.
+- 정적 요청: CRUD 구역과 세 `classDef crud*`는 있지만 `class … crud*` 줄·이모지 접두·범례가 없다.
+- CRUD class를 하나만 둬도 세 줄 설명이 모두 생기며, 세 class를 모두 둬도 한 번만 생긴다.
 - 정적/동적을 묻는 질문은 판단이 실제로 불가능할 때만 나온다.
 
-**검증**: 두 산출물의 CRUD 구역·`class` 줄·라벨 접두를 대조하고, 미리보기에서 굵은 테두리·대시 테두리·점선+회색 글자가 테두리 색과 함께 보이는지 확인한다.
+**검증**: `python specs/003-architecture-view-skill/test_build_diagram.py`를 실행하고 미리보기에서 3줄 설명을 확인한다.
 
 ## 시나리오 26 — 노드 규격 표시어 (FR-036, SC-015)
 

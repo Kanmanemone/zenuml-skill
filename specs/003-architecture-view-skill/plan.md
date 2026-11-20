@@ -18,7 +18,7 @@
 
 **Storage**: 영속 데이터베이스는 없음. FR-021에 따라 구조 뷰 출력 파일을 프로젝트 루트의 `.zenuml/`에 저장한다 — 이미 `.gitignore`에 포함된 기존 디렉터리를 그대로 재사용한다.
 
-**Testing**: 이 기능에는 자동화된 테스트가 없다(hover 스크립트는 `specs/009-hover-detail-panel/fixtures/`로 확인한다). spec.md의 User Story 1~3과 Edge Case를 커버하는 대표 프롬프트 시나리오를 `quickstart.md`에 정의하고 수동으로 실행해 성공 기준(SC-001~SC-011) 충족 여부를 검증한다.
+**Testing**: `build_diagram.build()`를 직접 호출하는 작은 회귀 테스트로 CRUD 표시 없음·각 표시 하나씩·세 표시 전부를 확인하고, `quickstart.md` 시나리오 25에서 Mermaid 미리보기까지 확인한다. 기존 hover 스크립트는 `specs/009-hover-detail-panel/fixtures/`로 확인한다.
 
 **Target Platform**: Claude Code (CLI/IDE) — 이 저장소의 기존 `.claude/skills/*`와 동일한 실행 환경.
 
@@ -30,7 +30,7 @@
 - 목적(Purpose)이 실제로 불분명할 때만 확인 질문을 거쳐야 하며, 이미 명시됐거나 추론 가능하면 되묻지 않고 그 목적으로 바로 구조 뷰를 생성해야 한다(spec.md FR-001~003).
 - Dependency, Responsibility, Collaboration 세 섹션을 항상 이 순서로 생성해야 한다(FR-005).
 - Dependency는 `flowchart LR` + 그룹별 `direction TB` + 코드펜스 맨 앞의 고정 YAML frontmatter `config` 스타일 블록을 쓰고(엣지는 `eN@` ID와 엣지 클래스로 색칠, 라벨이 ID와 다른 노드는 `@{ label }`), 각 화살표에 관계 성격 레이블을, 각 노드·그 노드발 화살표에 일관된 색상을 부여해야 한다(FR-007~008b). 사용자가 요청에서 명시적으로 렌더러(예: "elk")를 지정한 경우에 한해 YAML `config` 바로 아래에 `layout`을 그 값 그대로 추가해야 하며, 명시하지 않은 요청(재생성 포함)에서는 이전 라운드 값을 이어받지 않고 생략해야 한다 — 렌더러 이름은 관계 성격 레이블과 동일하게 열린 어휘이고 검증·매핑 로직을 두지 않는다(FR-007b).
-- 요청은 매번 구조(정적)와 구조 변화(동적) 중 하나로 분류하고(실제로 판단할 수 없을 때만 질문), 동적이면 설명이 밝힌 추가·변경·삭제 노드에만 라벨 접두(`✨<b>`/`♻️`/`🗑️<s>`)와 CRUD 클래스를 붙인다. 라벨 규칙 주석(`%% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>`)과 CRUD classDef 세 줄은 정적·동적 모두 항상 고정 구역에 두고, 테두리 색은 건드리지 않으며, 범례는 Mermaid의 절대 위치 지정 불가로 두지 않는다(FR-034, FR-035).
+- 요청은 매번 구조(정적)와 구조 변화(동적) 중 하나로 분류하고, 동적이면 설명이 밝힌 노드에만 이모지 라벨과 CRUD 클래스를 붙인다. CRUD class가 하나 이상이면 스크립트가 제목 없는 `✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제` text node를 하나 추가한다(FR-034, FR-035).
 - 원본 코드의 선언 하나나 파일 하나에 대응하고 실제로 확인한 노드의 Dependency 라벨은 007 설정 두 개를 독립적으로 따른다. `dependency.nodeMarkers=true`면 원본 선언 키워드와 파일의 마지막 확장자를 보이고, `dependency.functionParentheses=true`면 확인된 함수 이름 끝에 `()`를 정확히 한 번 붙인다. 기본값은 각각 `false`, `true`다. 확인하지 못했거나 선언도 파일도 아닌 노드는 이름만 두고, 라벨에 부가 설명을 넣지 않으며, 본문의 굵은 이름·노드 ID·링크·hover 내용에는 적용하지 않는다. 표시어와 괄호는 스킬이 쓰고 `build_diagram.py`는 바꾸지 않으며 기존 schema 기반 boolean 로더를 재사용한다(FR-036, 007 FR-012d, research.md "노드 규격 표시어").
 - Responsibility는 더 이상 쌍을 비교하지 않는다 — 그룹·요소마다 책임(추상)/역할(구체)을 서술해야 한다(FR-009~010). 다만 같은 그룹·같은 관계 성격에서 병렬적 구조적 역할만 수행하는 요소가 3개 이상이면(종류가 다른 역할을 가진 대상은 제외), 각각 대신 "A, B, C" 이름을 모두 나열한 하나의 통합 항목으로 서술할 수 있다(FR-009b).
 - Collaboration은 실제 의존관계가 있는 그룹·요소 쌍에만 항목을 만들고, 각 항목에 책임의 경계/분리 이유&합리성 평가/내가 할 수 있는 질문 세 하위 항목을 담아야 하며, 다수 대상 통합 조건(같은 그룹·같은 관계 성격·3개 이상·병렬적 구조적 역할 — 개별 이름/구현 차이나 개별 엣지가 있어도 무방하며, 종류가 다른 역할을 가진 대상만 제외)을 만족하면 서술적 표현으로 압축해야 한다(FR-025~027b). Responsibility(FR-009b)와 Collaboration(FR-027b)은 동일한 통합 판단 기준을 재사용한다.
@@ -46,15 +46,15 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-기준: `.specify/memory/constitution.md` v1.1.1(2026-11-15 비준). 이 절을 처음 쓸 때(2026-07-31)는 헌법이 placeholder라 N/A였고, 아래는 2026-11-20 FR-036 계획에서 다시 점검한 결과다.
+기준: `.specify/memory/constitution.md` v1.1.1(2026-11-15 비준). 이 절을 처음 쓸 때(2026-07-31)는 헌법이 placeholder라 N/A였고, 아래는 2026-11-21 CRUD 이모지 범례 계획에서 다시 점검한 결과다.
 
 | 원칙 | 점검 | 결과 |
 |------|------|------|
-| I. 오버엔지니어링 금지 | 007의 기존 설정 로더를 재사용하고 스크립트·언어별 키워드 목록을 새로 두지 않는다. 라벨 규칙만 조건화한다 | 통과 |
-| II. 요청은 해당 Spec에서 진행 | 노드 출력 계약은 003, 사용자 설정 계약은 기존 007에서 고친다 | 통과 |
-| III. 출력 변동성 수정에 Spec Kit 미사용 | 라벨 형식이라는 요구사항 변화라 해당 없음 | 해당 없음 |
+| I. 오버엔지니어링 금지 | 기존 `build_diagram.py`의 CRUD 수집 결과와 Mermaid 공식 text shape만 재사용한다. 설정·의존성·별도 생성 단계를 추가하지 않는다 | 통과 |
+| II. 요청은 해당 Spec에서 진행 | 기존 003의 CRUD 변화 표시 출력 계약을 갱신한다 | 통과 |
+| III. 출력 변동성 수정에 Spec Kit 미사용 | 모든 해당 산출물에 적용되는 새 범례 계약이므로 출력 변동성 수정이 아니다 | 해당 없음 |
 
-**Post-Phase 1 재확인**: research.md·data-model.md·contracts·quickstart 반영 뒤에도 새 실행 파일·의존성·언어별 목록이 없다. 위반 없음.
+**Post-Phase 1 재확인**: research.md·data-model.md·contracts·quickstart 반영 뒤에도 새 런타임 의존성·설정·에이전트 판단이 없다. 작은 회귀 테스트 외에는 새 파일도 없다. 위반 없음.
 
 ## Project Structure
 
@@ -66,6 +66,7 @@ specs/003-architecture-view-skill/
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)
 ├── quickstart.md        # Phase 1 output (/speckit-plan command)
+├── test_build_diagram.py # CRUD 범례 조건의 작은 회귀 테스트
 ├── contracts/           # Phase 1 output (/speckit-plan command)
 │   └── skill-interface.md
 ├── checklists/
@@ -81,7 +82,7 @@ specs/003-architecture-view-skill/
 ├── SKILL.md              # 워크플로: 목적 판단(필요시만 확인) → Dependency 생성(자동 그룹핑, 관계 레이블, 색상) → Responsibility 생성(그룹/요소별 책임(추상)/역할(구체)) → Collaboration 생성(의존관계 있는 쌍만, 3필드, 다수 대상 통합) → 하이퍼링크 결정 → 안티패턴 자기검증 → .zenuml/<slug>.architecture.md 저장 → 파일 링크 제시
 ├── scripts/
 │   ├── read_settings.py  # 설정 읽기·검증(007)
-│   ├── build_diagram.py  # Dependency 다이어그램의 고정 부분을 채움(FR-008d)
+│   ├── build_diagram.py  # 고정 부분과 조건부 CRUD 범례를 채움(FR-008d)
 │   ├── apply_hover.py    # hover 패널 적용(009)
 │   └── hover/            # hover 스크립트 모듈(009)
 └── references/
@@ -95,7 +96,7 @@ specs/003-architecture-view-skill/
 
 **다이어그램 고정 부분 스크립트 (FR-008d)**: `scripts/build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<값>]`. Python 3.9 이상, 표준 라이브러리만(009 hover 스크립트와 같은 실행 방식, 설정은 `scripts/hover/settings.py`로 읽음).
 - 입력: `### Dependency` 아래 첫 `mermaid` 펜스. 스킬이 쓴 기본 모양은 `flowchart LR` → 노드·그룹 선언(`subgraph`/`direction TB`/`end` 포함) → `Source -->|관계| Target` 엣지 → (동적이면) `class <Id> crud*` 줄 → `click` 줄이다. 이미 엣지 ID(`eN@`)가 있으면 손대지 않고 0이 아닌 코드로 끝난다.
-- 출력: 템플릿(`references/templates.md`)과 같은 완성 모양. 설정 블록을 펜스 맨 앞에 넣고, `layout`은 `--layout` 값(요청이 밝힌 렌더러) → 없으면 `dependency.renderer`가 `elk`일 때 `elk` → 그 외에는 넣지 않는다. 엣지에 쓴 순서대로 `e0@`부터 ID를 붙인다. 노드는 선언 순서(선언 없이 엣지에만 나온 노드는 처음 나온 순서로 뒤에)로 6색을 돌려 배정하고, 노드마다 `classDef <id>Node`+`class`, 엣지를 가진 출발 노드마다 `classDef <id>Edge`와 `class eN <id>Edge`를 만든다. 네 섹션 주석, 라벨 규약 주석, `classDef crud*` 세 줄을 넣고 스킬의 `class … crud*` 줄은 CRUD 섹션 끝으로, `click` 줄은 맨 뒤로 옮긴다.
+- 출력: 기존 완성 모양에, 수집한 CRUD class 줄이 하나 이상일 때만 `CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제" }`를 CRUD 구역 끝에 추가한다. 그 밖의 출력 순서는 바꾸지 않는다.
 - 실행 순서: 산출 파일 쓰기 → `build_diagram.py` → 로그 라운드 쓰기(완성된 파일 내용) → `apply_hover.py`.
 - Python이 없거나 0이 아닌 코드로 끝나면 파일은 기본 모양 그대로 두고 응답 끝에 `⚙️ 다이어그램 서식 건너뜀: <이유>` 한 줄을 남긴다.
 
