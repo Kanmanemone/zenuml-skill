@@ -164,3 +164,17 @@ T008(panel_text.py) 진행 중에 동시에:
 - [X] T033 [US1] `.agents/skills/generating-architecture-views/scripts/hover/view_parser.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 quickstart Q1–Q4·Q9를 실행한다 per FR-021, SC-003, SC-004, SC-005, SC-008
 
 **Dependencies**: T032 → T033.
+
+## Phase 10: GitHub에서 hover CSS 원문 접기 (FR-022, SC-009)
+
+**Purpose**: VS Code hover 스타일은 유지하면서 GitHub 첫 화면에는 적용되지 않는 CSS의 설명 한 줄만 보인다.
+
+**Independent Test**: Q1–Q4와 Q10을 실행하고, Q1 결과의 wrapper·요약·CSS가 `details-wrapped-style.md`와 같은지 확인한다.
+
+- [X] T034 [US1] `specs/009-hover-detail-panel/fixtures/view.default.expected.md`와 `view.custom.expected.md`를 고정 `<details>` wrapper 기대값으로 바꾸고, 기존 생 `<style>`도 교체·제거되는 Q10 회귀를 확인한다 per FR-022, SC-004, SC-005
+- [X] T035 [US1] `.agents/skills/generating-architecture-views/scripts/hover/style_blocks.py`의 두 CSS를 `details-wrapped-style.md` 형식으로 감싸고 wrapper 숨김 규칙을 넣는다 per FR-022
+- [X] T036 [US1] `.agents/skills/generating-architecture-views/scripts/hover/view_parser.py`가 새 wrapper 전체와 기존 생 `<style>`을 패널 블록으로 찾게 하고 `apply_hover.py`의 설명·reference 예시를 맞춘다 per FR-022
+- [X] T037 [US1] quickstart Q1–Q4·Q10과 skill validator를 실행한다 per SC-003, SC-004, SC-005, SC-009
+  - Q1–Q4와 Q10은 통과했다. skill validator는 실행했으나 환경에 PyYAML이 없어 시작 전에 종료됐다(`ModuleNotFoundError: yaml`).
+
+**Dependencies**: T034 → T035 → T036 → T037.

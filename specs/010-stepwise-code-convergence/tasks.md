@@ -483,3 +483,17 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 - [X] T079 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `clean_name`이 변화 표시·HTML 태그를 제거한 원본 라벨에서 마지막 `&nbsp;` 뒤 이름을 반환하게 하고 전체 `test_learning_stages.py`를 실행한다 per FR-021, SC-003, SC-015
 
 **Dependencies**: T078 → T079.
+
+## Phase 19: GitHub에서 단계 문서 CSS 원문 접기 (FR-022, SC-016)
+
+**Purpose**: 편집기 단계·diff 스타일은 유지하면서 GitHub 첫 화면에는 적용되지 않는 CSS의 설명 한 줄만 보인다.
+
+**Independent Test**: 전체 테스트가 통과하고, 생성된 `.md`가 wrapper 하나 안에 기본·diff CSS를 가지며 `.base.md`에는 같은 wrapper 안 기본 CSS만 있는지 확인한다.
+
+- [X] T080 [US2] `test_learning_stages.py`에 wrapper 하나, 요약·공식 링크, 기본·diff CSS 포함 여부와 diff 제거 동등성을 확인하는 회귀를 추가한다 per FR-022, SC-016
+- [X] T081 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`가 기본·diff `<style>`을 고정 `<details>` 하나로 감싸고 기본 CSS로 wrapper를 숨기게 한다 per FR-022
+- [X] T082 [US2] `fixtures/expected/*.md`와 `*.base.md`를 새 wrapper 형식으로 재생성한다 per FR-022
+- [X] T083 [US2] 전체 테스트와 skill validator를 실행한다 per SC-003, SC-004, SC-016
+  - 표준 라이브러리 테스트 33개가 통과했다. skill validator는 실행했으나 환경에 PyYAML이 없어 시작 전에 종료됐다(`ModuleNotFoundError: yaml`).
+
+**Dependencies**: T080 → T081 → T082 → T083.
