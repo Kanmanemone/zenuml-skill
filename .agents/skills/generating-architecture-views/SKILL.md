@@ -82,6 +82,9 @@ them from a language keyword or extension list. Apply the three
 
 These settings change Dependency labels only. IDs, link targets, hover content,
 and Responsibility/Collaboration names remain unchanged.
+When a file and a declaration it contains are separate nodes with the same
+base name, give them distinct IDs (e.g. `AAA_kt` and `AAA`); each label still
+follows its own rule above.
 
 Resolve a link once and reuse it everywhere that name heads an entry:
 
