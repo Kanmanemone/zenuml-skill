@@ -51,6 +51,8 @@
 | architecture | `dependency.nodeNameFormat.declarationMarkers` | boolean | — | `false` | `false` (2026-11-21 사용자 확정, FR-012d) |
 | architecture | `dependency.nodeNameFormat.fileExtensions` | boolean | — | `false` | `true` (2026-11-21 사용자 확정, FR-012d) |
 | architecture | `dependency.nodeNameFormat.functionParentheses` | boolean | — | `true` | `true` (2026-11-21 사용자 확정, FR-012d) |
+| architecture | `dependency.sourceFile.enabled` | boolean | — | `true` | `true` (2026-11-22 사용자 확정, FR-012e) |
+| architecture | `dependency.sourceFile.position` | enum | `right`/`left` | `right` | `right` (2026-11-22 사용자 확정, FR-012e) |
 | architecture | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
 | zenuml | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
 | exporting | `questions.enabled` | boolean | — | `true` | `true` |

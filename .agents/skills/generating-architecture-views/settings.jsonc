@@ -44,6 +44,20 @@
       //   true  [0] 표시함(foo())
       //   false [0] 표시하지 않음(foo)
       "functionParentheses": true
+    },
+
+    // 노드가 나온 파일 이름을 노드 모서리에 작은 회색 글씨로 표시. 링크가 있는 노드만,
+    // 파일 자체를 가리키는 노드는 제외. 저장 후 번들 스크립트가 채움
+    "sourceFile": {
+      // 표시할지 (초기 기본값: true)
+      //   true  [0] 표시함
+      //   false [0] 표시하지 않음
+      "enabled": true,
+
+      // 표시 위치 (초기 기본값: right)
+      //   right [0] 오른쪽 위 모서리
+      //   left  [0] 왼쪽 위 모서리
+      "position": "right"
     }
   },
   "log": {

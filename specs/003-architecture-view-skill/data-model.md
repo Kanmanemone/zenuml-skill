@@ -99,9 +99,9 @@ Dependency 노드 라벨에 보이는 이름(spec.md FR-036, research.md "노드
 | function_suffix | 함수 선언임을 확인했고 `dependency.nodeNameFormat.functionParentheses=true`면 `()`, 그 밖에는 빈 값. 언어별 `marker` 값과 무관 |
 | change_mark | FR-035의 ✨/♻️/🗑️ (동적 요청에서 해당 노드만) |
 
-**표현**: `[change_mark&nbsp;][<b>|<s>][marker&nbsp;]name[file_extension][function_suffix][</b>|</s>]`. `dependency.nodeNameFormat.declarationMarkers=false`면 `marker`, `fileExtensions=false`면 `file_extension`, `functionParentheses=false`면 `function_suffix`를 각각 비운다. `marker`의 단어 사이와 `marker`·`name` 사이는 `&nbsp;`다. 함수 라벨을 기본 이름으로 연결하는 소비자는 마지막 `&nbsp;` 뒤 값의 끝 `()`만 제거한다. 설정 적용 결과 라벨이 Id와 다르면 `Id@{ label: "…" }`로 선언한다.
+**표현**: `[change_mark&nbsp;][<b>|<s>][marker&nbsp;]name[file_extension][function_suffix][</b>|</s>]`. `dependency.nodeNameFormat.declarationMarkers=false`면 `marker`, `fileExtensions=false`면 `file_extension`, `functionParentheses=false`면 `function_suffix`를 각각 비운다. `marker`의 단어 사이와 `marker`·`name` 사이는 `&nbsp;`다. 함수 라벨을 기본 이름으로 연결하는 소비자는 마지막 `&nbsp;` 뒤 값의 끝 `()`만 제거한다. 설정 적용 결과 라벨이 Id와 다르면 `Id@{ label: "…" }`로 선언한다. `click` 링크가 있고 파일 자체 노드가 아니면 `build_diagram.py`가 라벨 맨 앞에 `<span class=srcFile>…</span>`(FR-037)를 붙이며, 이름 연결은 이 부분을 내용째 무시한다.
 
-**검증 규칙**: 세 설정의 8개 조합이 독립적으로 적용된다. 선언 표시어는 선언 노드에만, 확장자는 파일 자체 노드에만, 켜진 함수 괄호는 함수 노드에만 정확히 한 번 나타난다. 표시어는 원본 근거를 복사하고 언어별 목록으로 판별하지 않는다. 라벨에 `marker`·`name`·`file_extension`·`function_suffix`·`change_mark` 외의 부가 설명(예: `Foo(state)`)이 없다. Responsibility·Collaboration 본문의 굵은 이름은 설정에 영향을 받지 않는다(FR-036, SC-015).
+**검증 규칙**: 세 설정의 8개 조합이 독립적으로 적용된다. 선언 표시어는 선언 노드에만, 확장자는 파일 자체 노드에만, 켜진 함수 괄호는 함수 노드에만 정확히 한 번 나타난다. 표시어는 원본 근거를 복사하고 언어별 목록으로 판별하지 않는다. 라벨에 `marker`·`name`·`file_extension`·`function_suffix`·`change_mark`와 FR-037 파일 이름 표시 외의 부가 설명(예: `Foo(state)`)이 없다. Responsibility·Collaboration 본문의 굵은 이름은 설정에 영향을 받지 않는다(FR-036, SC-015).
 
 ## Responsibility Entry (책임 서술)
 

@@ -90,5 +90,49 @@ class NodeNameFormatSettingsTest(unittest.TestCase):
                 self.assertEqual([], loaded["notices"])
 
 
+class SourceFileTagTest(unittest.TestCase):
+    # The file node and the class inside it share the base name; only the class gets a tag.
+    VIEW = [
+        "flowchart LR",
+        '  Memo_kt@{ label: "Memo.kt" }',
+        "  Memo",
+        '  save@{ label: "✨&nbsp;<b>save()</b>" }',
+        "  Plain",
+        "",
+        "  Memo_kt -->|선언| Memo",
+        "  Memo -->|호출| save",
+        "  save -->|호출| Plain",
+        "",
+        '  click Memo_kt "../src/Memo.kt" "Memo.kt"',
+        '  click Memo "../src/Memo.kt" "Memo.kt"',
+        '  click save "https://example.com/blob/main/src/Store.kt#L10" "Store.kt"',
+    ]
+
+    def test_tags_linked_declarations_but_not_the_file_itself(self):
+        out = build(self.VIEW, "", "right")
+
+        self.assertIn('  Memo_kt@{ label: "Memo.kt" }', out)
+        self.assertIn('  Memo@{ label: "<span class=srcFile>Memo.kt</span>Memo" }', out)
+        self.assertIn('  save@{ label: "<span class=srcFile>Store.kt</span>✨&nbsp;<b>save()</b>" }', out)
+        self.assertIn("  Plain", out)
+        self.assertIn("text-align: right;", next(line for line in out if "themeCSS" in line))
+
+    def test_left_position_and_disabled_tag(self):
+        self.assertIn("text-align: left;", next(line for line in build(self.VIEW, "", "left") if "themeCSS" in line))
+        plain = build(self.VIEW, "", "")
+        self.assertFalse(any("srcFile" in line for line in plain))
+
+    def test_file_extension_off_strips_only_the_file_node(self):
+        out = build(self.VIEW, "", "right", file_extensions=False)
+
+        self.assertIn('  Memo_kt@{ label: "Memo" }', out)
+        self.assertIn('  Memo@{ label: "<span class=srcFile>Memo.kt</span>Memo" }', out)
+
+    def test_hover_reads_the_base_name_through_the_tag(self):
+        from hover.view_parser import clean_name
+
+        self.assertEqual("save", clean_name("<span class=srcFile>Store.kt</span>✨&nbsp;<b>save()</b>"))
+
+
 if __name__ == "__main__":
     unittest.main()

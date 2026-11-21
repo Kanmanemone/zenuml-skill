@@ -77,7 +77,8 @@ _NOT_NODES = {"end"}
 
 def clean_name(label):
     """Display name from a node label: drop change-mark prefixes and inline markup."""
-    text = re.sub(r"</?(b|s|strong)>", "", label)
+    text = re.sub(r"<span class=srcFile>.*?</span>", "", label)  # source-file tag from build_diagram.py
+    text = re.sub(r"</?(b|s|strong)>", "", text)
     for mark in ("✨", "♻️", "♻", "🗑️", "🗑", "️"):
         text = text.replace(mark, "")
     name = text.split("&nbsp;")[-1].strip()

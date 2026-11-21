@@ -72,12 +72,14 @@ name-prefix/namespace signal. Without a grouping signal, draw no `subgraph`.
 
 Keep these source facts separate: base name, original declaration keyword(s),
 final file extension, and whether the declaration is a function. Never infer
-them from a language keyword or extension list. Apply the three
+them from a language keyword or extension list. Apply the
 `dependency.nodeNameFormat` booleans independently:
 
 - `declarationMarkers`: verified original keyword(s), only for declarations
   inside a file.
-- `fileExtensions`: verified final extension, only when the node is the file.
+- A node that is the file itself always gets its verified final extension,
+  whatever `fileExtensions` says; `build_diagram.py` drops it when that setting
+  is `false` and tags other linked nodes with their source file name.
 - `functionParentheses`: `()` exactly once, only for a verified function.
 
 These settings change Dependency labels only. IDs, link targets, hover content,
@@ -155,7 +157,9 @@ For a completed view, in this order:
 
 1. Write `.zenuml/<slug>.architecture.md`.
 2. Run `build_diagram.py <view>`; add `--layout=<value>` only when this request
-   names a renderer. On failure, keep the basic view and report the prescribed
+   names a renderer, and `--source-file=<true|false>`,
+   `--source-file-position=<left|right>`, or `--file-extensions=<true|false>`
+   only for a value this request states. On failure, keep the basic view and report the prescribed
    `⚙️ 다이어그램 서식 건너뜀: <reason>` line.
 3. Write only the relevant-turn request summary to a temporary UTF-8 text file.
    Resolve the log as `<log.directory>/<slug>.architecture.md`, then run

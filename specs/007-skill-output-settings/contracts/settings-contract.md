@@ -37,7 +37,9 @@
 ### architecture 노드 이름 적용 계약 (FR-012d)
 
 - `dependency.nodeNameFormat.declarationMarkers = true`: 실제 원본에서 확인한 파일 내부 선언 키워드를 이름 앞에 보인다. `false`: 선언 키워드를 감춘다.
-- `dependency.nodeNameFormat.fileExtensions = true`: 실제 파일 자체를 가리키는 노드의 마지막 확장자를 보인다. `false`: 확장자를 감춘다.
+- `dependency.nodeNameFormat.fileExtensions = true`: 실제 파일 자체를 가리키는 노드의 마지막 확장자를 보인다. `false`: 확장자를 감춘다. 스킬은 파일 자체 노드에 항상 확장자를 쓰고, 감추는 일은 `build_diagram.py`가 한다.
+- `dependency.sourceFile.enabled = true`: 링크가 있고 파일 자체 노드가 아닌 노드의 위쪽 모서리에 그 노드가 나온 파일 이름을 작은 회색 글씨로 보인다(003 FR-037). `false`: 보이지 않는다.
+- `dependency.sourceFile.position = right | left`: 그 파일 이름을 오른쪽 위 또는 왼쪽 위 모서리에 붙인다.
 - `dependency.nodeNameFormat.functionParentheses = true`: 실제 원본에서 함수임을 확인한 노드 이름 끝에 `()`를 정확히 한 번 붙인다. `false`: 붙이지 않는다.
 - 세 값은 독립적으로 적용한다. 함수 종류나 파일 확장자를 언어별 목록으로 판별하지 않고 입력 근거로 확인한다.
 - 적용 범위는 Dependency 라벨뿐이다. Responsibility·Collaboration 이름, Mermaid ID, 링크 대상과 hover 내용은 바꾸지 않는다.

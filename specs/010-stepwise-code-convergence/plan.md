@@ -207,7 +207,7 @@ specs/010-stepwise-code-convergence/fixtures/   # 신규 — quickstart용 입�
 
 ### 2026-11-20 호환성 보완
 
-003 FR-036의 규격 표시어 라벨은 기존 `scripts/stages.py`의 `clean_name`에서 처리한다. 변화 표시와 HTML 태그를 제거한 뒤 원본 라벨의 마지막 `&nbsp;` 뒤 토큰을 실제 이름으로 반환한다. 새 파서나 공용 모듈은 만들지 않고, 기존 `test_learning_stages.py`에 복합 표시어·변화 표시·기존 라벨을 함께 검사하는 회귀를 추가한다.
+003 FR-036의 규격 표시어 라벨은 기존 `scripts/stages.py`의 `clean_name`에서 처리한다. 변화 표시와 HTML 태그를 제거한 뒤 원본 라벨의 마지막 `&nbsp;` 뒤 토큰을 실제 이름으로 반환한다. 003 FR-037의 파일 이름 표시 `<span class=srcFile>…</span>`는 태그와 함께 내용째 지운다. 새 파서나 공용 모듈은 만들지 않고, 기존 `test_learning_stages.py`에 복합 표시어·변화 표시·기존 라벨을 함께 검사하는 회귀를 추가한다.
 
 ### 2026-11-21 GitHub CSS 원문 접기
 
