@@ -173,3 +173,8 @@
 - 체크포인트마다 멈춰서 해당 스토리를 독립적으로 검증할 것
 - 피할 것: 모호한 태스크, 동일 파일(`SKILL.md`) 동시 편집 충돌, 스토리 간 독립성을 깨는 교차 의존
 - **이전 판과의 차이**: 확인 질문/선택 UI(AskUserQuestion, 하드코딩 텍스트 메뉴)를 전부 없애고, 대신 "요청 종류 판단"을 워크플로 맨 앞의 명시적 Foundational 단계로 승격했다. 저장 구조도 다시 두 파일로 분리했다 — 산출물(`.zenuml/<slug>.md`, 재생성마다 교체)과 로그(`.zenuml/log/<slug>.md`, 계속 누적). 자세한 배경은 research.md 개정 이력 참고.
+## Phase 9: 로그 전문 복사 자동화
+
+- [X] T010 [US1] `specs/002-diagram-feedback-log/test_append_feedback.py`에 최초 생성, 재생성, 현재 위치에 로그가 없는 재생성, 요청 임시 파일 정리를 검증하는 테스트를 추가한다 per FR-010, FR-011
+- [X] T011 [US1] `.agents/skills/generating-zenuml-diagrams/scripts/append_feedback.py`를 표준 라이브러리만으로 구현한다 per FR-010, FR-011
+- [X] T012 [US1] `.agents/skills/generating-zenuml-diagrams/SKILL.md`가 요청 요약만 임시 파일에 쓰고 helper로 로그를 만들며 실패할 때만 기존 수동 절차를 사용하도록 갱신한다 per FR-012, SC-006

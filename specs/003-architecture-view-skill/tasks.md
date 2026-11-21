@@ -523,3 +523,9 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
   - 설정·CRUD 테스트 5개, 009 hover 기대 출력 2종, 010 단계 문서 테스트 33개가 통과했다. skill validator는 환경에 PyYAML이 없어 시작 전에 종료됐다(`ModuleNotFoundError: yaml`).
 
 **Dependencies**: T140 → T141 → T142 → T143.
+## Phase 40: 구조 뷰 토큰 효율 보완
+
+- [X] T144 [US1] `specs/002-diagram-feedback-log/test_append_feedback.py`가 architecture helper에도 같은 로그 계약을 검증하도록 매개변수화한다 per FR-037, FR-039
+- [X] T145 [US1] `.agents/skills/generating-architecture-views/scripts/append_feedback.py`와 `references/feedback-log.md`를 추가한다 per FR-037, FR-039
+- [X] T146 [US1] `.agents/skills/generating-architecture-views/SKILL.md`의 description, 전체 완성 예시, 중복 로그 설명을 줄이고 helper·기존 reference로 라우팅한다 per FR-038
+- [X] T147 [US1] `docs/skill-benchmark/run.py`를 네 스킬과 git ref/작업 트리 비교에 맞게 보완하고 정적 크기 및 기존 회귀 테스트를 실행한다 per SC-016

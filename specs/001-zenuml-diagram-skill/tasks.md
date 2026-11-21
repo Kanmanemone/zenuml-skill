@@ -193,3 +193,7 @@ Task: "SKILL.md 뼈대(frontmatter + 섹션 헤딩) 작성"
 - [X] T019 `SKILL.md` "Output file"에 산출 파일은 `zenuml` 코드펜스만, 채팅 응답은 파일 링크(파일 저장 불가 시 DSL 코드 블록)만 담고 부연 문구를 덧붙이지 않는다는 규칙(예외: 명확화 질문, 범위 밖 요청 안내, 사용자가 직접 물은 질문에 대한 답)을 추가하고, 자기검증 체크리스트에 이를 점검하는 AP-6을 추가 per FR-012, SC-006 (partial)
 - [X] T020 [P] `specs/001-zenuml-diagram-skill/contracts/skill-interface.md` Output Contract 두 성공 케이스에 부연 문구 금지를, `data-model.md` Anti-Pattern Checklist 표와 Checked 상태 정의에 AP-6을 반영 per FR-012 (partial)
 - [X] T021 [P] `specs/001-zenuml-diagram-skill/quickstart.md`에 참가자가 많은 설명과 파일 저장 불가 환경에서 산출 파일·채팅 응답에 부연 문구가 없는지 확인하는 시나리오를 추가 per SC-006 (missing)
+## Phase 10: SKILL.md 토큰 효율 보완
+
+- [X] T022 [US1] `.agents/skills/generating-zenuml-diagrams/SKILL.md`의 description과 중복 인라인 예시·배경 설명을 줄이되 문법 reference, 근거 제한, 자기검증, 출력 계약을 보존한다 per FR-013, FR-014
+- [X] T023 [US1] `docs/skill-benchmark/run.py`의 ZenUML 사례와 기존 quickstart를 이용해 생성 결과 경계를 확인한다 per SC-013

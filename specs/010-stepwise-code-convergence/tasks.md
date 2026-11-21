@@ -497,3 +497,7 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
   - 표준 라이브러리 테스트 33개가 통과했다. skill validator는 실행했으나 환경에 PyYAML이 없어 시작 전에 종료됐다(`ModuleNotFoundError: yaml`).
 
 **Dependencies**: T080 → T081 → T082 → T083.
+## Phase 20: SKILL.md 최소화
+
+- [X] T084 [US1] `.agents/skills/revealing-code-step-by-step/SKILL.md`의 description과 도입부 중복을 줄이고 outline 판단 규칙을 보존한다 per FR-023, FR-024
+- [X] T085 [US1] `specs/010-stepwise-code-convergence/test_learning_stages.py` 전체를 실행해 fixture 결과 불변을 확인한다 per SC-017
