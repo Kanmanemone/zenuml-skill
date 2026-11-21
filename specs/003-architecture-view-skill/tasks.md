@@ -507,3 +507,19 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 - [X] T139 [US1] 스크립트가 이모지 설명을 맡는 규칙을 `.agents/skills/generating-architecture-views/SKILL.md`, `.agents/skills/generating-architecture-views/references/templates.md`에 반영하고 quickstart 시나리오 25를 검증 per FR-008d, FR-035
 
 **Dependencies**: T137 → T138 → T139.
+
+---
+
+## Phase 39: 노드 이름 형식 설정 family 분리 (FR-036, SC-015)
+
+**Goal**: 선언 표시어·파일 확장자·함수 괄호를 `dependency.nodeNameFormat` 아래 세 boolean으로 묶고 서로 독립적으로 제어한다.
+
+**Independent Test**: 설정 스크립트가 배포본과 키 누락 상태에서 `false`·`false`·`true`를 반환하고, quickstart 시나리오 26의 8개 조합에서 각 옵션이 자기 표기만 바꾸는지 확인한다.
+
+- [X] T140 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`에 새 세 dotted key의 배포값·기본값과 제거된 두 구형 키의 알 수 없는 키 안내를 검증하는 회귀 테스트를 추가하고 현재 실패를 확인한다 per 007 FR-012d, SC-001, SC-003
+- [X] T141 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`에서 기존 두 키를 제거하고 `dependency.nodeNameFormat.declarationMarkers=false`, `fileExtensions=false`, `functionParentheses=true`를 추가한다 per FR-036, 007 FR-012d
+- [X] T142 [US1] `.agents/skills/generating-architecture-views/SKILL.md`와 `references/templates.md`의 노드 라벨 규칙·요청 재정의 예시·자기검증을 세 설정의 독립 역할과 8개 조합에 맞춘다 per FR-036, SC-015
+- [X] T143 [US1] `read_settings.py`, `test_build_diagram.py`, quickstart 시나리오 26을 검증하고 결과를 기록한다 per SC-015, 007 SC-010
+  - 설정·CRUD 테스트 5개, 009 hover 기대 출력 2종, 010 단계 문서 테스트 33개가 통과했다. skill validator는 환경에 PyYAML이 없어 시작 전에 종료됐다(`ModuleNotFoundError: yaml`).
+
+**Dependencies**: T140 → T141 → T142 → T143.
