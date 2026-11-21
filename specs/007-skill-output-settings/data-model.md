@@ -49,7 +49,7 @@
 | architecture | `collaboration.questions` | boolean | — | `false` | `false` (2026-11-16 사용자 확정, FR-012c) |
 | architecture | `dependency.renderer` | enum | `default`/`elk` | `default` | `elk` (2026-11-13 사용자 확정) |
 | architecture | `dependency.nodeNameFormat.declarationMarkers` | boolean | — | `false` | `false` (2026-11-21 사용자 확정, FR-012d) |
-| architecture | `dependency.nodeNameFormat.fileExtensions` | boolean | — | `false` | `false` (2026-11-21 사용자 확정, FR-012d) |
+| architecture | `dependency.nodeNameFormat.fileExtensions` | boolean | — | `false` | `true` (2026-11-21 사용자 확정, FR-012d) |
 | architecture | `dependency.nodeNameFormat.functionParentheses` | boolean | — | `true` | `true` (2026-11-21 사용자 확정, FR-012d) |
 | architecture | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
 | zenuml | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |

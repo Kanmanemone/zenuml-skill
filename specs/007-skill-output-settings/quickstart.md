@@ -33,7 +33,7 @@
 | `false` | `true` | `false` | `aaa`, `bbb`, `ccc`, `ddd.kt` |
 | `false` | `false` | `false` | `aaa`, `bbb`, `ccc`, `ddd` |
 
-배포본과 세 키가 빠진 설정에서는 `false`, `false`, `true`로 해석되는지 `scripts/read_settings.py` 출력으로 확인한다. 제거된 `dependency.nodeMarkers`·`dependency.functionParentheses`는 알 수 없는 키 안내 뒤 무시되는지도 확인한다. 모든 조합에서 Responsibility·Collaboration 이름, 노드 ID, 링크와 hover 내용은 같아야 하며, 함수 판단은 특정 키워드 목록이 아니라 원본 근거를 따라야 한다.
+배포본과 세 키가 빠진 설정에서는 `false`, `true`, `true`로 해석되는지 `scripts/read_settings.py` 출력으로 확인한다. 제거된 `dependency.nodeMarkers`·`dependency.functionParentheses`는 알 수 없는 키 안내 뒤 무시되는지도 확인한다. 모든 조합에서 Responsibility·Collaboration 이름, 노드 ID, 링크와 hover 내용은 같아야 하며, 함수 판단은 특정 키워드 목록이 아니라 원본 근거를 따라야 한다.
 
 ## 시나리오 4 — zenuml 로그 위치 (US3, FR-015c)
 
@@ -82,8 +82,8 @@ node .claude/skills/exporting-markdown-diagrams/scripts/read-settings.js
 
 | 검증 | 결과 | 비고 |
 |------|------|------|
-| 배포 기본값 | PASS | `read_settings.py`가 `dependency.nodeNameFormat.declarationMarkers=false`, `fileExtensions=false`, `functionParentheses=true`를 반환 |
-| 키 누락·구형 키 | PASS | 새 키 누락은 `false`·`false`·`true`, 제거된 `dependency.nodeMarkers`·`dependency.functionParentheses`는 안내 뒤 무시 |
+| 배포 기본값 | PASS | `read_settings.py`가 `dependency.nodeNameFormat.declarationMarkers=false`, `fileExtensions=true`, `functionParentheses=true`를 반환 |
+| 키 누락·구형 키 | PASS | 새 키 누락은 `false`·`true`·`true`, 제거된 `dependency.nodeMarkers`·`dependency.functionParentheses`는 안내 뒤 무시 |
 | 8개 조합 | PASS | 세 boolean의 모든 조합이 서로의 해석값을 바꾸지 않음 |
 | 생성 지침 계약 | PASS | 선언 표시어·파일 확장자·함수 괄호의 적용 대상이 분리되고 언어별 목록 없음 |
 | 소비자 회귀 | PASS | 009 hover 기대 출력 2종과 010 단계 문서 테스트 33개 통과 |

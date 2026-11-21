@@ -241,7 +241,7 @@
 **입력 예시**: Now in Android처럼 실제 코드가 있는 프로젝트에서 "`NiaAppState`와 `NiaNavHost`, 그리고 `core` 모듈의 구조를 보여줘". 코드에서 `NiaAppState`는 `class`, `NiaNavHost`는 `@Composable fun`, `TopLevelDestination`은 `enum class`로 선언되어 있고, `colors.xml` 같은 파일 하나를 가리키는 노드도 섞는다. 비교용으로 같은 구성의 동적 요청("이 커밋에서 `NiaNavHost`가 바뀌었다")도 낸다.
 
 **기대 결과**:
-- 기본 설정(`declarationMarkers=false`, `fileExtensions=false`, `functionParentheses=true`)에서는 `NiaAppState`, `NiaNavHost()`, `TopLevelDestination`, `colors`로 표시된다.
+- 기본 설정(`declarationMarkers=false`, `fileExtensions=true`, `functionParentheses=true`)에서는 `NiaAppState`, `NiaNavHost()`, `TopLevelDestination`, `colors.xml`로 표시된다.
 - 세 설정의 8개 조합에서 선언 키워드·파일의 마지막 확장자·함수 `()`가 서로 독립적으로 나타나거나 사라진다. 모두 true면 `class&nbsp;NiaAppState`, `fun&nbsp;NiaNavHost()`, `enum&nbsp;class&nbsp;TopLevelDestination`, `colors.xml`이다.
 - `core` 모듈 노드처럼 선언도 파일도 아닌 노드는 이름만 있다.
 - 동적 요청에서는 변화 표시가 설정 적용 뒤 라벨 앞에 온다(세 값이 모두 true면 `♻️&nbsp;fun&nbsp;NiaNavHost()`).
@@ -255,7 +255,7 @@
 
 ## Validation Results (T143, 2026-11-21)
 
-- `read_settings.py`: `dependency.nodeNameFormat`의 배포 기본값이 `false`·`false`·`true`이고 안내가 없음을 확인했다.
+- `read_settings.py`: `dependency.nodeNameFormat`의 배포 기본값이 `false`·`true`·`true`이고 안내가 없음을 확인했다.
 - `test_build_diagram.py`: 배포값·키 누락 기본값, 세 boolean의 8개 조합 독립성, 제거된 구형 두 키의 안내를 포함한 5개 테스트가 통과했다.
 - 지침 대조: 선언 표시어는 파일 내부 선언에만, 확장자는 파일 자체 노드에만, 괄호는 함수에만 적용하며 다른 이름·ID·링크·hover에는 적용하지 않도록 `SKILL.md`와 template가 일치한다.
 - 회귀: 009 hover 기본·사용자 설정 기대 출력이 일치했고, 010 단계 문서 테스트 33개가 통과했다.
