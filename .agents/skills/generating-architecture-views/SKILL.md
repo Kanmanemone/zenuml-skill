@@ -80,6 +80,8 @@ them from a language keyword or extension list. Apply the three
 - `fileExtensions`: verified final extension, only when the node is the file.
 - `functionParentheses`: `()` exactly once, only for a verified function.
 
+Their shipped defaults are `false`, `true`, and `true`.
+
 These settings change Dependency labels only. IDs, link targets, hover content,
 and Responsibility/Collaboration names remain unchanged.
 

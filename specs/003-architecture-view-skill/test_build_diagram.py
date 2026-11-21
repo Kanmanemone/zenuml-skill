@@ -33,7 +33,7 @@ class NodeNameFormatSettingsTest(unittest.TestCase):
         skill_dir = SCRIPT_DIR.parent
         expected = {
             "dependency.nodeNameFormat.declarationMarkers": False,
-            "dependency.nodeNameFormat.fileExtensions": False,
+            "dependency.nodeNameFormat.fileExtensions": True,
             "dependency.nodeNameFormat.functionParentheses": True,
         }
 
@@ -43,7 +43,7 @@ class NodeNameFormatSettingsTest(unittest.TestCase):
             (skill_dir / "settings.jsonc").read_text(encoding="utf-8")
         ))["dependency"]
         self.assertEqual(
-            {"declarationMarkers": False, "fileExtensions": False, "functionParentheses": True},
+            {"declarationMarkers": False, "fileExtensions": True, "functionParentheses": True},
             dependency["nodeNameFormat"],
         )
         self.assertNotIn("nodeMarkers", dependency)
@@ -63,7 +63,7 @@ class NodeNameFormatSettingsTest(unittest.TestCase):
             loaded = load_settings(root)
 
         self.assertFalse(loaded["values"]["dependency.nodeNameFormat.declarationMarkers"])
-        self.assertFalse(loaded["values"]["dependency.nodeNameFormat.fileExtensions"])
+        self.assertTrue(loaded["values"]["dependency.nodeNameFormat.fileExtensions"])
         self.assertTrue(loaded["values"]["dependency.nodeNameFormat.functionParentheses"])
         self.assertTrue(any("dependency.nodeMarkers" in notice for notice in loaded["notices"]))
         self.assertTrue(any("dependency.functionParentheses" in notice for notice in loaded["notices"]))

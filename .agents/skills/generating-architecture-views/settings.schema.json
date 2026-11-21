@@ -73,7 +73,7 @@
     {
       "key": "dependency.nodeNameFormat.fileExtensions",
       "type": "boolean",
-      "default": false,
+      "default": true,
       "description": "Dependency의 파일 자체 노드 이름에 마지막 확장자를 표시할지",
       "tokenImpact": {
         "true": "[0]",

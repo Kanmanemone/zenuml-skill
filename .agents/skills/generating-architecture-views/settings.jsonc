@@ -35,10 +35,10 @@
       //   false [0] 표시하지 않음(Foo, bar)
       "declarationMarkers": false,
 
-      // 파일 자체를 가리키는 노드에 마지막 확장자를 표시할지 (초기 기본값: false)
+      // 파일 자체를 가리키는 노드에 마지막 확장자를 표시할지 (초기 기본값: true)
       //   true  [0] 표시함(file.kt, file.c)
       //   false [0] 표시하지 않음(file)
-      "fileExtensions": false,
+      "fileExtensions": true,
 
       // 확인된 함수 노드 이름 끝에 ()를 표시할지 (초기 기본값: true)
       //   true  [0] 표시함(foo())
