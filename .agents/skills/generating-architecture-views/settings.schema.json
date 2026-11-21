@@ -61,17 +61,27 @@
       }
     },
     {
-      "key": "dependency.nodeMarkers",
+      "key": "dependency.nodeNameFormat.declarationMarkers",
       "type": "boolean",
       "default": false,
-      "description": "Dependency 노드 이름에 원본 선언 키워드와 파일 확장자를 표시할지",
+      "description": "Dependency의 파일 내부 선언 노드 이름에 원본 선언 키워드를 표시할지",
       "tokenImpact": {
         "true": "[+]",
         "false": "[0]"
       }
     },
     {
-      "key": "dependency.functionParentheses",
+      "key": "dependency.nodeNameFormat.fileExtensions",
+      "type": "boolean",
+      "default": false,
+      "description": "Dependency의 파일 자체 노드 이름에 마지막 확장자를 표시할지",
+      "tokenImpact": {
+        "true": "[0]",
+        "false": "[0]"
+      }
+    },
+    {
+      "key": "dependency.nodeNameFormat.functionParentheses",
       "type": "boolean",
       "default": true,
       "description": "Dependency 함수 노드 이름 끝에 ()를 표시할지",

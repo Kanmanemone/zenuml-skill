@@ -30,7 +30,7 @@ Each script prints one result line, plus any `⚙️ 설정 안내: …` notice 
 Run `read_settings.py` first, fresh every run. It prints one line of JSON: `values` (every option, already validated and defaulted) and `notices`. Use `values` as this run's settings; never read `settings.jsonc` or `settings.schema.json` yourself, and never edit either.
 
 - **No Python 3.9+, or the script fails**: read only the `default` of every option in `settings.schema.json`, use those, and add `⚙️ 설정 안내: settings.jsonc — 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용` to the response.
-- **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "표시어 빼고", "함수 괄호도 빼고", "질문도 만들어줘", "elk로", "hover 빼고"): use it for this request only.
+- **The request itself names a value** for something an option controls (e.g. "이번엔 상자 없이", "선언 표시어 빼고", "파일 확장자는 붙여줘", "함수 괄호도 빼고", "질문도 만들어줘", "elk로", "hover 빼고"): use it for this request only.
 
 ## Step 1 — Purpose and kind
 
@@ -81,9 +81,10 @@ flowchart LR
 ```
 
 - **Nodes**: declare every node, in the order you introduce it (that order sets its color). From source evidence, keep three facts separate: the base name, the original declaration keyword(s) or final file extension, and whether the declaration is a function. Do not infer any of them from a language-specific keyword or extension list. Exclude behavior modifiers, access modifiers, and annotations from the declaration marker. A description counts as verification only when it reproduces the original notation, not when it merely paraphrases the kind.
-  - `dependency.nodeMarkers=true`: prefix a declaration's base name with its verified original keyword(s), joined with `&nbsp;`, and keep a file's verified final extension. `false`: omit that prefix or final extension. Never invent one for an unverified node or a module/layer/screen grouping.
-  - `dependency.functionParentheses=true`: append `()` exactly once to the base name of every verified function. `false`: append nothing. This is independent of `nodeMarkers` and is not a copied parameter list.
-  - Thus the four combinations are marker + `name()`, `name()`, marker + `name`, and `name`. The shipped defaults are `nodeMarkers=false` and `functionParentheses=true`. Whenever the resulting label differs from the ID, use `Id@{ label: "…" }`.
+  - `dependency.nodeNameFormat.declarationMarkers=true`: prefix a verified file-internal declaration's base name with its original keyword(s), joined with `&nbsp;`. `false`: omit that prefix. Never invent one for an unverified node or a module/layer/screen grouping, and never apply it to a file node.
+  - `dependency.nodeNameFormat.fileExtensions=true`: keep the verified final extension only when the node represents the file itself. `false`: omit that extension. Never apply it to a declaration inside a file.
+  - `dependency.nodeNameFormat.functionParentheses=true`: append `()` exactly once to the base name of every verified function. `false`: append nothing. This is independent of the other two settings and is not a copied parameter list.
+  - The three booleans form eight independent combinations. The shipped defaults are `declarationMarkers=false`, `fileExtensions=false`, and `functionParentheses=true`. Whenever the resulting label differs from the ID, use `Id@{ label: "…" }`.
   - These settings affect only Dependency labels. Never change node IDs, link targets/tooltips, hover content, or the bold names in Responsibility/Collaboration, and never add label commentary such as `Foo(state)`.
 - **Edges**: `Source -->|관계 성격| Target`. The label is the relationship's nature in the description's own words (호출, 타입 참조, 선언 참조, 화면·타입 참조 … — open vocabulary); if the description doesn't say, use "호출".
 - **After the edges**: only `class <Id> crud*` lines (dynamic) and `click` lines. Never write a config block, edge IDs, `classDef` or color `class` lines, `linkStyle`, or `%%` comments.
@@ -168,7 +169,7 @@ Check the draft against every item; fix and re-check before saving. Don't narrat
 - AP-5: The diagram is in the basic form (Step 2, "Diagram").
 - AP-5b: `--layout` is planned exactly when this request named a renderer.
 - AP-5c: Static → no change marks; dynamic → exactly the nodes the description names carry the matching prefix and `class … crud*` line.
-- AP-5d: The resolved `dependency.nodeMarkers` and `dependency.functionParentheses` values are applied independently to verified evidence, without a language lookup; enabled function parentheses occur exactly once; labels contain no extra explanation; and IDs, links, hover content, and Responsibility/Collaboration bold names are unchanged.
+- AP-5d: The three resolved `dependency.nodeNameFormat` values are applied independently to verified evidence, without a language lookup: declaration markers only to file-internal declarations, extensions only to file nodes, and enabled function parentheses exactly once only to functions. Labels contain no extra explanation; IDs, links, hover content, and Responsibility/Collaboration bold names are unchanged.
 - AP-6: Every group and element has 책임 (추상) and 역할 (구체), or `설명에 명시되지 않음`; identifiers in 역할 (구체) are backticked.
 - AP-6b: Responsibility consolidation only where its condition holds, every member linked and cited.
 - AP-7: Group-level entries only for group pairs with a crossing edge (none with fewer than 2 groups).
