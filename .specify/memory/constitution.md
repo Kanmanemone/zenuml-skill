@@ -24,6 +24,18 @@
   고치는 작업에는 Spec Kit을 쓰지 않고 Spec도 수정하지 않는다. 이런 차이는 요구사항의 변화가
   아니기 때문이다. 원칙 II는 이런 작업에 적용하지 않는다.
 
+### IV. 설정 기본값은 옵션 정의 한 곳에만 둠
+
+- 스킬 설정 옵션의 기본값은 그 스킬 `settings.schema.json`의 `default` 하나에만 둔다. 배포
+  `settings.jsonc`의 값과 그 주석은 이 값과 같게 유지한다.
+- spec·plan·research·data-model·contract·quickstart·tasks 같은 Spec Kit 문서와 스킬
+  지침(`SKILL.md`, `references/`)은 옵션의 의미와 허용 값만 적고, 기본값을 옮겨 적지 않는다.
+- 테스트는 기본값을 하드코딩하지 않고 옵션 정의의 `default`와 비교한다.
+- 예외: 날짜가 붙은 결정 기록(Clarifications 세션 등)과 이미 실행한 검증 결과는 그 시점의
+  사실이므로 그대로 둔다.
+- 근거: 기본값이 여러 곳에 있으면 값 하나를 바꿀 때마다 여러 문서를 고쳐야 하고, 고치지 못한
+  곳은 실제 값과 어긋난다. 이 규칙이 지켜지면 기본값 변경은 그 스킬의 두 설정 파일만 바꾼다.
+
 ## Governance
 
 - 이 헌법은 다른 모든 지침·관행보다 우선한다.
@@ -32,4 +44,4 @@
 - 개정은 `/speckit-constitution`으로 한다. 버전은 원칙을 없애거나 뜻을 바꾸면 MAJOR,
   원칙·섹션을 더하면 MINOR, 문구만 다듬으면 PATCH를 올린다.
 
-**Version**: 1.1.1 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-15
+**Version**: 1.2.0 | **Ratified**: 2026-11-15 | **Last Amended**: 2026-11-22
