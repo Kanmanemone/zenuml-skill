@@ -48,8 +48,9 @@
 | architecture | `collaboration.display` | enum | 위와 같음 | `plain` | `collapsed` |
 | architecture | `collaboration.questions` | boolean | — | `false` | `false` (2026-11-16 사용자 확정, FR-012c) |
 | architecture | `dependency.renderer` | enum | `default`/`elk` | `default` | `elk` (2026-11-13 사용자 확정) |
-| architecture | `dependency.nodeMarkers` | boolean | — | `false` | `false` (2026-11-20 사용자 확정, FR-012d) |
-| architecture | `dependency.functionParentheses` | boolean | — | `true` | `true` (2026-11-20 사용자 확정, FR-012d) |
+| architecture | `dependency.nodeNameFormat.declarationMarkers` | boolean | — | `false` | `false` (2026-11-21 사용자 확정, FR-012d) |
+| architecture | `dependency.nodeNameFormat.fileExtensions` | boolean | — | `false` | `false` (2026-11-21 사용자 확정, FR-012d) |
+| architecture | `dependency.nodeNameFormat.functionParentheses` | boolean | — | `true` | `true` (2026-11-21 사용자 확정, FR-012d) |
 | architecture | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
 | zenuml | `log.directory` | relativePath(projectRoot) | — | `./.zenuml/log` | `./.zenuml/log` |
 | exporting | `questions.enabled` | boolean | — | `true` | `true` |
@@ -61,7 +62,7 @@
 
 확정 배포 초기값은 2026-11-13 사용자가 항목별로 지정했다(FR-003). 옵션 정의의 `default`와 배포 `settings.jsonc` 값은 이 열과 같다.
 
-`dependency.nodeMarkers`와 `dependency.functionParentheses`는 독립적으로 조합한다. 첫 값은 확인된 선언 키워드와 파일의 마지막 확장자만 제어하고, 둘째 값은 확인된 함수 이름 끝의 `()`만 제어한다. 둘 다 Dependency 라벨에만 적용하며 본문 이름·노드 ID·링크·hover 데이터는 바꾸지 않는다.
+`dependency.nodeNameFormat`의 세 boolean은 독립적으로 조합한다. `declarationMarkers`는 확인된 파일 내부 선언 키워드만, `fileExtensions`는 파일 자체 노드의 마지막 확장자만, `functionParentheses`는 확인된 함수 이름 끝의 `()`만 제어한다. 모두 Dependency 라벨에만 적용하며 본문 이름·노드 ID·링크·hover 데이터는 바꾸지 않는다.
 
 ## Collapsible Section (구조 뷰 산출물 안)
 

@@ -20,16 +20,20 @@
 
 ## 시나리오 3b — 노드 이름 스타일 (FR-012d, SC-010)
 
-원본에서 `class aaa`, 함수 `fun bbb`, 값 `val ccc`, 파일 `ddd.kt`임을 확인할 수 있는 같은 입력으로 아래 네 조합을 각각 생성한다.
+원본에서 `class aaa`, 함수 `fun bbb`, 값 `val ccc`, 파일 `ddd.kt`임을 확인할 수 있는 같은 입력으로 세 boolean의 8개 조합을 각각 생성한다.
 
-| `nodeMarkers` | `functionParentheses` | Dependency 라벨 |
-|---|---|---|
-| `true` | `true` | `class aaa`, `fun bbb()`, `val ccc`, `ddd.kt` |
-| `false` | `true` | `aaa`, `bbb()`, `ccc`, `ddd` |
-| `true` | `false` | `class aaa`, `fun bbb`, `val ccc`, `ddd.kt` |
-| `false` | `false` | `aaa`, `bbb`, `ccc`, `ddd` |
+| `declarationMarkers` | `fileExtensions` | `functionParentheses` | Dependency 라벨 |
+|---|---|---|---|
+| `true` | `true` | `true` | `class aaa`, `fun bbb()`, `val ccc`, `ddd.kt` |
+| `true` | `false` | `true` | `class aaa`, `fun bbb()`, `val ccc`, `ddd` |
+| `false` | `true` | `true` | `aaa`, `bbb()`, `ccc`, `ddd.kt` |
+| `false` | `false` | `true` | `aaa`, `bbb()`, `ccc`, `ddd` |
+| `true` | `true` | `false` | `class aaa`, `fun bbb`, `val ccc`, `ddd.kt` |
+| `true` | `false` | `false` | `class aaa`, `fun bbb`, `val ccc`, `ddd` |
+| `false` | `true` | `false` | `aaa`, `bbb`, `ccc`, `ddd.kt` |
+| `false` | `false` | `false` | `aaa`, `bbb`, `ccc`, `ddd` |
 
-배포본과 두 키가 빠진 설정에서는 `nodeMarkers=false`, `functionParentheses=true`로 해석되는지 `scripts/read_settings.py` 출력으로 확인한다. 모든 조합에서 Responsibility·Collaboration 이름, 노드 ID, 링크와 hover 내용은 같아야 하며, 함수 판단은 특정 키워드 목록이 아니라 원본 근거를 따라야 한다.
+배포본과 세 키가 빠진 설정에서는 `false`, `false`, `true`로 해석되는지 `scripts/read_settings.py` 출력으로 확인한다. 제거된 `dependency.nodeMarkers`·`dependency.functionParentheses`는 알 수 없는 키 안내 뒤 무시되는지도 확인한다. 모든 조합에서 Responsibility·Collaboration 이름, 노드 ID, 링크와 hover 내용은 같아야 하며, 함수 판단은 특정 키워드 목록이 아니라 원본 근거를 따라야 한다.
 
 ## 시나리오 4 — zenuml 로그 위치 (US3, FR-015c)
 
@@ -73,6 +77,16 @@ node .claude/skills/exporting-markdown-diagrams/scripts/read-settings.js
 | 9. 옵션 추가 내구성 | exporting 옵션 정의에 시험용 `trial.flag` 추가 후 `read-settings.js` 실행 | PASS | `lib/settings.js` 수정 없이 기본값 `false`로 해석, 안내 없음. 확인 후 되돌림 |
 
 시나리오 1~4b·8은 LLM이 따르는 지침 동작이라 실제 스킬 호출로 확인해야 하며, 이번 구현 단계에서는 SKILL.md 규칙 대조까지만 했다.
+
+## Validation Results (003 T143, 2026-11-21)
+
+| 검증 | 결과 | 비고 |
+|------|------|------|
+| 배포 기본값 | PASS | `read_settings.py`가 `dependency.nodeNameFormat.declarationMarkers=false`, `fileExtensions=false`, `functionParentheses=true`를 반환 |
+| 키 누락·구형 키 | PASS | 새 키 누락은 `false`·`false`·`true`, 제거된 `dependency.nodeMarkers`·`dependency.functionParentheses`는 안내 뒤 무시 |
+| 8개 조합 | PASS | 세 boolean의 모든 조합이 서로의 해석값을 바꾸지 않음 |
+| 생성 지침 계약 | PASS | 선언 표시어·파일 확장자·함수 괄호의 적용 대상이 분리되고 언어별 목록 없음 |
+| 소비자 회귀 | PASS | 009 hover 기대 출력 2종과 010 단계 문서 테스트 33개 통과 |
 
 ## Validation Results (T041, 2026-11-20)
 

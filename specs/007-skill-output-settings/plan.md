@@ -26,7 +26,7 @@
 
 **Constraints**: 기본값은 기능 도입 전 동작과 같아야 하되, 사용자가 명시적으로 정한 노드 이름 기본값은 예외다(FR-003, FR-012d). 변환 결과는 LLM 판단에 의존하지 않는다(004 원칙, FR-015b). 각 스킬은 다른 스킬을 전제하지 않는 독립 스킬이다(003 FR-014) — 공통 절차도 스킬마다 자기 안에 둔다.
 
-**Scale/Scope**: 기존 옵션에 architecture boolean 2개(`dependency.nodeMarkers`, `dependency.functionParentheses`)를 추가하고, 고정 동작 1개(PDF 펼침)는 유지한다.
+**Scale/Scope**: architecture의 노드 이름 형식 boolean 3개를 `dependency.nodeNameFormat` 아래에 두고, 고정 동작 1개(PDF 펼침)는 유지한다.
 
 ## Constitution Check
 

@@ -96,12 +96,12 @@ Dependency 노드 라벨에 보이는 이름(spec.md FR-036, research.md "노드
 | name | 본문·ID와 연결하는 기본 노드 이름. 파일 노드면 마지막 확장자를 뺀 이름(`Foo`) |
 | marker | 원본에 쓰인 선언 키워드(`class`, `data class`, `fun` …). 선언 하나에 대응하고 실제로 확인한 노드에만 있고, 그 밖에는 없음 |
 | file_extension | 파일 노드에서 실제로 확인한 마지막 확장자(`.kt` 등), 그 밖에는 빈 값 |
-| function_suffix | 함수 선언임을 확인했고 `dependency.functionParentheses=true`면 `()`, 그 밖에는 빈 값. 언어별 `marker` 값과 무관 |
+| function_suffix | 함수 선언임을 확인했고 `dependency.nodeNameFormat.functionParentheses=true`면 `()`, 그 밖에는 빈 값. 언어별 `marker` 값과 무관 |
 | change_mark | FR-035의 ✨/♻️/🗑️ (동적 요청에서 해당 노드만) |
 
-**표현**: `[change_mark&nbsp;][<b>|<s>][marker&nbsp;]name[file_extension][function_suffix][</b>|</s>]`. `dependency.nodeMarkers=false`면 `marker`와 `file_extension`을 비우고, `dependency.functionParentheses=false`면 `function_suffix`를 비운다. `marker`의 단어 사이와 `marker`·`name` 사이는 `&nbsp;`다. 함수 라벨을 기본 이름으로 연결하는 소비자는 마지막 `&nbsp;` 뒤 값의 끝 `()`만 제거한다. 설정 적용 결과 라벨이 Id와 다르면 `Id@{ label: "…" }`로 선언한다.
+**표현**: `[change_mark&nbsp;][<b>|<s>][marker&nbsp;]name[file_extension][function_suffix][</b>|</s>]`. `dependency.nodeNameFormat.declarationMarkers=false`면 `marker`, `fileExtensions=false`면 `file_extension`, `functionParentheses=false`면 `function_suffix`를 각각 비운다. `marker`의 단어 사이와 `marker`·`name` 사이는 `&nbsp;`다. 함수 라벨을 기본 이름으로 연결하는 소비자는 마지막 `&nbsp;` 뒤 값의 끝 `()`만 제거한다. 설정 적용 결과 라벨이 Id와 다르면 `Id@{ label: "…" }`로 선언한다.
 
-**검증 규칙**: 두 설정의 네 조합이 독립적으로 적용된다. 켜진 함수 괄호는 정확히 한 번만 나타나며 함수가 아닌 노드에는 없다. 표시어는 원본 근거를 복사하고 언어별 목록으로 판별하지 않는다. 라벨에 `marker`·`name`·`file_extension`·`function_suffix`·`change_mark` 외의 부가 설명(예: `Foo(state)`)이 없다. Responsibility·Collaboration 본문의 굵은 이름은 설정에 영향을 받지 않는다(FR-036, SC-015).
+**검증 규칙**: 세 설정의 8개 조합이 독립적으로 적용된다. 선언 표시어는 선언 노드에만, 확장자는 파일 자체 노드에만, 켜진 함수 괄호는 함수 노드에만 정확히 한 번 나타난다. 표시어는 원본 근거를 복사하고 언어별 목록으로 판별하지 않는다. 라벨에 `marker`·`name`·`file_extension`·`function_suffix`·`change_mark` 외의 부가 설명(예: `Foo(state)`)이 없다. Responsibility·Collaboration 본문의 굵은 이름은 설정에 영향을 받지 않는다(FR-036, SC-015).
 
 ## Responsibility Entry (책임 서술)
 

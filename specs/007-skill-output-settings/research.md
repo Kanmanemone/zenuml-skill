@@ -71,11 +71,11 @@
 
 ## Decision: 구조 뷰 노드 이름 스타일
 
-- **Decision**: `generating-architecture-views`의 Dependency 설정에 boolean 두 개를 둔다. `dependency.nodeMarkers`는 원본 선언 키워드와 파일 이름의 마지막 확장자 표시를 함께 제어하며 기본값은 `false`다. `dependency.functionParentheses`는 확인된 함수 이름 끝의 `()`를 제어하며 기본값은 `true`다.
-- **Decision — 독립 조합**: 두 값은 서로 독립이다. 표시어가 꺼져도 함수 괄호는 남을 수 있고, 표시어가 켜져도 함수 괄호는 빠질 수 있다. 괄호는 함수에만 정확히 한 번 붙인다.
-- **Decision — 적용 위치**: 스킬이 확인한 원본 표기를 바탕으로 Dependency 라벨을 쓸 때 해석된 두 값을 적용한다. `build_diagram.py`와 기존 schema 기반 boolean 설정 로더는 바꾸지 않는다.
-- **Decision — 표시어 범위**: 선언에는 원본 키워드를 복사하고, 파일에는 이름의 마지막 확장자를 보이거나 감춘다. 언어별 키워드나 확장자 목록을 만들지 않는다. 모듈·계층처럼 원래 표시어가 없는 노드는 설정과 무관하게 이름만 쓴다.
+- **Decision**: `generating-architecture-views`의 세 노드 이름 형식 boolean을 `dependency.nodeNameFormat` 아래에 둔다. `declarationMarkers`는 원본 선언 키워드, `fileExtensions`는 파일 자체 노드의 마지막 확장자, `functionParentheses`는 확인된 함수 이름 끝의 `()`를 제어한다. 기본값은 각각 `false`, `false`, `true`다.
+- **Decision — 독립 조합**: 세 값은 서로 독립이다. 선언 표시어를 켜도 파일 확장자는 켜지지 않고, 파일 확장자를 켜도 선언 표시어는 붙지 않는다. 괄호는 함수에만 정확히 한 번 붙는다.
+- **Decision — 적용 위치**: 스킬이 확인한 원본 표기를 바탕으로 Dependency 라벨을 쓸 때 해석된 세 값을 적용한다. `build_diagram.py`와 기존 schema 기반 boolean 설정 로더는 바꾸지 않는다.
+- **Decision — 표시어 범위**: 선언에는 원본 키워드를 복사하고, 파일 자체 노드에는 이름의 마지막 확장자를 보이거나 감춘다. 언어별 키워드나 확장자 목록을 만들지 않는다. 모듈·계층처럼 원래 표시어가 없는 노드는 설정과 무관하게 이름만 쓴다.
 - **Decision — 비적용 범위**: Responsibility·Collaboration의 굵은 이름, Mermaid 노드 ID, 링크 대상, hover 내용은 바꾸지 않는다. 기존 소비자는 노드 ID와 기본 이름을 계속 사용하므로 추가 정규화가 필요 없다.
 - **Decision — 우선순위**: 사용자가 요청에서 해당 표시 방식을 명시하면 기존 설정 계약에 따라 그 요청에서만 설정값보다 우선한다.
-- **Rationale**: 두 개의 직교 boolean만으로 사용자가 요구한 네 조합을 모두 표현하며, 기존 설정 로더와 원본 근거 복사 규칙을 재사용하는 가장 작은 변경이다.
-- **Alternatives considered**: 네 값 enum(두 축을 따로 바꾸기 어렵고 조합 의미가 중복됨), 언어별 표시어 목록(근거 없는 하드코딩이며 새 언어마다 유지보수 필요), 다이어그램 후처리(원본 선언 종류를 알 수 없어 정확히 적용할 수 없음).
+- **Rationale**: 한 묶음의 세 직교 boolean으로 family 관계와 8개 조합을 직접 표현하며, 기존 설정 로더와 원본 근거 복사 규칙을 재사용하는 가장 작은 변경이다.
+- **Alternatives considered**: `dependency` 바로 아래에 세 키 유지(family 관계가 드러나지 않음), 조합 enum(세 축을 따로 바꾸기 어렵고 값이 8개로 불어남), 언어별 표시어 목록(근거 없는 하드코딩), 다이어그램 후처리(원본 선언 종류를 알 수 없음).

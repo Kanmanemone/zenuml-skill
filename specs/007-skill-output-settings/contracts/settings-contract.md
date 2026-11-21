@@ -36,9 +36,10 @@
 
 ### architecture 노드 이름 적용 계약 (FR-012d)
 
-- `dependency.nodeMarkers = true`: 실제 원본에서 확인한 선언 키워드를 이름 앞에 보이고 파일 노드의 마지막 확장자를 보인다. `false`: 선언 키워드와 마지막 확장자를 감춘다.
-- `dependency.functionParentheses = true`: 실제 원본에서 함수임을 확인한 노드 이름 끝에 `()`를 정확히 한 번 붙인다. `false`: 붙이지 않는다.
-- 두 값은 독립적으로 적용한다. 함수 종류를 `fun`, `def` 같은 목록으로 판별하지 않고 입력 근거로 확인한다.
+- `dependency.nodeNameFormat.declarationMarkers = true`: 실제 원본에서 확인한 파일 내부 선언 키워드를 이름 앞에 보인다. `false`: 선언 키워드를 감춘다.
+- `dependency.nodeNameFormat.fileExtensions = true`: 실제 파일 자체를 가리키는 노드의 마지막 확장자를 보인다. `false`: 확장자를 감춘다.
+- `dependency.nodeNameFormat.functionParentheses = true`: 실제 원본에서 함수임을 확인한 노드 이름 끝에 `()`를 정확히 한 번 붙인다. `false`: 붙이지 않는다.
+- 세 값은 독립적으로 적용한다. 함수 종류나 파일 확장자를 언어별 목록으로 판별하지 않고 입력 근거로 확인한다.
 - 적용 범위는 Dependency 라벨뿐이다. Responsibility·Collaboration 이름, Mermaid ID, 링크 대상과 hover 내용은 바꾸지 않는다.
 - 요청이 표시 방식을 직접 밝히면 그 요청에서만 해당 값보다 우선한다.
 

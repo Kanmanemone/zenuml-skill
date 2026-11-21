@@ -88,7 +88,7 @@
 
 ## Decision: 노드 규격 표시어 (FR-036, 2026-11-20)
 
-- **Decision — 누가 쓰나**: 스킬(에이전트)이 007 설정을 읽고 노드 라벨에 직접 쓴다. `dependency.nodeMarkers=true`면 `Foo@{ label: "class&nbsp;Foo" }`나 파일의 `Foo@{ label: "Foo.kt" }`처럼 표시하고, `false`면 기본 이름만 쓴다. `build_diagram.py`는 바꾸지 않는다.
+- **Decision — 누가 쓰나**: 스킬(에이전트)이 007 설정의 `dependency.nodeNameFormat` 세 값을 읽고 노드 라벨에 직접 쓴다. `declarationMarkers=true`면 `Foo@{ label: "class&nbsp;Foo" }`, `fileExtensions=true`면 파일 노드를 `Foo@{ label: "Foo.kt" }`처럼 표시한다. `build_diagram.py`는 바꾸지 않는다.
 - **Rationale**: 표시어는 원본 코드를 읽고 옮겨 오는 판단이라 FR-008d의 "판단이 필요한 부분은 스킬이 쓴다"에 속한다. `build_diagram.py`는 노드 선언 줄을 해석하지 않고 그대로 옮기므로 라벨이 달라져도 영향이 없다. 표시어가 붙은 노드만 `@{ label }` 형식이 되어 늘어나는 토큰은 그 노드 수만큼이다.
 - **Alternatives considered**: 스크립트가 붙이기(스크립트가 종류를 알려면 에이전트가 종류를 따로 넘겨야 해서 쓰는 양이 줄지 않고 인터페이스만 늘어 기각).
 
@@ -96,7 +96,7 @@
 - **Rationale**: FR-022에 따라 구조 뷰 생성 단계는 설명만 쓴다. 표시어도 경로·식별자처럼 설명에 담긴 근거여야 같은 원칙이 지켜진다(SKILL.md의 코드베이스 입력 안내에 "선언 종류"를 근거 목록에 더한다).
 - **Alternatives considered**: 이름 관례로 짐작(`I` 접두 → interface 등 — FR-036이 금지해 기각).
 
-- **Decision — 붙이는 모양**: `dependency.nodeMarkers=true`일 때 표시어와 이름 사이, 여러 단어 표시어의 단어 사이는 `&nbsp;`로 잇는다(`data&nbsp;class&nbsp;Foo`). 파일 노드는 마지막 확장자까지 보이며, `false`면 선언 키워드와 마지막 확장자를 감춘다. `dependency.functionParentheses=true`일 때만 함수 노드 이름 끝에 `()`를 정확히 한 번 붙인다. 두 설정은 독립이고 기본값은 각각 `false`, `true`다. 변화 표시와 함께 쓰면 설정 적용 뒤의 표시어·이름·함수 괄호를 함께 `<b>`/`<s>` 안에 둔다.
+- **Decision — 붙이는 모양**: `declarationMarkers=true`일 때 표시어와 이름 사이, 여러 단어 표시어의 단어 사이는 `&nbsp;`로 잇는다(`data&nbsp;class&nbsp;Foo`). `fileExtensions=true`일 때만 파일 자체 노드에 마지막 확장자를 붙인다. `functionParentheses=true`일 때만 함수 노드 이름 끝에 `()`를 정확히 한 번 붙인다. 세 설정은 독립이고 기본값은 각각 `false`, `false`, `true`다. 변화 표시와 함께 쓰면 설정 적용 뒤의 표시어·이름·확장자·함수 괄호를 함께 `<b>`/`<s>` 안에 둔다.
 - **Rationale**: 변화 표시 이모지에 `&nbsp;`를 쓴 이유(FR-035)와 같이, 긴 라벨이 줄바꿈될 때 `class`만 윗줄에 남지 않게 한다. 함수의 `()`는 언어별 표시어와 무관한 단일 접미 규칙이라 별도 키워드 목록이 필요 없다. 공백이 든 이름(`Now in Android 앱`)은 `&nbsp;`가 없으므로 그대로 남는다.
 - **Alternatives considered**: 보통 공백으로 잇기(줄바꿈 문제, 그리고 공백 든 이름과 구분할 수 없어 기각). 언어별 키워드 목록으로 함수 여부를 다시 판별하기(기존 근거를 중복하고 열린 어휘라 빠짐이 생겨 기각).
 
