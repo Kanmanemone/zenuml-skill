@@ -1,178 +1,104 @@
 ---
 name: generating-zenuml-diagrams
-description: Generates ZenUML sequence diagram DSL text from a natural-language description of a process, using a bundled zenuml-core syntax reference and an anti-fluff self-check so the output stays accurate and free of invented content. Use when the user asks for a ZenUML diagram, a ZenUML sequence diagram, or to turn a described process/flow into ZenUML DSL.
+description: Generate ZenUML sequence-diagram DSL from a natural-language process description. Use for participants, calls, branches, and loops; not structural architecture views or image export.
 ---
 
 # Generating ZenUML Diagrams
 
-## Syntax reference
+Generate only evidence-supported ZenUML, save it as Markdown, and reply with the
+file link.
 
-Full grammar: [references/syntax.md](references/syntax.md) (participants, messages, control flow, comments, expressions — reorganized from `mermaid-js/zenuml-core`'s `docs/DSL_SYNTAX.md`, MIT licensed). Read it before generating; do not guess syntax.
+## Workflow
 
-Target renderer/grammar baseline: `mermaid-js/zenuml-core`. Do not assume compatibility with the standalone `zenuml.com` product or other ZenUML tooling unless the user says so.
+1. Run `scripts/read_settings.py` and use its resolved values.
+2. Classify the request as regeneration, new, colliding new slug, or ambiguous.
+3. Read [references/syntax.md](references/syntax.md) before generating; target
+   `mermaid-js/zenuml-core`, not standalone zenuml.com syntax.
+4. Generate from the description, run the self-check, save, and log.
 
 ## Settings
 
-Before anything else in each run, find a Python 3.9+ interpreter as `python3`, then `python`, then `py -3` — on Windows `python`, then `py -3`, then `python3` (there `python3` is often only a Microsoft Store stub) — and run it by its full path, without changing the working directory (paths stay relative to the project root):
+Run scripts from the project root by full path. Find Python 3.9+ once: on Windows
+try `python`, `py -3`, `python3`; elsewhere try `python3`, `python`, `py -3`.
+Run `read_settings.py` fresh every time and never read or edit the settings files
+yourself. A value in the current request overrides settings for that request.
 
-```text
-<python> <this skill's directory>/scripts/read_settings.py
-```
+If the script cannot run, use schema defaults and add:
+`⚙️ 설정 안내: settings.jsonc 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용`.
+Append the script's notice lines unchanged to the chat response.
 
-It prints one line of JSON: `values` (every option resolved from `settings.schema.json` and the user's `settings.jsonc`; missing file or keys fall back to defaults, invalid values fall back per key, unknown keys are ignored) and `notices` (ready-made `⚙️ 설정 안내: …` lines). Use `values` as this run's settings — run it fresh every run, never reuse an earlier result, and don't read either settings file yourself. Add each `notices` line, as is, at the end of the chat response — never into the output file or log.
+## Request classification
 
-- **No Python 3.9+, or the script fails**: read only the `default` of every option in `settings.schema.json`, use those, finish the work, and add `⚙️ 설정 안내: settings.jsonc — 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용` at the end of the response.
-- **The request itself names a value** for something an option controls: use what the request says, for this request only.
-
-Never edit either settings file. What each option actually does lives in the section it affects.
-
-## Request classification (do this first)
-
-After reading the settings and before generating anything, checking syntax, or touching any file, classify the request. This determines which of the branches below applies, and getting it wrong risks silently overwriting an unrelated diagram or appending history to the wrong log — so don't skip or defer this.
-
-1. **Regeneration** — this message is a follow-up asking to change a diagram already presented earlier in this conversation (e.g. "use Gateway instead of Server", "add a return value", "that's not quite right, retry"). The target is that diagram's existing `<slug>`.
-2. **Initial generation** — a self-contained description of a process that isn't a follow-up to something just shown, and no `.zenuml/<slug>.md` exists yet for the slug derived from it.
-3. **New request with a colliding slug** — same as (2), but the slug derived from this description happens to already name an existing, unrelated `.zenuml/<slug>.md`. Treat the two diagrams as unrelated: apply the existing name-collision rule (see "Output file" below — append `-2`, `-3`, ...) rather than the regeneration rule.
-4. **Still ambiguous** — if, after weighing the conversation context, it's genuinely unclear whether this is (1) or (2)/(3), don't guess and don't write or overwrite any file. Ask directly, e.g., "Are you asking me to change the diagram I just made, or create a new one?"
-
-Only proceed past this point once the request is classified as (1), (2), or (3).
+- A follow-up changing the diagram just shown is regeneration and keeps its slug.
+- A self-contained process request is new.
+- An unrelated new request whose slug exists uses `-2`, `-3`, etc.
+- If conversation context cannot distinguish these, ask before touching a file.
 
 ## Generation rules
 
-- Use only the participants, messages, and control-flow structures that the user's description explicitly states or clearly implies. Never add a participant, call, branch, loop, or exception handler that isn't grounded in the input.
-- When a call chain is described ("A calls B, which calls C"), nest the calls with braces per the syntax reference rather than flattening them into a sequence of unrelated messages.
-- Prefer the shallowest nesting that still represents the described logic correctly.
-- The ZenUML DSL text is the primary output, but don't paste it into the chat response — save it to a file and link to it (see "Output file" below).
-- If the description implies a very large number of participants or an unusually complex flow, still generate it faithfully — don't silently drop or simplify described content — and don't add any notice that the result may be hard to read or any suggestion to split it.
-- Match the user's language for anything you invent — participant/method names that merely describe an actor's behavior (no real code backs them), plus all surrounding prose (comments, table text, log `Request`/`Response` write-ups). Proper nouns copied from real source (actual class/function names, exact identifiers a codebase uses) are exempt — keep those exactly as given, regardless of language. `zenuml-core`'s `ID` token accepts Unicode letters (`\p{L}`), so non-Latin identifiers are valid ZenUML, e.g. `A.데이터_가져오기()`. In a script with no letter case (Korean, Japanese, Chinese, ...), use `snake_case` for multi-word invented names instead of camelCase, since camelCase relies on a case distinction that script doesn't have.
+- Use only stated or clearly implied participants, messages, returns, branches,
+  loops, and exception handling. Never invent scaffolding to complete the story.
+- A call chain is nested according to the syntax reference, using the shallowest
+  nesting that remains correct.
+- Preserve real identifiers exactly. Write invented actor/behavior names and
+  comments in the user's language; for scripts without letter case, use
+  `snake_case` for invented multi-word names.
+- Generate a faithfully large flow when requested. Do not truncate it, warn about
+  length, or propose splitting it.
+- If caller direction or a structural condition is ambiguous, ask one targeted
+  question. Do not ask about cosmetic naming or ordering.
 
-### Example: minimal request
+## Self-check
 
-Input: "Client calls Server.getData()."
+Before saving, fix and re-check:
 
-Generated ZenUML (this goes into the output file per "Output file" below, not pasted into the chat response):
+1. No participant, message, return, branch, loop, or try/catch exceeds evidence.
+2. Call chains and nesting match the syntax reference and are no deeper than
+   necessary.
+3. The output file contains only the required `zenuml` fence.
+4. The chat response contains only the file link and permitted clarification,
+   direct-answer, out-of-scope, or settings-notice lines.
 
-```text
-Client->Server.getData()
-```
+## Output and logging
 
-Only two participants, one call, no wrapping/outer call invented to hold it. No return value, error handling, or extra participants are added because none were described.
-
-### Example: request with conditional flow
-
-Input: "A user submits a login form. AuthService validates the credentials. If valid, it creates a Session and returns it. If not, the user can retry up to 3 times."
-
-Generated ZenUML (this goes into the output file per "Output file" below, not pasted into the chat response):
-
-```text
-User.submitLogin() {
-  if (AuthService.validate(credentials)) {
-    session = AuthService.createSession()
-    return session
-  } else {
-    // retry up to 3 times, per the description
-    loop (attempts < 3) {
-      AuthService.validate(credentials)
-    }
-  }
-}
-```
-
-Only the branching and looping actually described is represented — no invented logging, no unrelated participants, no exception handling that wasn't mentioned.
-
-## Self-check before presenting a diagram
-
-Before showing a generated diagram to the user, check the draft against this list. Copy it into your working notes and go through it every time:
-
-```text
-ZenUML anti-pattern check:
-- [ ] AP-1: No participants beyond what the description states or clearly implies
-- [ ] AP-2: No messages/method calls beyond what the description states or clearly implies
-- [ ] AP-3: No conditional branches or loops beyond what the description states or clearly implies
-- [ ] AP-4: No unjustified try/catch blocks or invented return values
-- [ ] AP-5: Uses the shallowest nesting that still represents the described logic
-- [ ] AP-6: The output file holds only the `zenuml` code fence and the chat response only the file link (or the DSL code block when there's no filesystem) — no length/complexity notice, split suggestion, fallback notice, or other added commentary (settings notices from "Settings" are the only extra lines allowed)
-```
-
-Workflow: **generate a draft → check it against AP-1 through AP-6 → if anything fails, revise the draft → re-check → only then present the result to the user.** A draft that hasn't passed all six items is not ready to show. If a fix for one item would violate another (rare), prefer accuracy (AP-1–AP-4) over minimal nesting (AP-5).
-
-For a simple, unambiguous request the check is quick — don't narrate it verbatim to the user, just perform it before responding.
-
-## Output file
-
-Don't paste the ZenUML code into the chat response, and don't publish it as a Claude Artifact — Artifacts auto-open/preview in the client the moment they're published, with no parameter to suppress that, which gets intrusive for something generated on every request. Write a file instead: it only opens when the user actually clicks the link.
-
-**Where**: `.zenuml/<slug>.md` in the project root, where `<slug>` is a short kebab-case name derived from what the diagram is about (e.g. `client-server-getdata.md`). Make sure `.zenuml/` is listed in the project's `.gitignore` — add the entry if it's missing (these are generated files, not source).
-
-- If this is **initial generation** or a **new request with a colliding slug** (see "Request classification" above) and a file with that name already exists, append `-2`, `-3`, etc. rather than overwriting it — the two diagrams are unrelated.
-- If this is a **regeneration** of the diagram at `<slug>`, overwrite `.zenuml/<slug>.md` completely with the new content — don't append a suffix, and don't preserve the previous content in this file (the previous content lives on in the feedback log; see below).
-
-**File contents** — the ZenUML DSL inside a `mermaid` code fence using the `zenuml` diagram type. This is both the actual output and the rendered preview — no translation needed. VS Code's built-in Markdown preview (Mermaid Markdown Features, part of the "Markdown Preview Mermaid Support" component) renders `zenuml` natively; confirmed by direct testing. (Claude Artifacts do **not** render `zenuml` — it falls back to plain text there — which is a separate reason this skill writes a file instead of publishing an Artifact; see "Output file" intro above.)
+Write `.zenuml/<slug>.md` containing only:
 
 ````markdown
 ```mermaid
 zenuml
-Client->Server.getData()
+<generated DSL>
 ```
 ````
 
-No title heading needed — the filename already identifies the diagram. Nothing else goes in the file either: no notes, captions, or commentary around the code fence.
+Initial/colliding requests never overwrite an unrelated file. Regeneration
+overwrites the target completely. Ensure `.zenuml/` is ignored, adding the entry
+only when absent. With no filesystem, return only the DSL code block and skip
+logging.
 
-After writing the file, the entire chat response is just a relative link to it — no code block:
+After saving:
 
-📄 [Client calls Server.getData()](.zenuml/client-server-getdata.md)
+1. Write only the relevant-turn request summary to a temporary UTF-8 text file.
+2. Resolve the log as `<log.directory>/<slug>.md`, then run
+   `append_feedback.py <output> <resolved log path> <request file>
+   --mode=<new|append>`. Use `new` for initial/colliding requests and `append`
+   for regeneration. The helper consumes the request file and copies the saved
+   output verbatim; do not reproduce it yourself on success.
+3. If the helper fails, read
+   [references/feedback-log.md](references/feedback-log.md) and preserve the
+   existing append-only contract manually.
+4. Reply with the relative file link.
 
-If the current environment has no filesystem access to write to, skip the file and put the ZenUML DSL in a fenced code block in the chat response instead — just the code block, with no notice that you fell back to it. Skip the feedback log below too in that case — there's no file to log against.
+The request summary gathers every turn since the previous round that shaped the
+diagram, including clarification, and omits unrelated talk. Changing
+`log.directory` never moves old logs; regeneration starts Round 1 when no log
+exists at the current location.
 
-Don't add anything else to the chat response either — no remarks on the diagram's size or complexity, split suggestions, or explanations of how it was built. The only exceptions are a clarifying question (when the description is too ambiguous to draw), an out-of-scope notice (see "Out-of-scope requests"), a direct answer when the user actually asked something (e.g. how to render it), and settings notices (see "Settings").
+## Out of scope
 
-### Diagram feedback log
+- Non-sequence diagrams.
+- Converting an existing diagram rather than a natural-language process.
+- Rendering an image; the saved Markdown is the primary DSL output.
 
-Alongside `.zenuml/<slug>.md`, every successfully generated or regenerated diagram gets a feedback log at `<log.directory>/<slug>.md` — same slug, in the directory the `log.directory` setting names, resolved from the project root (default `./.zenuml/log`, i.e. `.zenuml/log/<slug>.md`). Create the directory if it doesn't exist. Changing the setting never moves or deletes logs already written elsewhere — a regeneration just continues in the log at the currently configured location (starting a fresh Round 1 there if none exists yet). The default location is already covered by the `.zenuml/` `.gitignore` entry; if the setting points somewhere `.gitignore` doesn't cover, leave `.gitignore` alone — that's the user's call.
-
-Any markdown heading added to `.zenuml/<slug>.md` itself (e.g. a supplementary table title) must be `###` or deeper — never `##` or shallower. This is a property of the primary file, not a log-only rule: each round's `**Response**:` field here echoes `.zenuml/<slug>.md`'s content verbatim underneath that round's own `## Round N — <ISO date>` heading, so keeping the primary file's own headings at `###`+ from the start means they always nest correctly once copied in, with no separate transformation needed at log time.
-
-**What goes in the `**Request**:` field**: not just the single message that immediately triggered this round. Gather every turn since the previous round (or, for Round 1, since the conversation about this diagram started) that actually contributed to what got built — including a clarifying question you asked and the user's answer to it, if that's how this round's content was pinned down. Drop anything unrelated to constructing the diagram (small talk, tangents), and lightly edit the rest into one coherent entry rather than pasting a raw transcript. This costs no extra input tokens — those turns are already in context — and keeps the field short, so it doesn't waste output tokens either. Default to plain prose; if it grows long enough that prose gets hard to scan, switch to a numbered list instead.
-
-**On initial generation** (or a new request with a colliding slug), create the log fresh:
-
-````markdown
-## Round 1 — <ISO date>
-**Request**: <the user's request, verbatim or lightly summarized>
-
-**Response**:
-```mermaid
-zenuml
-<the generated ZenUML>
-```
-````
-
-**On regeneration**, append a new round to the existing `<log.directory>/<slug>.md` — never rewrite or delete earlier rounds, no matter how many rounds accumulate:
-
-````markdown
-## Round N — <ISO date>
-**Request**: <this round's request>
-
-**Response**:
-```mermaid
-zenuml
-<the regenerated ZenUML>
-```
-````
-
-Don't summarize, analyze, or prune this log's content, ever — it exists purely so a human can read it later and decide what's worth acting on. After presenting the updated diagram, if the user sends another follow-up, go back to "Request classification" above and classify it fresh — don't assume it's automatically another regeneration of the same diagram.
-
-**Citing a feedback log elsewhere**: the default log location `.zenuml/log/` is gitignored, same as the rest of `.zenuml/`. If some other piece of work actually reads and cites a specific `<log.directory>/<slug>.md` as a source, stage that one file right then with `git add -f <log.directory>/<slug>.md` — nothing else gets staged automatically, and uncited logs stay untracked. `.zenuml/<slug>.md` itself is never a citation target — it gets overwritten on every regeneration, so it has no history worth citing. This skill doesn't do any citing itself and this convention doesn't reach into other skills' files — it only documents, here, what to do when the citing happens.
-
-## When the description is ambiguous
-
-If the description doesn't make clear **who calls whom** or **under what condition a branch happens**, don't invent an answer — ask a specific, targeted question instead (e.g., "Does the client call the server directly, or through a gateway?"). Do not generate a diagram with guessed structure just to have something to show.
-
-Don't over-ask, though: minor cosmetic details (exact display names, colors, participant ordering) don't need a question — pick a reasonable default and move on. Only stop for ambiguity that would change the actual structure of the diagram.
-
-## Out-of-scope requests
-
-- **Non-sequence diagrams** (class, deployment, component, etc.): ZenUML supports sequence diagrams only. Say so rather than attempting a workaround.
-- **Converting an existing Mermaid/PlantUML diagram**: out of scope for this skill. Say so; only natural-language process descriptions are supported as input.
-- **Analyzing a codebase to produce a diagram**: this skill's self-check (AP-1–AP-6) only verifies that a diagram doesn't exceed a *given* description — it has no way to verify that a description faithfully covers an entire codebase. So this skill still takes only a natural-language description as input, not raw code or a repository. If real code is available, read it yourself first (directly, or with your search tools or `gh`), distill what you find into a description that cites concrete evidence (file paths, exact identifiers, commit/PR references), then pass that description in as normal.
-- **Rendering / producing an image**: the primary output is ZenUML DSL text, not an image. The output file already renders as a diagram in VS Code's Markdown preview (see "Output file"); for anything beyond that, tell the user to render it with other `mermaid-js/zenuml-core`-compatible tooling.
+For a codebase request, inspect the code first and distill an evidence-citing
+process description, then use that description. State other boundaries briefly
+without inventing a workaround.

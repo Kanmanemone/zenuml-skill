@@ -1,339 +1,107 @@
-# Complete Examples
+# Decision Examples
 
-These examples show finished files — the Dependency diagrams are as completed by `scripts/build_diagram.py`. Write only the basic form (`templates.md`, "Dependency template").
+Read only when an unusual grouping, link, or consolidation case is unclear after
+`SKILL.md` and `templates.md`. These show the basic form written before scripts;
+`templates.md` is the single source for completed section shape.
 
-Full input→output walkthroughs, end to end. See `templates.md` for the underlying section shapes and `SKILL.md` ("Example") for the rules these follow. Each example below focuses on facets the `SKILL.md` example doesn't show.
+## Contents
 
-All examples below show Responsibility and Collaboration with display `plain` so the content is easy to read; under `collapsed`/`expanded` each is wrapped as in `SKILL.md` "Section display", and under `hidden` it's absent. They also show `collaboration.questions` `true`; under `false` every <strong>내가 할 수 있는 질문</strong> sub-part is absent.
+- Two groups and local links
+- Multi-target consolidation and repository links
+- No grouping or link evidence
 
-## Example 1 — Onboarding, two groups, local-project hyperlinks
+## Two groups and local links
 
-**User**: "OrderService(src/main/kotlin/order/OrderService.kt)와 PaymentService(src/main/kotlin/order/PaymentService.kt)는 '주문 도메인'에 속해. InventoryService(src/main/kotlin/inventory/InventoryService.kt)는 '재고 도메인'에 속해. OrderService가 PaymentService를 호출해서 결제를 진행하고(호출), InventoryService의 재고 수량 타입을 참조해서 주문 가능 여부를 판단해(타입 참조). OrderService는 주문 생성을 담당하고, PaymentService는 결제 처리를 담당해. 이 저장소 루트 기준 경로야."
+Input evidence:
 
-**Skill** (purpose not stated and not inferable from context → asks, user picks 1/온보딩) writes `.zenuml/order-inventory.architecture.md`:
+- `app/App.kt` calls `feature/search/SearchRoute.kt`.
+- `SearchRoute.kt` calls `data/SearchRepository.kt`.
+- Purpose: onboarding.
 
-````markdown
-### Dependency
-
-주문 도메인과 재고 도메인의 주문·결제·재고 참조 의존 구조
-
-```mermaid
----
-config:
-  flowchart:
-    curve: basis
-    nodeSpacing: 45
-    rankSpacing: 70
-    titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
----
-flowchart LR
-  subgraph OrderDomain["주문 도메인"]
-    direction TB
-    OrderService
-    PaymentService
-  end
-  subgraph InventoryDomain["재고 도메인"]
-    direction TB
-    InventoryService
-  end
-
-  %% ---- 엣지 ----
-  OrderService e0@-->|호출| PaymentService
-  OrderService e1@-->|타입 참조| InventoryService
-
-  %% ---- 노드 스타일 ----
-  classDef orderNode stroke:#E69F00,stroke-width:3px
-  class OrderService orderNode
-  classDef paymentNode stroke:#56B4E9,stroke-width:3px
-  class PaymentService paymentNode
-  classDef inventoryNode stroke:#009E73,stroke-width:3px
-  class InventoryService inventoryNode
-
-  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef orderEdge stroke:#E69F00,stroke-width:3.5px
-  class e0 orderEdge
-  class e1 orderEdge
-
-  %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
-  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
-  classDef crudCreate stroke-width:5px
-  classDef crudUpdate stroke-dasharray:12 4 2 4
-  classDef crudDelete stroke-dasharray:5 10,color:#6B7280
-
-  click OrderService "../src/main/kotlin/order/OrderService.kt" "OrderService.kt"
-  click PaymentService "../src/main/kotlin/order/PaymentService.kt" "PaymentService.kt"
-  click InventoryService "../src/main/kotlin/inventory/InventoryService.kt" "InventoryService.kt"
-```
-
-### Responsibility
-
-#### 그룹의 책임
-
-- <strong>[주문 도메인](../src/main/kotlin/order/)</strong>
-  - <strong>책임 (추상)</strong>: 주문 생성과 결제 진행을 담당한다.
-  - <strong>역할 (구체)</strong>: `OrderService`와 `PaymentService`를 통해 주문 생성과 결제 처리를 수행한다.
-- <strong>[재고 도메인](../src/main/kotlin/inventory/)</strong>
-  - <strong>책임 (추상)</strong>: 재고 수량 정보를 제공한다.
-  - <strong>역할 (구체)</strong>: `InventoryService`가 재고 수량 타입을 노출해 주문 가능 여부 판단에 쓰인다.
-
-#### 요소의 책임
-
-- <strong>[OrderService](../src/main/kotlin/order/OrderService.kt)</strong>
-  - <strong>책임 (추상)</strong>: 주문 생성을 담당한다.
-  - <strong>역할 (구체)</strong>: 주문을 생성하는 처리를 수행한다.
-- <strong>[PaymentService](../src/main/kotlin/order/PaymentService.kt)</strong>
-  - <strong>책임 (추상)</strong>: 결제 처리를 담당한다.
-  - <strong>역할 (구체)</strong>: 결제를 진행하는 처리를 수행한다.
-- <strong>[InventoryService](../src/main/kotlin/inventory/InventoryService.kt)</strong>
-  - <strong>책임 (추상)</strong>: 재고 수량 정보를 제공한다.
-  - <strong>역할 (구체)</strong>: 설명에 구체적인 동작이 명시되지 않음 — 재고 수량 타입만 언급됨.
-
-### Collaboration
-
-#### 그룹 간 비교
-
-- <strong>[주문 도메인](../src/main/kotlin/order/)</strong>는 <strong>[재고 도메인](../src/main/kotlin/inventory/)</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - 주문 도메인은 주문 생성과 결제를 책임진다.
-    - 재고 도메인은 재고 수량 정보를 책임진다.
-    - 경계는 `OrderService`가 주문 가능 여부를 판단하려고 `InventoryService`의 재고 수량 타입을 참조하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 주문 처리와 재고 관리는 서로 다른 이유로 바뀌므로 하나로 합치지 않았다.
-    - 재고 도메인이 여러 주문 관련 도메인에서 재사용될 수 있다면 이 분리는 합리적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - 주문 도메인이 재고 도메인의 내부 저장 방식까지 알고 있지는 않은가?
-    - 재고 확인 실패 시 처리 책임은 어느 쪽에 있는가?
-
-#### 요소 간 비교
-
-- <strong>[OrderService](../src/main/kotlin/order/OrderService.kt)</strong>는 <strong>[PaymentService](../src/main/kotlin/order/PaymentService.kt)</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - `OrderService`는 주문 생성을 책임진다.
-    - `PaymentService`는 결제 처리를 책임진다.
-    - 경계는 `OrderService`가 결제가 필요한 시점에 `PaymentService`를 호출하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 주문 생성과 결제 처리를 하나로 합치지 않아 각자의 변경 이유를 분리한다.
-    - 결제 수단이 늘어나도 주문 생성 로직은 영향받지 않으므로 합리적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - `OrderService`가 결제 수단별 분기까지 알고 있지는 않은가?
-    - `PaymentService`가 주문 상태를 직접 변경하지는 않는가?
-- <strong>[OrderService](../src/main/kotlin/order/OrderService.kt)</strong>는 <strong>[InventoryService](../src/main/kotlin/inventory/InventoryService.kt)</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - `OrderService`는 주문 가능 여부를 판단한다.
-    - `InventoryService`는 재고 수량 정보를 제공한다.
-    - 경계는 `OrderService`가 `InventoryService`의 재고 수량 타입을 참조해 판단에 쓰는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 재고 조회를 주문 로직과 분리해 재고 도메인이 다른 소비자에게도 재사용될 수 있게 한다.
-    - 재고 수량이라는 타입만 참조하고 내부 구현을 알지 않는다면 합리적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - `OrderService`가 `InventoryService`의 내부 저장 구조까지 알고 있지는 않은가?
-    - 이 참조가 타입 하나로 충분한가, 더 넓은 API가 필요한가?
-````
-
-**Skill** responds with the file link only.
-
-## Example 2 — Troubleshooting, multi-target consolidation, web-repo hyperlinks
-
-**User** (troubleshooting stated up front): "NotificationDispatcher가 문제인 것 같아 봐야 해. '알림 모듈'의 NotificationDispatcher가 '채널 모듈'에 속한 EmailSender, SmsSender, PushSender를 전부 호출해서(호출) 발송을 위임하고, '템플릿 모듈'의 TemplateRenderer가 만든 렌더링 결과 타입도 참조해(타입 참조). EmailSender는 sendEmail()을, SmsSender는 sendSms()를, PushSender는 sendPush()를 각각 호출해서 발송하는데, 셋 다 발송 채널을 구현하는 동일한 역할이야. 이 저장소는 https://github.com/example/notify-service 에 있고, NotificationDispatcher는 src/notify/NotificationDispatcher.kt, EmailSender/SmsSender/PushSender는 각각 src/channel/EmailSender.kt·SmsSender.kt·PushSender.kt, TemplateRenderer는 src/template/TemplateRenderer.kt에 있어."
-
-**Skill** (purpose already stated as troubleshooting — no question needed) writes `.zenuml/notify-dispatch.architecture.md`. Its Dependency caption, taken from the request's keywords, is `NotificationDispatcher의 알림 발송 위임 의존 구조`. Dependency has 3 groups (알림 모듈, 채널 모듈, 템플릿 모듈) with `click` directives pointing at full GitHub URLs (e.g. `https://github.com/example/notify-service/blob/main/src/channel/EmailSender.kt`) instead of relative paths, since the evidence here is a web repository, not the local project.
-
-Responsibility lists 알림 모듈, 채널 모듈, 템플릿 모듈 (그룹) and NotificationDispatcher, TemplateRenderer (요소) individually — same shape as Example 1, omitted here for brevity. EmailSender/SmsSender/PushSender, however, qualify for parallel-sibling consolidation (3 elements, same group, same parallel role — each is its own channel-sender implementation, no member with a genuinely different kind of role) and get one combined entry instead of three:
-
-````markdown
-- <strong>[EmailSender](https://github.com/example/notify-service/blob/main/src/channel/EmailSender.kt)</strong>, <strong>[SmsSender](https://github.com/example/notify-service/blob/main/src/channel/SmsSender.kt)</strong>, <strong>[PushSender](https://github.com/example/notify-service/blob/main/src/channel/PushSender.kt)</strong>
-  - <strong>책임 (추상)</strong>: 각자의 발송 채널을 구현해 실제 메시지를 내보낸다.
-  - <strong>역할 (구체)</strong>: `EmailSender`는 `sendEmail()`을, `SmsSender`는 `sendSms()`를, `PushSender`는 `sendPush()`를 호출해 발송한다.
-````
-
-Each sender's own function name (`sendEmail()` vs `sendSms()` vs `sendPush()`) is a different name filling the same role, not a difference in kind — that's exactly why this still consolidates instead of blocking it. If PushSender additionally managed its own retry policy that EmailSender/SmsSender don't have, that would be a real difference in kind, and PushSender would be excluded from this combined entry and given its own individual one instead.
-
-Collaboration:
-
-````markdown
-### Collaboration
-
-#### 그룹 간 비교
-
-- <strong>[알림 모듈](...)</strong>는 <strong>[채널 모듈](...)</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - 알림 모듈은 어떤 알림을 언제 보낼지 결정한다.
-    - 채널 모듈은 실제 발송 수단별 구현을 제공한다.
-    - 경계는 `NotificationDispatcher`가 각 채널 발신자를 호출하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 발송 결정 로직과 채널별 발송 구현을 분리해 새 채널 추가가 결정 로직에 영향을 주지 않게 한다.
-    - 채널이 3개 이상으로 늘어난 현재 상태에서 이 분리는 특히 합리적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - 알림 모듈이 채널별 API 세부사항까지 알고 있지는 않은가?
-    - 채널 모듈이 알림 정책을 스스로 판단하고 있지는 않은가?
-- <strong>[알림 모듈](...)</strong>는 <strong>[템플릿 모듈](...)</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - 알림 모듈은 언제 무엇을 보낼지 결정한다.
-    - 템플릿 모듈은 보낼 내용을 렌더링한다.
-    - 경계는 `NotificationDispatcher`가 `TemplateRenderer`의 렌더링 결과 타입을 참조하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 렌더링 로직을 알림 발송 결정에서 분리해 템플릿 변경이 발송 로직에 영향을 주지 않게 한다.
-    - 템플릿 형식이 채널마다 다를 수 있다면 이 분리는 합리적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - 알림 모듈이 템플릿 렌더링 세부 로직까지 알고 있지는 않은가?
-    - 렌더링 실패 시 처리 책임은 어느 쪽에 있는가?
-
-#### 요소 간 비교
-
-- <strong>[NotificationDispatcher](...)</strong>는 <strong>채널 발신 요소들</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - `NotificationDispatcher`는 어떤 채널로 보낼지 결정하고 호출한다.
-    - 채널 발신 요소들(`EmailSender`, `SmsSender`, `PushSender`)은 각자의 실제 발송 수단을 구현한다.
-    - 경계는 `NotificationDispatcher`가 각 발신자를 호출하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 채널별 발송 구현을 각 발신자에 분산해 새 채널 추가 시 `NotificationDispatcher`를 건드리지 않게 한다.
-    - 세 채널 모두 동일한 방식(호출)으로 위임되므로 이 분리는 일관적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - 각 발신자의 호출 형태가 일관된가?
-    - `NotificationDispatcher`가 특정 채널의 실패를 다르게 처리하지는 않는가?
-- <strong>[NotificationDispatcher](...)</strong>는 <strong>[TemplateRenderer](...)</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - `NotificationDispatcher`는 렌더링 결과를 소비한다.
-    - `TemplateRenderer`는 렌더링 결과를 만든다.
-    - 경계는 렌더링 결과 타입이 전달되는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 렌더링을 발송 결정과 분리해 템플릿 로직을 독립적으로 테스트할 수 있게 한다.
-    - 타입만 참조한다면 이 분리는 합리적이다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - `NotificationDispatcher`가 렌더링 결과의 내부 구조에 과도하게 의존하고 있지는 않은가?
-````
-
-EmailSender, SmsSender, PushSender all share the same group (채널 모듈) and the same relationship nature (호출) from NotificationDispatcher, and all three play the same parallel structural role (each is its own channel-sender implementation) — 3 targets meets the consolidation threshold, so they're collapsed into "채널 발신 요소들" instead of three separate entries, the same way their Responsibility entries were combined above. Each sender having its own distinct function name and its own edge in the diagram doesn't block this — that's just a different implementation filling the same role, not a difference in kind (see the Responsibility consolidation above for the retry-policy counterexample that *would* have excluded PushSender). TemplateRenderer is a single target in a different group with a different nature (타입 참조), so it stays its own entry.
-
-**Skill** responds with the file link only.
-
-## Example 3 — No hyperlink evidence, single group, unspecified responsibility
-
-**User**: "AuthGateway, TokenStore, SessionManager가 모두 '인증' 이라는 하나의 묶음에 속해. AuthGateway가 TokenStore를 호출해서 토큰을 저장하고, SessionManager도 TokenStore를 호출해서 세션 토큰을 조회해. 어느 파일에 있는지는 몰라."
-
-**Skill** writes `.zenuml/auth-token.architecture.md` — no `click` directives anywhere in Dependency, and no Markdown links in Responsibility/Collaboration, since the description gives no file path or repository URL for anything:
-
-````markdown
-### Dependency
-
-인증 묶음의 토큰 저장·세션 조회 의존 구조
+Basic Dependency:
 
 ```mermaid
----
-config:
-  flowchart:
-    curve: basis
-    nodeSpacing: 45
-    rankSpacing: 70
-    titleTopMargin: 25
-  themeCSS: ".cluster-label text { font-size: 20px !important; font-weight: 700 !important; } .edgeLabel, .edgeLabel p { background-color: transparent !important; } .labelBkg { background-color: color-mix(in srgb, var(--vscode-editor-background, #ffffff) 70%, transparent) !important; }"
----
 flowchart LR
-  subgraph Auth["인증"]
-    direction TB
-    AuthGateway
-    TokenStore
-    SessionManager
+  subgraph App["app"]
+    AppKt@{ label: "App" }
+  end
+  subgraph Search["search"]
+    SearchRouteKt@{ label: "SearchRoute" }
+    SearchRepositoryKt@{ label: "SearchRepository" }
   end
 
-  %% ---- 엣지 ----
-  AuthGateway e0@-->|호출| TokenStore
-  SessionManager e1@-->|호출| TokenStore
+  AppKt -->|호출| SearchRouteKt
+  SearchRouteKt -->|호출| SearchRepositoryKt
 
-  %% ---- 노드 스타일 ----
-  classDef authGatewayNode stroke:#E69F00,stroke-width:3px
-  class AuthGateway authGatewayNode
-  classDef tokenStoreNode stroke:#56B4E9,stroke-width:3px
-  class TokenStore tokenStoreNode
-  classDef sessionManagerNode stroke:#009E73,stroke-width:3px
-  class SessionManager sessionManagerNode
-
-  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----
-  classDef authGatewayEdge stroke:#E69F00,stroke-width:3.5px
-  class e0 authGatewayEdge
-  classDef sessionManagerEdge stroke:#009E73,stroke-width:3.5px
-  class e1 sessionManagerEdge
-
-  %% ---- CRUD 표시 (테두리 색은 건드리지 않음) ----
-  %% 라벨: ✨&nbsp;<b>추가</b> · ♻️&nbsp;변경 · 🗑️&nbsp;<s>삭제</s>
-  classDef crudCreate stroke-width:5px
-  classDef crudUpdate stroke-dasharray:12 4 2 4
-  classDef crudDelete stroke-dasharray:5 10,color:#6B7280
+  click AppKt "../app/App.kt" "App.kt"
+  click SearchRouteKt "../feature/search/SearchRoute.kt" "SearchRoute.kt"
+  click SearchRepositoryKt "../data/SearchRepository.kt" "SearchRepository.kt"
 ```
 
-### Responsibility
+Decision points:
 
-#### 그룹의 책임
+- `app` and `search` are evidence-backed groups.
+- Group Collaboration contains `app → search` because one edge crosses them.
+- Element Collaboration contains only the two directly connected pairs.
+- Group links use evident common parent folders; element links use their files.
 
-- <strong>인증</strong>
-  - <strong>책임 (추상)</strong>: 설명에 명시되지 않음 — "인증"이라는 이름 외에 그룹 자체의 역할에 대한 설명은 없음.
-  - <strong>역할 (구체)</strong>: 설명에 명시되지 않음.
+## Multi-target consolidation and repository links
 
-#### 요소의 책임
+Input evidence:
 
-- <strong>AuthGateway</strong>
-  - <strong>책임 (추상)</strong>: 설명에 명시되지 않음.
-  - <strong>역할 (구체)</strong>: `TokenStore`를 호출해 토큰을 저장한다.
-- <strong>TokenStore</strong>
-  - <strong>책임 (추상)</strong>: 토큰을 저장하고 조회 가능하게 한다.
-  - <strong>역할 (구체)</strong>: `AuthGateway`와 `SessionManager`의 호출을 받아 토큰을 저장/제공한다.
-- <strong>SessionManager</strong>
-  - <strong>책임 (추상)</strong>: 설명에 명시되지 않음.
-  - <strong>역할 (구체)</strong>: `TokenStore`를 호출해 세션 토큰을 조회한다.
+- `NotificationService` sends the same notification through `EmailSender`,
+  `SmsSender`, and `PushSender` in one `channels` group.
+- Each component has a stated repository file URL.
+- Purpose: troubleshooting.
 
-### Collaboration
+Basic Dependency:
 
-#### 요소 간 비교
+```mermaid
+flowchart LR
+  NotificationService
+  subgraph Channels["channels"]
+    EmailSender
+    SmsSender
+    PushSender
+  end
 
-- <strong>AuthGateway</strong>는 <strong>TokenStore</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - `AuthGateway`의 구체적 책임은 설명에 명시되지 않았다.
-    - `TokenStore`는 토큰을 저장/제공한다.
-    - 경계는 `AuthGateway`가 토큰 저장을 위해 `TokenStore`를 호출하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 토큰 저장을 별도 요소로 분리한 이유는 설명에 명시되지 않았다 — 추측하지 않는다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - `AuthGateway`의 나머지 책임은 무엇인가?
-    - `TokenStore`가 저장소 구현(메모리/DB 등)까지 노출하고 있지는 않은가?
-- <strong>SessionManager</strong>는 <strong>TokenStore</strong>에 의존한다.
-  - <strong>책임의 경계</strong>
-    - `SessionManager`의 구체적 책임은 설명에 명시되지 않았다.
-    - `TokenStore`는 토큰을 저장/제공한다.
-    - 경계는 `SessionManager`가 세션 토큰 조회를 위해 `TokenStore`를 호출하는 지점이다.
-  - <strong>분리 이유 & 합리성 평가</strong>
-    - 세션 조회를 별도 요소로 분리한 이유는 설명에 명시되지 않았다 — 추측하지 않는다.
-  - <strong>내가 할 수 있는 질문</strong>
-    - `SessionManager`의 나머지 책임은 무엇인가?
-    - `AuthGateway`와 `SessionManager`가 `TokenStore`를 동시에 호출할 때 경합 문제는 없는가?
-````
+  NotificationService -->|알림 전송| EmailSender
+  NotificationService -->|알림 전송| SmsSender
+  NotificationService -->|알림 전송| PushSender
 
-AuthGateway and SessionManager both call TokenStore but never call each other, so no entry exists for that pair. No group-level Collaboration subsection appears since there's only one group.
-
-## After the hover script (any example)
-
-Every example above is what you write. When hover is on, `scripts/apply_hover.py` then changes only these parts of the saved file — e.g. for Example 3's last `click` line and the end of the file (shapes per `templates.md`, "After the hover script"):
-
-```text
-  click <Node> "<target>" "<b><Node></b><br/><b>책임 (추상)</b>: …<br/><b>역할 (구체)</b>: …<br/><br/><b><Other>에 의존한다 (호출)</b><br/><b>책임의 경계</b>: …"
+  click NotificationService "https://example.test/repo/NotificationService.kt" "NotificationService.kt"
+  click EmailSender "https://example.test/repo/channels/EmailSender.kt" "EmailSender.kt"
+  click SmsSender "https://example.test/repo/channels/SmsSender.kt" "SmsSender.kt"
+  click PushSender "https://example.test/repo/channels/PushSender.kt" "PushSender.kt"
 ```
 
-```text
-…the last line of the Collaboration section…
+Decision points:
 
-<details class="zenuml-hover-style">
-<summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
+- The three targets meet the same-source, same-group, same-nature, same-slot
+  condition, so element Collaboration uses one collective target entry.
+- A target with a different responsibility or relationship stays separate.
+- Repository URLs are reused in Responsibility and Collaboration headings.
 
-<style>
-.zenuml-hover-style {
-  display: none;
-}
-div.mermaidTooltip {
-  …
-}
-</style>
+## No grouping or link evidence
 
-</details>
+Input evidence:
+
+- `OrderService` calls `PaymentService`.
+- No layer, namespace, file path, URL, or concrete responsibilities are stated.
+
+Basic Dependency:
+
+```mermaid
+flowchart LR
+  OrderService
+  PaymentService
+
+  OrderService -->|호출| PaymentService
 ```
 
-You never write these forms yourself; the body above them stays exactly as you wrote it.
+Decision points:
+
+- Draw no `subgraph` and no `click` lines.
+- Responsibility keeps both required levels and uses the specified unknown phrase
+  where evidence is absent.
+- Collaboration has one element pair and no group-pair section.

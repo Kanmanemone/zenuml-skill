@@ -29,3 +29,5 @@
 | step5-python-order | generating-zenuml-diagrams | 1 | 8 | 144893 | 25711 | 1940 | 6 | 38 | 1 | 0 |
 | step5-python-order | generating-zenuml-diagrams | 2 | 6 | 101294 | 25666 | 1818 | 6 | 25 | 1 | 0 |
 | step5-python-order | generating-zenuml-diagrams | 3 | 6 | 101389 | 25778 | 1888 | 8 | 21 | 1 | 0 |
+| before-router-v2 | generating-architecture-views | 1 | 22 | 513918 | 52552 | 10319 | 12 | 106 | 1 | 0 |
+| after-router-v2 | generating-architecture-views | 1 | 24 | 621103 | 56920 | 8546 | 13 | 106 | 1 | 0 |

@@ -1,6 +1,6 @@
 # Section Templates
 
-Reusable Mermaid and prose templates for the three sections this skill produces. Read this after `SKILL.md`'s generation rules — it only shows *shape*, not what content is allowed (that's governed by the anti-fluff rules in `SKILL.md`).
+Reusable Mermaid and prose templates for the three sections this skill produces. Read this after `SKILL.md`'s evidence rules — this file defines shape, while `SKILL.md` defines what content is allowed.
 
 ## Table of Contents
 
@@ -73,7 +73,7 @@ Place the configured label inside `<b>`/`<s>`. With both options on, examples ar
 
 ### Hyperlink syntax
 
-`click <NodeName> "<target>" "<label>"` — `target` is a relative path (from `.zenuml/`, e.g. `../app/src/.../Foo.kt`) or a full URL; `label` is a short tooltip, usually the file's own name. See `SKILL.md`, "Hyperlink resolution" for how `target` is determined (local root project / web repository / no link — resolve once and reuse the identical target for the Markdown link on the same name in Responsibility/Collaboration).
+`click <NodeName> "<target>" "<label>"` — `target` is a relative path (from `.zenuml/`, e.g. `../app/src/.../Foo.kt`) or a full URL; `label` is a short tooltip, usually the file's own name. See `SKILL.md`, "Evidence and links" for how `target` is determined (local root project / web repository / no link — resolve once and reuse the identical target for the Markdown link on the same name in Responsibility/Collaboration).
 
 ### After the hover script
 
@@ -191,7 +191,7 @@ Targets with their own edges elsewhere, or their own distinct Responsibility wor
 
 ## Collapsible section
 
-Used for Responsibility or Collaboration when its display setting is `collapsed` or `expanded` (see `SKILL.md`, "Section display"). The `###` heading stays outside the box; the summary is always the fixed text `Details` (the browser's own default label — never the section name, which would just repeat the heading); the content inside is exactly what `plain` would have written.
+Used for Responsibility or Collaboration when its display setting is `collapsed` or `expanded` (see `SKILL.md`, "Output file"). The `###` heading stays outside the box; the summary is always the fixed text `Details` (the browser's own default label — never the section name, which would just repeat the heading); the content inside is exactly what `plain` would have written.
 
 `collapsed` (closed when the preview opens):
 

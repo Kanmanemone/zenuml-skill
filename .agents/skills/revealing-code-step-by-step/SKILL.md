@@ -1,13 +1,17 @@
 ---
 name: revealing-code-step-by-step
-description: Builds a gradual source-code walkthrough from an architecture view — a plain-language situation under a fixed responsibility line, then an outline showing every step as a numbered placeholder nested by scope, then the source unfolded one layer at a time. Use to understand the implementation behind a structural view step by step. Not for creating architecture views or sequence diagrams.
+description: Reveal source behind an architecture view one scope at a time, from a plain-language outline to exact code. Use for implementation walkthroughs, not for creating diagrams.
 ---
 
 # Revealing Code Step by Step
 
 Each node gets one pager of **refinement steps** (정제 단계): a situation paragraph, an **outline** (the real declaration head with every step as `⟨n. sentence⟩`, inner steps indented under the one that holds them — the forest), one **unfold** per step that opens one layer of exact source (the trees), and the source when the last visible scene is not already the source. The node's responsibility sentence from the view stays fixed above the pager.
 
-`scripts/stages.py` does everything deterministic: it splits each node's source into a **scope tree** (statements, multi-line argument lists, multi-line call chains; a layer with a single child is merged away), prints each scope once, orders and numbers the steps, builds every code scene, checks your input, and renders the documents. You write only one `outline.json`: per scope, a purpose sentence and which children open with it or stay for later; an isolated subagent writes stage 1. Never write scene code. Never read `stages.md`, `settings.jsonc`, or the work files yourself; the script prints what you need. Do not add question captions or rhetorical prompts to the documents.
+`scripts/stages.py` owns scope parsing, numbering, scenes, validation, and rendering.
+Write only `outline.json`: each scope's purpose and which children open now or
+later. An isolated subagent writes stage 1. Never write scene code or read
+`stages.md`, settings, or work files; the script prints what is needed. Do not add
+question captions or rhetorical prompts.
 
 ## Running the script
 
