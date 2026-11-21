@@ -529,3 +529,17 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 - [X] T145 [US1] `.agents/skills/generating-architecture-views/scripts/append_feedback.py`와 `references/feedback-log.md`를 추가한다 per FR-037, FR-039
 - [X] T146 [US1] `.agents/skills/generating-architecture-views/SKILL.md`의 description, 전체 완성 예시, 중복 로그 설명을 줄이고 helper·기존 reference로 라우팅한다 per FR-038
 - [X] T147 [US1] `docs/skill-benchmark/run.py`를 네 스킬과 git ref/작업 트리 비교에 맞게 보완하고 정적 크기 및 기존 회귀 테스트를 실행한다 per SC-016
+
+---
+
+## Phase 41: 파일 확장자 기본 표시 (FR-036, 007 FR-012d)
+
+**Goal**: 파일 자체를 가리키는 Dependency 노드가 별도 설정 없이 마지막 확장자를 표시하도록 `fileExtensions`의 배포 기본값을 `true`로 바꾼다.
+
+**Independent Test**: 설정 스크립트가 배포본과 키 누락 상태에서 `declarationMarkers=false`, `fileExtensions=true`, `functionParentheses=true`를 반환하고 기존 8개 조합 독립성 테스트가 그대로 통과하는지 확인한다.
+
+- [ ] T148 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`의 배포값·키 누락 기본값 기대치를 `false`·`true`·`true`로 바꾸고 구현 전 실패를 확인한다 per FR-036, 007 FR-012d
+- [ ] T149 [US1] `.agents/skills/generating-architecture-views/settings.jsonc`와 `settings.schema.json`의 `fileExtensions` 기본값을 `true`로 바꾸고, `SKILL.md`와 `references/templates.md`의 배포 기본값 설명을 같은 값으로 맞춘다 per FR-036, 007 FR-012d
+- [ ] T150 [US1] `.agents/skills/generating-architecture-views/scripts/read_settings.py`와 `specs/003-architecture-view-skill/test_build_diagram.py`를 실행해 새 기본값과 기존 설정 회귀를 검증한다 per SC-015, 007 SC-010
+
+**Dependencies**: T148 → T149 → T150.
