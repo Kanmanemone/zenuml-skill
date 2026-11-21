@@ -117,7 +117,7 @@ Kotlin만 받던 제한을 없애고, 노드가 파일 자체를 가리키면 �
 **Storage**: 파일만 쓴다. 스킬 폴더의 `settings.jsonc`·`settings.schema.json`은 읽기만 한다.
 
 - 입력(읽기만): `.zenuml/<slug>.architecture.md`와, 그 링크가 가리키는 원본 파일(언어 제한 없음, 2026-11-18)
-- 산출물: `<output.directory>/<slug>.stages/` 아래의 문서(`*.md`)와 작업 폴더(`work/`). 기본값으로는 `.zenuml/<slug>.stages/`
+- 산출물: `<output.directory>/<slug>.stages/` 아래의 문서(`*.md`)와 작업 폴더(`work/`)
 
 **Testing**: 자동화 테스트 프레임워크는 없다(기존 스킬과 같다). [quickstart.md](quickstart.md)에 다음 세 가지 확인을 둔다.
 
@@ -145,7 +145,7 @@ Kotlin만 받던 제한을 없애고, 노드가 파일 자체를 가리키면 �
 **Scale/Scope**:
 
 - 새 스킬 1개: SKILL.md, `stages.md`, `settings.jsonc`, `settings.schema.json`, `scripts/stages.py` 1개
-- 새 설정 옵션 2개: `stages`(단계 별명 → 보이기), `output.directory`(결과 위치, 구조 뷰 폴더 기준 상대 경로, 기본값 `.`). 설정 로더는 기존 스킬과 같은 동작을 `stages.py` 안에 옮겨 쓴다.
+- 새 설정 옵션 2개: `stages`(단계 별명 → 보이기), `output.directory`(결과 위치, 구조 뷰 폴더 기준 상대 경로). 설정 로더는 기존 스킬과 같은 동작을 `stages.py` 안에 옮겨 쓴다.
 - `.gitignore`의 허용 목록에 새 스킬 폴더 추가
 - README 영어·한국어 두 벌에 항목 추가
 - spec FR-008의 7단계 표는 `stages.md`로 옮기고, spec에는 링크만 남긴다.
@@ -188,7 +188,7 @@ specs/010-stepwise-code-convergence/
 ├── stage1-prompt.md    # 1단계 서브에이전트 지시의 틀 — prepare가 채워 work/stage1-prompt.md로 씀
 ├── stages.md           # 단계 정의 파일 — 단계 구성을 고치는 유일한 곳(spec FR-007·008)
 ├── settings.jsonc      # 단계마다 보일지(stages 맵), 결과 위치(output.directory) — 007 주석·토큰 기호 관례
-├── settings.schema.json # 두 옵션의 정의(stageToggles 타입 기본값 {}, relativePath 타입 기본값 ".")
+├── settings.schema.json # 두 옵션의 정의(stageToggles 타입, relativePath 타입)
 └── scripts/
     └── stages.py       # python scripts/stages.py prepare|begin|apply|build ...
 

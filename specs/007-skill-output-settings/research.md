@@ -66,12 +66,12 @@
 
 ## Decision: 배포 초기값
 
-- **Decision**: 구현 단계에서는 모든 옵션의 초기값을 spec의 잠정값(= 기능 도입 전 동작)으로 둔다. 세 스킬 구현과 converge가 끝나면 사용자에게 옵션별 초기값을 한꺼번에 확인해 `settings.schema.json`의 `default`와 `settings.jsonc` 값을 함께 고친다(FR-003).
+- **Decision**: 구현 단계에서는 모든 옵션의 초기값을 spec의 잠정값(= 기능 도입 전 동작)으로 둔다. 세 스킬 구현과 converge가 끝나면 사용자에게 옵션별 초기값을 한꺼번에 확인해 `settings.schema.json`의 `default`와 `settings.jsonc` 값을 함께 고친다(FR-003). 확정한 값은 옵션 정의에만 두고 spec 문서에는 옮겨 적지 않는다.
 - **Rationale**: 사용자 요청(2026-11-13). 정의와 배포 파일 두 곳을 같이 고쳐야 SC-001이 만족된다.
 
 ## Decision: 구조 뷰 노드 이름 스타일
 
-- **Decision**: `generating-architecture-views`의 세 노드 이름 형식 boolean을 `dependency.nodeNameFormat` 아래에 둔다. `declarationMarkers`는 원본 선언 키워드, `fileExtensions`는 파일 자체 노드의 마지막 확장자, `functionParentheses`는 확인된 함수 이름 끝의 `()`를 제어한다. 기본값은 각각 `false`, `true`, `true`다.
+- **Decision**: `generating-architecture-views`의 세 노드 이름 형식 boolean을 `dependency.nodeNameFormat` 아래에 둔다. `declarationMarkers`는 원본 선언 키워드, `fileExtensions`는 파일 자체 노드의 마지막 확장자, `functionParentheses`는 확인된 함수 이름 끝의 `()`를 제어한다.
 - **Decision — 독립 조합**: 세 값은 서로 독립이다. 선언 표시어를 켜도 파일 확장자는 켜지지 않고, 파일 확장자를 켜도 선언 표시어는 붙지 않는다. 괄호는 함수에만 정확히 한 번 붙는다.
 - **Decision — 적용 위치**: 스킬이 확인한 원본 표기를 바탕으로 Dependency 라벨을 쓸 때 해석된 세 값을 적용한다. `build_diagram.py`와 기존 schema 기반 boolean 설정 로더는 바꾸지 않는다.
 - **Decision — 표시어 범위**: 선언에는 원본 키워드를 복사하고, 파일 자체 노드에는 이름의 마지막 확장자를 보이거나 감춘다. 언어별 키워드나 확장자 목록을 만들지 않는다. 모듈·계층처럼 원래 표시어가 없는 노드는 설정과 무관하게 이름만 쓴다.

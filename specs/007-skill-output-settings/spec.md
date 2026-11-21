@@ -89,7 +89,7 @@
 
 ### User Story 3 - 시퀀스 다이어그램 피드백 로그 저장 위치 정하기 (Priority: P3)
 
-사용자는 `generating-zenuml-diagrams` 스킬 디렉터리의 설정 파일로 피드백 로그가 저장될 위치를 프로젝트 루트 기준 상대 경로로 정한다(기본값 `./.zenuml/log` — 지금 위치). 옵션 구조는 다른 두 스킬과 같으며, 나중에 옵션이 생기면 같은 절차(FR-018)로 추가한다.
+사용자는 `generating-zenuml-diagrams` 스킬 디렉터리의 설정 파일로 피드백 로그가 저장될 위치를 프로젝트 루트 기준 상대 경로로 정한다. 옵션 구조는 다른 두 스킬과 같으며, 나중에 옵션이 생기면 같은 절차(FR-018)로 추가한다.
 
 **Why this priority**: 사용자가 요청한 옵션 하나만 있는 가장 작은 스토리다.
 
@@ -123,7 +123,7 @@
 
 - **FR-001**: 세 스킬(`generating-architecture-views`, `generating-zenuml-diagrams`, `exporting-markdown-diagrams`)은 각자 자기 스킬 디렉터리 안에 사용자가 직접 편집할 수 있는 설정 파일을 하나씩 가져야 하며, 그 파일에는 그 스킬의 모든 옵션이 기본값으로 미리 적혀 있어야 한다. 파일 형식은 FR-020을 따른다.
 - **FR-002**: 각 스킬은 실행할 때마다 자기 설정 파일을 새로 읽어 그 실행의 산출물에 적용해야 한다. 이전 실행에서 읽은 값을 기억해 재사용해서는 안 된다.
-- **FR-003**: 배포되는 설정 파일의 초기값과 옵션 정의의 기본값(키가 없을 때 쓰는 값)은 같아야 하며, 그 값은 사용자가 항목별로 지정한다 — 세 스킬의 구현이 모두 끝난 뒤 모든 옵션의 초기값을 한꺼번에 사용자에게 확인해 확정한다. 확정 전까지 이 spec의 FR에 적힌 기본값은 잠정값이며, 잠정값은 기능 도입 전 동작과 같다.
+- **FR-003**: 배포되는 설정 파일의 초기값과 옵션 정의의 기본값(키가 없을 때 쓰는 값)은 같아야 하며, 그 값은 사용자가 항목별로 지정한다. 기본값의 유일한 기준은 옵션 정의(FR-016), 곧 그 스킬 `settings.schema.json`의 `default`다. spec·plan·data-model·contract·quickstart 같은 문서는 옵션의 의미와 허용 값만 적고 기본값을 옮겨 적지 않는다. 그래서 기본값을 바꿀 때 고칠 곳은 옵션 정의와 배포 설정 파일뿐이다.
 - **FR-004**: 설정 파일이 없으면 스킬은 모든 옵션에 기본값을 쓰고 아무것도 알리지 않아야 한다.
 - **FR-005**: 설정 파일을 읽을 수 없거나, 어떤 키의 값이 허용되지 않거나, 알 수 없는 키가 있으면, 스킬은 해당 부분만 기본값으로 대체(또는 무시)하고 작업을 끝까지 진행한 뒤, 채팅 응답에 대상 파일과 키를 밝히는 한 줄 안내를 덧붙여야 한다. 이 안내는 산출 파일에는 넣지 않으며, 기존 "산출물에는 실제 내용만" 규칙(003 FR-032, 001 FR-012)의 허용 예외로 추가된다.
 - **FR-006**: 사용자가 요청 문장에서 설정과 다른 형식을 직접 밝히면, 그 요청에 한해 사용자의 말이 설정보다 우선해야 한다. 스킬은 설정 파일을 직접 고쳐서는 안 된다.
@@ -131,28 +131,28 @@
 
 **generating-architecture-views 옵션**
 
-- **FR-008**: 설정은 Responsibility와 Collaboration 각각의 표시 방식(`display`)을 `hidden`(그리지 않음), `plain`(상자 없음), `collapsed`(접은 글 상자, 처음 접힘), `expanded`(접은 글 상자, 처음 펼침) 중 하나로 독립적으로 고를 수 있어야 한다(기본: 둘 다 `plain`).
+- **FR-008**: 설정은 Responsibility와 Collaboration 각각의 표시 방식(`display`)을 `hidden`(그리지 않음), `plain`(상자 없음), `collapsed`(접은 글 상자, 처음 접힘), `expanded`(접은 글 상자, 처음 펼침) 중 하나로 독립적으로 고를 수 있어야 한다.
 - **FR-009**: `collapsed`나 `expanded`인 섹션은 섹션 헤딩(`### Responsibility` / `### Collaboration`)을 상자 밖에 그대로 두고, 그 아래 내용 전체를 상자 하나에 넣어야 한다. 미리보기를 처음 열었을 때 `collapsed`는 접힌 상태로, `expanded`는 펼쳐진 상태로 보여야 하며, 어느 쪽이든 사용자가 클릭해 접고 펼 수 있어야 한다. 상자의 요약 줄(▶ 옆 문구)은 섹션과 상태에 관계없이 고정 문구 `Details`로 쓴다 — 섹션 이름은 상자 밖 헤딩에만 나온다. 상자를 펼쳤을 때의 내용(항목, 하이퍼링크, 볼드 표기, 하위 헤딩 순서)은 `plain`일 때와 같아야 한다.
 - **FR-010**: `hidden`인 섹션은 헤딩과 내용 모두 산출 파일에 넣지 않아야 하며, 스킬은 그 섹션의 내용을 만들거나 그 섹션만을 위한 자기검증을 하지 않아야 한다. 나머지 섹션의 순서(Dependency → Responsibility → Collaboration)는 유지된다.
 - **FR-011**: Dependency 섹션(캡션과 다이어그램)은 이 옵션들과 상관없이 항상 상자 없이 나와야 한다.
-- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다(기본: `elk`, 사용자 확정 2026-11-13). `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
-- **FR-012c** (003 개정): 설정은 Collaboration 항목마다 "내가 할 수 있는 질문" 하위 항목을 만들지(`collaboration.questions`)를 `true`(만듦)와 `false`(만들지 않음) 중에서 고를 수 있어야 한다(기본: `false`, 사용자 확정 2026-11-16). `false`이면 003 FR-027의 하위 항목 중 "내가 할 수 있는 질문"만 빠지고, 나머지 하위 항목과 항목의 개수·순서·형식은 그대로다. `collaboration.display`가 `hidden`이면 이 값은 쓰이지 않는다. 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다.
-- **FR-012d** (003 개정): 설정은 Dependency 노드 이름 형식의 한 family를 `dependency.nodeNameFormat` 묶음 아래 세 boolean으로 제공해야 한다. `declarationMarkers`(기본 `false`)는 실제로 확인한 파일 내부 선언의 원본 선언 키워드만 제어하고, `fileExtensions`(기본 `true`)는 파일 자체를 가리키는 노드의 마지막 확장자만 제어하며, `functionParentheses`(기본 `true`)는 확인한 함수 이름 끝의 `()`만 제어한다. 세 값은 서로 독립이고 언어별 표시어 목록을 새로 만들지 않으며 원본에서 확인한 열린 어휘를 그대로 쓴다. 세 옵션은 Dependency 라벨만 바꾸며 Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상, hover 내용에는 영향을 주지 않는다. 요청 문장이 어느 값을 직접 밝히면 FR-006을 따른다. 토큰 소모 영향은 `declarationMarkers=true`만 `[+]`이고 나머지 모든 값은 `[0]`다. 기존 `dependency.nodeMarkers`와 `dependency.functionParentheses`는 더는 정의된 키가 아니며 FR-005·FR-019에 따라 무시하고 안내한다.
-- **FR-012e** (003 개정): 설정은 003 FR-037의 파일 이름 표시를 `dependency.sourceFile.enabled`(boolean, 기본 `true`)로 켜고 끄고, `dependency.sourceFile.position`(`right` 오른쪽 위, `left` 왼쪽 위, 기본 `right`)으로 위치를 고를 수 있어야 한다. 표시는 번들 스크립트가 채우므로 토큰 소모 영향은 모든 값이 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
+- **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다. `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
+- **FR-012c** (003 개정): 설정은 Collaboration 항목마다 "내가 할 수 있는 질문" 하위 항목을 만들지(`collaboration.questions`)를 `true`(만듦)와 `false`(만들지 않음) 중에서 고를 수 있어야 한다. `false`이면 003 FR-027의 하위 항목 중 "내가 할 수 있는 질문"만 빠지고, 나머지 하위 항목과 항목의 개수·순서·형식은 그대로다. `collaboration.display`가 `hidden`이면 이 값은 쓰이지 않는다. 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다.
+- **FR-012d** (003 개정): 설정은 Dependency 노드 이름 형식의 한 family를 `dependency.nodeNameFormat` 묶음 아래 세 boolean으로 제공해야 한다. `declarationMarkers`는 실제로 확인한 파일 내부 선언의 원본 선언 키워드만 제어하고, `fileExtensions`는 파일 자체를 가리키는 노드의 마지막 확장자만 제어하며, `functionParentheses`는 확인한 함수 이름 끝의 `()`만 제어한다. 세 값은 서로 독립이고 언어별 표시어 목록을 새로 만들지 않으며 원본에서 확인한 열린 어휘를 그대로 쓴다. 세 옵션은 Dependency 라벨만 바꾸며 Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상, hover 내용에는 영향을 주지 않는다. 요청 문장이 어느 값을 직접 밝히면 FR-006을 따른다. 토큰 소모 영향은 `declarationMarkers=true`만 `[+]`이고 나머지 모든 값은 `[0]`다. 기존 `dependency.nodeMarkers`와 `dependency.functionParentheses`는 더는 정의된 키가 아니며 FR-005·FR-019에 따라 무시하고 안내한다.
+- **FR-012e** (003 개정): 설정은 003 FR-037의 파일 이름 표시를 `dependency.sourceFile.enabled`(boolean)로 켜고 끄고, `dependency.sourceFile.position`(`right` 오른쪽 위, `left` 왼쪽 위)으로 위치를 고를 수 있어야 한다. 표시는 번들 스크립트가 채우므로 토큰 소모 영향은 모든 값이 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
-- **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다(기본: `./.zenuml/log` — 지금 위치). 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
+- **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다. 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
 
 **exporting-markdown-diagrams 옵션과 동작**
 
-- **FR-013**: 설정은 형식·범위·문서 전체 PDF 레이아웃 각각의 기본값을 정할 수 있어야 한다 — `defaults.format`(`none`/`svg`/`png`/`pdf`), `defaults.scope`(`none`/`diagram`/`document`), `defaults.pdfLayout`(`none`/`single`/`paginated`). 배포 초기값은 모두 `none`(기본값 없음)이다. 요청 문장이 직접 밝힌 값은 언제나 기본값보다 우선한다.
-- **FR-013b**: 설정은 빠진 정보를 선택지 질문으로 물을지(`questions.enabled`, 기본 `true`)를 정할 수 있어야 한다. `true`이면 지금처럼 빠진 정보만 묻되, 각 질문에서 FR-013의 기본값과 같은 선택지의 문자열 끝에 " (기본값)"을 붙인다 — 붙는 위치는 설정 값으로만 정해지며 고정된 선택지가 없고, 기본값이 `none`이면 어느 선택지에도 붙이지 않는다. `false`이면 빠진 정보를 묻지 않고 기본값으로 채우며, 기본값이 `none`이라 채울 수 없는 항목만 그 항목에 한해 묻는다. 기존 질문 규칙(빠진 형식·범위·레이아웃은 한 번에 함께 묻기, 문서 전체면 형식은 PDF·PNG 중에서, 다이어그램만이면 레이아웃 답은 무시 — 004 FR-003·FR-014, 008)은 그대로다.
-- **FR-014**: 설정은 PNG 해상도 배율을 양수로 정할 수 있어야 하며(기본: 3), 산출물 저장 위치(`output.directory`)를 원본 파일이 있는 디렉터리 기준 상대 경로로 정할 수 있어야 한다(기본: `./exports` — 지금 위치). 저장 위치가 없으면 새로 만든다. 절대 경로나 경로로 해석할 수 없는 값은 허용되지 않는 값으로 보고 FR-005를 따른다.
+- **FR-013**: 설정은 형식·범위·문서 전체 PDF 레이아웃 각각의 기본값을 정할 수 있어야 한다 — `defaults.format`(`none`/`svg`/`png`/`pdf`), `defaults.scope`(`none`/`diagram`/`document`), `defaults.pdfLayout`(`none`/`single`/`paginated`). 요청 문장이 직접 밝힌 값은 언제나 기본값보다 우선한다.
+- **FR-013b**: 설정은 빠진 정보를 선택지 질문으로 물을지(`questions.enabled`)를 정할 수 있어야 한다. `true`이면 지금처럼 빠진 정보만 묻되, 각 질문에서 FR-013의 기본값과 같은 선택지의 문자열 끝에 " (기본값)"을 붙인다 — 붙는 위치는 설정 값으로만 정해지며 고정된 선택지가 없고, 기본값이 `none`이면 어느 선택지에도 붙이지 않는다. `false`이면 빠진 정보를 묻지 않고 기본값으로 채우며, 기본값이 `none`이라 채울 수 없는 항목만 그 항목에 한해 묻는다. 기존 질문 규칙(빠진 형식·범위·레이아웃은 한 번에 함께 묻기, 문서 전체면 형식은 PDF·PNG 중에서, 다이어그램만이면 레이아웃 답은 무시 — 004 FR-003·FR-014, 008)은 그대로다.
+- **FR-014**: 설정은 PNG 해상도 배율을 양수로 정할 수 있어야 하며, 산출물 저장 위치(`output.directory`)를 원본 파일이 있는 디렉터리 기준 상대 경로로 정할 수 있어야 한다. 저장 위치가 없으면 새로 만든다. 절대 경로나 경로로 해석할 수 없는 값은 허용되지 않는 값으로 보고 FR-005를 따른다.
 - **FR-015**: 문서 전체 PDF는 원본의 접은 글 상자를 초기 상태(`collapsed`/`expanded`)와 상관없이 모두 펼친 상태로 담아, 상자 안 내용이 빠짐없이 보이게 해야 한다. 이는 설정 옵션이 아니라 고정 동작이며, 원본 마크다운 파일은 바뀌지 않는다.
 - **FR-015b**: 이 스킬의 설정 값과 FR-015의 동작은 번들 스크립트가 직접 적용해야 한다. 변환 결과가 LLM 판단에 의존하지 않는다는 기존 원칙(004 spec)은 그대로 유지된다. 레이아웃 질문을 생략할지 같은 대화 흐름 판단만 SKILL.md가 설정을 읽어 결정한다.
 
 **generating-zenuml-diagrams 옵션**
 
-- **FR-015c**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다(기본: `./.zenuml/log` — 지금 위치). 로그 파일 이름 규칙(`<slug>.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다.
+- **FR-015c**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다. 로그 파일 이름 규칙(`<slug>.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다.
 
 **옵션 확장 구조**
 

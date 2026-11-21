@@ -55,7 +55,7 @@
 **Acceptance Scenarios**:
 
 1. **Given** 기본 설정으로 만든 구조 뷰, **When** 사용자가 링크가 붙은 노드에 마우스를 올리면, **Then** 미리보기 아래쪽에 왼쪽 정렬된 넓은 패널이 뜨고, 그 노드의 책임 (추상)·역할 (구체)와 그 노드가 의존하는 협력의 대상·관계(예: `PaymentService에 의존한다 (호출)`)가 보인다. 그 노드에 의존하는 쪽은 보이지 않는다.
-2. **Given** 같은 구조 뷰(`hover.position`이 기본값 `bottom`), **When** 다이어그램의 오른쪽 아래 끝에 있는 노드에 마우스를 올리면, **Then** 패널이 다른 노드와 같은 위치(미리보기 아래쪽)에 뜨고, 내용이 미리보기 화면 높이 안에 들어가는 한 오른쪽이나 아래쪽 경계에서 잘리지 않는다.
+2. **Given** 같은 구조 뷰(`hover.position`이 `bottom`), **When** 다이어그램의 오른쪽 아래 끝에 있는 노드에 마우스를 올리면, **Then** 패널이 다른 노드와 같은 위치(미리보기 아래쪽)에 뜨고, 내용이 미리보기 화면 높이 안에 들어가는 한 오른쪽이나 아래쪽 경계에서 잘리지 않는다.
 3. **Given** 본문에서 굵게·코드로 표시된 이름이 있는 항목, **When** 패널이 뜨면, **Then** 굵게·코드 표시가 패널에서도 구분되어 보인다.
 4. **Given** 링크 대상이 없는 노드, **When** 그 노드에 마우스를 올리면, **Then** 링크가 있는 노드와 같은 패널이 뜨고 노드 이름에 밑줄이 생기며, 그 노드를 클릭해도 어디로도 이동하지 않는다.
 5. **Given** 구조 뷰 파일, **When** 같은 파일을 PNG나 PDF로 내보내면, **Then** 패널 모양을 정하는 블록의 내용이 결과에 글자로 드러나지 않는다.
@@ -84,7 +84,7 @@
 9. **Given** `hover.position`이 `node`, **When** 오른쪽 끝 노드에 마우스를 올린 뒤 왼쪽 끝 노드에 마우스를 올리면, **Then** 오른쪽 끝 노드의 툴팁은 미리보기 오른쪽 끝에 붙어 잘리지 않고, 왼쪽 끝 노드의 툴팁은 그 노드 아래에 뜨며, 두 툴팁의 폭이 같다.
 10. **Given** `hover.position`만 `bottom`에서 `node`로 바꾼 경우, **When** 기존 파일에 도구를 다시 실행하면, **Then** 패널 모양 블록만 바뀌고 툴팁 내용과 본문은 그대로다.
 11. **Given** `hover.responsibility`·`hover.collaboration`이 기본값이고 `hover.enabled`가 `false`, **When** 구조 뷰를 만들면, **Then** 산출 파일은 이 기능 도입 전과 같다. **When** `hover.enabled`만 `true`로 바꾸고 다시 만들면, **Then** 패널에 책임·역할과 의존 대상(책임의 경계, 분리 이유 & 합리성 평가 포함)이 들어간다.
-12. **Given** `hover.collaboration`이 기본값(`questions` 포함)이고 `collaboration.questions`가 `false`(기본값), **When** 구조 뷰를 만들면, **Then** 본문 Collaboration에 "내가 할 수 있는 질문"이 없고 패널에도 질문이 없으며 설정 안내도 없다. **When** `collaboration.questions`만 `true`로 바꾸고 다시 만들면, **Then** 본문과 패널 모두에 질문이 들어간다.
+12. **Given** `hover.collaboration`에 `questions`가 들어 있고 `collaboration.questions`가 `false`, **When** 구조 뷰를 만들면, **Then** 본문 Collaboration에 "내가 할 수 있는 질문"이 없고 패널에도 질문이 없으며 설정 안내도 없다. **When** `collaboration.questions`만 `true`로 바꾸고 다시 만들면, **Then** 본문과 패널 모두에 질문이 들어간다.
 
 ---
 
@@ -135,8 +135,8 @@
 - **FR-005**: 패널이 들어간 파일은 맨 아래(본문의 마지막 내용 다음)에 패널 모양을 정하는 고정 블록(`<style>`) 하나를 가져야 한다. 블록 내용은 `hover.position`(FR-019) 값마다 고정이며 요청마다 달라지지 않는다. `bottom`이면 툴팁을 미리보기 아래쪽에 좌우로 넓게 고정되고, 왼쪽 정렬이며, 높이에 별도 상한이 없는 패널로 바꾼다(내용만큼 늘어나되 미리보기 화면 높이는 넘지 않는다). 패널 안의 내용은 폭 `25em`짜리 칸에 나눠 흘리며, 칸 수는 미리보기 폭에 따라 정해진다. 다만 칸 하나의 높이는 최소 3줄이어서, 내용이 3줄 이하이면 한 칸에만 흐르고 4줄부터 여러 칸으로 나뉜다(1~2줄짜리 패널도 높이는 3줄). `node`이면 툴팁 배경·테두리와 기본 위치(노드 아래)는 Mermaid대로 두고, 왼쪽 정렬로 바꾸며, 폭을 남은 공간과 상관없이 내용 폭(최대 `25em`)으로 두고, 미리보기 오른쪽으로 넘칠 때만 오른쪽 끝에 붙인다. 이를 위해 넘침 판단 기준을 문서 전체로 두고, hover 중인 노드가 없을 때는 툴팁을 화면에서 빼서 직전 노드에서 쓴 위치가 다음 노드에 이어지지 않게 한다(이 때문에 `node`에서는 마우스를 떼면 툴팁이 흐려지는 효과 없이 바로 사라진다). 블록은 이 동작에 필요한 최소한의 속성만 담는다. 여기에 더해, 패널 내용이 있는 노드(링크 유무와 무관)에 마우스를 올린 동안 노드 이름에 밑줄을 긋는 규칙 하나를 담는다. 이 밑줄은 "지금 이 노드를 hover하고 있다"는 표시다.
 - **FR-006**: 패널 내용이 들어간 노드가 하나도 없으면(`hover.enabled`가 `false`이거나, 두 hover 목록이 모두 비었거나, 본문에 대응하는 항목이 없는 경우) 파일에는 FR-005 블록도, 링크 없는 노드용 툴팁 줄(FR-013)도 없어야 하고, 링크가 있는 노드의 `click` 툴팁은 기존 규칙(파일 이름)대로여야 한다. 도구는 이 상태로 되돌리는 일도 해야 한다.
 - **FR-007**: 별도 CSS 파일이나 편집기 설정 없이 산출 md 파일 하나만으로 VS Code Markdown 미리보기에서 패널이 동작해야 한다.
-- **FR-008**: `hover.responsibility` 값은 패널에 넣을 항목의 목록이다. 항목은 `abstract`(책임 (추상))와 `concrete`(역할 (구체))이며, 적은 항목만 적은 순서대로 넣는다. `[]`이면 Responsibility 부분을 넣지 않는다. 기본값은 `["abstract", "concrete"]`다.
-- **FR-009**: `hover.collaboration` 값은 그 노드가 의존하는 협력마다 넣을 항목의 목록이다. 항목은 `targets`(대상·관계 줄), `boundary`(책임의 경계), `rationale`(분리 이유 & 합리성 평가), `questions`(내가 할 수 있는 질문)이며, 적은 항목만 적은 순서대로 넣는다. `targets`를 적지 않아도 다른 항목이 하나라도 있으면 어느 협력인지 알 수 있도록 대상·관계 줄을 협력마다 맨 앞에 붙인다. `[]`이면 Collaboration 부분을 넣지 않는다. 기본값은 `["targets", "boundary", "rationale", "questions"]`다(사용자 확정 2026-11-16).
+- **FR-008**: `hover.responsibility` 값은 패널에 넣을 항목의 목록이다. 항목은 `abstract`(책임 (추상))와 `concrete`(역할 (구체))이며, 적은 항목만 적은 순서대로 넣는다. `[]`이면 Responsibility 부분을 넣지 않는다.
+- **FR-009**: `hover.collaboration` 값은 그 노드가 의존하는 협력마다 넣을 항목의 목록이다. 항목은 `targets`(대상·관계 줄), `boundary`(책임의 경계), `rationale`(분리 이유 & 합리성 평가), `questions`(내가 할 수 있는 질문)이며, 적은 항목만 적은 순서대로 넣는다. `targets`를 적지 않아도 다른 항목이 하나라도 있으면 어느 협력인지 알 수 있도록 대상·관계 줄을 협력마다 맨 앞에 붙인다. `[]`이면 Collaboration 부분을 넣지 않는다.
 - **FR-009b**: 007 FR-012c의 `collaboration.questions`가 `false`이면 본문 Collaboration에 "내가 할 수 있는 질문"이 없으므로, `hover.collaboration`에 `questions`가 있어도 패널에 질문이 뜨지 않아야 한다. 이 경우 `questions`는 없는 항목처럼 동작하며 설정 안내는 하지 않는다(정상 조합으로 본다, FR-010과 같은 원칙). 두 값이 설정 파일에서 떨어져 있으므로 `hover.collaboration` 주석에 이 규칙을 적는다.
 - **FR-009a**: 두 목록에서 패널 안 순서는 Responsibility 부분이 항상 Collaboration 부분보다 위다. 목록이 아닌 값, 모르는 항목, 같은 항목을 두 번 적은 목록은 잘못된 값으로 보고 007 FR-005대로 그 설정만 기본값을 쓰고 안내 한 줄을 남긴다.
 - **FR-010**: 섹션의 `display`가 `hidden`이면 그 섹션의 hover 목록(`hover.responsibility` 또는 `hover.collaboration`)은 값과 상관없이 빈 목록으로 동작해야 한다. 이 경우 설정 안내는 하지 않는다(정상 조합으로 본다). 두 값이 설정 파일에서 떨어져 있으므로, 설정 파일의 `hover` 그룹 주석에 이 규칙을 적는다.
@@ -148,8 +148,8 @@
 - **FR-016** (003 개정): 003의 "산출물에는 실제 내용만" 규칙(FR-032, SKILL.md AP-13c)의 허용 목록에 FR-005의 고정 블록을 추가한다. 이 블록은 메타 코멘트가 아니라 표시 규칙이다.
 - **FR-017** (003 개정): 003의 `click` 툴팁 규칙(툴팁은 파일 이름)은 해당 노드에 패널 내용이 있을 때 그 내용으로 바뀐다. 링크 대상 자체(경로·URL)는 바뀌지 않는다. 또 003의 "링크 대상이 없으면 `click`을 두지 않는다" 규칙에, 패널 내용이 있을 때 FR-013의 이동 없는 툴팁 줄을 두는 예외를 추가한다.
 - **FR-018** (007 개정): 007의 설정 옵션 목록과 옵션 정의(settings.schema.json)에 `hover.enabled`, `hover.responsibility`, `hover.collaboration`, `hover.position`을 추가하고, 사용자가 고치는 설정 파일(settings.jsonc)에 기존 형식대로 설명 주석과 함께 넣는다. 네 옵션의 모든 값의 토큰 영향 표기는 `[0]`(거의 같음)이다. 잘못된 값 처리는 007 FR-005를 따른다.
-- **FR-019**: `hover.position` 값은 `bottom`(미리보기 아래쪽에 넓게 고정된 패널)과 `node`(노드 바로 아래, Mermaid 기본 위치) 중 하나이며 기본값은 `bottom`이다. 이 값은 FR-005 블록의 내용만 바꾸고, 툴팁 내용·밑줄·링크 없는 노드 처리(FR-013)에는 영향을 주지 않는다. 두 hover 목록이 모두 빈 것으로 동작하면(`hover.enabled`가 `false`인 경우 포함) 이 값은 쓰이지 않는다.
-- **FR-020**: `hover.enabled` 값은 `true`와 `false` 중 하나이며 기본값은 `true`다. `false`이면 hover 기능 전체가 꺼져, `hover.responsibility`·`hover.collaboration`·`hover.position` 값과 상관없이 FR-006의 상태(이 기능 도입 전과 같은 산출물)가 된다. 이 값을 바꿔도 다른 hover 값은 그대로 남아, 다시 `true`로 바꾸면 이전 항목 설정대로 동작한다. 요청 문장에서 hover를 켜거나 끄라고 하면 그 요청에 한해 따른다(FR-014).
+- **FR-019**: `hover.position` 값은 `bottom`(미리보기 아래쪽에 넓게 고정된 패널)과 `node`(노드 바로 아래, Mermaid 기본 위치) 중 하나다. 이 값은 FR-005 블록의 내용만 바꾸고, 툴팁 내용·밑줄·링크 없는 노드 처리(FR-013)에는 영향을 주지 않는다. 두 hover 목록이 모두 빈 것으로 동작하면(`hover.enabled`가 `false`인 경우 포함) 이 값은 쓰이지 않는다.
+- **FR-020**: `hover.enabled` 값은 `true`와 `false` 중 하나다. `false`이면 hover 기능 전체가 꺼져, `hover.responsibility`·`hover.collaboration`·`hover.position` 값과 상관없이 FR-006의 상태(이 기능 도입 전과 같은 산출물)가 된다. 이 값을 바꿔도 다른 hover 값은 그대로 남아, 다시 `true`로 바꾸면 이전 항목 설정대로 동작한다. 요청 문장에서 hover를 켜거나 끄라고 하면 그 요청에 한해 따른다(FR-014).
 - **FR-021**: Dependency 노드 라벨에 003 FR-036의 원본 규격 표시어가 있으면, 도구는 변화 표시와 HTML 태그를 제거한 뒤 마지막 `&nbsp;` 뒤의 실제 노드 이름으로 Responsibility·Collaboration 본문을 연결하고 패널 머리글을 만들어야 한다. `class&nbsp;NiaAppState`, `enum&nbsp;class&nbsp;TopLevelDestination`, `♻️&nbsp;fun&nbsp;NiaNavHost`는 각각 `NiaAppState`, `TopLevelDestination`, `NiaNavHost`로 연결된다. 표시어가 없는 기존 라벨과 ID는 이전과 같아야 한다. 003 FR-037의 파일 이름 표시 `<span class=srcFile>…</span>`는 태그와 함께 내용째 지운다.
 - **FR-022**: FR-005의 `<style>`은 `docs/hover-tooltip-test/details-wrapped-style.md`에서 검증한 고정 `<details>` 안에 있어야 한다. 설명은 "이 문서에 적용되지 못한 `<style>` 코드"와 관련 GFM 공식 문서 링크를 보여준다. VS Code에서는 이 접은 글 자체가 보이지 않고 CSS가 종전과 같이 적용되어야 하며, GitHub에서는 접힌 설명 한 줄만 먼저 보여 CSS 원문이 본문에 그대로 펼쳐지지 않아야 한다. 도구는 기존의 맨 끝 생 `<style>` 블록도 찾아 새 형식으로 교체하거나 제거해야 한다.
 

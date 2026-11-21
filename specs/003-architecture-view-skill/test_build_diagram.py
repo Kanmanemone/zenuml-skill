@@ -14,6 +14,12 @@ from hover.settings import load_settings, strip_json_comments  # noqa: E402
 
 BASE = ["flowchart LR", "  A", "  B", "", "  A -->|호출| B"]
 LEGEND = '  CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제" }'
+FORMAT_KEYS = ("declarationMarkers", "fileExtensions", "functionParentheses")
+
+
+def schema_defaults(skill_dir):
+    options = json.loads((skill_dir / "settings.schema.json").read_text(encoding="utf-8"))["options"]
+    return {option["key"]: option["default"] for option in options}
 
 
 class CrudLegendTest(unittest.TestCase):
@@ -31,19 +37,15 @@ class CrudLegendTest(unittest.TestCase):
 class NodeNameFormatSettingsTest(unittest.TestCase):
     def test_shipped_settings_and_defaults_use_one_format_family(self):
         skill_dir = SCRIPT_DIR.parent
-        expected = {
-            "dependency.nodeNameFormat.declarationMarkers": False,
-            "dependency.nodeNameFormat.fileExtensions": True,
-            "dependency.nodeNameFormat.functionParentheses": True,
-        }
+        defaults = schema_defaults(skill_dir)  # the schema is the only source of default values
 
         loaded = load_settings(skill_dir)
-        self.assertEqual(expected, {key: loaded["values"][key] for key in expected})
+        self.assertEqual([], loaded["notices"])
         dependency = json.loads(strip_json_comments(
             (skill_dir / "settings.jsonc").read_text(encoding="utf-8")
         ))["dependency"]
         self.assertEqual(
-            {"declarationMarkers": False, "fileExtensions": True, "functionParentheses": True},
+            {name: defaults["dependency.nodeNameFormat." + name] for name in FORMAT_KEYS},
             dependency["nodeNameFormat"],
         )
         self.assertNotIn("nodeMarkers", dependency)
@@ -62,9 +64,10 @@ class NodeNameFormatSettingsTest(unittest.TestCase):
 
             loaded = load_settings(root)
 
-        self.assertFalse(loaded["values"]["dependency.nodeNameFormat.declarationMarkers"])
-        self.assertTrue(loaded["values"]["dependency.nodeNameFormat.fileExtensions"])
-        self.assertTrue(loaded["values"]["dependency.nodeNameFormat.functionParentheses"])
+        defaults = schema_defaults(skill_dir)
+        for name in FORMAT_KEYS:
+            key = "dependency.nodeNameFormat." + name
+            self.assertEqual(defaults[key], loaded["values"][key])
         self.assertTrue(any("dependency.nodeMarkers" in notice for notice in loaded["notices"]))
         self.assertTrue(any("dependency.functionParentheses" in notice for notice in loaded["notices"]))
 

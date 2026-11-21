@@ -308,7 +308,7 @@ Technical Context에 NEEDS CLARIFICATION은 없다. 아래는 설계를 정하�
 
 ## R10. 산출물 위치와 문서 나누기 (FR-015c, FR-019, FR-020)
 
-- **Decision**: 산출물은 `<output.directory>/<slug>.stages/`에 둔다. `output.directory`는 구조 뷰 파일이 있는 폴더 기준 상대 경로이고, 기본값은 `.`이다. 그래서 기본값이면 `.zenuml/<slug>.stages/`가 된다(R12). `prepare`는 이 `<slug>.stages/` 폴더만 통째로 지우고 새로 만든다. `output.directory` 자체나 그 안의 다른 파일은 지우지 않는다(spec FR-019a). 문서 이름은 다음 셋 중 하나다.
+- **Decision**: 산출물은 `<output.directory>/<slug>.stages/`에 둔다. `output.directory`는 구조 뷰 파일이 있는 폴더 기준 상대 경로다(R12). `prepare`는 이 `<slug>.stages/` 폴더만 통째로 지우고 새로 만든다. `output.directory` 자체나 그 안의 다른 파일은 지우지 않는다(spec FR-019a). 문서 이름은 다음 셋 중 하나다.
   - `<최상위 subgraph Id>.md`
   - `others.md`: 작은 그룹과 그룹 없는 노드를 모은 문서
   - `all.md`: 문서가 하나뿐일 때
