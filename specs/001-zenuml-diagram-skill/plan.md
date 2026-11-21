@@ -71,6 +71,12 @@ specs/001-zenuml-diagram-skill/
 
 **Structure Decision**: 이 기능은 전통적인 애플리케이션이 아니라 Claude Code Skill이므로, "Option 1/2/3" 소스 구조가 적용되지 않는다. 실제 산출물은 이 저장소가 이미 사용 중인 패턴과 동일하게 `.claude/skills/<skill-name>/` 아래에 `SKILL.md` + 참조 파일 1개로 구성되는 단일 skill 모듈이다(research.md, Prior Art — 저장소 내 기존 15개 speckit skill과 동일 패턴). 별도의 `src/`, `tests/`, 백엔드/프론트엔드 분리는 필요하지 않다.
 
+## 2026-11-21 토큰 효율 보완 계획
+
+`SKILL.md`의 트리거 설명과 중복 예시를 줄인다. 문법 reference와 근거 제한,
+자기검증, 출력 계약은 정확성 경계이므로 유지한다. 새 스크립트나 의존성은
+추가하지 않으며 피드백 로그 자동화는 002에서 다룬다.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*

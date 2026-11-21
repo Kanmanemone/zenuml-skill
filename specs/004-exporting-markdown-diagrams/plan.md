@@ -79,6 +79,12 @@ specs/004-exporting-markdown-diagrams/
 
 **Structure Decision**: 이 기능은 이 저장소의 기존 두 스킬(`generating-zenuml-diagrams`, `generating-architecture-views`)과 동일하게 `.claude/skills/<name>/` 아래 `SKILL.md` + 보조 코드로 구성되는 단일 skill 모듈이다. 다만 앞의 두 스킬과 달리 `references/`(참조 문서)가 아니라 `scripts/`(실행 코드)를 번들한다 — Anthropic 자신의 `pdf`/`docx` 스킬이 쓰는 패턴과 같다(평가 단계 `research.md` 참고). 전통적인 애플리케이션의 "Option 1/2/3" 소스 구조는 적용되지 않는다.
 
+## 2026-11-21 토큰 효율 보완 계획
+
+긴 선택지 구성법과 예시는 `references/questions.md`로 옮기고 누락 값이 있을
+때만 읽는다. 변환 스크립트와 설정 계약은 바꾸지 않는다. description은 실제
+변환과 생성의 경계만 남긴다.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*

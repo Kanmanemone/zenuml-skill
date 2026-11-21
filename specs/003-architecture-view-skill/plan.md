@@ -100,6 +100,17 @@ specs/003-architecture-view-skill/
 - 실행 순서: 산출 파일 쓰기 → `build_diagram.py` → 로그 라운드 쓰기(완성된 파일 내용) → `apply_hover.py`.
 - Python이 없거나 0이 아닌 코드로 끝나면 파일은 기본 모양 그대로 두고 응답 끝에 `⚙️ 다이어그램 서식 건너뜀: <이유>` 한 줄을 남긴다.
 
+## 2026-11-21 토큰 효율 보완 계획
+
+- `scripts/append_feedback.py`: 산출물·요청 요약을 기존 로그 형식으로 복사하는
+  표준 라이브러리 helper. 002의 독립 복사본과 같은 계약을 쓴다.
+- `references/feedback-log.md`: helper 실패 또는 로그 인용 때만 읽는 수동 형식과
+  보존 규칙.
+- `SKILL.md`: 전체 완성 예시를 제거하고 기존 examples/templates reference로
+  연결한다. 구조 판단 규칙은 본문에 남겨 매번 필요한 판단을 숨기지 않는다.
+- `docs/skill-benchmark/run.py`: 네 스킬을 같은 방식으로 비교하고 실제
+  input/output token과 턴 수를 기록한다.
+
 ## Complexity Tracking
 
 *No constitution violations to justify. This section is intentionally empty.*

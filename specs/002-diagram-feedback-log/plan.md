@@ -85,6 +85,14 @@ specs/002-diagram-feedback-log/
 
 **Structure Decision**: 이 기능은 새 skill이 아니라 기존 `generating-zenuml-diagrams` skill의 확장이므로, "Option 1/2/3" 소스 구조가 적용되지 않는다. 실제 변경은 기존 `SKILL.md` 워크플로 맨 앞에 판단 절차를 추가하고 그 아래로 재생성·로깅·인용 스테이징 절을 잇는 것뿐이다. 산출물은 feature 001이 이미 쓰는 `.zenuml/`을 그대로 쓰고, 로그는 그 하위에 새 디렉토리 하나(`.zenuml/log/`)만 생긴다. 별도의 `src/`, `tests/`, 백엔드/프론트엔드 분리는 필요하지 않다(feature 001의 선례와 동일한 구조 결정).
 
+## 2026-11-21 로그 helper 계획
+
+`generating-zenuml-diagrams/scripts/append_feedback.py`를 추가한다. 표준
+라이브러리만 사용하며 산출물, 로그, 요청 임시 파일과 `new|append` 모드를
+입력받는다. `new`는 Round 1로 새로 쓰고 `append`는 기존 최대 Round 다음을
+추가하되 로그가 없으면 Round 1로 시작한다. 성공한 뒤 요청 임시 파일을
+제거한다. 실패 시 SKILL.md가 기존 수동 형식을 사용한다.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*

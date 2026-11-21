@@ -213,6 +213,11 @@ specs/010-stepwise-code-convergence/fixtures/   # 신규 — quickstart용 입�
 
 `stages.py`가 이미 문서 끝에 붙이는 기본·diff `<style>`을 `docs/hover-tooltip-test/details-wrapped-style.md`와 같은 `<details>` 하나로 감싼다. 기본 CSS에 wrapper 숨김 규칙 하나를 더하고, 기존 `strip_diff_layer`의 정확한 문자열 제거 경계를 유지해 diff CSS만 뺀 결과가 `with_diff=False` 결과와 계속 같게 한다. 별도 스크립트·설정·의존성은 추가하지 않는다. 네 사용자 스킬 중 구조 뷰와 이 스킬만 Markdown `<style>`을 출력하며, ZenUML 생성은 미사용, 내보내기는 임시 HTML 내부 CSS라 변경하지 않는다.
 
+## 2026-11-21 토큰 효율 보완 계획
+
+이미 짧은 SKILL.md의 description과 도입부 중복만 제거한다. outline의 목적 문장과
+그룹 판단은 모델 판단으로 유지하며 새 reference나 스크립트를 만들지 않는다.
+
 ## Complexity Tracking
 
 | 더하는 복잡도 | 필요한 이유 | 더 단순한 방법을 고르지 않은 이유 |
