@@ -162,5 +162,30 @@ class SourceFileTagTest(unittest.TestCase):
         self.assertIn("{ top: -21px; }", center)
         self.assertNotIn("<details", self._hover(**{"dependency.sourceFile.enabled": False}))
 
+    def _panels(self, nodes, names):
+        """Hover-on result for a view whose body headings use base names."""
+        body = "\n".join("- <strong>" + n + "</strong>\n  - <strong>책임 (추상)</strong>: " + n + " 책임\n"
+                         "  - <strong>역할 (구체)</strong>: 설명에 명시되지 않음" for n in names)
+        text = ("### Dependency\n\n```mermaid\n" + "\n".join(build(["flowchart LR"] + nodes, "")) + "\n```\n\n"
+                "### Responsibility\n\n#### 요소의 책임\n\n" + body + "\n")
+        return self._hover(text, **{"hover.enabled": True})
+
+    def test_hover_matches_file_node_by_base_name(self):
+        out = self._panels(['  SearchViewModelKt@{ label: "SearchViewModel.kt" }', "  Repo", "",
+                            "  SearchViewModelKt -->|호출| Repo",
+                            '  click SearchViewModelKt "../a/SearchViewModel.kt" "SearchViewModel.kt"'],
+                           ["SearchViewModel"])
+        click = next(l for l in out.splitlines() if l.strip().startswith("click SearchViewModelKt "))
+        self.assertIn("SearchViewModel 책임", click)
+
+    def test_exact_declaration_name_wins_over_file_stem(self):
+        out = self._panels(['  Memo_kt@{ label: "Memo.kt" }', "  Memo", "", "  Memo_kt -->|선언| Memo",
+                            '  click Memo_kt "../src/Memo.kt" "Memo.kt"', '  click Memo "../src/Memo.kt" "Memo.kt"'],
+                           ["Memo"])
+        memo = next(l for l in out.splitlines() if l.strip().startswith("click Memo "))
+        file_node = next(l for l in out.splitlines() if l.strip().startswith("click Memo_kt "))
+        self.assertIn("Memo 책임", memo)
+        self.assertNotIn("Memo 책임", file_node)
+
 if __name__ == "__main__":
     unittest.main()

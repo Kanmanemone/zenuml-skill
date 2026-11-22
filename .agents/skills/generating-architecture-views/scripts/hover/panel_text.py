@@ -54,6 +54,12 @@ class PanelBuilder:
         for node in view.nodes.values():
             self.by_name.setdefault(node.id, node.id)
             self.by_name.setdefault(node.name, node.id)
+        # Body names keep the base name while file-node labels keep the extension (003 FR-036);
+        # added last so an exact declaration name still wins.
+        for node in view.nodes.values():
+            stem, dot, ext = node.name.rpartition(".")
+            if dot and stem and ext:
+                self.by_name.setdefault(stem, node.id)
 
     def node_id(self, name):
         return self.by_name.get(name)
