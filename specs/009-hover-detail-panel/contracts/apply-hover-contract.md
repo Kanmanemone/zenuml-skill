@@ -5,7 +5,7 @@
 ## 실행
 
 ```text
-<python> .claude/skills/generating-architecture-views/scripts/apply_hover.py <구조 뷰 파일> [--enabled=<true|false>] [--responsibility=<항목,…>] [--collaboration=<항목,…>] [--position=<bottom|node>]
+<python> .claude/skills/generating-architecture-views/scripts/apply_hover.py <구조 뷰 파일> [--enabled=<true|false>] [--responsibility=<항목,…>] [--collaboration=<항목,…>] [--position=<bottom|node>] [--source-file=<true|false>] [--source-file-position=<left|right>]
 ```
 
 | 인자 | 뜻 |
@@ -30,9 +30,21 @@
 3. **`cursor:auto`** — `hoverOnly` 줄을 단 노드의 색상 `classDef` 줄 끝에 `,cursor:auto`. 색상 클래스는 노드마다 하나씩이므로(003 FR-008b) 그 노드에만 적용된다. 이전 실행이 붙인 `,cursor:auto`는 먼저 모두 지운다.
 4. **패널 모양 블록** — 파일 끝의 `div.mermaidTooltip`을 담은 새 `<details>…</details>` 블록이나 기존 생 `<style>…</style>` 블록을 지우고, 파일 끝에 빈 줄 하나 + 현재 `position`의 고정 wrapper를 붙인다. 블록 내용은 [style 블록 원본](#style-블록-원본)과 바이트 단위로 같다.
 
+## 파일 이름 표시 (003 FR-037)
+
+`dependency.sourceFile.enabled`가 켜져 있고 다이어그램의 `class … srcFile` 줄에 링크 `click`이 있는 노드가 있으면, 패널 모양 블록의 `<style>` 끝에 그 노드마다 아래 규칙을 하나씩 붙인다(노드 선언 순서). hover가 꺼짐이어도 이 규칙이 있으면 wrapper 숨김 규칙과 이 규칙만 담은 같은 wrapper를 붙인다. `SIDE`는 `dependency.sourceFile.position`, `<color>`는 노드의 색상 class, `<file>`은 링크 대상의 파일 이름(`"`·`\`는 `\` 이스케이프)이다.
+
+```css
+.node.srcFile foreignObject { overflow: visible; }
+.node.srcFile .label foreignObject > div { position: relative; }
+.srcFile.<color> .nodeLabel::before { content: "<file>"; position: absolute; top: -9px; SIDE: -13px; font-size: 10px; line-height: 1; font-weight: normal; color: #9CA3AF; }
+```
+
+공통 두 규칙은 한 번만 쓴다. `--source-file`·`--source-file-position`은 이번 실행에서만 두 설정 값을 덮는다.
+
 ## 변환 규칙 (꺼짐)
 
-유효 설정이 꺼짐이거나 NodePanel이 하나도 없으면:
+유효 설정이 꺼짐이거나 NodePanel이 하나도 없으면(파일 이름 규칙이 있으면 4는 위 절을 따른다):
 
 1. 링크 `click` 줄의 툴팁을 파일 이름으로 되돌린다(research R11).
 2. `hoverOnly` 줄을 모두 지운다.
@@ -61,7 +73,7 @@
 
 ## SKILL.md 쪽 규약
 
-- 저장 순서: 구조 뷰 파일 → 피드백 로그 → (유효 설정이 켜짐이면) `apply_hover.py` 실행. 요청 문장이 hover 값을 밝혔으면 해당 옵션만 명령줄에 붙인다.
+- 저장 순서: 구조 뷰 파일 → 피드백 로그 → `apply_hover.py` 실행(파일 이름 표시도 이 스크립트가 그리므로 hover 설정과 무관하게 항상). 요청 문장이 hover 값을 밝혔으면 해당 옵션만 명령줄에 붙인다.
 - 스크립트의 설정 안내 줄은 채팅 응답 끝 설정 안내에 합친다(같은 안내를 두 번 쓰지 않는다).
 - 종료 코드가 `0`이 아니면 구조 뷰 파일은 그대로 두고, 응답에 한 줄로 알린다.
 - Python 3.9 이상을 찾지 못하면 스크립트를 건너뛴다. 구조 뷰는 기능 도입 전 형태(툴팁은 파일 이름)로 남고, 응답 끝에 `⚙️ hover 건너뜀: Python 3.9 이상을 찾지 못함` 한 줄을 남긴다. 구조 뷰 생성 자체는 실패로 보지 않는다.

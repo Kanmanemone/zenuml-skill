@@ -88,7 +88,7 @@
 
 ## Decision: 노드 규격 표시어 (FR-036, 2026-11-20)
 
-- **Decision — 누가 쓰나**: 스킬(에이전트)이 007 설정의 `dependency.nodeNameFormat` 세 값을 읽고 노드 라벨에 직접 쓴다. `declarationMarkers=true`면 `Foo@{ label: "class&nbsp;Foo" }`, 파일 자체 노드는 설정과 무관하게 `Foo@{ label: "Foo.kt" }`처럼 쓰고, `fileExtensions=false`이면 `build_diagram.py`가 그 확장자를 지운다. 라벨이 `click` 대상의 파일 이름과 같은지로 파일 자체 노드를 알아보며, FR-037의 파일 이름 표시도 같은 판정을 쓴다.
+- **Decision — 누가 쓰나**: 스킬(에이전트)이 007 설정의 `dependency.nodeNameFormat` 세 값을 읽고 노드 라벨에 직접 쓴다. `declarationMarkers=true`면 `Foo@{ label: "class&nbsp;Foo" }`, 파일 자체 노드는 설정과 무관하게 `Foo@{ label: "Foo.kt" }`처럼 쓰고, `fileExtensions=false`이면 `build_diagram.py`가 그 확장자를 지운다. 라벨이 `click` 대상의 파일 이름과 같은지로 파일 자체 노드를 알아보며, FR-037의 표시 대상 판정도 같은 판정을 쓴다.
 - **Rationale**: 표시어는 원본 코드를 읽고 옮겨 오는 판단이라 FR-008d의 "판단이 필요한 부분은 스킬이 쓴다"에 속한다. `build_diagram.py`는 노드 선언 줄을 해석하지 않고 그대로 옮기므로 라벨이 달라져도 영향이 없다. 표시어가 붙은 노드만 `@{ label }` 형식이 되어 늘어나는 토큰은 그 노드 수만큼이다.
 - **Alternatives considered**: 스크립트가 붙이기(스크립트가 종류를 알려면 에이전트가 종류를 따로 넘겨야 해서 쓰는 양이 줄지 않고 인터페이스만 늘어 기각).
 
@@ -100,9 +100,16 @@
 - **Rationale**: 변화 표시 이모지에 `&nbsp;`를 쓴 이유(FR-035)와 같이, 긴 라벨이 줄바꿈될 때 `class`만 윗줄에 남지 않게 한다. 함수의 `()`는 언어별 표시어와 무관한 단일 접미 규칙이라 별도 키워드 목록이 필요 없다. 공백이 든 이름(`Now in Android 앱`)은 `&nbsp;`가 없으므로 그대로 남는다.
 - **Alternatives considered**: 보통 공백으로 잇기(줄바꿈 문제, 그리고 공백 든 이름과 구분할 수 없어 기각). 언어별 키워드 목록으로 함수 여부를 다시 판별하기(기존 근거를 중복하고 열린 어휘라 빠짐이 생겨 기각).
 
-- **Decision — 다른 기능에 미치는 영향**: 표시 설정은 Dependency 라벨에만 적용한다. Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상과 hover 내용은 바꾸지 않는다. 009·010은 기존처럼 노드 ID와 마지막 `&nbsp;` 뒤의 기본 이름을 사용하고 끝 `()`를 제거하므로 새 정규화가 필요 없다. FR-037의 파일 이름 표시 `<span class=srcFile>…</span>`만 두 `clean_name`이 내용째 지운다.
+- **Decision — 다른 기능에 미치는 영향**: 표시 설정은 Dependency 라벨에만 적용한다. Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상과 hover 내용은 바꾸지 않는다. 009·010은 기존처럼 노드 ID와 마지막 `&nbsp;` 뒤의 기본 이름을 사용하고 끝 `()`를 제거하므로 새 정규화가 필요 없다.
 - **Rationale**: 두 기능 모두 이미 표시 라벨을 기본 이름으로 정규화하는 책임이 있다. 접미사 한 쌍만 제거하면 기존 표시어 열린 어휘 규칙을 유지하면서 함수 노드의 hover와 선언 찾기가 깨지지 않는다.
 - **Alternatives considered**: 언어별 함수 표시어 목록으로 괄호 제거 여부를 판단(하드코딩과 중복이라 기각). 소비자가 `foo()`를 기본 이름으로 사용(Responsibility·Collaboration과 실제 선언 이름 `foo`의 연결이 끊겨 기각).
+
+## Decision: 파일 이름 표시 (FR-037, 2026-11-22)
+
+- **Decision — 판정과 그리기를 나눔**: `build_diagram.py`는 지금처럼 파일 자체 노드를 판정하되 라벨을 바꾸지 않고, 표시 대상 노드 ID를 `class A,B srcFile` 한 줄로 남긴다(설정과 무관하게 항상). `apply_hover.py`는 이 줄의 노드마다 `click` 대상의 파일 이름으로 `.srcFile.<색상 class> .nodeLabel::before` 규칙을 만들어, 문서 끝 `<details class="zenuml-hover-style">` 속 `<style>`에 붙인다. `dependency.sourceFile.enabled`·`position`과 그 명령줄 값은 `apply_hover.py`가 읽는다. hover가 꺼져도 규칙이 있으면 같은 블록을 쓰므로 SKILL.md는 이 스크립트를 항상 실행한다.
+- **Rationale**: `fileExtensions=false`이면 파일 노드와 같은 이름 선언 노드의 라벨이 같아져 나중에는 구분할 수 없으므로, 확장자를 지우는 쪽이 판정 결과를 남겨야 한다. 정의 없는 class는 Mermaid에서 아무것도 바꾸지 않아 GitHub 렌더링과 라벨에 영향이 없다. 문서 끝 style 블록은 GitHub가 적용하지 않고 지우면 함께 사라지므로 FR-037의 OCP 조건을 그대로 만족한다. `::before`를 `position: absolute`로 띄우므로 노드 크기와 이름 위치는 바뀌지 않는다.
+- **위치**: Mermaid 12.3의 노드 사각형은 라벨 상자보다 가로 16px, 세로 12px씩 크다(실측). 라벨 상자를 기준으로 `top: -9px`, `right|left: -13px`에 두면 3px 테두리 안쪽에 붙는다. `foreignObject`의 `overflow: visible`로 라벨 상자 밖을 그린다.
+- **Alternatives considered**: 라벨에 span을 넣고 themeCSS로 꾸미기(이전 방식 — GitHub에 글자가 남고 이름을 아래로 밀어 기각). `build_diagram.py`가 별도 style 블록을 쓰기(문서 끝 블록이 둘이 되고 `apply_hover.py`의 블록 제거와 충돌해 기각). `apply_hover.py`가 라벨만 보고 판정(`fileExtensions=false`에서 구분 불가로 기각).
 
 - **Decision — 예시 정리**: SKILL.md와 `references/templates.md`의 `ComponentB@{ label: "ComponentB(state)" }` 예시를 FR-036에 맞는 `ComponentB@{ label: "class&nbsp;ComponentB" }`로 바꾼다.
 - **Rationale**: FR-036은 라벨에 부가 설명을 넣지 않는다. 예시가 괄호 설명을 보여 주면 에이전트가 그대로 따라 써서 원본 표기 `foo()`와 헷갈린다.

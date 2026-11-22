@@ -31,7 +31,7 @@
 - Dependency, Responsibility, Collaboration 세 섹션을 항상 이 순서로 생성해야 한다(FR-005).
 - Dependency는 `flowchart LR` + 그룹별 `direction TB` + 코드펜스 맨 앞의 고정 YAML frontmatter `config` 스타일 블록을 쓰고(엣지는 `eN@` ID와 엣지 클래스로 색칠, 라벨이 ID와 다른 노드는 `@{ label }`), 각 화살표에 관계 성격 레이블을, 각 노드·그 노드발 화살표에 일관된 색상을 부여해야 한다(FR-007~008b). 사용자가 요청에서 명시적으로 렌더러(예: "elk")를 지정한 경우에 한해 YAML `config` 바로 아래에 `layout`을 그 값 그대로 추가해야 하며, 명시하지 않은 요청(재생성 포함)에서는 이전 라운드 값을 이어받지 않고 생략해야 한다 — 렌더러 이름은 관계 성격 레이블과 동일하게 열린 어휘이고 검증·매핑 로직을 두지 않는다(FR-007b).
 - 요청은 매번 구조(정적)와 구조 변화(동적) 중 하나로 분류하고, 동적이면 설명이 밝힌 노드에만 이모지 라벨과 CRUD 클래스를 붙인다. CRUD class가 하나 이상이면 스크립트가 제목 없는 `✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제` text node를 하나 추가한다(FR-034, FR-035).
-- 실제로 확인한 노드의 Dependency 라벨은 007의 `dependency.nodeNameFormat` 세 boolean을 독립적으로 따른다. `declarationMarkers`는 파일 내부 선언의 원본 키워드, `fileExtensions`는 파일 자체 노드의 마지막 확장자, `functionParentheses`는 확인된 함수 이름 끝 `()`만 제어한다. 확인하지 못했거나 선언도 파일도 아닌 노드는 이름만 두고, 라벨에 부가 설명을 넣지 않으며, 본문의 굵은 이름·노드 ID·링크·hover 내용에는 적용하지 않는다. 스킬은 `declarationMarkers`·`functionParentheses`를 라벨에 적용하고 파일 자체 노드에는 항상 확장자를 쓴다. `build_diagram.py`가 `click` 대상에서 파일 이름을 얻어 `fileExtensions=false`의 확장자 제거와 FR-037의 파일 이름 표시를 하며, schema 기반 설정 로더는 바꾸지 않는다(FR-036, FR-037, 007 FR-012d, FR-012e, research.md "노드 규격 표시어").
+- 실제로 확인한 노드의 Dependency 라벨은 007의 `dependency.nodeNameFormat` 세 boolean을 독립적으로 따른다. `declarationMarkers`는 파일 내부 선언의 원본 키워드, `fileExtensions`는 파일 자체 노드의 마지막 확장자, `functionParentheses`는 확인된 함수 이름 끝 `()`만 제어한다. 확인하지 못했거나 선언도 파일도 아닌 노드는 이름만 두고, 라벨에 부가 설명을 넣지 않으며, 본문의 굵은 이름·노드 ID·링크·hover 내용에는 적용하지 않는다. 스킬은 `declarationMarkers`·`functionParentheses`를 라벨에 적용하고 파일 자체 노드에는 항상 확장자를 쓴다. `build_diagram.py`가 `click` 대상에서 파일 이름을 얻어 `fileExtensions=false`의 확장자 제거를 하고 FR-037 표시 대상 노드에 표식 class `srcFile`을 붙인다. 파일 이름 자체는 `apply_hover.py`가 문서 끝 `<details>` 속 `<style>`에 노드별 `::before` 규칙으로 그린다(research.md "파일 이름 표시"), schema 기반 설정 로더는 바꾸지 않는다(FR-036, FR-037, 007 FR-012d, FR-012e, research.md "노드 규격 표시어").
 - Responsibility는 더 이상 쌍을 비교하지 않는다 — 그룹·요소마다 책임(추상)/역할(구체)을 서술해야 한다(FR-009~010). 다만 같은 그룹·같은 관계 성격에서 병렬적 구조적 역할만 수행하는 요소가 3개 이상이면(종류가 다른 역할을 가진 대상은 제외), 각각 대신 "A, B, C" 이름을 모두 나열한 하나의 통합 항목으로 서술할 수 있다(FR-009b).
 - Collaboration은 실제 의존관계가 있는 그룹·요소 쌍에만 항목을 만들고, 각 항목에 책임의 경계/분리 이유&합리성 평가/내가 할 수 있는 질문 세 하위 항목을 담아야 하며, 다수 대상 통합 조건(같은 그룹·같은 관계 성격·3개 이상·병렬적 구조적 역할 — 개별 이름/구현 차이나 개별 엣지가 있어도 무방하며, 종류가 다른 역할을 가진 대상만 제외)을 만족하면 서술적 표현으로 압축해야 한다(FR-025~027b). Responsibility(FR-009b)와 Collaboration(FR-027b)은 동일한 통합 판단 기준을 재사용한다.
 - 그룹·요소 이름에는 분석 대상에 맞는 하이퍼링크(로컬 상대 경로/URL/링크 없음)를 붙여야 하며, 로컬 경로 `click`을 쓰더라도 클릭 이동 제약 같은 안내는 덧붙이지 않는다(FR-027c~027d). 산출 파일은 세 섹션의 실제 내용과 Dependency의 요청 키워드 기반 한 줄 캡션만 담고, 메타 코멘트는 넣지 않는다(FR-032, FR-033).
@@ -46,7 +46,9 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-기준: `.specify/memory/constitution.md` v1.1.1(2026-11-15 비준). 이 절을 처음 쓸 때(2026-07-31)는 헌법이 placeholder라 N/A였고, 아래는 2026-11-21 CRUD 이모지 범례 계획에서 다시 점검한 결과다.
+기준: `.specify/memory/constitution.md` v1.2.0. 이 절을 처음 쓸 때(2026-07-31)는 헌법이 placeholder라 N/A였고, 아래는 2026-11-21 CRUD 이모지 범례 계획에서 다시 점검한 결과다.
+
+**2026-11-22 파일 이름 표시 이동(FR-037) 점검**: I — 새 스크립트·설정·의존성 없이 기존 `build_diagram.py`의 판정과 `apply_hover.py`의 style 블록을 재사용하고, 라벨 span과 두 `clean_name`의 span 제거를 지운다. II — 기존 003 FR-037을 개정한다. III — 모든 산출물에 적용되는 출력 계약 변경이다. IV — 기본값을 문서에 옮겨 적지 않는다. 위반 없음.
 
 | 원칙 | 점검 | 결과 |
 |------|------|------|
