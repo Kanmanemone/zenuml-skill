@@ -246,8 +246,7 @@ NOT_NODES = {"end", "direction", "flowchart", "graph"}
 
 
 def clean_name(label):
-    text = re.sub(r"<span class=srcFile>.*?</span>", "", label)  # source-file tag from build_diagram.py
-    text = re.sub(r"</?(b|s|strong)>", "", text)
+    text = re.sub(r"</?(b|s|strong)>", "", label)
     for mark in ("✨", "♻️", "♻", "🗑️", "🗑", "️"):
         text = text.replace(mark, "")
     name = text.split("&nbsp;")[-1].strip()

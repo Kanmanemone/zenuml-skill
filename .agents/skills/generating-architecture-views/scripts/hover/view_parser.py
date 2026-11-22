@@ -21,6 +21,7 @@ class Node:
     order: int
     color_class: Optional[str] = None
     link: Optional[str] = None
+    source_file: bool = False  # marked `class … srcFile` by build_diagram.py (003 FR-037)
 
 
 @dataclass
@@ -77,8 +78,7 @@ _NOT_NODES = {"end"}
 
 def clean_name(label):
     """Display name from a node label: drop change-mark prefixes and inline markup."""
-    text = re.sub(r"<span class=srcFile>.*?</span>", "", label)  # source-file tag from build_diagram.py
-    text = re.sub(r"</?(b|s|strong)>", "", text)
+    text = re.sub(r"</?(b|s|strong)>", "", label)
     for mark in ("✨", "♻️", "♻", "🗑️", "🗑", "️"):
         text = text.replace(mark, "")
     name = text.split("&nbsp;")[-1].strip()
@@ -140,6 +140,11 @@ def _parse_fence(lines, start, end):
             edges.append(Edge(m.group(1), m.group(3), label))
             continue
         m = _CLASS.match(raw)
+        if m and m.group(2) == "srcFile":
+            for nid in m.group(1).split(","):
+                if nid in nodes:
+                    nodes[nid].source_file = True
+            continue
         if m and not m.group(2).startswith("crud"):
             for nid in m.group(1).split(","):
                 if nid in nodes and nodes[nid].color_class is None:
@@ -268,7 +273,7 @@ def find_style_block(lines):
         for s in range(k, -1, -1):
             if lines[s].strip() == '<details class="zenuml-hover-style">':
                 body = "\n".join(lines[s:k + 1])
-                return (s, k) if "div.mermaidTooltip" in body else None
+                return (s, k) if "div.mermaidTooltip" in body or ".srcFile" in body else None
         return None
     if lines[k].strip() == "</style>":
         for s in range(k, -1, -1):

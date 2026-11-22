@@ -111,30 +111,44 @@ class SourceFileTagTest(unittest.TestCase):
         '  click save "https://example.com/blob/main/src/Store.kt#L10" "Store.kt"',
     ]
 
-    def test_tags_linked_declarations_but_not_the_file_itself(self):
-        out = build(self.VIEW, "", "right")
+    def test_marks_linked_declarations_without_touching_labels(self):
+        out = build(self.VIEW, "")
 
         self.assertIn('  Memo_kt@{ label: "Memo.kt" }', out)
-        self.assertIn('  Memo@{ label: "<span class=srcFile>Memo.kt</span>Memo" }', out)
-        self.assertIn('  save@{ label: "<span class=srcFile>Store.kt</span>✨&nbsp;<b>save()</b>" }', out)
-        self.assertIn("  Plain", out)
-        self.assertIn("text-align: right;", next(line for line in out if "themeCSS" in line))
-
-    def test_left_position_and_disabled_tag(self):
-        self.assertIn("text-align: left;", next(line for line in build(self.VIEW, "", "left") if "themeCSS" in line))
-        plain = build(self.VIEW, "", "")
-        self.assertFalse(any("srcFile" in line for line in plain))
+        self.assertIn("  Memo", out)
+        self.assertIn('  save@{ label: "✨&nbsp;<b>save()</b>" }', out)
+        self.assertIn("  class Memo,save srcFile", out)
+        self.assertFalse(any("srcFile" in line for line in out if "label" in line or "themeCSS" in line))
 
     def test_file_extension_off_strips_only_the_file_node(self):
-        out = build(self.VIEW, "", "right", file_extensions=False)
+        out = build(self.VIEW, "", file_extensions=False)
 
         self.assertIn('  Memo_kt@{ label: "Memo" }', out)
-        self.assertIn('  Memo@{ label: "<span class=srcFile>Memo.kt</span>Memo" }', out)
+        self.assertIn("  class Memo,save srcFile", out)
 
-    def test_hover_reads_the_base_name_through_the_tag(self):
-        from hover.view_parser import clean_name
+    def _hover(self, text=None, **values):
+        from apply_hover import transform
 
-        self.assertEqual("save", clean_name("<span class=srcFile>Store.kt</span>✨&nbsp;<b>save()</b>"))
+        if text is None:
+            text = "### Dependency\n\n```mermaid\n" + "\n".join(build(self.VIEW, "", file_extensions=False)) + "\n```\n"
+        settings = load_settings(SCRIPT_DIR.parent)["values"]
+        settings.update({"hover.enabled": False, "dependency.sourceFile.enabled": True,
+                         "dependency.sourceFile.position": "right"}, **values)
+        return transform(text, settings)[0]
+
+    def test_style_block_draws_names_for_marked_nodes_only(self):
+        out = self._hover()
+        style = out[out.index('<details class="zenuml-hover-style">'):]
+
+        self.assertIn('.srcFile.memoNode .nodeLabel::before { content: "Memo.kt"; position: absolute; top: -9px; right: -13px;', style)
+        self.assertIn('.srcFile.saveNode .nodeLabel::before { content: "Store.kt";', style)
+        self.assertNotIn("memo_ktNode .nodeLabel", style)
+        self.assertNotIn("div.mermaidTooltip", style)
+        self.assertEqual(out, self._hover(out))
+
+    def test_left_position_and_disabled(self):
+        self.assertIn("left: -13px;", self._hover(**{"dependency.sourceFile.position": "left"}))
+        self.assertNotIn("<details", self._hover(**{"dependency.sourceFile.enabled": False}))
 
 
 if __name__ == "__main__":

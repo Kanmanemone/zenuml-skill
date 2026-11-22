@@ -264,6 +264,12 @@
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.
 
+## Validation Results (T155, 2026-11-22)
+
+- `test_build_diagram.py`: 라벨 불변·`class … srcFile` 표식, `fileExtensions=false` 파일 노드 판정, style 블록 규칙·멱등, 왼쪽·꺼짐을 포함한 9개 테스트가 통과했다.
+- 009 fixture: 기본·사용자 설정 기대 출력과 끄기 복원이 바이트 단위로 같았고, 010 테스트 33개가 통과했다.
+- Mermaid CLI 12.3 렌더링(문서 style을 페이지 CSS로 주입): 오른쪽·왼쪽 모두 파일 이름이 테두리 안쪽 끝에 붙고, 파일 노드와 링크 없는 노드에는 없으며, 노드 이름 위치와 노드 크기는 그대로였다. VS Code 미리보기는 확인하지 못했다.
+
 ## Validation Results (T143, 2026-11-21)
 
 - `read_settings.py`: `dependency.nodeNameFormat`의 배포 기본값이 `false`·`true`·`true`이고 안내가 없음을 확인했다.

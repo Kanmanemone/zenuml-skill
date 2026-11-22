@@ -8,13 +8,14 @@ the YAML config block (with `layout`), edge IDs `eN@`, one color class per node 
 class per source node (six Okabe-Ito colors in node declaration order, cycling), the four
 section comments, the label-convention comment, the three `classDef crud*` lines, and the
 three-line change-mark explanation when any CRUD class is used. From each `click` target it
-also tags a linked node with its source file name (dependency.sourceFile) and, for a node that is
-the file itself, drops the extension when dependency.nodeNameFormat.fileExtensions is false.
+marks linked nodes that are not the file itself with `class … srcFile` (apply_hover.py draws
+their file name) and, for a node that is the file itself, drops the extension when
+dependency.nodeNameFormat.fileExtensions is false.
 
 Usage: python3 build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<renderer>]
-       [--source-file=true|false] [--source-file-position=left|right] [--file-extensions=true|false]
+       [--file-extensions=true|false]
 --layout is a renderer the request itself names; otherwise the dependency.renderer setting
-decides (`elk` -> layout: elk, `default` -> no layout line). The other options are values the
+decides (`elk` -> layout: elk, `default` -> no layout line). --file-extensions is a value the
 request itself states; otherwise settings.jsonc decides.
 Requires Python 3.9+, standard library only. Exits non-zero (file untouched) on any problem.
 """
@@ -56,13 +57,7 @@ EDGE = re.compile(r"^(\s*)([A-Za-z_]\w*)\s*-->\s*\|([^|]*)\|\s*([A-Za-z_]\w*)\s*
 CRUD_CLASS = re.compile(r"^\s*class\s+\S+\s+crud(Create|Update|Delete)\s*$")
 NODE = re.compile(r"^\s*([A-Za-z_]\w*)")
 DECL = re.compile(r'^(\s*)(\w+)(?:@\{\s*label:\s*"(.*)"\s*\}|\["(.*)"\])?\s*$')
-SOURCE_CSS = (" foreignObject { overflow: visible; } .srcFile { display: block; text-align: SIDE;"
-              " font-size: 10px; line-height: 1; color: #9CA3AF; margin: -7px -9px 4px -9px; }")
-OVERRIDES = {
-    "--source-file=": "dependency.sourceFile.enabled",
-    "--source-file-position=": "dependency.sourceFile.position",
-    "--file-extensions=": "dependency.nodeNameFormat.fileExtensions",
-}
+FILE_EXTENSIONS = "dependency.nodeNameFormat.fileExtensions"
 STRUCTURE = re.compile(r"^\s*(subgraph\b|end\s*$|direction\b|flowchart\b|%%)")
 
 
@@ -74,16 +69,16 @@ def class_base(node_id):
     return node_id[0].lower() + node_id[1:]
 
 
-def label_sources(declarations, clicks, source_side, file_extensions):
-    """Tag linked nodes with their source file name. A node whose label already is that file name
-    is the file itself (the skill's fileExtensions judgment): no tag, and its extension goes when
-    file_extensions is off. Returns (declarations, whether any tag was added)."""
+def label_sources(declarations, clicks, file_extensions):
+    """Find linked nodes that need a source file name. A node whose label already is that file
+    name is the file itself (the skill's fileExtensions judgment): no mark, and its extension goes
+    when file_extensions is off. Returns (declarations, marked node ids)."""
     files = {}
     for line in clicks:
         found = match_link_click(line)
         if found:
             files[found[0]] = file_name(found[1])
-    out, tagged = [], False
+    out, marked = [], []
     for line in declarations:
         m = DECL.match(line)
         if not m or m.group(2) not in files:
@@ -91,24 +86,19 @@ def label_sources(declarations, clicks, source_side, file_extensions):
             continue
         indent, node, name = m.group(1), m.group(2), files[m.group(2)]
         label = m.group(3) or m.group(4) or node
-        if clean_name(label) == name:
-            if file_extensions or "." not in name:
-                out.append(line)
-                continue
-            i = label.rindex(name)
-            label = label[:i] + name.rsplit(".", 1)[0] + label[i + len(name):]
-        elif source_side:
-            label, tagged = "<span class=srcFile>" + name + "</span>" + label, True
-        else:
+        if clean_name(label) != name:
+            marked.append(node)
+        if clean_name(label) != name or file_extensions or "." not in name:
             out.append(line)
             continue
+        i = label.rindex(name)
+        label = label[:i] + name.rsplit(".", 1)[0] + label[i + len(name):]
         out.append(indent + node + ('@{ label: "' + label + '" }' if label != node else ""))
-    return out, tagged
+    return out, marked
 
 
-def build(fence_lines, layout, source_side="", file_extensions=True):
-    """fence_lines: the lines between ```mermaid and ```. Returns the completed lines.
-    source_side: "left"/"right" tags linked nodes with their source file; "" adds no tag."""
+def build(fence_lines, layout, file_extensions=True):
+    """fence_lines: the lines between ```mermaid and ```. Returns the completed lines."""
     if any(re.search(r"\be\d+@-->", line) for line in fence_lines):
         raise BuildError("다이어그램에 이미 엣지 ID가 있음")
     declarations, edges, crud, clicks = [], [], [], []
@@ -134,16 +124,13 @@ def build(fence_lines, layout, source_side="", file_extensions=True):
     if not edges:
         raise BuildError("엣지가 없음")
 
-    declarations, tagged = label_sources(declarations, clicks, source_side, file_extensions)
+    declarations, marked = label_sources(declarations, clicks, file_extensions)
     nodes = list(dict.fromkeys(declared + edge_nodes))
     while declarations and not declarations[-1].strip():
         declarations.pop()
     color = {node: PALETTE[i % len(PALETTE)] for i, node in enumerate(nodes)}
 
     out = [("  layout: " + layout if c == "{layout}" else c) for c in CONFIG if c != "{layout}" or layout]
-    if tagged:
-        i = next(i for i, c in enumerate(out) if c.startswith("  themeCSS:"))
-        out[i] = out[i][:-1] + SOURCE_CSS.replace("SIDE", source_side) + '"'
     out += declarations + ["", "  %% ---- 엣지 ----"]
     by_source = {}
     for i, (indent, source, label, target) in enumerate(edges):
@@ -155,6 +142,8 @@ def build(fence_lines, layout, source_side="", file_extensions=True):
     for node in nodes:
         out.append("  classDef " + class_base(node) + "Node stroke:" + color[node] + ",stroke-width:3px")
         out.append("  class " + node + " " + class_base(node) + "Node")
+    if marked:
+        out.append("  class " + ",".join(marked) + " srcFile")
     out += ["", "  %% ---- 엣지 스타일 (출발 노드 색과 동일) ----"]
     for source, ids in by_source.items():
         out.append("  classDef " + class_base(source) + "Edge stroke:" + color[source] + ",stroke-width:3.5px")
@@ -179,22 +168,20 @@ def main():
         if arg.startswith("--layout="):
             layout = arg[len("--layout="):]
             args.remove(arg)
-        for flag, key in OVERRIDES.items():
-            if arg.startswith(flag):
-                raw = arg[len(flag):].strip()
-                value = {"true": True, "false": False}.get(raw.lower(), raw)
-                if settings_mod.is_valid(options[key], value):
-                    values[key] = value
-                else:
-                    print(settings_mod.notice("명령줄 `" + key + "` 값이 허용되지 않아 설정 값 사용"))
-                args.remove(arg)
+        if arg.startswith("--file-extensions="):
+            raw = arg[len("--file-extensions="):].strip()
+            value = {"true": True, "false": False}.get(raw.lower(), raw)
+            if settings_mod.is_valid(options[FILE_EXTENSIONS], value):
+                values[FILE_EXTENSIONS] = value
+            else:
+                print(settings_mod.notice("명령줄 `" + FILE_EXTENSIONS + "` 값이 허용되지 않아 설정 값 사용"))
+            args.remove(arg)
     if len(args) != 1:
         print("usage: build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<renderer>]", file=sys.stderr)
         return 2
     path = Path(args[0])
     if layout is None:
         layout = "elk" if values["dependency.renderer"] == "elk" else ""
-    source_side = values["dependency.sourceFile.position"] if values["dependency.sourceFile.enabled"] else ""
     try:
         text = path.read_bytes().decode("utf-8")
         nl = "\r\n" if "\r\n" in text else "\n"
@@ -202,8 +189,7 @@ def main():
         start = lines.index("### Dependency")
         open_i = next(i for i in range(start, len(lines)) if lines[i].strip() == "```mermaid")
         close_i = next(i for i in range(open_i + 1, len(lines)) if lines[i].strip() == "```")
-        built = build(lines[open_i + 1:close_i], layout, source_side,
-                      values["dependency.nodeNameFormat.fileExtensions"])
+        built = build(lines[open_i + 1:close_i], layout, values[FILE_EXTENSIONS])
     except (OSError, ValueError, StopIteration, BuildError) as e:
         print("다이어그램 서식 실패: " + str(e), file=sys.stderr)
         return 1

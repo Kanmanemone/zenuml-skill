@@ -79,7 +79,7 @@ them from a language keyword or extension list. Apply the
   inside a file.
 - A node that is the file itself always gets its verified final extension,
   whatever `fileExtensions` says; `build_diagram.py` drops it when that setting
-  is `false` and tags other linked nodes with their source file name.
+  is `false`, and the scripts show other linked nodes' source file names.
 - `functionParentheses`: `()` exactly once, only for a verified function.
 
 These settings change Dependency labels only. IDs, link targets, hover content,
@@ -157,9 +157,8 @@ For a completed view, in this order:
 
 1. Write `.zenuml/<slug>.architecture.md`.
 2. Run `build_diagram.py <view>`; add `--layout=<value>` only when this request
-   names a renderer, and `--source-file=<true|false>`,
-   `--source-file-position=<left|right>`, or `--file-extensions=<true|false>`
-   only for a value this request states. On failure, keep the basic view and report the prescribed
+   names a renderer, and `--file-extensions=<true|false>` only for a value this
+   request states. On failure, keep the basic view and report the prescribed
    `⚙️ 다이어그램 서식 건너뜀: <reason>` line.
 3. Write only the relevant-turn request summary to a temporary UTF-8 text file.
    Resolve the log as `<log.directory>/<slug>.architecture.md`, then run
@@ -170,9 +169,9 @@ For a completed view, in this order:
    view into the log yourself on success. If it fails, read
    [references/feedback-log.md](references/feedback-log.md) and preserve the
    same log manually.
-4. When hover is enabled and either hover content list is non-empty, run
-   `apply_hover.py <view>` with only current-request overrides. It copies content
-   from the saved sections; never write panel text yourself. A hover-only refresh
+4. Run `apply_hover.py <view>` with only current-request overrides. It copies
+   content from the saved sections and draws source file names; never write
+   panel text or that style yourself. A hover-only refresh
    runs this script without regeneration or a log round.
 5. Reply with the file link and allowed notices.
 
@@ -181,7 +180,8 @@ Changing `log.directory` never moves old logs; regeneration at a new location
 starts Round 1 there.
 
 For hover overrides, pass only values the current request states: `--enabled`,
-`--responsibility`, `--collaboration`, or `--position`. A request for questions
+`--responsibility`, `--collaboration`, `--position`, `--source-file`, or
+`--source-file-position`. A request for questions
 in hover also enables `collaboration.questions` for that request because hover
 can only copy questions present in the body. If Python is absent or hover fails,
 keep the formatted view and report one `⚙️ hover 건너뜀: <reason>` line.

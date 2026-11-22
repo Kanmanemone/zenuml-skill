@@ -6,11 +6,14 @@ the file's body into the Dependency diagram's `click` tooltips, adds a non-navig
 `click Id hoverOnly "..."` line for nodes without a link (plus `,cursor:auto` on that
 node's color class), and appends the fixed wrapped panel style for hover.position.
 When hover is off (or no node has content), it restores the pre-feature form instead.
+The same wrapped style also draws each `class … srcFile` node's source file name
+(003 FR-037, dependency.sourceFile), with or without hover.
 The body itself is never changed. Running it twice with the same settings changes nothing.
 
 Usage: python3 apply_hover.py <view.architecture.md>
          [--enabled=true|false] [--responsibility=abstract,concrete]
          [--collaboration=targets,boundary,rationale,questions] [--position=bottom|node]
+         [--source-file=true|false] [--source-file-position=left|right]
 The options override settings.jsonc for this run only (a value stated in the request).
 Requires Python 3.9+, standard library only. Contract: specs/009-hover-detail-panel/contracts/.
 """
@@ -41,6 +44,8 @@ OVERRIDES = {
     "responsibility": "hover.responsibility",
     "collaboration": "hover.collaboration",
     "position": "hover.position",
+    "source_file": "dependency.sourceFile.enabled",
+    "source_file_position": "dependency.sourceFile.position",
 }
 
 
@@ -50,7 +55,7 @@ def fail(message, code):
 
 
 def parse_override(name, raw):
-    if name == "enabled":
+    if name in ("enabled", "source_file"):
         return {"true": True, "false": False}.get(raw.strip().lower(), raw)
     if name in ("responsibility", "collaboration"):
         return [item.strip() for item in raw.split(",") if item.strip()] if raw.strip() else []
@@ -119,6 +124,11 @@ def transform(text, values):
             if panel:
                 panels[node_id] = panel
 
+    sources = []
+    if values["dependency.sourceFile.enabled"]:
+        sources = [(n.color_class, file_name(n.link)) for n in view.nodes.values()
+                   if n.source_file and n.link and n.color_class]
+
     last_link = None
     for i in range(view.fence_start + 1, view.fence_end):
         found = match_link_click(lines[i])
@@ -144,9 +154,11 @@ def transform(text, values):
                 for name in classes:
                     if is_classdef(line, name):
                         lines[i] = line.rstrip() + CURSOR
+    if panels or sources:
         while lines and lines[-1].strip() == "":
             lines.pop()
-        lines += [""] + block_for(values["hover.position"]).split("\n")
+        position = values["hover.position"] if panels else None
+        lines += [""] + block_for(position, sources, values["dependency.sourceFile.position"]).split("\n")
 
     result = eol.join(lines) + (eol if view.final_newline else "")
     return result, len(panels)
@@ -159,7 +171,7 @@ def main():
     parser = argparse.ArgumentParser(description="Fill or remove node hover panels in an architecture view file.")
     parser.add_argument("file")
     for name in OVERRIDES:
-        parser.add_argument("--" + name)
+        parser.add_argument("--" + name.replace("_", "-"))
     try:
         args = parser.parse_args()
     except SystemExit:
