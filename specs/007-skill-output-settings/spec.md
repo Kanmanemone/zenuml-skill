@@ -43,6 +43,7 @@
 
 - (사용자 결정) 파일 자체 노드가 기본 출력에서도 마지막 확장자를 유지하도록 `dependency.nodeNameFormat.fileExtensions`의 배포 기본값을 `true`로 바꾼다(FR-012d).
 - (사용자 결정) 노드가 나온 파일 이름 표시(003 FR-037)를 켜고 끄는 설정(기본 켬)과 왼쪽·오른쪽 위 모서리 중 위치를 고르는 설정(기본 오른쪽)을 둔다(FR-012e).
+- (사용자 결정, 2026-11-22) 위치 설정은 위쪽 테두리 선 위의 왼쪽·중간·오른쪽 3가지로 한다(기본 오른쪽, FR-012e).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -138,7 +139,7 @@
 - **FR-011b**: 설정은 Dependency 다이어그램의 렌더러(`dependency.renderer`)를 `default`(렌더러 지정을 넣지 않음 — 보는 곳의 Mermaid 기본 레이아웃을 따른다. VS Code 내장 Mermaid와 내보내기 스크립트 모두 Mermaid 12라 현재는 elk — 004 FR-017로 내보내기를 12로 올리기 전 mermaid 11.17은 dagre였다)와 `elk` 중에서 고를 수 있어야 한다. `elk`이면 매 생성·재생성마다 003 FR-007b와 같은 방식으로 YAML 설정의 `config.layout`에 elk를 넣는다(`config.flowchart.defaultRenderer`는 VS Code 내장 Mermaid가 무시하므로 쓰지 않는다 — 003 FR-007b, 2026-11-13). 요청 문장이 렌더러를 직접 밝히면 그 요청에 한해 요청 값이 설정보다 우선한다(FR-006, 003 FR-007b).
 - **FR-012c** (003 개정): 설정은 Collaboration 항목마다 "내가 할 수 있는 질문" 하위 항목을 만들지(`collaboration.questions`)를 `true`(만듦)와 `false`(만들지 않음) 중에서 고를 수 있어야 한다. `false`이면 003 FR-027의 하위 항목 중 "내가 할 수 있는 질문"만 빠지고, 나머지 하위 항목과 항목의 개수·순서·형식은 그대로다. `collaboration.display`가 `hidden`이면 이 값은 쓰이지 않는다. 토큰 소모 영향은 `false` `[0]`, `true` `[+]`다.
 - **FR-012d** (003 개정): 설정은 Dependency 노드 이름 형식의 한 family를 `dependency.nodeNameFormat` 묶음 아래 세 boolean으로 제공해야 한다. `declarationMarkers`는 실제로 확인한 파일 내부 선언의 원본 선언 키워드만 제어하고, `fileExtensions`는 파일 자체를 가리키는 노드의 마지막 확장자만 제어하며, `functionParentheses`는 확인한 함수 이름 끝의 `()`만 제어한다. 세 값은 서로 독립이고 언어별 표시어 목록을 새로 만들지 않으며 원본에서 확인한 열린 어휘를 그대로 쓴다. 세 옵션은 Dependency 라벨만 바꾸며 Responsibility·Collaboration의 굵은 이름, 노드 ID, 링크 대상, hover 내용에는 영향을 주지 않는다. 요청 문장이 어느 값을 직접 밝히면 FR-006을 따른다. 토큰 소모 영향은 `declarationMarkers=true`만 `[+]`이고 나머지 모든 값은 `[0]`다. 기존 `dependency.nodeMarkers`와 `dependency.functionParentheses`는 더는 정의된 키가 아니며 FR-005·FR-019에 따라 무시하고 안내한다.
-- **FR-012e** (003 개정): 설정은 003 FR-037의 파일 이름 표시를 `dependency.sourceFile.enabled`(boolean)로 켜고 끄고, `dependency.sourceFile.position`(`right` 오른쪽 위, `left` 왼쪽 위)으로 위치를 고를 수 있어야 한다. 표시는 번들 스크립트가 채우므로 토큰 소모 영향은 모든 값이 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
+- **FR-012e** (003 개정): 설정은 003 FR-037의 파일 이름 표시를 `dependency.sourceFile.enabled`(boolean)로 켜고 끄고, `dependency.sourceFile.position`(위쪽 테두리 선 위의 `left` 왼쪽, `center` 중간, `right` 오른쪽)으로 위치를 고를 수 있어야 한다. 표시는 번들 스크립트가 채우므로 토큰 소모 영향은 모든 값이 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
 - **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다. 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
 
