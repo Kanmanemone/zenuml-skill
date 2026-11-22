@@ -574,3 +574,16 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 ## Phase 44: Convergence
 
 - [X] T160 `.agents/skills/generating-architecture-views/settings.schema.json`의 `dependency.sourceFile.enabled` 설명에서 "모서리"를 위쪽 테두리 표시로 고친다 per FR-037, 007 FR-012e (partial)
+
+## Phase 45: 점검 판단 규칙과 지침 정합성 (FR-027, FR-040, FR-041, SC-018)
+
+**Goal**: 실행마다 갈리던 판단을 규칙으로 정하고, 규칙 중복과 예시 불일치를 없앤다.
+
+**Independent Test**: 시나리오 28(quickstart.md)을 실행한다.
+
+- [ ] T161 [US1] `.agents/skills/generating-architecture-views/references/examples.md` 첫 예시를 파일 노드 확장자 라벨과 `data` 그룹 분리로 고치고, 호출자 없는 문장·외부 시스템·중첩 그룹 예시를 더한다 per FR-040, FR-041
+- [ ] T162 [US1] `.agents/skills/generating-architecture-views/references/templates.md`에서 노드 이름 형식·링크 결정·통합 조건의 중복 문장을 참조로 줄이고, Collaboration 단락을 bullet로 나눠 미지 문구 예외를 넣고, 이력 문구를 지운다 per FR-027, FR-041
+- [ ] T163 [US1] `.agents/skills/generating-architecture-views/SKILL.md`에 FR-040 판단 규칙, 설정 직접 읽기 금지의 이유와 Python 부재 예외, 코드 확인 경계를 넣고 description을 FR-041에 맞게 고친다 per FR-040, FR-041
+- [ ] T164 [US1] 기존 테스트를 실행하고 `examples.md`를 `SKILL.md` 규칙(확장자, 그룹 폴더, 다른 스킬 이름 없음)과 대조한다 per SC-008, SC-018
+
+**Dependencies**: T161, T162 → T163 → T164.
