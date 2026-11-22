@@ -543,3 +543,17 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 - [X] T150 [US1] `.agents/skills/generating-architecture-views/scripts/read_settings.py`와 `specs/003-architecture-view-skill/test_build_diagram.py`를 실행해 새 기본값과 기존 설정 회귀를 검증한다 per SC-015, 007 SC-010
 
 **Dependencies**: T148 → T149 → T150.
+
+## Phase 42: 파일 이름 표시를 문서 style 블록으로 이동 (FR-037, SC-017)
+
+**Goal**: 파일 이름을 라벨 밖, 문서 끝 `<details>` 속 `<style>`로만 그리고 테두리 안쪽 끝에 붙인다.
+
+**Independent Test**: 시나리오 27(quickstart.md)을 실행한다.
+
+- [ ] T151 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`와 `specs/009-hover-detail-panel/`의 테스트를 새 계약(라벨 불변, `class … srcFile` 표식 줄, style 블록 규칙, hover 꺼짐에서도 규칙 블록)으로 바꾸고 구현 전 실패를 확인한다 per FR-037, research.md "파일 이름 표시"
+- [ ] T152 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`에서 span·themeCSS 추가와 `--source-file*` 옵션을 지우고 표시 대상 노드를 `class … srcFile` 한 줄로 남긴다 per data-model.md 노드 라벨, FR-037
+- [ ] T153 [US1] `.agents/skills/generating-architecture-views/scripts/apply_hover.py`와 `scripts/hover/style_blocks.py`가 표식 노드마다 파일 이름 규칙을 style 블록에 붙이고 `--source-file`·`--source-file-position`을 받도록 한다 per contracts(009 apply-hover-contract.md "파일 이름 표시")
+- [ ] T154 [P] [US1] `scripts/hover/view_parser.py`와 `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `clean_name`에서 span 제거를 지운다 per 009·010 FR-021
+- [ ] T155 [US1] `.agents/skills/generating-architecture-views/SKILL.md`와 `references/templates.md`를 apply_hover 항상 실행·옵션 이동에 맞추고, 003·009·010 테스트와 Mermaid CLI 렌더링(왼쪽·오른쪽)으로 시나리오 27을 검증해 quickstart.md에 기록한다 per SC-017
+
+**Dependencies**: T151 → T152 → T153 → T155. T154는 T151 뒤 아무 때나.
