@@ -1361,6 +1361,8 @@ def sentence_problem(text, responsibility):
         return "문장에 ⟨⟩가 있음: " + text
     if "," in text or LISTING_MARK.search(text):
         return "두 가지 이상을 잇거나 나열함(쉼표·~하고·~며): " + text
+    if not text.endswith("다."):
+        return "문장이 '다.'로 끝나지 않음: " + text
     if same_sentence(text, responsibility):
         return "책임 한 줄과 같음: " + text
     return None
@@ -1642,11 +1644,12 @@ def cmd_prepare(args):
     manifest = {"view": rel(view), "slug": slug, "dir": rel(result_dir), "docs": docs,
                 "stages": planned, "notices": notices, "nodes": nodes}
     write_text(manifest_path(result_dir), json.dumps(manifest, ensure_ascii=False, indent=1))
-    prompt = write_stage1_prompt(result_dir, view_text, planned[0], nodes)
+    # A hidden first stage is never shown and nothing builds on it, so no isolated worker is needed (spec FR-009a).
+    prompt = write_stage1_prompt(result_dir, view_text, planned[0], nodes) if planned[0]["visible"] else None
     pick = [{"id": n["id"], "source": n["link"] if re.match(r"https?://", n["link"]) else rel(view_dir / n["link"].split("#")[0]),
              "candidates": n["candidates"]}
             for n in nodes if n["candidates"] and n["skip_reason"]]
-    emit({"dir": rel(result_dir), "stage1_prompt": prompt.as_posix(),
+    emit({"dir": rel(result_dir), "stage1_prompt": prompt and prompt.as_posix(),
           "outline": rel(result_dir / "work" / OUTLINE_FILE), "pick": pick,
           "stages": [{"nickname": s["nickname"], "kind": s["kind"], "visible": s["visible"]} for s in planned]})
     if listing and not pick:
@@ -1782,8 +1785,9 @@ def strip_diff_layer(doc):
 def node_scenes(result_dir, manifest, node, parsed):
     """[(title, kind, content)] of one node's pager, numbered per node (spec FR-015)."""
     stages = {s["kind"]: s for s in manifest["stages"]}
-    prose = read_text(work_dir(result_dir, 1) / (node["id"] + ".kt")).strip()
-    scenes = [(stages["prose"]["nickname"], "prose", prose)] if stages["prose"]["visible"] else []
+    scenes = []
+    if stages["prose"]["visible"]:
+        scenes.append((stages["prose"]["nickname"], "prose", read_text(work_dir(result_dir, 1) / (node["id"] + ".kt")).strip()))
     if not node["skip_reason"]:
         original = read_text(Path(result_dir) / "work" / "original" / (node["id"] + ".kt"))
         tree = node_tree(node, original)
@@ -1860,8 +1864,9 @@ def extract_last_stage(doc_text, node_id, last):
 
 
 def load_outline(result_dir, manifest):
+    needed = manifest["stages"][0]["visible"]
     missing = [rel(work_dir(result_dir, 1) / (n["id"] + ".kt")) for n in manifest["nodes"]
-               if not (work_dir(result_dir, 1) / (n["id"] + ".kt")).is_file()]
+               if needed and not (work_dir(result_dir, 1) / (n["id"] + ".kt")).is_file()]
     if missing:
         raise InputError("1단계 파일이 없음: " + ", ".join(missing))
     path = Path(result_dir) / "work" / OUTLINE_FILE

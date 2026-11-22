@@ -508,10 +508,14 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 
 **Independent Test**: `python specs/010-stepwise-code-convergence/test_learning_stages.py`
 
-- [ ] T086 [US3] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 첫 단계를 끈 실행(1단계 파일 없이 `build` 성공, `stage1_prompt`가 `null`, 끈 결과 문서 불변)과 `다.` 어미 거부 테스트를 더하고 구현 전 실패를 확인한다 per SC-018, FR-026
-- [ ] T087 [US3] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `cmd_prepare`·`load_outline`·`node_scenes`가 끈 첫 단계를 만들지도 요구하지도 않게 하고, `sentence_problem`에 어미 검사를 더한다 per FR-009a, FR-026
-- [ ] T088 [US1] `.agents/skills/revealing-code-step-by-step/SKILL.md`에 조건부 2단계와 격리 작업자 폴백, `with`·`pick`·`=` 줄 규칙, 직접 읽지 않는 이유를 넣고 description을 고친다 per FR-025, FR-026, FR-027
-- [ ] T089 [US1] `.agents/skills/revealing-code-step-by-step/stage1-prompt.md`와 `stages.md`에 필요로 하는 쪽을 역할로 말하는 경계를 넣고, `stages.md` "단계를 고칠 때" 4번을 실제 검사 항목으로 고친다 per FR-026
-- [ ] T090 테스트 전체를 실행하고 기존 fixture 결과 불변을 확인한다 per SC-004, SC-018
+- [X] T086 [US3] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 첫 단계를 끈 실행(1단계 파일 없이 `build` 성공, `stage1_prompt`가 `null`, 끈 결과 문서 불변)과 `다.` 어미 거부 테스트를 더하고 구현 전 실패를 확인한다 per SC-018, FR-026
+- [X] T087 [US3] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `cmd_prepare`·`load_outline`·`node_scenes`가 끈 첫 단계를 만들지도 요구하지도 않게 하고, `sentence_problem`에 어미 검사를 더한다 per FR-009a, FR-026
+- [X] T088 [US1] `.agents/skills/revealing-code-step-by-step/SKILL.md`에 조건부 2단계와 격리 작업자 폴백, `with`·`pick`·`=` 줄 규칙, 직접 읽지 않는 이유를 넣고 description을 고친다 per FR-025, FR-026, FR-027
+- [X] T089 [US1] `.agents/skills/revealing-code-step-by-step/stage1-prompt.md`와 `stages.md`에 필요로 하는 쪽을 역할로 말하는 경계를 넣고, `stages.md` "단계를 고칠 때" 4번을 실제 검사 항목으로 고친다 per FR-026
+- [X] T090 테스트 전체를 실행하고 기존 fixture 결과 불변을 확인한다 per SC-004, SC-018
 
 **Dependencies**: T086 → T087 → T088, T089 → T090.
+
+## Phase 22: Convergence
+
+- [X] T091 `specs/010-stepwise-code-convergence/research.md` R13 2번과 그 예시 주석에, 첫 단계를 끄면 만들지 않는다는 2026-11-23 개정을 적는다 per FR-009a (contradicts)

@@ -383,7 +383,7 @@ class Outline(unittest.TestCase):
         self.assertEqual(self.check(NESTED, good)[0], [])
         cases = [
             ('s', 'A를 구하고, B를 그린다.'), ('s', '값을 구하고 그린다.'), ('s', '가' * 46), ('s', '⟨x⟩를 한다.'),
-            ('s', '필드를 그린다'), ('s', ''), ('with', [1]), ('sep', [{'ids': [1]}]), ('sep', [{'ids': [1, 1, 2]}]),
+            ('s', '필드를 그린다'), ('s', '재고 확인'), ('s', ''), ('with', [1]), ('sep', [{'ids': [1]}]), ('sep', [{'ids': [1, 1, 2]}]),
             ('sep', [{'ids': ['1']}]), ('sep', [{'ids': [1, 2]}]),
         ]
         for key, value in cases:
@@ -487,6 +487,17 @@ class Workflow(unittest.TestCase):
             node = next(n for n in manifest['nodes'] if n['id'] == 'OrderService')
             self.assertEqual([name for name, _, _ in s.node_scenes(result, manifest, node, parsed_outline(result, manifest))],
                              ['사용 상황', '윤곽', '원본'])
+
+    def test_hidden_situation_needs_no_stage1_files(self):
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            _, with_files, _, ra = self.prepare(Path(a), 'view.architecture.md', 'unfold', hide='사용 상황')
+            _, meta, _, rb = self.prepare(Path(b), 'view.architecture.md', None, hide='사용 상황')
+            shutil.copyfile(FIXTURE / 'unfold/outline.json', rb / 'work/outline.json')
+            self.assertIsNone(meta['stage1_prompt'])
+            self.assertFalse((rb / 'work/stage1-prompt.md').exists())
+            built_a, _ = run(s.cmd_build, dir=str(ra))
+            built_b, _ = run(s.cmd_build, dir=str(rb))
+            self.assertEqual([Path(d).read_bytes() for d in built_a['docs']], [Path(d).read_bytes() for d in built_b['docs']])
 
     def test_bad_outline_and_missing_files_exit_2(self):
         with tempfile.TemporaryDirectory() as tmp:
