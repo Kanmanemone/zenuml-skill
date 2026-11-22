@@ -254,11 +254,12 @@
 **입력 예시**: 파일 `Memo.kt` 노드와 그 안의 `class Memo` 노드, 다른 파일의 함수 노드가 모두 링크를 가진 구조 뷰.
 
 **기대 결과**:
-- `Memo` 선언 노드와 함수 노드의 테두리 안쪽 위 모서리에 파일 이름이 설정한 쪽 끝에 붙어 보이고, `Memo.kt` 파일 노드와 링크 없는 노드에는 없다.
+- `Memo` 선언 노드와 함수 노드의 위쪽 테두리 선 위, 설정한 자리(왼쪽·중간·오른쪽)에 파일 이름이 그 노드 테두리 색으로 보이고 글자 뒤 테두리 선은 가려진다. `Memo.kt` 파일 노드와 링크 없는 노드에는 없다.
+- Mermaid의 `classic`(VS Code 미리보기)·`neo`(Mermaid CLI) 두 모양과 라이트·다크 테마에서 같은 자리에 같은 모양으로 보인다.
 - 노드 라벨 텍스트에 파일 이름이 없다. 문서 끝 `<details>` 블록을 지우거나 GitHub에서 보면 파일 이름만 사라지고 노드 크기·이름 위치는 같다.
 - `fileExtensions=false`에서도 파일 노드에는 표시가 없고 같은 이름 선언 노드에는 있다.
 
-**검증**: `python specs/003-architecture-view-skill/test_build_diagram.py`와 009 테스트를 실행하고, Mermaid CLI 렌더링에서 왼쪽·오른쪽 위치를 확인한다.
+**검증**: `python specs/003-architecture-view-skill/test_build_diagram.py`와 009 fixture 회귀를 실행하고, Mermaid CLI로 `look: classic`·`neo` × 왼쪽·중간·오른쪽과 다크 테마 변수를 넣은 렌더링을 확인한다.
 
 ## 결과 기록
 

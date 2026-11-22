@@ -52,7 +52,7 @@
 | architecture | `dependency.nodeNameFormat.fileExtensions` | boolean | — |
 | architecture | `dependency.nodeNameFormat.functionParentheses` | boolean | — |
 | architecture | `dependency.sourceFile.enabled` | boolean | — |
-| architecture | `dependency.sourceFile.position` | enum | `right`/`left` |
+| architecture | `dependency.sourceFile.position` | enum | `left`/`center`/`right` |
 | architecture | `log.directory` | relativePath(projectRoot) | — |
 | zenuml | `log.directory` | relativePath(projectRoot) | — |
 | exporting | `questions.enabled` | boolean | — |

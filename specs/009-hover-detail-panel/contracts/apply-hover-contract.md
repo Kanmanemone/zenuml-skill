@@ -32,15 +32,17 @@
 
 ## 파일 이름 표시 (003 FR-037)
 
-`dependency.sourceFile.enabled`가 켜져 있고 다이어그램의 `class … srcFile` 줄에 링크 `click`이 있는 노드가 있으면, 패널 모양 블록의 `<style>` 끝에 그 노드마다 아래 규칙을 하나씩 붙인다(노드 선언 순서). hover가 꺼짐이어도 이 규칙이 있으면 wrapper 숨김 규칙과 이 규칙만 담은 같은 wrapper를 붙인다. `SIDE`는 `dependency.sourceFile.position`, `<color>`는 노드의 색상 class, `<file>`은 링크 대상의 파일 이름(`"`·`\`는 `\` 이스케이프)이다.
+`dependency.sourceFile.enabled`가 켜져 있고 다이어그램의 `class … srcFile` 줄에 링크 `click`이 있는 노드가 있으면, 패널 모양 블록의 `<style>` 끝에 그 노드마다 아래 규칙을 하나씩 붙인다(노드 선언 순서). hover가 꺼짐이어도 이 규칙이 있으면 wrapper 숨김 규칙과 이 규칙만 담은 같은 wrapper를 붙인다. `<color>`는 노드의 색상 class, `<file>`은 링크 대상의 파일 이름(`"`·`\`는 `\` 이스케이프), `<stroke>`는 그 색상 class의 `classDef … stroke:` 값이다(없으면 `color`를 생략). `PLACE_NEO`·`PLACE_CLASSIC`은 `dependency.sourceFile.position`에 따라 `right`면 `right: -5px`·`right: -19px`, `left`면 `left: -5px`·`left: -19px`, `center`면 `left: 50%; transform: translateX(-50%)`·빈 값이다(research.md "파일 이름 표시").
 
 ```css
 .node.srcFile foreignObject { overflow: visible; }
 .node.srcFile .label foreignObject > div { position: relative; }
-.srcFile.<color> .nodeLabel::before { content: "<file>"; position: absolute; top: -9px; SIDE: -13px; font-size: 10px; line-height: 1; font-weight: normal; color: #9CA3AF; }
+.node.srcFile .nodeLabel::before { position: absolute; top: -18px; PLACE_NEO; font-size: 10px; line-height: 1; font-weight: normal; font-style: italic; white-space: nowrap; padding: 1px 2px; background-color: var(--vscode-editorWidget-background, #ffffff); }
+[data-look="classic"] .node.srcFile .nodeLabel::before, .node.srcFile[data-look="classic"] .nodeLabel::before { top: -21px; PLACE_CLASSIC }
+.srcFile.<color> .nodeLabel::before { content: "<file>"; color: <stroke>; }
 ```
 
-공통 두 규칙은 한 번만 쓴다. `--source-file`·`--source-file-position`은 이번 실행에서만 두 설정 값을 덮는다.
+마지막 규칙만 노드마다 쓰고, 앞의 네 규칙은 한 번만 쓴다. `--source-file`·`--source-file-position`은 이번 실행에서만 두 설정 값을 덮는다.
 
 ## 변환 규칙 (꺼짐)
 
