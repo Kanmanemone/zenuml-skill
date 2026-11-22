@@ -6,11 +6,13 @@ Read only when an unusual grouping, link, or consolidation case is unclear after
 
 ## Contents
 
-- Two groups and local links
+- Folder groups and local links
 - Multi-target consolidation and repository links
 - No grouping or link evidence
+- Callerless sentence and external system
+- Nested folders and a removed node
 
-## Two groups and local links
+## Folder groups and local links
 
 Input evidence:
 
@@ -23,11 +25,13 @@ Basic Dependency:
 ```mermaid
 flowchart LR
   subgraph App["app"]
-    AppKt@{ label: "App" }
+    AppKt@{ label: "App.kt" }
   end
   subgraph Search["search"]
-    SearchRouteKt@{ label: "SearchRoute" }
-    SearchRepositoryKt@{ label: "SearchRepository" }
+    SearchRouteKt@{ label: "SearchRoute.kt" }
+  end
+  subgraph Data["data"]
+    SearchRepositoryKt@{ label: "SearchRepository.kt" }
   end
 
   AppKt -->|호출| SearchRouteKt
@@ -40,10 +44,13 @@ flowchart LR
 
 Decision points:
 
-- `app` and `search` are evidence-backed groups.
-- Group Collaboration contains `app → search` because one edge crosses them.
+- Each file's parent folder is its group, even with one member; file nodes keep
+  their extension.
+- Group Collaboration contains `app → search` and `search → data`, one per
+  crossing edge.
 - Element Collaboration contains only the two directly connected pairs.
-- Group links use evident common parent folders; element links use their files.
+- Group links are the folders (`../app/`, `../feature/search/`, `../data/`);
+  element links are the files.
 
 ## Multi-target consolidation and repository links
 
@@ -105,3 +112,77 @@ Decision points:
 - Responsibility keeps both required levels and uses the specified unknown phrase
   where evidence is absent.
 - Collaboration has one element pair and no group-pair section.
+
+## Callerless sentence and external system
+
+Input evidence:
+
+- `OrderService` calls `PaymentService`; `PaymentService` calls the external PG
+  API.
+- "After payment, `NotificationService` sends mail."
+
+Basic Dependency:
+
+```mermaid
+flowchart LR
+  OrderService
+  PaymentService
+  PgApi@{ label: "외부 PG API" }
+  NotificationService
+
+  OrderService -->|호출| PaymentService
+  PaymentService -->|호출| PgApi
+```
+
+Decision points:
+
+- "After payment" is order in time, not a caller, so `NotificationService` has
+  no edge and no Collaboration entry.
+- The external API is an ordinary node; "외부" alone is not a group signal.
+
+## Nested folders and a removed node
+
+Input evidence (dynamic):
+
+- Before: `feature/search/SearchViewModel.kt` called `data/LegacySearchApi.kt`.
+- After: `SearchViewModel` calls new `data/SearchRepository.kt`, which calls
+  `data/remote/SearchRemoteDataSource.kt`.
+- `LegacySearchApi` was deleted; `SearchViewModel` was changed.
+
+Basic Dependency:
+
+```mermaid
+flowchart LR
+  subgraph Search["search"]
+    SearchViewModelKt@{ label: "♻️&nbsp;SearchViewModel.kt" }
+  end
+  subgraph Data["data"]
+    LegacySearchApiKt@{ label: "🗑️&nbsp;<s>LegacySearchApi.kt</s>" }
+    SearchRepositoryKt@{ label: "✨&nbsp;<b>SearchRepository.kt</b>" }
+    subgraph Remote["remote"]
+      SearchRemoteDataSourceKt@{ label: "SearchRemoteDataSource.kt" }
+    end
+  end
+
+  SearchViewModelKt -->|호출| LegacySearchApiKt
+  SearchViewModelKt -->|호출| SearchRepositoryKt
+  SearchRepositoryKt -->|호출| SearchRemoteDataSourceKt
+
+  class SearchViewModelKt crudUpdate
+  class LegacySearchApiKt crudDelete
+  class SearchRepositoryKt crudCreate
+
+  click SearchViewModelKt "../feature/search/SearchViewModel.kt" "SearchViewModel.kt"
+  click LegacySearchApiKt "../data/LegacySearchApi.kt" "LegacySearchApi.kt"
+  click SearchRepositoryKt "../data/SearchRepository.kt" "SearchRepository.kt"
+  click SearchRemoteDataSourceKt "../data/remote/SearchRemoteDataSource.kt" "SearchRemoteDataSource.kt"
+```
+
+Decision points:
+
+- `data/remote` sits inside `data`, so its group nests. For group pairs each
+  node counts only in its innermost group: `search → data` and
+  `data → remote`.
+- The removed node keeps its old edge with no extra edge mark, and keeps its
+  stated path as a link.
+- `SearchRemoteDataSource` is not named as added or changed, so it has no mark.

@@ -48,9 +48,8 @@ Rules:
 - Exactly one plain-text caption line sits between `### Dependency` and the Mermaid fence — built only from the request's key keywords (the system/process named and the aspect asked about), in the user's language; no blockquote/heading/bold, nothing the request didn't say, nothing about rendering or layout.
 - Nothing follows the closing fence except the next section's heading — no notes about `click` behavior, renderers, or layout.
 - `subgraph` only for evidence-based groups (a name/layer/domain signal in the description); components with no such signal sit at the top level, no `subgraph` at all.
-- Declare every node, in the order you introduce it — that order decides its color. Keep the source-proven base name, original declaration keyword(s), final file extension, and function identity as separate facts; never match a language list. Apply the `dependency.nodeNameFormat` booleans independently: `declarationMarkers` prefixes only verified file-internal declarations, and `functionParentheses` appends `()` exactly once only to a verified function. A node representing the file itself always keeps its final extension; `build_diagram.py` drops it when `fileExtensions` is `false`, and the scripts show other linked nodes' source file names — never write them yourself. Join marker words and the marker to the name with `&nbsp;`. Do not add behavior/access modifiers, annotations, guessed markers, copied parameters, or label commentary. These settings affect only Dependency labels, not IDs, links, hover content, or Responsibility/Collaboration names. Whenever a label differs from its ID, use `Id@{ label: "…" }`; otherwise declare the node bare.
+- Declare every node, in the order you introduce it — that order decides its color. Label text follows `SKILL.md`, "Evidence and links" (node-name format). Join marker words and the marker to the name with `&nbsp;`; add no modifiers, annotations, copied parameters, or label commentary. Never write source file names; the scripts draw them. Whenever a label differs from its ID, use `Id@{ label: "…" }`; otherwise declare the node bare.
 - Every edge is `Source -->|관계 성격| Target`, using the description's own wording for the nature (호출, 타입 참조, 선언 참조, ... — open vocabulary, not a fixed enum). No stated nature → default label "호출".
-- Draw only edges the description directly states or implies between those exact two components. A described chain (A calls B, B calls C) becomes `A --> B` and `B --> C` — never a collapsed `A --> C` shortcut.
 - After the edges come only `class <Id> crud*` lines (dynamic requests, see "Change marking" below) and `click` lines. Never write a config block, edge IDs, `classDef`/color `class` lines, `linkStyle`, or `%%` comments.
 - `click` is optional per node — attach it only when "Hyperlink syntax" below resolves a real target for that node; omit it otherwise.
 
@@ -73,7 +72,7 @@ Place the configured label inside `<b>`/`<s>`. With both options on, examples ar
 
 ### Hyperlink syntax
 
-`click <NodeName> "<target>" "<label>"` — `target` is a relative path (from `.zenuml/`, e.g. `../app/src/.../Foo.kt`) or a full URL; `label` is a short tooltip, usually the file's own name. See `SKILL.md`, "Evidence and links" for how `target` is determined (local root project / web repository / no link — resolve once and reuse the identical target for the Markdown link on the same name in Responsibility/Collaboration).
+`click <NodeName> "<target>" "<label>"` — `target` is the link `SKILL.md`, "Evidence and links" resolves (e.g. `../app/src/.../Foo.kt` or a full URL); `label` is a short tooltip, usually the file's own name.
 
 ### After the hover script
 
@@ -123,7 +122,7 @@ No pairwise comparisons — one entry per group, one entry per element, each wit
   - <strong>역할 (구체)</strong>: <각 요소가 실제로 언급하는 이름·동작을 요소별로 빠짐없이 인용, 예: `EmailSender`는 `sendEmail()`을, `SmsSender`는 `sendSms()`를, `PushSender`는 `sendPush()`를 호출한다>
 ```
 
-Every member's name is individually hyperlinked in the heading (joined with commas), never a collective phrase in place of the names. 역할 (구체) must still name-check every member — consolidating the entry shrinks the entry count, not the evidence. A member with a real difference in kind (an extra responsibility/relationship the others lack, not just a different name) is excluded and gets its own individual entry instead. This reuses the exact same 3+ threshold and judgment as Collaboration's "Multi-target consolidation" below — see that section for the full rule.
+Every member's name is individually hyperlinked in the heading (joined with commas), never a collective phrase in place of the names. 역할 (구체) must still name-check every member — consolidating the entry shrinks the entry count, not the evidence. Which members qualify follows "Multi-target consolidation" below; an excluded member gets its own entry.
 
 ## Collaboration template
 
@@ -167,18 +166,24 @@ Two levels, group-to-group first (only if 2+ groups), then element-to-element. B
 
 Direction: one-way → <strong>A</strong>는 <strong>B</strong>에 의존한다; bidirectional → <strong>A</strong>와 <strong>B</strong>는 서로 의존한다 — never a neutral "vs", never an arbitrarily-picked direction. Use `<strong>` tags throughout (names, direction sentence, and all three sub-part headings) — never markdown `**...**`.
 
-The <strong>내가 할 수 있는 질문</strong> sub-part appears only when `collaboration.questions` is `true`; when it is `false`, drop that sub-part and keep the other two unchanged. Each sub-part (책임의 경계/분리 이유 & 합리성 평가/내가 할 수 있는 질문) is a `<strong>` heading bullet followed by its own nested bullet list of 2–4 short points — never a single inline "레이블: 문장." paragraph. Wrap every cited code-level identifier in the nested bullets in backticks; a group/element already named in a `<strong>[이름](경로)</strong>` heading elsewhere is referred to **inside these nested bullets** with plain backticks, not re-bolded or re-linked. That plain-backtick treatment never extends to the entry's opening line — the opening line's names (both group-level and element-level) always keep their own `<strong>[이름](경로)</strong>` bold-and-hyperlink form, same as the Responsibility heading for that same name (see the examples above: `<strong>[ComponentA](../path/to/ComponentA.kt)</strong>는 <strong>[ComponentB](../path/to/ComponentB.kt)</strong>에 의존한다`).
+Sub-parts:
+
+- <strong>내가 할 수 있는 질문</strong> appears only when `collaboration.questions` is `true`; otherwise drop it and keep the other two unchanged.
+- Each sub-part is a `<strong>` heading bullet with its own nested list of 2–4 short points — never a single inline "레이블: 문장." paragraph.
+- When the description gives no evidence for <strong>책임의 경계</strong> or <strong>분리 이유 & 합리성 평가</strong>, that sub-part holds exactly one bullet: `설명에 명시되지 않음`. Never repeat the phrase to reach the point count.
+- Inside nested bullets, wrap code identifiers in backticks and refer to already-headed groups/elements with plain backticks, not re-bolded or re-linked.
+- The entry's opening line always keeps the `<strong>[이름](경로)</strong>` form for both names, same as their Responsibility headings.
 
 ### Group-to-group comparisons
 
 - Only exists when there are 2 or more groups **and** at least one pair has a cross-group dependency edge. Otherwise skip this subsection entirely.
-- One entry per group pair with at least one dependency edge crossing between their members — a pair with no such edge gets no entry.
+- One entry per group pair with at least one dependency edge crossing between their members — a pair with no such edge gets no entry. With nested groups, each node counts only in its innermost group.
 - Ground each group's identity in the name/label the description actually gave it, plus anything else the description states about it beyond the bare label — never a guessed role/purpose.
 
 ### Element-to-element comparisons
 
 - One entry per unordered pair of elements **directly connected by a dependency**, in first-appearance order (walk source nodes in the order they first appear, then each source's edges in the order they appear).
-- Same-group and cross-group pairs are treated identically here — being in different groups doesn't exclude a pair from this level (that's a change from earlier drafts of this skill: cross-group element pairs get their own entry *and* contribute to the group-level entry above, they aren't mutually exclusive).
+- Same-group and cross-group pairs are treated identically here — being in different groups doesn't exclude a pair from this level — a cross-group pair gets its own entry *and* contributes to the group-level entry above.
 - Never add an entry for a pair with no direct dependency, regardless of shared group membership.
 
 ### Multi-target consolidation

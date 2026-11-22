@@ -336,3 +336,20 @@
 | 11. 산출물만으로 답변 | 구조적 검토 | PASS | `three-domains.architecture.md` + `three-domains.md`가 함께 존재하는 상태로 세 질문 모두에 산출물만으로 답할 수 있음을 확인 |
 
 **결론(2섹션 구형 형식 기준)**: 실제 호출로 검증한 시나리오 중 둘(시나리오 2, 4)에서 스킬 설계 자체의 결함을 실전 검증으로 발견해 수정했다. 위임 실행(시나리오 6)까지 end-to-end로 완주했다. 이 결과는 2026-08-02 3섹션 재구성 이전 형식에 대한 것이므로, 새 형식에 대한 실제 검증(시나리오 1~18)은 별도로 수행해야 한다.
+
+## Validation Results (T164, 2026-11-23)
+
+- 003 `test_build_diagram.py` 9개, 002 `test_append_feedback.py` 2개 통과.
+- `examples.md`의 다섯 Mermaid 예시를 `build_diagram.py`에 넣어 모두 exit 0. `.kt` 파일 노드 라벨에 확장자가 없는 경우 0건. 지침 문서에 다른 스킬 이름 0건(SC-008).
+- 시나리오 28의 새 에이전트 재실행은 아직 하지 않음(SC-018 일부 미검증).
+
+## Validation Results (T165, 2026-11-23)
+
+시나리오 28을 스킬만 복사한 빈 프로젝트에서 새 에이전트 둘로 실행했다(기대 결과는 알려 주지 않음).
+
+| 케이스 | 결과 | 비고 |
+|---|---|---|
+| 정적 주문 시스템 | PASS | `NotificationService` 엣지 없음, `PgApi@{ label: "외부 PG API" }`는 그룹 없는 노드, 목적 질문 없음, 분리 이유마다 미지 문구 bullet 1개. 약 69k 토큰, 90초 |
+| 동적 PR 변경 | PASS(구조 뷰) | `data` ⊃ `remote` 중첩, 그룹 쌍 search→data·data→remote, 삭제 노드 엣지 별도 표시 없음·링크 유지, `SearchRemoteDataSource` 표시 없음, 목적 질문 없음. 약 84k 토큰, 115초 |
+
+동적 케이스에서 hover 결함이 따로 드러났다. 본문 이름을 FR-036대로 기본 이름(`SearchViewModel`)으로 쓰면 `apply_hover.py`가 노드 ID나 확장자가 붙은 라벨(`SearchViewModel.kt`)과만 맞춰 보므로, 아무 패널도 넣지 못한 채 exit 0과 "변경 없음"으로 끝난다. 이번 지침 변경과 무관한 기존 결함이므로 버그 흐름으로 따로 다룬다.

@@ -1,6 +1,6 @@
 ---
 name: generating-architecture-views
-description: Generate an evidence-based structural view of components, responsibilities, and actual dependencies from a natural-language system description. Use for architecture or component-relationship questions, not runtime sequence or call-order diagrams.
+description: Generate an evidence-based architecture view — a Mermaid dependency diagram plus responsibility and collaboration notes saved as .zenuml/<slug>.architecture.md — from a system description or from code the user points to. Use when asked to show a system's structure, architecture, dependencies, or component relationships (e.g. "구조 보여줘", "의존성 그려줘", "아키텍처 설명해줘"), including what a PR, commit, diff, or refactor added, changed, or removed ("이번 PR에서 구조가 어떻게 바뀌었는지"). Not for runtime sequence or call-order diagrams.
 ---
 
 # Generating Architecture Views
@@ -26,11 +26,13 @@ Run scripts from the project root by full path without changing directory. Find
 Python 3.9+ once per run: on Windows try `python`, `py -3`, `python3`; elsewhere
 try `python3`, `python`, `py -3`.
 
-Run `read_settings.py` fresh on every request. Never read or edit
-`settings.jsonc` or `settings.schema.json` yourself. If Python or the script is
-unavailable, read only schema defaults and add
+Run `read_settings.py` fresh on every request. Do not read or edit
+`settings.jsonc` or `settings.schema.json` yourself: the script merges defaults
+and validates values, so reading the files directly can disagree with it. Only
+if Python or the script is unavailable, read the schema `default` values and add
 `⚙️ 설정 안내: settings.jsonc 설정 스크립트를 실행하지 못해 모든 값을 기본값으로 사용`.
-Collect script notice lines without duplicates for the final response.
+Script notices are the output lines starting with `⚙️`; collect them without
+duplicates for the final response. Other status lines are not relayed.
 
 A value stated in the current request overrides the matching setting for that
 request only. Earlier request overrides do not carry into regeneration.
@@ -44,12 +46,15 @@ unclear: onboarding, troubleshooting, or another purpose the user describes.
 An ambiguous or absent answer defaults to onboarding with a short notice. If no
 components are identifiable, ask which system or process to show instead.
 
-Purpose does not change the three output sections.
+Purpose does not change the sections or the evidence; it only sets the focus of
+Collaboration questions. A purpose and scope evident from the request (e.g.
+reviewing a PR's change) needs no question.
 
 ### Static or dynamic
 
 - Dynamic: the request asks what a commit, PR, diff, or refactor added, changed,
-  or removed. Mark only changes the description identifies.
+  or removed. Mark only changes the description identifies. Changes show on nodes only; an
+edge of a removed node gets no extra mark.
 - Static: every other request. Do not add change marks.
 
 Decide without asking unless the intended kind is genuinely ambiguous.
@@ -57,7 +62,8 @@ Decide without asking unless the intended kind is genuinely ambiguous.
 ### File request
 
 - A follow-up refining the view just shown regenerates and overwrites that view.
-- A self-contained new request creates a new slug.
+- A self-contained new request creates a new slug: short English kebab-case
+  naming the system and focus (e.g. `order-processing`, `search-pr-change`).
 - An unrelated request colliding with an existing slug uses `-2`, `-3`, etc.
 - If conversation context cannot distinguish these, ask before writing.
 
@@ -67,8 +73,17 @@ Use only components, groups, dependencies, responsibilities, changes, and source
 locations the description states or clearly implies. Never add structure to make
 the result feel complete. A chain A→B→C stays two edges, never an A→C shortcut.
 
-Create a group only from an explicit layer/domain or a shared
-name-prefix/namespace signal. Without a grouping signal, draw no `subgraph`.
+Create a group only from an explicit layer/domain, a shared
+name-prefix/namespace, or a stated folder. Without a grouping signal, draw no
+`subgraph`. A signal makes a group even with one member; a folder inside another
+group's folder nests its `subgraph`.
+
+- An edge needs both ends named. "After X, Y does Z" is order in time, not a
+  caller: draw Y with no edge rather than inventing one.
+- A named external system is an ordinary node; give a non-identifier name a
+  PascalCase ID and keep the description's wording as its label. "External"
+  alone is not a group signal.
+- Edge labels use the description's own wording for the relationship.
 
 Keep these source facts separate: base name, original declaration keyword(s),
 final file extension, and whether the declaration is a function. Never infer
@@ -93,12 +108,12 @@ Resolve a link once and reuse it everywhere that name heads an entry:
 1. A stated or clearly implied local path, relative to `.zenuml/`; groups use an
    evident common parent folder.
 2. A stated repository URL; groups use the folder URL.
-3. Otherwise plain text. Never fabricate a path or URL and never search the
-   codebase merely to discover one.
+3. Otherwise plain text. Never fabricate a path or URL.
 
-When actual code is available, first inspect it and distill a natural-language
-description with concrete paths, identifiers, declarations, and relationships;
-then generate from that evidence.
+A removed node keeps its stated link. When the user provides or points to code,
+read that code first and distill a description with concrete paths,
+identifiers, declarations, and relationships; then generate from it. Never
+search beyond it merely to discover a link or component.
 
 ## Sections
 
@@ -160,8 +175,9 @@ For a completed view, in this order:
    names a renderer, and `--file-extensions=<true|false>` only for a value this
    request states. On failure, keep the basic view and report the prescribed
    `⚙️ 다이어그램 서식 건너뜀: <reason>` line.
-3. Write only the relevant-turn request summary to a temporary UTF-8 text file.
-   Resolve the log as `<log.directory>/<slug>.architecture.md`, then run
+3. Write the relevant request turns, lightly edited, to a temporary UTF-8 text
+   file. Resolve the log as `<log.directory>/<slug>.architecture.md`
+   (`log.directory` is relative to the project root), then run
    `append_feedback.py <view> <resolved log path> <request file>
    --mode=<new|append>`. Use `new` for initial/colliding requests and `append`
    for regeneration; the helper starts Round 1 when the current log is absent.
