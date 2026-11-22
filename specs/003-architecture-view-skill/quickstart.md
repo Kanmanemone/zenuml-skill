@@ -261,6 +261,19 @@
 
 **검증**: `python specs/003-architecture-view-skill/test_build_diagram.py`와 009 fixture 회귀를 실행하고, Mermaid CLI로 `look: classic`·`neo` × 왼쪽·중간·오른쪽과 다크 테마 변수를 넣은 렌더링을 확인한다.
 
+## 시나리오 28 — 점검 케이스 재실행 (FR-027, FR-040, SC-018)
+
+**입력 예시**: 두 요청을 새 에이전트에게 각각 준다.
+- 정적: "신규 팀원 온보딩 목적으로 주문 처리 시스템의 구조를 보여줘. OrderController가 주문 요청을 받아 OrderService를 호출한다. OrderService는 InventoryRepository로 재고를 확인하고 PaymentService로 결제한다. PaymentService는 외부 PG API를 호출하고, 결제가 끝나면 NotificationService가 메일을 보낸다."
+- 동적: "이번 PR에서 검색 기능 구조가 어떻게 바뀌었는지 보여줘. 원래 feature/search/SearchViewModel.kt가 data/LegacySearchApi.kt를 직접 호출했는데, 이번에 data/SearchRepository.kt를 새로 만들어서 SearchViewModel은 SearchRepository만 호출하고, SearchRepository가 data/remote/SearchRemoteDataSource.kt를 호출하게 바꿨어. LegacySearchApi는 삭제했고, SearchViewModel은 수정됐어."
+
+**기대 결과**:
+- 정적: `NotificationService`는 엣지 없는 노드, 외부 PG API는 `subgraph` 없는 일반 노드이고, 목적을 묻지 않는다.
+- 동적: `data` 안에 `data/remote`가 중첩되고, 그룹 쌍은 가장 안쪽 그룹 기준으로 엣지가 가로지를 때만 있다. 삭제된 노드의 엣지에는 별도 표시가 없고 목적을 묻지 않는다.
+- 두 결과 모두 Collaboration의 근거 없는 하위 항목에 "설명에 명시되지 않음" bullet이 하나만 있다.
+
+**검증**: 두 산출물을 위 기대와 `SKILL.md` "Evidence and checks"에 대조한다.
+
 ## 결과 기록
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.

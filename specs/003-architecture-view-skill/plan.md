@@ -113,6 +113,32 @@ specs/003-architecture-view-skill/
 - `docs/skill-benchmark/run.py`: 네 스킬을 같은 방식으로 비교하고 실제
   input/output token과 턴 수를 기록한다.
 
+## 2026-11-23 점검 반영 계획 (FR-027, FR-040, FR-041)
+
+지침 문서만 고친다. 스크립트·설정·테스트 동작은 바뀌지 않는다.
+
+- `SKILL.md` "Evidence and links": FR-040 판단 규칙을 짧은 bullet로 더하는 유일한 자리다.
+  코드 확인 경계(사용자가 준 코드는 읽고, 링크를 찾으려고 그 밖을 탐색하지 않음)를 한 문장으로 합친다.
+- `SKILL.md` "Classification"·"Scripts and settings"·"Saving": 목적의 역할, slug 형식,
+  `⚙️` 줄만 옮기는 규칙, `log.directory` 기준, 로그 요청 문구를 각 절에 한 줄씩 넣는다.
+  설정 파일을 직접 읽지 않는 이유(스크립트가 기본값 병합과 검증을 함)를 붙이고,
+  Python이 없을 때 schema `default`만 읽는 예외로 정리한다.
+- `SKILL.md` frontmatter `description`: FR-041의 네 요소를 넣고 다른 스킬 이름은 쓰지 않는다.
+- `references/templates.md`: 노드 이름 형식·링크 결정 규칙은 `SKILL.md` 참조로 줄이고 모양 규칙만 남긴다.
+  Responsibility 통합 조건은 "Multi-target consolidation" 참조로 줄인다. Collaboration의 긴 단락을
+  bullet로 나누고 FR-027의 미지 문구 예외를 넣는다. 이력 문구("earlier drafts")를 지운다.
+- `references/examples.md`: 첫 예시를 파일 노드 확장자 라벨과 `data` 그룹 분리로 고치고,
+  FR-040의 흔한 경우(호출자 없는 문장, 외부 시스템, 중첩 그룹)를 보여 주는 예시 하나를 더한다.
+- `references/feedback-log.md`: 바꾸지 않는다(이미 "lightly edited"가 기준).
+- `quickstart.md`: SC-018 재실행 시나리오를 더한다.
+
+하지 않는 것: 점검 보고가 제안한 `lint_view.py`, 스킬 폴더 `evals/`, description 트리거 최적화 루프는
+이번 요구사항에 없으므로 만들지 않는다(원칙 I). Out of scope 안내에 다른 스킬을 추천하지 않는 것은
+FR-014·SC-008이 정한 의도이므로 유지한다.
+
+**Constitution Check (2026-11-23)**: I — 새 파일·스크립트·설정 없이 지침 문장만 고치고 중복을 줄인다. II — 기존 003을 개정한다.
+III — 판단이 갈린 경우를 규칙으로 정하는 요구사항 변경이며 단발 출력 차이 수정이 아니다. IV — 기본값을 문서에 옮겨 적지 않는다. 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify. This section is intentionally empty.*
