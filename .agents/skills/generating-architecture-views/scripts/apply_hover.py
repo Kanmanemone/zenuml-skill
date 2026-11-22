@@ -13,12 +13,13 @@ The body itself is never changed. Running it twice with the same settings change
 Usage: python3 apply_hover.py <view.architecture.md>
          [--enabled=true|false] [--responsibility=abstract,concrete]
          [--collaboration=targets,boundary,rationale,questions] [--position=bottom|node]
-         [--source-file=true|false] [--source-file-position=left|right]
+         [--source-file=true|false] [--source-file-position=left|center|right]
 The options override settings.jsonc for this run only (a value stated in the request).
 Requires Python 3.9+, standard library only. Contract: specs/009-hover-detail-panel/contracts/.
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -39,6 +40,7 @@ from hover.view_parser import (  # noqa: E402
 )
 
 CURSOR = ",cursor:auto"
+STROKE = re.compile(r"^\s*classDef (\w+) stroke:(#[0-9A-Fa-f]{3,8})", re.M)  # node border color
 OVERRIDES = {
     "enabled": "hover.enabled",
     "responsibility": "hover.responsibility",
@@ -126,7 +128,8 @@ def transform(text, values):
 
     sources = []
     if values["dependency.sourceFile.enabled"]:
-        sources = [(n.color_class, file_name(n.link)) for n in view.nodes.values()
+        strokes = dict(STROKE.findall("\n".join(lines[view.fence_start:view.fence_end])))
+        sources = [(n.color_class, file_name(n.link), strokes.get(n.color_class)) for n in view.nodes.values()
                    if n.source_file and n.link and n.color_class]
 
     last_link = None

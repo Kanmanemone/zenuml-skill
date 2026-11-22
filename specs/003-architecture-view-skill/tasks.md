@@ -564,9 +564,13 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 **Independent Test**: 시나리오 27(quickstart.md)을 실행한다.
 
-- [ ] T156 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`의 style 블록 기대치를 009 apply-hover-contract.md "파일 이름 표시"의 공통 4규칙과 노드별 `content`·테두리 색 규칙, 왼쪽·중간·오른쪽 값으로 바꾸고 구현 전 실패를 확인한다 per FR-037, 007 FR-012e
-- [ ] T157 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`의 `dependency.sourceFile.position` 허용 값에 `center`를 더하고 설명을 위쪽 테두리 선 위 위치로 고친다 per data-model.md(007) `dependency.sourceFile.position`, 007 FR-012e
-- [ ] T158 [US1] `.agents/skills/generating-architecture-views/scripts/hover/style_blocks.py`를 contract의 공통 규칙(look별 `top`·좌우 보정, 중간 정렬, 배경 변수, 기울임)과 노드별 규칙으로 바꾸고, `scripts/apply_hover.py`가 노드 색상 class의 `classDef … stroke:` 값을 넘기게 한다 per contracts(009 apply-hover-contract.md), research.md "파일 이름 표시"
-- [ ] T159 [US1] `.agents/skills/generating-architecture-views/SKILL.md`의 `--source-file-position` 값 목록을 `left|center|right`로 고치고, 003·009·010 테스트와 Mermaid CLI 렌더링(`classic`·`neo` × 세 위치, 다크 변수)으로 시나리오 27을 검증해 quickstart.md에 기록한다 per SC-017
+- [X] T156 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`의 style 블록 기대치를 009 apply-hover-contract.md "파일 이름 표시"의 공통 4규칙과 노드별 `content`·테두리 색 규칙, 왼쪽·중간·오른쪽 값으로 바꾸고 구현 전 실패를 확인한다 per FR-037, 007 FR-012e
+- [X] T157 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`의 `dependency.sourceFile.position` 허용 값에 `center`를 더하고 설명을 위쪽 테두리 선 위 위치로 고친다 per data-model.md(007) `dependency.sourceFile.position`, 007 FR-012e
+- [X] T158 [US1] `.agents/skills/generating-architecture-views/scripts/hover/style_blocks.py`를 contract의 공통 규칙(look별 `top`·좌우 보정, 중간 정렬, 배경 변수, 기울임)과 노드별 규칙으로 바꾸고, `scripts/apply_hover.py`가 노드 색상 class의 `classDef … stroke:` 값을 넘기게 한다 per contracts(009 apply-hover-contract.md), research.md "파일 이름 표시"
+- [X] T159 [US1] `.agents/skills/generating-architecture-views/SKILL.md`의 `--source-file-position` 값 목록을 `left|center|right`로 고치고, 003·009·010 테스트와 Mermaid CLI 렌더링(`classic`·`neo` × 세 위치, 다크 변수)으로 시나리오 27을 검증해 quickstart.md에 기록한다 per SC-017
 
 **Dependencies**: T156 → T157 → T158 → T159.
+
+## Phase 44: Convergence
+
+- [X] T160 `.agents/skills/generating-architecture-views/settings.schema.json`의 `dependency.sourceFile.enabled` 설명에서 "모서리"를 위쪽 테두리 표시로 고친다 per FR-037, 007 FR-012e (partial)

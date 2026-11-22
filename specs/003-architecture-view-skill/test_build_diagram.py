@@ -140,16 +140,27 @@ class SourceFileTagTest(unittest.TestCase):
         out = self._hover()
         style = out[out.index('<details class="zenuml-hover-style">'):]
 
-        self.assertIn('.srcFile.memoNode .nodeLabel::before { content: "Memo.kt"; position: absolute; top: -9px; right: -13px;', style)
-        self.assertIn('.srcFile.saveNode .nodeLabel::before { content: "Store.kt";', style)
+        # node rules: file name in the node's own border color (classDef stroke)
+        self.assertIn('.srcFile.memoNode .nodeLabel::before { content: "Memo.kt"; color: #56B4E9; }', style)
+        self.assertIn('.srcFile.saveNode .nodeLabel::before { content: "Store.kt"; color: #009E73; }', style)
+        # shared rule once: on the top border, node-fill background, italic; classic look overrides offsets
+        self.assertEqual(1, style.count("top: -18px; right: -5px;"))
+        self.assertIn("font-style: italic;", style)
+        self.assertIn("background-color: var(--vscode-editorWidget-background, #ffffff);", style)
+        self.assertIn('[data-look="classic"] .node.srcFile .nodeLabel::before, .node.srcFile[data-look="classic"]'
+                      " .nodeLabel::before { top: -21px; right: -19px; }", style)
         self.assertNotIn("memo_ktNode .nodeLabel", style)
         self.assertNotIn("div.mermaidTooltip", style)
         self.assertEqual(out, self._hover(out))
 
-    def test_left_position_and_disabled(self):
-        self.assertIn("left: -13px;", self._hover(**{"dependency.sourceFile.position": "left"}))
+    def test_left_center_and_disabled(self):
+        left = self._hover(**{"dependency.sourceFile.position": "left"})
+        self.assertIn("top: -18px; left: -5px;", left)
+        self.assertIn("{ top: -21px; left: -19px; }", left)
+        center = self._hover(**{"dependency.sourceFile.position": "center"})
+        self.assertIn("top: -18px; left: 50%; transform: translateX(-50%);", center)
+        self.assertIn("{ top: -21px; }", center)
         self.assertNotIn("<details", self._hover(**{"dependency.sourceFile.enabled": False}))
-
 
 if __name__ == "__main__":
     unittest.main()

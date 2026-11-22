@@ -5,7 +5,7 @@
 ## 실행
 
 ```text
-<python> .claude/skills/generating-architecture-views/scripts/apply_hover.py <구조 뷰 파일> [--enabled=<true|false>] [--responsibility=<항목,…>] [--collaboration=<항목,…>] [--position=<bottom|node>] [--source-file=<true|false>] [--source-file-position=<left|right>]
+<python> .claude/skills/generating-architecture-views/scripts/apply_hover.py <구조 뷰 파일> [--enabled=<true|false>] [--responsibility=<항목,…>] [--collaboration=<항목,…>] [--position=<bottom|node>] [--source-file=<true|false>] [--source-file-position=<left|center|right>]
 ```
 
 | 인자 | 뜻 |

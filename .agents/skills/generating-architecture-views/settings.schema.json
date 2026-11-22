@@ -94,7 +94,7 @@
       "key": "dependency.sourceFile.enabled",
       "type": "boolean",
       "default": true,
-      "description": "Dependency에서 링크가 있는 노드(파일 자체 노드 제외)의 모서리에 그 노드가 나온 파일 이름을 표시할지",
+      "description": "Dependency에서 링크가 있는 노드(파일 자체 노드 제외)의 위쪽 테두리 선 위에 그 노드가 나온 파일 이름을 표시할지",
       "tokenImpact": {
         "true": "[0]",
         "false": "[0]"
@@ -105,12 +105,14 @@
       "type": "enum",
       "values": [
         "right",
+        "center",
         "left"
       ],
       "default": "right",
-      "description": "파일 이름을 노드의 오른쪽 위와 왼쪽 위 중 어느 모서리에 표시할지",
+      "description": "파일 이름을 노드 위쪽 테두리 선 위의 오른쪽·중간·왼쪽 중 어디에 표시할지",
       "tokenImpact": {
         "right": "[0]",
+        "center": "[0]",
         "left": "[0]"
       }
     },
