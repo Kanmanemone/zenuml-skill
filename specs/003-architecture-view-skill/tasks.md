@@ -591,3 +591,17 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 ## Phase 46: Convergence
 
 - [X] T165 quickstart.md 시나리오 28의 두 요청을 스킬을 따르는 새 에이전트로 재실행하고 기대 결과와 대조해 quickstart.md에 기록한다 per SC-018 (partial)
+
+## Phase 47: 사용 외 의존 옅은 선 (FR-042~045, SC-019·020, 007 FR-012f·SC-011)
+
+**Goal**: 에이전트가 사용 외 의존 간선에 정해진 라벨을 쓰면, 스크립트가 그 간선을 출발 노드 색을 옅게 한 선으로 진한 선 아래에 그리고 범례 줄을 붙인다.
+
+**Independent Test**: 시나리오 29(quickstart.md)를 실행한다.
+
+- [ ] T166 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`에 옅은 선 테스트를 더한다: 세 라벨만 옅음(`생성·호출`은 진함), 옅은 간선 줄이 먼저이고 ID는 원래 순서, `<base>Faint` classDef와 class 줄, CRUD 유무별 범례 한 줄과 `wrappingWidth: 400`, 설정 끔·옅은 간선 없음은 기존 출력과 같음, schema 기본값과 배포 설정 일치 per FR-043~045, 007 SC-011
+- [ ] T167 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`에 boolean `dependency.faintNonUsageEdges`(tokenImpact 두 값 `[0]`, 한국어 주석)를 더한다 per 007 FR-012f
+- [ ] T168 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`에 옅은 간선 판정·줄 순서·Faint 클래스·범례·`wrappingWidth`와 `--faint-edges=` 처리를 plan.md "2026-11-23 사용 외 의존 옅은 선 계획"대로 넣고 docstring을 고친다 per FR-044, FR-045
+- [ ] T169 [US1] `.agents/skills/generating-architecture-views/SKILL.md` "Evidence and links"에 변경 영향 의존·사용 의존/사용 외 의존 판단·세 라벨 규칙을, "Saving"에 `--faint-edges`를 넣고, `references/templates.md` 스크립트가 채우는 목록에 옅은 선과 범례 줄을 더하며, `references/examples.md`의 간선 라벨이 새 규칙과 맞는지 확인한다 per FR-042, FR-043, FR-041
+- [ ] T170 [US1] 003·009·010 테스트를 실행하고, 시나리오 29 산출물을 만들어 Mermaid로 렌더링해 옅은 선·겹침 순서·범례 한 줄을 확인하고 quickstart.md에 기록한다 per SC-019, SC-020
+
+**Dependencies**: T166 → T167 → T168 → T169 → T170.
