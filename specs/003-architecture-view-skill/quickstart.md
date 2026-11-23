@@ -274,6 +274,18 @@
 
 **검증**: 두 산출물을 위 기대와 `SKILL.md` "Evidence and checks"에 대조한다.
 
+## 시나리오 29 — 사용 외 의존 옅은 선 (FR-042~045, SC-019·020, 007 SC-011)
+
+**입력 예시**: "`MemoFeed`는 `ReorderableState`를 만들어 `MemoList`에 넘기고, `MemoList`는 그 상태의 `moved()`를 호출한다. `MemoFeed`는 `MemoList`를 화면에 그린다." 같은 구성에 변화 표시가 있는 동적 요청도 낸다.
+
+**기대 결과**:
+- `MemoFeed → ReorderableState`는 라벨 `생성`의 옅은 선(출발 노드 색, 화살촉·라벨 글자도 옅음)이고, `MemoList → ReorderableState`와 `MemoFeed → MemoList`는 진한 선이다.
+- 옅은 선이 진한 선과 겹치면 아래에 깔린다. 범례 `옅은 선: 사용 외 의존 (생성·전달)`은 한 줄이고, 동적 요청에서는 ✨·♻️·🗑️ 세 줄 다음에 온다.
+- `dependency.faintNonUsageEdges=false`(또는 요청에서 끔)이면 모든 간선이 진한 선이고 범례 줄이 없으며, 라벨·간선 ID는 켰을 때와 같다.
+- 사용 의존만 있는 요청의 산출물은 이 기능 전과 같다.
+
+**검증**: `python -m unittest specs/003-architecture-view-skill/test_build_diagram.py`를 실행하고, 산출물을 VS Code 미리보기와 GitHub(임시 push 후 되돌림)에서 보고 옅은 선·겹침·범례 한 줄을 확인한다.
+
 ## 결과 기록
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.

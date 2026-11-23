@@ -139,6 +139,26 @@ FR-014·SC-008이 정한 의도이므로 유지한다.
 **Constitution Check (2026-11-23)**: I — 새 파일·스크립트·설정 없이 지침 문장만 고치고 중복을 줄인다. II — 기존 003을 개정한다.
 III — 판단이 갈린 경우를 규칙으로 정하는 요구사항 변경이며 단발 출력 차이 수정이 아니다. IV — 기본값을 문서에 옮겨 적지 않는다. 위반 없음.
 
+## 2026-11-23 사용 외 의존 옅은 선 계획 (FR-042~045, SC-019·020, 007 FR-012f·SC-011)
+
+에이전트는 라벨만 고르고, 나머지는 `build_diagram.py`가 라벨로 정한다(research "옅은 선").
+
+- `scripts/build_diagram.py`:
+  - `FAINT_LABELS = {"생성", "전달", "타입 참조"}`. `label.strip()`이 이 중 하나와 정확히 같고 설정이 켜져 있으면 그 간선은 옅다.
+  - 간선 ID는 지금처럼 원래 순서 `eN`을 그대로 쓰고, `%% ---- 엣지 ----` 아래에는 옅은 간선 줄을 먼저, 진한 간선 줄을 나중에 쓴다(각 무리 안에서는 원래 순서). 켜고 끈 두 산출물의 ID가 같다(SC-011).
+  - 엣지 스타일: 진한 간선은 지금의 `<base>Edge`. 옅은 간선이 있는 출발 노드에는 `classDef <base>Faint stroke:<색>4D,stroke-width:3px,color:<색>80`을 `<base>Edge` 바로 다음에 두고 `class eN <base>Faint`로 단다.
+  - 범례: 옅은 간선이 하나라도 있으면 `옅은 선: 사용 외 의존 (생성·전달)`을 CRUD 범례 label 끝에 `<br/>`로 붙이고, CRUD가 없으면 같은 `CrudLegend@{ shape: text, … }` 노드를 이 한 줄로 만든다. 이때만 config `flowchart:`에 `wrappingWidth: 400`을 더한다(줄바꿈 방지).
+  - 옅은 간선이 없거나 설정이 꺼져 있으면 출력은 지금과 바이트 단위로 같다.
+  - 명령줄 `--faint-edges=true|false`: 요청 문장이 값을 밝힐 때만. 기존 `--file-extensions`와 같은 처리로 검증한다(두 옵션의 처리를 표 하나로 합침).
+- `settings.schema.json`: boolean `dependency.faintNonUsageEdges`(tokenImpact 두 값 `[0]`). `settings.jsonc`: `dependency` 아래 같은 키와 한국어 주석. 기본값은 schema `default`에만(헌법 IV).
+- `SKILL.md` "Evidence and links": 간선 판단을 순서 있는 질문 네 개로 쓴 bullet 하나(① 변경 영향이 없으면 간선 없음 ② 멤버를 쓰면 사용 ③ 이름만 나오면 세 라벨 ④ 이름 없이 동작에 기대면 근거가 밝힐 때만 사용 의존, 라벨에 가정)와 애매할 때의 원칙(사용 쪽, 코드에 숨은 관계일수록 다이어그램이 필요). 기존 "Edge labels use the description's own wording" bullet은 그대로 둔다. "Saving"의 `--faint-edges` 한 구절. 스크립트가 옅게 칠하므로 모양은 쓰지 않는다.
+- `references/templates.md` "Dependency template": 스크립트가 채우는 목록에 옅은 선과 범례 줄을 더한다.
+- `specs/003-architecture-view-skill/test_build_diagram.py`: 옅은 간선 순서·ID·classDef·범례(CRUD 유무)·`wrappingWidth`, `생성·호출`은 진한 선, 설정 끔과 옅은 간선 없음은 지금 출력과 같음, schema 기본값과 배포 설정이 같음.
+- `quickstart.md`: 시나리오 29(SC-019·SC-011, VS Code·GitHub 육안 확인).
+- 바뀌지 않는 것: `hover/view_parser.py`(간선 정규식이 순서·class와 무관), `apply_hover.py`, 단계별 코드 공개(010), 기존 산출물(다시 만들 때만 반영).
+
+**Constitution Check (2026-11-23)**: I — 새 파일·의존성 없이 기존 스크립트에 라벨 집합 하나와 조건 분기만 더한다. 설정은 007 FR-012f가 요구한 하나뿐이다. II — 기존 003·007을 개정한다. III — 요구사항 변경이다. IV — 기본값은 schema `default`와 배포 `settings.jsonc`에만 두고, 테스트는 schema와 비교한다. 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify. This section is intentionally empty.*
