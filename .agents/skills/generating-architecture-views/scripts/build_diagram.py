@@ -72,28 +72,30 @@ def class_base(node_id):
 def label_sources(declarations, clicks, file_extensions):
     """Find linked nodes that need a source file name. A node whose label already is that file
     name is the file itself (the skill's fileExtensions judgment): no mark, and its extension goes
-    when file_extensions is off. Returns (declarations, marked node ids)."""
-    files = {}
+    when file_extensions is off. Every linked label is wrapped in an HTML link to the same target:
+    VS Code's preview opens only HTML links, not the SVG link a `click` line makes (bug
+    architecture-view-local-link-click). Returns (declarations, marked node ids)."""
+    targets = {}
     for line in clicks:
         found = match_link_click(line)
         if found:
-            files[found[0]] = file_name(found[1])
+            targets[found[0]] = found[1]
     out, marked = [], []
     for line in declarations:
         m = DECL.match(line)
-        if not m or m.group(2) not in files:
+        if not m or m.group(2) not in targets:
             out.append(line)
             continue
-        indent, node, name = m.group(1), m.group(2), files[m.group(2)]
+        indent, node, target = m.group(1), m.group(2), targets[m.group(2)]
+        name = file_name(target)
         label = m.group(3) or m.group(4) or node
         if clean_name(label) != name:
             marked.append(node)
-        if clean_name(label) != name or file_extensions or "." not in name:
-            out.append(line)
-            continue
-        i = label.rindex(name)
-        label = label[:i] + name.rsplit(".", 1)[0] + label[i + len(name):]
-        out.append(indent + node + ('@{ label: "' + label + '" }' if label != node else ""))
+        elif not file_extensions and "." in name:
+            i = label.rindex(name)
+            label = label[:i] + name.rsplit(".", 1)[0] + label[i + len(name):]
+        href = target.replace("&", "&amp;").replace("'", "&#39;").replace('"', "&quot;")
+        out.append(indent + node + "@{ label: \"<a href='" + href + "'>" + label + '</a>" }')
     return out, marked
 
 

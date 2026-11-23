@@ -254,7 +254,7 @@ NOT_NODES = {"end", "direction", "flowchart", "graph"}
 
 
 def clean_name(label):
-    text = re.sub(r"</?(b|s|strong)>", "", label)
+    text = re.sub(r"</?(b|s|strong)>|<a\s[^>]*>|</a>", "", label)  # <a>: the architecture view links the label
     for mark in ("✨", "♻️", "♻", "🗑️", "🗑", "️"):
         text = text.replace(mark, "")
     name = text.split("&nbsp;")[-1].strip()

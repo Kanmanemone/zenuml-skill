@@ -117,6 +117,7 @@ class Definition(unittest.TestCase):
             '♻️&nbsp;fun&nbsp;NiaNavHost()': 'NiaNavHost',
             'render()': 'render',
             'PlainNode': 'PlainNode',
+            "<a href='../app/NiaApp.kt'>♻️&nbsp;<b>fun&nbsp;NiaApp()</b></a>": 'NiaApp',  # linked label (architecture view)
         }
         self.assertEqual({label: s.clean_name(label) for label in cases}, cases)
 

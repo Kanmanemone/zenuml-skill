@@ -72,7 +72,7 @@ Place the configured label inside `<b>`/`<s>`. With both options on, examples ar
 
 ### Hyperlink syntax
 
-`click <NodeName> "<target>" "<label>"` — `target` is the link `SKILL.md`, "Evidence and links" resolves (e.g. `../app/src/.../Foo.kt` or a full URL); `label` is a short tooltip, usually the file's own name.
+`click <NodeName> "<target>" "<label>"` — `target` is the link `SKILL.md`, "Evidence and links" resolves (e.g. `../app/src/.../Foo.kt` or a full URL); `label` is a short tooltip, usually the file's own name. `scripts/build_diagram.py` then wraps that node's label in `<a href='<target>'>…</a>` (VS Code's preview opens only HTML links); never write that link yourself.
 
 ### After the hover script
 

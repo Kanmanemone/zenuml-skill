@@ -111,20 +111,32 @@ class SourceFileTagTest(unittest.TestCase):
         '  click save "https://example.com/blob/main/src/Store.kt#L10" "Store.kt"',
     ]
 
-    def test_marks_linked_declarations_without_touching_labels(self):
+    def test_marks_linked_declarations_and_links_their_labels(self):
         out = build(self.VIEW, "")
 
-        self.assertIn('  Memo_kt@{ label: "Memo.kt" }', out)
-        self.assertIn("  Memo", out)
-        self.assertIn('  save@{ label: "✨&nbsp;<b>save()</b>" }', out)
+        self.assertIn('  Memo_kt@{ label: "<a href=\'../src/Memo.kt\'>Memo.kt</a>" }', out)
+        self.assertIn('  Memo@{ label: "<a href=\'../src/Memo.kt\'>Memo</a>" }', out)
+        self.assertIn('  save@{ label: "<a href=\'https://example.com/blob/main/src/Store.kt#L10\'>✨&nbsp;<b>save()</b></a>" }', out)
+        self.assertIn("  Plain", out)  # no link, untouched
         self.assertIn("  class Memo,save srcFile", out)
         self.assertFalse(any("srcFile" in line for line in out if "label" in line or "themeCSS" in line))
 
     def test_file_extension_off_strips_only_the_file_node(self):
         out = build(self.VIEW, "", file_extensions=False)
 
-        self.assertIn('  Memo_kt@{ label: "Memo" }', out)
+        self.assertIn('  Memo_kt@{ label: "<a href=\'../src/Memo.kt\'>Memo</a>" }', out)
         self.assertIn("  class Memo,save srcFile", out)
+
+    def test_link_target_quotes_are_escaped_and_names_still_read(self):
+        # VS Code's preview opens only HTML links, so every linked label carries one
+        # (bug architecture-view-local-link-click); the name readers must look through it.
+        from hover.view_parser import clean_name
+
+        view = ["flowchart LR", "  A", "  B", "", "  A -->|호출| B", "",
+                '  click A "https://example.com/a?x=1&y=it\'s" "a"']
+        out = build(view, "")
+        self.assertIn('  A@{ label: "<a href=\'https://example.com/a?x=1&amp;y=it&#39;s\'>A</a>" }', out)
+        self.assertEqual(clean_name("<a href='../x.kt'>♻️&nbsp;<b>fun&nbsp;Foo()</b></a>"), "Foo")
 
     def _hover(self, text=None, **values):
         from apply_hover import transform
