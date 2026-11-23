@@ -178,6 +178,7 @@ UNREVEALED = "- 아직 드러나지 않은 것:"
 KIND = "- 표현:"
 KINDS = ("prose", "outline", "unfold", "source")
 CHANGE = "change"  # optional stage 0, after the four; shown only with a comparison point (spec FR-031)
+BEFORE = "before"  # optional stage -1, after change: the old code as is (spec FR-034)
 
 
 def parse_stage_definition(path=STAGES_FILE):
@@ -199,13 +200,14 @@ def parse_stage_definition(path=STAGES_FILE):
         if names.count(name) > 1:
             raise InputError("stages.md에 별명 `" + name + "`이 겹침")
     for s in stages:
-        if s["kind"] not in KINDS + (CHANGE,):
-            raise InputError("단계 표현은 %s 중 하나여야 함: %s" % (", ".join(KINDS + (CHANGE,)), s["nickname"]))
+        if s["kind"] not in KINDS + (CHANGE, BEFORE):
+            raise InputError("단계 표현은 %s 중 하나여야 함: %s" % (", ".join(KINDS + (CHANGE, BEFORE)), s["nickname"]))
         for head, field in ((BECOMES, "becomes"), (UNREVEALED, "unrevealed")):
             if not s[field]:
                 raise InputError("stages.md의 `" + s["nickname"] + "` 단계에 `" + head + "` 항목이 없음")
-    if [s["kind"] for s in stages] not in (list(KINDS), list(KINDS) + [CHANGE]):
-        raise InputError("stages.md의 단계 표현은 prose, outline, unfold, source 순서로 하나씩이고, 그 뒤에 change 하나를 둘 수 있음")
+    if [s["kind"] for s in stages] not in (list(KINDS), list(KINDS) + [CHANGE], list(KINDS) + [CHANGE, BEFORE]):
+        raise InputError("stages.md의 단계 표현은 prose, outline, unfold, source 순서로 하나씩이고, "
+                         "그 뒤에 change 하나, 다시 그 뒤에 before 하나를 둘 수 있음")
     return stages
 
 
@@ -215,10 +217,10 @@ def plan_stages(stages, toggles, show, hide):
     notices = []
     names = [s["nickname"] for s in stages]
     last = next(s["nickname"] for s in stages if s["kind"] == "source")
-    change = next((s["nickname"] for s in stages if s["kind"] == CHANGE), None)
+    change = {s["nickname"] for s in stages if s["kind"] in (CHANGE, BEFORE)}
     visible = {name: True for name in names}
     for name, value in toggles.items():
-        if name == change:
+        if name in change:
             notices.append(settings_notice("`" + name + "` 단계는 비교 기준이 있을 때만 붙으므로 무시"))
         elif name == last:
             notices.append(settings_notice("마지막 단계 `" + name + "`는 항상 보이므로 무시"))
@@ -230,7 +232,7 @@ def plan_stages(stages, toggles, show, hide):
             visible[name] = value
     for names_in_request, value in ((show, True), (hide, False)):
         for name in names_in_request:
-            if name == change:
+            if name in change:
                 notices.append("⚙️ 요청 안내: `" + name + "` 단계는 비교 기준이 있을 때만 붙으므로 무시")
             elif name == last:
                 if not value:
@@ -1826,9 +1828,10 @@ def note_for(changed):
     return "" if changed else "이 단계에서는 달라진 것이 없음"
 
 
-def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin", stage0=None):
+def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin", stage0=None, stage_minus1=None):
     """Base box. slides: [(title, note, code)]; diff_layers: [markup or None] (added after the code).
     stage0: optional (title, code, layer) reached by stepping back from stage 1 (spec FR-031).
+    stage_minus1: optional (title, code) reached by stepping back from stage 0 (spec FR-034).
     Headings come first; every stage's scene sits in one shared scroll box, so stepping keeps the
     position (spec FR-033, research R19)."""
     n = len(slides)
@@ -1836,6 +1839,8 @@ def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin", stage0=N
     items = [(k, title, note, kinds[k - 1], code, diff_layers[k - 1]) for k, (title, note, code) in enumerate(slides, start=1)]
     if stage0:
         items.insert(0, (0, stage0[0], "", "code", stage0[1], stage0[2]))
+        if stage_minus1:
+            items.insert(0, (-1, stage_minus1[0], "", "code", stage_minus1[1], None))
     out = ['<div class="stages">', ""]
     if not items:  # nothing to show (hidden situation, no source): an empty box as before
         return "\n".join(out + ["", "</div>"])
@@ -1942,7 +1947,8 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
             parts += ["비교 기준: `%s` → `%s`" % (compare["base"], compare["head"]) if compare["head"]
                       else "비교 기준: `%s` → 작업 트리" % compare["base"], ""]
         change_stage = next((s for s in manifest["stages"] if s["kind"] == CHANGE), None)
-        has_stage0 = False
+        before_stage = next((s for s in manifest["stages"] if s["kind"] == BEFORE), None)
+        has_stage0 = has_minus1 = False
         current_path = None
         for node in [n for n in manifest["nodes"] if n["doc"] == doc]:
             group_path = [g[1] for g in node["group_path"][node["doc_depth"]:]]
@@ -1967,12 +1973,17 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
                 prev = content if kind == "code" else prev
             counts[node["id"]] = len(scenes)
             max_slides = max(max_slides, len(slides))
-            stage0 = None
+            stage0 = minus1 = None
             if change_stage and node.get("change") == "changed" and slides:
                 stage0 = change_scene(result_dir, node, compare, change_stage["nickname"], with_diff)
                 has_stage0 = True
-            parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin", stage0), ""]
-        shown = range(0 if has_stage0 else 1, max_slides + 1)
+                if before_stage:  # stage -1: the old range as is, already checked by stage 0 (spec FR-034)
+                    minus1 = ("-1단계: %s (%s)" % (before_stage["nickname"], compare["base"]),
+                              read_text(Path(result_dir) / "work" / "before" / (node["id"] + ".kt")).rstrip("\n"))
+                    has_minus1 = True
+            parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin",
+                                 stage0, minus1), ""]
+        shown = range(-1 if has_minus1 else 0 if has_stage0 else 1, max_slides + 1)
         rules = "\n".join([".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k) for k in shown]
                           + [".stages > input.s%d:checked ~ .scroller > .pane.p%d { display: block; }" % (k, k) for k in shown])
         parts += ['<details class="zenuml-stepwise-style">', "<summary>" + STYLE_SUMMARY + "</summary>", "",

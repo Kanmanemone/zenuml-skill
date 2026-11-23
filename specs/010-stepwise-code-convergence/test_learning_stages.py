@@ -91,24 +91,28 @@ def exit_code(argv):
 class Definition(unittest.TestCase):
     def test_kinds_in_order_and_notes_section_is_not_a_stage(self):
         stages = s.parse_stage_definition()
-        self.assertEqual([x['kind'] for x in stages], list(s.KINDS) + [s.CHANGE])
-        self.assertEqual([x['nickname'] for x in stages], ['사용 상황', '윤곽', '펼치기', '원본', '변화'])
+        self.assertEqual([x['kind'] for x in stages], list(s.KINDS) + [s.CHANGE, s.BEFORE])
+        self.assertEqual([x['nickname'] for x in stages], ['사용 상황', '윤곽', '펼치기', '원본', '변화', '변경 전'])
 
     def test_hiding_and_unknown_names(self):
         planned, notices = s.plan_stages(s.parse_stage_definition(), {'윤곽': False, '없는 단계': True}, [], ['펼치기', '원본'])
-        self.assertEqual([x['visible'] for x in planned], [True, False, False, True, True])
+        self.assertEqual([x['visible'] for x in planned], [True, False, False, True, True, True])
         self.assertEqual(len(notices), 2)
 
     def test_change_stage_is_optional_and_not_toggled(self):
-        planned, notices = s.plan_stages(s.parse_stage_definition(), {'변화': False}, ['변화'], ['변화'])
-        self.assertEqual(planned[-1]['kind'], 'change')
-        self.assertTrue(planned[-1]['visible'])
-        self.assertEqual(len(notices), 3)  # settings, --show, --hide: each ignored with one line
+        planned, notices = s.plan_stages(s.parse_stage_definition(), {'변화': False, '변경 전': False}, ['변화'], ['변경 전'])
+        self.assertEqual([x['kind'] for x in planned[-2:]], ['change', 'before'])
+        self.assertTrue(all(x['visible'] for x in planned[-2:]))
+        self.assertEqual(len(notices), 4)  # settings (two), --show, --hide: each ignored with one line
         with tempfile.TemporaryDirectory() as tmp:
             four = Path(tmp) / 'stages.md'
             text = s.read_text(s.STAGES_FILE)
             four.write_text(text[:text.index('## 변화')], encoding='utf-8')
             self.assertEqual([x['kind'] for x in s.parse_stage_definition(four)], list(s.KINDS))
+            alone = Path(tmp) / 'alone.md'
+            alone.write_text(text[:text.index('## 변화')] + text[text.index('## 변경 전'):], encoding='utf-8')
+            with self.assertRaises(s.InputError):  # stage -1 only with stage 0 (FR-034)
+                s.parse_stage_definition(alone)
 
     def test_node_display_marks_are_not_part_of_the_source_name(self):
         cases = {
@@ -1027,6 +1031,17 @@ class ChangeStage(unittest.TestCase):
             removed = (result / 'work/original/PaymentGateway.kt').read_text(encoding='utf-8')
             self.assertIn('class PaymentGateway', removed)
             self.assertNotIn('<label class="nav" for="OrderService-0">', doc)
+            # stage -1: the old code as is, only before the changed node's stage 0 (FR-034, SC-023)
+            self.assertEqual(doc.count('<div class="stage s-1">'), 1)
+            box = doc[doc.index('id="InventoryRepository--1"'):]
+            pane = box[box.index('<div class="pane p-1">'):box.index('<div class="pane p0">')]
+            self.assertEqual(re.search(r'\n(`{3,})\w*\n(.*?)\n\1\n', pane, re.S).group(2), before.rstrip('\n'))
+            self.assertNotIn('<pre class="diff"', pane)
+            stage0 = box[box.index('<div class="stage s0">'):box.index('<div class="stage s1">')]
+            self.assertIn('<label class="nav" for="InventoryRepository--1">←</label>', stage0)
+            self.assertIn('-1단계: 변경 전 (%s)' % manifest['compare']['base'], box)
+            for other in ('OrderService', 'PaymentGateway'):
+                self.assertNotIn('id="%s--1"' % other, doc)
 
             with_base = s.load_manifest(result)
             parsed = parsed_outline(result, with_base)
