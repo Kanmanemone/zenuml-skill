@@ -202,3 +202,17 @@ Task: "scripts/lib/inline-svg.js 작성"
 - [X] T042 [US1] `.agents/skills/exporting-markdown-diagrams/references/questions.md`에 기존 선택지 구성·충돌 처리 규칙을 옮긴다 per FR-022
 - [X] T043 [US1] `.agents/skills/exporting-markdown-diagrams/SKILL.md`의 description을 줄이고 누락 값이 있을 때만 질문 reference를 읽도록 갱신한다 per FR-021, FR-022
 - [X] T044 [US1] 기존 diagram/document 변환 테스트와 명확한 요청의 단일 dispatch 경계를 검증한다 per SC-013
+
+## Phase 10: VS Code 미리보기 모양 (FR-023, SC-014, 007 FR-014c)
+
+**Goal**: 내보낸 다이어그램을 VS Code Light+ 미리보기와 같은 모양으로 그리거나, Mermaid 기본 렌더링을 고른다.
+
+**Independent Test**: quickstart.md 시나리오 14를 실행한다.
+
+- [ ] T045 `.agents/skills/exporting-markdown-diagrams/settings.schema.json`과 `settings.jsonc`에 enum `render.theme`(`vscode-light-plus`, `mermaid-default`, 한국어 주석)을 더한다 per 007 FR-014c
+- [ ] T046 `.agents/skills/exporting-markdown-diagrams/scripts/vscode-light-plus.json`을 research.md "VS Code 미리보기 모양"의 값으로 만든다 per FR-023
+- [ ] T047 `.agents/skills/exporting-markdown-diagrams/scripts/lib/run-mmdc.js`가 `--theme=` 또는 `render.theme`에 따라 `-c`를 더하고, `export-diagrams.js`·`export-document-pdf.js`·`export-document-png.js`가 위치 인자에서 `--theme=`를 걸러 내게 한다 per FR-023, 007 FR-014c
+- [ ] T048 `.agents/skills/exporting-markdown-diagrams/SKILL.md`에 요청이 모양을 밝힐 때만 `--theme=<값>`을 붙인다는 한 줄을 넣는다 per 007 FR-014c
+- [ ] T049 quickstart.md 시나리오 14를 실행해 결과를 기록한다 per SC-014
+
+**Dependencies**: T045, T046 → T047 → T048 → T049.
