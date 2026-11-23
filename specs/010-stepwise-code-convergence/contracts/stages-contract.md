@@ -316,3 +316,8 @@
 - 노드 상자: `<div class="stages">` 안에 라디오(0단계가 있으면 `-0`부터), 그다음 단계마다 `<div class="stage sK">`(제목 줄과 note만), 그다음 `<div class="scroller">` 하나가 온다. `scroller` 안에는 단계마다 `<div class="pane pK">`가 있고, 그 안에 지금과 같은 장면(`<div class="scene">` 또는 `<div class="code">` + fence + 색칠 층)이 든다.
 - 기본 CSS: `.stages > .scroller`가 높이 상한 `min(30lh, 70vh)`와 `overflow: auto`를 갖는다. `.stages > .scroller > .pane`은 숨기고, 문서에 나오는 단계 번호마다 `.stages > input.sK:checked ~ .scroller > .pane.pK { display: block; }` 한 줄을 둔다(제목 규칙과 같은 범위). `.code`는 높이 상한과 스크롤을 갖지 않는다.
 - `extract_last_stage`는 마지막 단계의 `pane` 안 fence를 읽는다.
+
+# 2026-11-24 -1단계 계약 (위 계약에 더함)
+
+- `stages.md`: `change` 다음에 `- 표현: before`인 단계 하나를 선택으로 둘 수 있다. `change` 없이는 둘 수 없다(exit 2). `change`처럼 `stages` 설정과 `--show`/`--hide`에서는 무시하고 알린다.
+- 문서: 0단계가 있고 `before` 단계가 정의된 상자는 라디오 `<input ... id="<id>--1" class="s-1">`를 `-0` 앞에 둔다. `<div class="stage s-1">`를 `s0` 앞에, `<div class="pane p-1">`를 `p0` 앞에 둔다. 제목은 `-1단계: <before 별명> (<base>)`이다. 0단계의 ←는 `<id>--1`을 가리키고, -1단계의 ←는 비활성이다. pane에는 `work/before/<id>.kt`의 fence만 있고 색칠 층은 없다. `prepare`·`build`의 명령줄과 출력 JSON은 그대로다.

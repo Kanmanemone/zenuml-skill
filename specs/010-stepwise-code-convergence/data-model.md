@@ -111,3 +111,7 @@ prepare ─▶ (서브에이전트) work/01 ─▶ begin 2 ─▶ apply 2 ─▶
 - **비교 기준** (`manifest.compare`): `base`(짧은 해시), `head`(짧은 해시 또는 null = 작업 트리). `prepare --base`가 있을 때만 있다.
 - **노드 변화** (`node.change`): `changed` | `removed` | `added` | `same` | null. 변경 전·후 원본 범위(R16)로 정해지며 구조 뷰 표시와 무관하다. `removed`이면 `original`이 변경 전 범위를 가리킨다. `changed`이면 `work/before/<id>.kt`가 있다.
 - **0단계 줄** (`changed` 노드 build 때만, 저장하지 않음): `(줄, add|mod|del|None)`의 목록이다. 불변식: `del`을 빼면 `work/original/<id>.kt`, `add`·`mod`를 빼면 `work/before/<id>.kt`와 글자까지 같다.
+
+## 2026-11-24 -1단계
+
+- **-1단계 장면** (`changed` 노드이고 `stages.md`에 `before` 단계가 있을 때, build 때만, 저장하지 않음): 코드는 `work/before/<id>.kt`와 글자까지 같고 줄 클래스가 없다. 0단계가 없는 노드에는 없다.

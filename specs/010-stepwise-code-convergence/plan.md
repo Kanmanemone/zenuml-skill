@@ -274,6 +274,33 @@ III — 판단이 갈린 경우와 불필요한 작업자 실행을 요구사항
 
 **Constitution Check (2026-11-23 공유 스크롤 상자)**: I — 기존 함수 네 곳의 출력 모양과 CSS 몇 줄만 바꾸고, 새 함수·설정·의존성은 없다. II — 010을 개정한다. III — 사용자가 고른 새 동작을 요구사항으로 정한 변경이다. IV — 새 기본값이 없다. 위반 없음. 설계 뒤 다시 확인했고 달라진 것이 없다.
 
+## 2026-11-24 -1단계 계획 (FR-034, SC-023)
+
+설계 근거는 [research.md](research.md) R20에 있다. 실행 규약은 [contracts/stages-contract.md](contracts/stages-contract.md)의 마지막 절에 있다.
+
+- **`stages.md`**: `## 변화` 다음에 `## 변경 전` 단계를 두고 `- 표현: before`로 적는다. 원본과 같아지는 것은 "비교 기준의 변경 전 원본 범위 전체", 아직 드러나지 않은 것은 "없음"이다.
+- **`scripts/stages.py`**:
+  - **단계 정의**: `BEFORE = "before"`를 둔다. `parse_stage_definition`이 허용하는 순서에 `KINDS + [change, before]`를 더한다. `before`는 `change` 없이 둘 수 없다.
+  - **보이기 설정**: `plan_stages`는 `before`를 `change`와 똑같이 보이기 대상에서 뺀다. 설정·`--show`·`--hide`에 나오면 무시하고 알린다.
+  - **문서 만들기**: `build_documents`에서 `before` 단계가 정의돼 있고 그 노드에 0단계를 만들었을 때만, `work/before/<id>.kt`로 -1단계 `("-1단계: <별명> (<base>)", 코드, None)`을 만든다. 0단계를 만들 때 이미 읽는 파일이고 diff는 없다. 상자 CSS 규칙의 시작 번호는 -1단계가 있는 문서에서 -1이다.
+  - **상자 그리기**: `render_box`에 선택 인자 `stage_minus1`을 더해, 0단계 앞에 `k = -1`로 넣는다. 라디오 id `<id>--1`, 클래스 `s-1`·`p-1`, ←/→ 연결은 기존 `first`·`k-1`·`k+1` 규칙으로 저절로 맞는다. 색칠 층은 없다.
+  - 0단계, `change_scene`, 일반 단계, `extract_last_stage`(`id="<id>-1"`을 찾으므로 `<id>--1`과 겹치지 않음)는 바뀌지 않는다.
+- **SKILL.md**: Prepare 절의 "stage 0 (what changed)" 옆에 "and stage −1 (the code before)"를 더한다. 흐름은 바뀌지 않는다.
+- **테스트**:
+  - `ChangeStage`의 변경 노드 테스트에 SC-023을 더한다. -1단계는 고친 노드에만 하나 있고, fence가 `work/before`와 같으며, 색칠 층이 없고, 0단계의 ←가 -1단계를 가리켜야 한다.
+  - `test_change_stage_is_optional_and_not_toggled`는 `before`도 무시되는지와, `change` 없는 `before`가 거부되는지를 본다.
+  - 기대 결과 파일은 비교 기준 없는 실행만 쓰므로 바뀌지 않는다.
+
+하지 않는 것: -1단계를 끄는 설정, 없어진 노드·새로 생긴 노드의 -1단계, 변경 전 코드의 단계적 펼치기, 0단계 일반화(여러 앞 단계를 받는 목록 인자).
+
+**Constitution Check (2026-11-24 -1단계)**:
+- I: 새 단계는 이미 읽는 파일을 그대로 보이는 장면 하나다. 선택 인자 하나와 표현 하나만 더한다. 0단계·-1단계를 목록으로 일반화하지 않은 것은 쓰는 곳이 둘뿐이어서다. 새 의존성은 없다.
+- II: 010을 개정한다.
+- III: 새 요구사항이다.
+- IV: 새 설정 기본값이 없다.
+
+위반 없음. 설계 뒤 다시 확인했고 달라진 것이 없다.
+
 ## Complexity Tracking
 
 | 더하는 복잡도 | 필요한 이유 | 더 단순한 방법을 고르지 않은 이유 |
