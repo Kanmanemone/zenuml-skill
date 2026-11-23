@@ -45,6 +45,11 @@
 - 적용 범위는 Dependency 라벨뿐이다. Responsibility·Collaboration 이름, Mermaid ID, 링크 대상과 hover 내용은 바꾸지 않는다.
 - 요청이 표시 방식을 직접 밝히면 그 요청에서만 해당 값보다 우선한다.
 
+### architecture 옅은 선 계약 (FR-012f)
+
+- `dependency.faintNonUsageEdges = true`: 라벨이 `생성`·`전달`·`타입 참조` 중 하나와 정확히 같은 간선을 출발 노드 색을 옅게 한 선으로 진한 선 아래에 그리고, 범례에 `옅은 선: 사용 외 의존 (생성·전달)` 한 줄을 붙인다(003 FR-044·FR-045). `false`: 모든 간선을 진한 선으로 그리고 범례 줄을 붙이지 않는다.
+- 이 값은 `build_diagram.py`만 읽는다. 스킬이 쓰는 라벨은 값과 상관없이 같다. 요청이 값을 직접 밝히면 `--faint-edges=<true|false>`로 그 요청에서만 우선한다.
+
 ## exporting 스크립트 계약
 
 - `node scripts/read-settings.js` → 표준 출력에 `{"values": {...}, "notices": ["..."]}` 한 줄 JSON. 종료 코드 0(설정 문제로 실패하지 않음).

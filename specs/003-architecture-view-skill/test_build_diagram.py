@@ -34,6 +34,50 @@ class CrudLegendTest(unittest.TestCase):
                 self.assertEqual(1, result.count(LEGEND))
 
 
+FAINT = ["flowchart LR", "  A", "  B", "  C", "", "  A -->|호출| B", "  A -->|생성| C",
+         "  B -->|생성·호출| C", "  C -->|타입 참조| B"]
+FAINT_LINE = "옅은 선: 사용 외 의존 (생성·전달)"
+
+
+class FaintEdgeTest(unittest.TestCase):
+    def test_only_exact_non_usage_labels_are_faint_and_drawn_first(self):
+        out = build(FAINT, "", faint_edges=True)
+        edges = [line for line in out if "@-->" in line]
+        self.assertEqual(["  A e1@-->|생성| C", "  C e3@-->|타입 참조| B",
+                          "  A e0@-->|호출| B", "  B e2@-->|생성·호출| C"], edges)
+        self.assertIn("  classDef aFaint stroke:#E69F004D,stroke-width:3px,color:#E69F0080", out)
+        self.assertEqual(out.index("  classDef aEdge stroke:#E69F00,stroke-width:3.5px") + 1,
+                         out.index("  classDef aFaint stroke:#E69F004D,stroke-width:3px,color:#E69F0080"))
+        for line in ("  class e1 aFaint", "  class e3 cFaint", "  class e0 aEdge", "  class e2 bEdge"):
+            self.assertIn(line, out)
+        self.assertNotIn("  classDef cEdge stroke:#009E73,stroke-width:3.5px", out)
+
+    def test_legend_line_alone_or_after_change_marks_and_wrapping_width(self):
+        alone = build(FAINT, "", faint_edges=True)
+        self.assertIn('  CrudLegend@{ shape: text, label: "' + FAINT_LINE + '" }', alone)
+        self.assertEqual(1, alone.count("    wrappingWidth: 400"))
+        with_crud = build(FAINT + ["", "  class A crudCreate"], "", faint_edges=True)
+        self.assertIn('  CrudLegend@{ shape: text, label: "✨: 추가<br/>♻️: 변경<br/>🗑️: 삭제<br/>'
+                      + FAINT_LINE + '" }', with_crud)
+
+    def test_off_or_no_faint_edge_keeps_previous_output(self):
+        previous = build(FAINT, "")
+        self.assertEqual(previous, build(FAINT, "", faint_edges=False))
+        self.assertFalse(any("Faint" in line or "wrappingWidth" in line or FAINT_LINE in line
+                             for line in previous))
+        self.assertEqual(build(BASE, ""), build(BASE, "", faint_edges=True))
+        ids = lambda out: sorted(line for line in out if "@-->" in line)
+        self.assertEqual(ids(previous), ids(build(FAINT, "", faint_edges=True)))
+
+    def test_shipped_setting_matches_schema_default(self):
+        skill_dir = SCRIPT_DIR.parent
+        dependency = json.loads(strip_json_comments(
+            (skill_dir / "settings.jsonc").read_text(encoding="utf-8")
+        ))["dependency"]
+        self.assertEqual(schema_defaults(skill_dir)["dependency.faintNonUsageEdges"],
+                         dependency["faintNonUsageEdges"])
+
+
 class NodeNameFormatSettingsTest(unittest.TestCase):
     def test_shipped_settings_and_defaults_use_one_format_family(self):
         skill_dir = SCRIPT_DIR.parent

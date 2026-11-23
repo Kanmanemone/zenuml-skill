@@ -84,6 +84,20 @@ group's folder nests its `subgraph`.
   PascalCase ID and keep the description's wording as its label. "External"
   alone is not a group signal.
 - Edge labels use the description's own wording for the relationship.
+- Judge each edge A → B by asking, in order:
+  1. If B changed, might A have to change? If not, draw no edge (e.g. a
+     callback back to the caller is runtime flow, not a dependency).
+  2. Does A's code use B: call, read, or subscribe to its members, call a
+     function node, or inherit/implement it? → usage edge, never labeled with
+     one of the three labels in 3 alone.
+  3. Does B's name appear in A only as a constructor call, a value passed along
+     unchanged, or a written type name? → label exactly `생성`, `전달`, or
+     `타입 참조`; `build_diagram.py` draws it faint.
+  4. Does A rely on B's behavior without naming B (e.g. an overlay that exists
+     because B consumes touches)? Draw it only when the evidence states that
+     assumption, as a usage edge whose label names it.
+  When unsure, choose usage: faint is only for what the code shows plainly; a
+  relation the code hides needs the diagram most.
 
 Keep these source facts separate: base name, original declaration keyword(s),
 final file extension, and whether the declaration is a function. Never infer
@@ -172,8 +186,8 @@ For a completed view, in this order:
 
 1. Write `.zenuml/<slug>.architecture.md`.
 2. Run `build_diagram.py <view>`; add `--layout=<value>` only when this request
-   names a renderer, and `--file-extensions=<true|false>` only for a value this
-   request states. On failure, keep the basic view and report the prescribed
+   names a renderer, and `--file-extensions=<true|false>` or
+   `--faint-edges=<true|false>` only for a value this request states. On failure, keep the basic view and report the prescribed
    `⚙️ 다이어그램 서식 건너뜀: <reason>` line.
 3. Write the relevant request turns, lightly edited, to a temporary UTF-8 text
    file. Resolve the log as `<log.directory>/<slug>.architecture.md`

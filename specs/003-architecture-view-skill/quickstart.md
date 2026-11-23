@@ -365,3 +365,26 @@
 | 동적 PR 변경 | PASS(구조 뷰) | `data` ⊃ `remote` 중첩, 그룹 쌍 search→data·data→remote, 삭제 노드 엣지 별도 표시 없음·링크 유지, `SearchRemoteDataSource` 표시 없음, 목적 질문 없음. 약 84k 토큰, 115초 |
 
 동적 케이스에서 hover 결함이 따로 드러났다. 본문 이름을 FR-036대로 기본 이름(`SearchViewModel`)으로 쓰면 `apply_hover.py`가 노드 ID나 확장자가 붙은 라벨(`SearchViewModel.kt`)과만 맞춰 보므로, 아무 패널도 넣지 못한 채 exit 0과 "변경 없음"으로 끝난다. 이번 지침 변경과 무관한 기존 결함이므로 버그 흐름으로 따로 다룬다.
+
+## Validation Results (T170, 2026-11-23)
+
+- `python -m unittest specs/003-architecture-view-skill/test_build_diagram.py` 16 OK, 010 `test_learning_stages.py` 40 OK, 002 `test_append_feedback.py` 2 OK.
+- 시나리오 29 구성(정적·동적, `생성` 하나, 진한 간선 둘)을 `build_diagram.py`로 서식하고 Mermaid CLI(ELK)로 렌더링: `생성` 간선만 선·화살촉·라벨이 옅은 주황, 진한 간선은 그대로, 옅은 간선 줄이 먼저 선언됨(`e1`, `e0`, `e2`), 범례는 ✨·♻️·🗑️ 다음 `옅은 선: 사용 외 의존 (생성·전달)` 한 줄.
+- `--faint-edges=false`: `Faint`·범례 줄·`wrappingWidth`가 없고 간선 ID·라벨은 켰을 때와 같음.
+- 확인하지 않음: VS Code 미리보기와 GitHub의 육안 확인(SC-019), 에이전트가 새 규칙으로 라벨을 고르는 실제 실행(SC-020).
+
+## Validation Results (T173, 2026-11-23)
+
+- 시나리오 29 설명을 `SKILL.md` 새 규칙으로 판정(이 규칙을 쓴 에이전트 자신이 실행, 독립 실행 아님): `MemoFeed → ReorderableState`는 만들어 넘기기만 하므로 `생성`, `MemoList → ReorderableState`는 `moved()` 호출이라 사용 의존, `MemoFeed → MemoList`는 함수 노드를 그리는(호출하는) 사용 의존. T170의 정적 산출물과 같고, 늘어난 출력은 라벨 단어뿐이다.
+- 어긋난 사례: handoff의 4라운드 판정은 `TouchOverlay → MemoCard`(덮음)를 옅게 봤지만, 새 규칙에서는 화면 함수를 호출해 그리는 것이 사용 의존이라 진한 선이 되고 `덮음`은 세 라벨 중 하나도 아니다. 사용자 확인 필요.
+
+## Validation Results (T172, 2026-11-23)
+
+- VS Code 미리보기: 사용자가 시나리오 29 동적 산출물을 열어 옅은 선과 범례가 잘 나온다고 확인.
+- GitHub: 샘플 파일 하나만 담은 임시 브랜치를 push해 파일 미리보기로 확인. `생성` 간선의 선·화살촉·라벨이 옅은 주황, 진한 간선 둘은 그대로, 범례는 ✨·♻️·🗑️ 다음 `옅은 선: 사용 외 의존 (생성·전달)` 한 줄. 확인 뒤 원격·로컬 임시 브랜치를 지움.
+
+## Validation Results (T175, 2026-11-23)
+
+- 003 테스트 16 OK, 010 테스트 40 OK.
+- 새 질문 순서로 판정(규칙을 쓴 에이전트 자신이 실행): 시나리오 29의 `MemoFeed → ReorderableState`는 ①예 ②아니오 ③예 → `생성`(옅음), `MemoList → ReorderableState`·`MemoFeed → MemoList`는 ②예 → 진함. T170·T173과 같다.
+- swemo 4라운드: `CategorySelector → ReorderableState`·`MemoFeed → ReorderableState`는 ③ → `생성`(옅음), `draggedItem → ReorderableState`는 key·offset 읽기라 ② → 진함(handoff 판정과 같음). `TouchOverlay → MemoCard`는 코드에 `MemoCard`가 없는 형제 관계지만 ①예(카드가 터치를 먹지 않게 바뀌면 레이어가 불필요) ②아니오 ③아니오 ④예, 근거("카드 안 TextField가 터치를 소비하기 때문")가 가정을 밝히므로 진한 선이며 라벨에 그 가정을 담는다. handoff의 옅음 판정은 이 규칙으로 바뀐다.
