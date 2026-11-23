@@ -105,3 +105,9 @@ prepare ─▶ (서브에이전트) work/01 ─▶ begin 2 ─▶ apply 2 ─▶
 - `begin k`는 `work/<k-1>`과 그 작업 파일이 모두 있어야 하고, `work/<k>`가 이미 있으면 거부한다. 지나간 단계를 되돌아가 덮어쓰지 않기 위해서다.
 - `build`는 1단계와 2…g-1단계의 작업 파일이 모두 있어야 한다.
 - 어느 노드의 k단계 코드가 k-1단계와 같으면, 그 단계에 "이 단계에서는 달라진 것이 없음"이 붙는다(FR-014).
+
+## 2026-11-23 변화 0단계
+
+- **비교 기준** (`manifest.compare`): `base`(짧은 해시), `head`(짧은 해시 또는 null = 작업 트리). `prepare --base`가 있을 때만 있다.
+- **노드 변화** (`node.change`): `changed` | `removed` | `added` | `same` | null. 변경 전·후 원본 범위(R16)로 정해지며 구조 뷰 표시와 무관하다. `removed`이면 `original`이 변경 전 범위를 가리킨다. `changed`이면 `work/before/<id>.kt`가 있다.
+- **0단계 줄** (`changed` 노드 build 때만, 저장하지 않음): `(줄, add|mod|del|None)`의 목록이다. 불변식: `del`을 빼면 `work/original/<id>.kt`, `add`·`mod`를 빼면 `work/before/<id>.kt`와 글자까지 같다.

@@ -238,6 +238,22 @@ specs/010-stepwise-code-convergence/fixtures/   # 신규 — quickstart용 입�
 **Constitution Check (2026-11-23)**: I — 기존 함수 세 곳의 조건과 검사 한 줄, 지침 문장만 고친다. II — 010을 개정한다.
 III — 판단이 갈린 경우와 불필요한 작업자 실행을 요구사항으로 바꾸는 변경이다. IV — 기본값을 옮겨 적지 않는다. 위반 없음.
 
+## 2026-11-23 변화 0단계 계획 (FR-028~032, SC-019~021)
+
+설계 근거는 [research.md](research.md)의 R15~R18, 실행 규약은 [contracts/stages-contract.md](contracts/stages-contract.md)의 마지막 절에 있다. 0단계를 만들어 본 샘플(swemo `5ee6b90 → 26035c6`, 노드 3개)에서 모양과 색을 사용자가 확인했다.
+
+- **역할 분담**: 비교 기준을 요청에서 읽어 git 리비전으로 옮기는 것만 모델이 한다(SKILL.md). 변경 전 원본 찾기, 노드 분류, 0단계부터 n단계까지 모든 diff 계산과 색칠, 복원 검증은 `stages.py`가 한다. 모델은 diff를 보지도 쓰지도 않는다. 일관성을 위해서이고, 토큰 낭비도 없다(FR-032, SC-021).
+- **`prepare`**: `--base=<rev>`와 `--head=<rev>`(선택)를 더한다. `--base`가 없으면 지금과 글자까지 같게 동작한다. `--base`가 있으면 노드의 로컬 링크 파일마다 `git -C <파일 폴더> rev-parse --show-toplevel`로 저장소를 찾고, `git show <rev>:<경로>`로 변경 전 원본을 읽는다(R15). `--head`가 있으면 변경 후 원본도 `git show <head>:<경로>`로 읽고, 없으면 지금처럼 파일을 읽는다. 원본 범위는 기존 `locate_range`로 찾고, `--pick`은 변경 전과 후에 같이 적용한다. 노드를 changed·removed·added·same으로 나눈다(R16). removed는 변경 전 범위를 `work/original/`에 두므로 이후 흐름(스코프 목록, outline, build)이 지금과 같다. changed는 변경 전 범위를 `work/before/<id>.kt`에 두고 스코프 목록에는 넣지 않는다. git이 없거나 리비전·파일을 읽을 수 없으면 0단계 없이 계속하고, `notices`에 이유를 한 줄 남긴다.
+- **`build`**: changed 노드의 상자에 0단계 슬라이드를 하나 더한다(R17). `render_box`에 선택 인자 `stage0`을 두어, `s0` 라디오는 `s1` 앞에 checked 없이 두고, 1단계의 ← 를 `s0`으로 잇는다. 0단계 코드와 색칠 층은 `diff_lines`와 같은 `difflib` opcode로 만든다. 변경 전 줄은 `del`, 짝지은 변경 후 줄은 `mod`, 나머지 변경 후 줄은 `add`이다. 만든 뒤 두 복원(`del` 줄을 빼면 변경 후, `add`·`mod` 줄을 빼면 변경 전)을 확인하고, 다르면 `SourceMismatch`(exit 3)다(SC-020). 비교 기준이 있으면 문서 제목 아래에 `비교 기준: \`<base>\` → \`<head 또는 작업 트리>\``를 둔다. removed 노드는 제목을 `### 🗑️ <이름>`으로 쓴다.
+- **사라진 자리 표시 없애기**: `diff_lines`는 `add`·`mod`만 낸다. `DIFF_CSS`에서 삼각형 규칙 세 줄을 빼고, `.del`을 빨간 배경 한 줄로 바꾼다 — `background: oklch(0.7 0.15 25 / 10%); box-shadow: inset 4px 0 0 oklch(0.62 0.17 18);`(R18). `STAGE_RULES`는 0단계가 있는 문서에서만 `s0` 규칙 한 줄을 더한다.
+- **`stages.md`**: `## 변화` 단계를 `- 표현: change`로 맨 끝에 선택으로 둔다. `parse_stage_definition`은 네 표현 뒤에 `change` 하나를 허용한다. `plan_stages`의 "마지막 단계" 규칙과 설정 목록은 `source`를 가리키게 하고 `change`는 보이기 대상에서 뺀다(FR-031). `settings.jsonc`는 바뀌지 않는다.
+- **SKILL.md**: Prepare 절에 몇 줄을 더한다. 요청이 비교 기준을 가리킬 때만 `--base`/`--head`를 붙인다. 커밋 X는 `--base=X~1 --head=X`, 브랜치 B는 `--base=<git merge-base <기본 브랜치> B> --head=B`, 커밋 안 된 변경은 `--base=HEAD`이다. 비교 기준을 정할 수 없으면 묻지 않고 붙이지 않는다. 이 지침 외의 흐름은 바뀌지 않는다.
+- **테스트**: `test_learning_stages.py`에 다음을 더한다. 임시 git 저장소에서 노드 하나를 고치고 하나를 지운 커밋 두 개를 만든 fixture로 SC-020·SC-021을 확인한다(git이 없으면 skip). 기존 기대 결과는 사라진 자리 표시와 그 CSS만 다르게 갱신한다(SC-019).
+
+하지 않는 것: 요청 종류를 따로 분류하는 단계, 윤곽의 변화 표시, 이름·경로가 바뀐 파일 추적(git rename 감지 포함), URL 링크 원본의 변경 전 읽기, PR 번호를 브랜치로 바꾸기(모델이 할 수 있으면 하고, 못 하면 붙이지 않음), 넘겨 보기를 지원하지 않는 곳의 0단계 배치, 새 설정 항목.
+
+**Constitution Check (2026-11-23 변화 0단계)**: I — 명령은 늘리지 않고 `prepare`에 선택 인자 두 개, `render_box`에 선택 인자 하나만 더한다. diff는 기존 `difflib` 흐름을 재사용한다. git은 `--base`가 있을 때만 부르는 외부 명령으로, 새 설치 단계가 아니다. 없으면 알리고 지금처럼 만든다. II — 010을 개정한다. III — 새 동작을 요구사항으로 정한 변경이다. IV — 새 설정 기본값이 없다. 위반 없음. Phase 1 설계 뒤 다시 확인했고 달라진 것이 없다.
+
 ## Complexity Tracking
 
 | 더하는 복잡도 | 필요한 이유 | 더 단순한 방법을 고르지 않은 이유 |

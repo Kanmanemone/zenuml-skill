@@ -229,3 +229,15 @@ Q2 뒤에 `work/edits.txt`에 블록 두 개를 적는다. 하나는 `OrderServi
 - 두 번째 실행: `Screen`의 `range`가 3–7줄이다. `work/original/Screen.kt`는 `fixtures/expected/original/overload-Screen.kt`와 바이트 단위로 같다.
 - 그다음 `fixtures/work-overload/01/*`를 `work/01/`에 복사하고 `begin 2`~`begin 6`, `build`를 실행한다. 종료 코드는 0이고 `verified`는 1이다(`ScreenViewModel`은 링크가 없어 구체화하지 않음).
 - 확인한 뒤 `fixtures/overload.stages/`를 지운다.
+
+## 2026-11-23 변화 0단계 확인
+
+**준비**: git이 있어야 한다. 자동 확인은 `python -m unittest specs/010-stepwise-code-convergence/test_learning_stages.py`에 들어 있다(임시 저장소를 만들어 노드 하나를 고치고 하나를 지운다. git이 없으면 skip).
+
+**기대 결과**:
+
+- `--base` 없이 돌린 기존 fixture의 결과는 기존 기대 결과와 비교해 사라진 자리 표시(`del`/`del-after` 클래스)와 그 CSS만 다르다(SC-019).
+- `--base`를 준 실행에서 고친 노드에만 0단계가 하나 있고, 두 복원이 변경 후·변경 전 범위와 같다. 지운 노드는 `### 🗑️` 제목이고, 마지막 단계가 변경 전 범위와 같다. 다른 노드의 1단계 이후는 `--base` 없는 결과와 같다(SC-020).
+- 같은 실행의 스코프 목록에 고친 노드의 변경 전 줄이 없고, outline 항목은 지운 노드만큼만 늘어난다(SC-021).
+
+**수동 확인**: 실제 저장소(예: swemo, `--base=5ee6b90 --head=26035c6`)로 만든 문서를 VS Code 미리보기로 연다. 1단계에서 ←를 누르면 0단계가 나오고, 0단계의 ←는 비활성이며, →를 누르면 1단계로 돌아온다. 초록·파랑·빨강 배경과 막대가 보인다.

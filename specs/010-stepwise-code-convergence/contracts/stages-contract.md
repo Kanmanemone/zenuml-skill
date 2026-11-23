@@ -301,3 +301,12 @@
 # 2026-11-16 학습 장면 계약 (초기 계약보다 우선)
 
 정의의 선택 항목은 `- 표현: prose|code`, `- 반복: dependency`다. CLI·작업 경로는 유지한다. 첫 장면은 상황 문단 하나인 prose 장면이며, 그다음 첫 code 장면의 작업 파일은 `begin`이 `이름 {`·`}`로 시작시킨다. 반복은 직접 화살표 순서로 확장하며 기본 별명으로 숨긴다. `prepare`는 단계별 `nickname/kind/targets`를 출력하고 `begin`도 이 필드를 출력한다. 대상 없는 노드는 이전 코드를 복사하고 화면에서는 해당 장면을 생략한다. prose는 fence 없이 이스케이프한 문단으로, code는 Kotlin fence로 보인다. 제목 아래에 질문 문구는 붙이지 않는다. 숨긴 prose는 코드에 합치지 않는다. 최종 번호·검증은 노드별이며 원본 없는 노드도 구조 뷰만으로 작성 가능한 앞 장면을 보인다. 기존 manifest는 새 필드 부재를 code로 취급한다.
+
+# 2026-11-23 변화 0단계 계약 (위 계약에 더함)
+
+- `prepare <view> [...] [--base=<rev> [--head=<rev>]]`: `--head`는 `--base`와만 쓴다. `--base`가 없으면 출력과 작업 폴더가 지금과 같다. `--base`가 있으면 `manifest.compare = {"base": <짧은 해시>, "head": <짧은 해시 또는 null>}`이고, 노드마다 `change`(`changed`·`removed`·`added`·`same`, 변경 전을 읽지 못한 노드는 `null`)를 둔다. `changed` 노드는 `work/before/<id>.kt`를 갖는다. `removed` 노드의 `work/original/<id>.kt`는 변경 전 범위이고, 스코프 목록에 나온다. 읽지 못한 것은 exit 2가 아니라 `notices`에 `🕘 0단계를 붙이지 못함: <이유>` 한 줄씩 남긴다.
+- 같은 `prepare`에서 변경 전 원본에만 노드 이름의 선언이 여럿이면, 그 후보를 `pick`에 `{"id", "source", "revision": <base 짧은 해시>, "candidates"}`로 내보낸다. 그동안에는 노드를 분류하지 않고 스코프 목록도 출력하지 않는다. `--pick`은 변경 전·후에 같은 번호로 적용된다.
+- `build <dir>`: `changed` 노드마다 0단계를 만들고 두 복원을 확인한다. 다르면 exit 3이다. 출력 JSON은 그대로다.
+- 문서: `compare`가 있으면 `# <제목> — 정제 단계` 다음에 빈 줄과 `비교 기준: \`<base>\` → \`<head>\``(head가 null이면 `작업 트리`)를 둔다. `removed` 노드의 제목은 `### 🗑️ <이름>`이다. 0단계가 있는 상자는 `<input ... id="<id>-0" class="s0">`를 `-1` 라디오 앞에 두고, 슬라이드 `<div class="stage s0">`를 `s1` 슬라이드 앞에 둔다. 제목은 `0단계: <change 별명> (<base> → <head>)`이다. 색칠 층의 줄 클래스는 `add`·`mod`·`del`이다.
+- `stages.md`: `source` 다음에 `- 표현: change`인 단계 하나를 선택으로 둘 수 있다. 그 단계는 `settings.jsonc`의 `stages`에 나오지 않고, `--show`/`--hide`에서는 무시하며 알린다.
+- 일반 단계의 색칠 층은 `add`·`mod`만 쓴다.
