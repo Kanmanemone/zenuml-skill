@@ -103,7 +103,7 @@ Only use `try/catch`, `par`, or `critical` when the source description actually 
 
 ## Comments & styling
 
-- Line comments: `// comment text` — attaches to the following statement and renders as a diagram note
+- Line comments: `// comment text` — attaches to the following statement and renders as a diagram note. A comment inside an empty block (`opt (c) { // x }`) has no statement to attach to and is not drawn; put it above the fragment instead.
 - Unicode identifiers and emoji (shortcode `[rocket]` or literal character) are supported in names and labels
 - Participant color/width/alias covered under [Participants](#participants)
 

@@ -43,6 +43,12 @@ Append the script's notice lines unchanged to the chat response.
 - Preserve real identifiers exactly. Write invented actor/behavior names and
   comments in the user's language; for scripts without letter case, use
   `snake_case` for invented multi-word names.
+- Write a state change as a `// comment` on the line above the call that causes
+  it, never as a message to oneself. A branch whose only effect is a state change
+  gets `// → <result>` above its fragment and an empty block (a comment inside an
+  empty block is not drawn). A message label is the function and its arguments
+  (or a short action name); keep explanations in comments. A self-message is only
+  for a real call to one's own function.
 - Generate a faithfully large flow when requested. Do not truncate it, warn about
   length, or propose splitting it.
 - If caller direction or a structural condition is ambiguous, ask one targeted
@@ -55,7 +61,8 @@ Before saving, fix and re-check:
 1. No participant, message, return, branch, loop, or try/catch exceeds evidence.
 2. Call chains and nesting match the syntax reference and are no deeper than
    necessary.
-3. The output file contains only the required `zenuml` fence.
+3. The output file contains only the required `zenuml` fence before
+   `apply_style.py` runs; no state change is drawn as a self-message.
 4. The chat response contains only the file link and permitted clarification,
    direct-answer, out-of-scope, or settings-notice lines.
 
@@ -77,16 +84,19 @@ logging.
 
 After saving:
 
-1. Write only the relevant-turn request summary to a temporary UTF-8 text file.
-2. Resolve the log as `<log.directory>/<slug>.md`, then run
+1. Run `apply_style.py <output>`; add `--style=<readable|zenuml-default>` only
+   when this request states the look. It adds or removes the style block at the
+   end of the file; never write that block yourself.
+2. Write only the relevant-turn request summary to a temporary UTF-8 text file.
+3. Resolve the log as `<log.directory>/<slug>.md`, then run
    `append_feedback.py <output> <resolved log path> <request file>
    --mode=<new|append>`. Use `new` for initial/colliding requests and `append`
    for regeneration. The helper consumes the request file and copies the saved
    output verbatim; do not reproduce it yourself on success.
-3. If the helper fails, read
+4. If the helper fails, read
    [references/feedback-log.md](references/feedback-log.md) and preserve the
    existing append-only contract manually.
-4. Reply with the relative file link.
+5. Reply with the relative file link.
 
 The request summary gathers every turn since the previous round that shaped the
 diagram, including clarification, and omits unrelated talk. Changing

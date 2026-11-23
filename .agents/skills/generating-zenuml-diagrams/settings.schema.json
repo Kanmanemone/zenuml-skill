@@ -9,6 +9,20 @@
       "tokenImpact": {
         "*": "[0]"
       }
+    },
+    {
+      "key": "diagram.style",
+      "type": "enum",
+      "values": [
+        "readable",
+        "zenuml-default"
+      ],
+      "default": "readable",
+      "description": "시퀀스 다이어그램을 어떤 모양으로 그릴지 (읽기 쉽게 다듬은 모양, 또는 아무것도 더하지 않은 Mermaid·ZenUML 기본 렌더링)",
+      "tokenImpact": {
+        "readable": "[0]",
+        "zenuml-default": "[0]"
+      }
     }
   ]
 }

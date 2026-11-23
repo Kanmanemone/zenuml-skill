@@ -56,6 +56,7 @@
 | architecture | `dependency.faintNonUsageEdges` | boolean | — |
 | architecture | `log.directory` | relativePath(projectRoot) | — |
 | zenuml | `log.directory` | relativePath(projectRoot) | — |
+| zenuml | `diagram.style` | enum | `readable`/`zenuml-default` |
 | exporting | `questions.enabled` | boolean | — |
 | exporting | `defaults.format` | enum | `none`/`svg`/`png`/`pdf` |
 | exporting | `defaults.scope` | enum | `none`/`diagram`/`document` |

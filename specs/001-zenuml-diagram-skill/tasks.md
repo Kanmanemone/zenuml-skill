@@ -204,11 +204,15 @@ Task: "SKILL.md 뼈대(frontmatter + 섹션 헤딩) 작성"
 
 **Independent Test**: quickstart.md "읽기 쉬운 시퀀스 다이어그램" 시나리오를 실행한다.
 
-- [ ] T024 `specs/001-zenuml-diagram-skill/test_apply_style.py`에 블록 추가·교체·제거, 코드펜스 불변, 명령줄 값 우선, 배포 설정과 schema 기본값 일치 테스트를 쓴다 per FR-016, 007 FR-015d
-- [ ] T025 `.agents/skills/generating-zenuml-diagrams/settings.schema.json`과 `settings.jsonc`에 enum `diagram.style`을 더한다 per 007 FR-015d
-- [ ] T026 `.agents/skills/generating-zenuml-diagrams/scripts/apply_style.py`를 plan.md 계획과 research.md 스타일 블록대로 만든다 per FR-016
-- [ ] T027 `.agents/skills/generating-zenuml-diagrams/SKILL.md`에 FR-015 작성 규칙과 `apply_style.py` 실행 순서를, `references/syntax.md`에 빈 블록 안 주석이 그려지지 않는다는 사실을 넣는다 per FR-012, FR-015
-- [ ] T028 `specs/007-skill-output-settings/data-model.md`와 `contracts/settings-contract.md`에 `diagram.style`을 더한다 per 007 FR-015d
-- [ ] T029 테스트를 실행하고 swemo 흐름으로 두 설정의 산출 파일을 만들어 quickstart.md에 기록한다 per SC-014, SC-015
+- [X] T024 `specs/001-zenuml-diagram-skill/test_apply_style.py`에 블록 추가·교체·제거, 코드펜스 불변, 명령줄 값 우선, 배포 설정과 schema 기본값 일치 테스트를 쓴다 per FR-016, 007 FR-015d
+- [X] T025 `.agents/skills/generating-zenuml-diagrams/settings.schema.json`과 `settings.jsonc`에 enum `diagram.style`을 더한다 per 007 FR-015d
+- [X] T026 `.agents/skills/generating-zenuml-diagrams/scripts/apply_style.py`를 plan.md 계획과 research.md 스타일 블록대로 만든다 per FR-016
+- [X] T027 `.agents/skills/generating-zenuml-diagrams/SKILL.md`에 FR-015 작성 규칙과 `apply_style.py` 실행 순서를, `references/syntax.md`에 빈 블록 안 주석이 그려지지 않는다는 사실을 넣는다 per FR-012, FR-015
+- [X] T028 `specs/007-skill-output-settings/data-model.md`와 `contracts/settings-contract.md`에 `diagram.style`을 더한다 per 007 FR-015d
+- [X] T029 테스트를 실행하고 swemo 흐름으로 두 설정의 산출 파일을 만들어 quickstart.md에 기록한다 per SC-014, SC-015
 
 **Dependencies**: T024 → T025 → T026 → T027 → T029. T028은 아무 때나.
+
+## Phase 12: Convergence
+
+- [X] T030 `specs/001-zenuml-diagram-skill/contracts/skill-interface.md`의 파일 내용 계약과 `data-model.md` AP-6에 FR-016 스타일 블록을 더한다 per FR-012 (contradicts)
