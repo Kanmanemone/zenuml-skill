@@ -818,6 +818,9 @@ def _declaration_end(masked, mlines, pos, lang=None, inside=None):
         elif ch == "\n" and depth == 0 and brace == 0 and not body and not semi:
             line_no = masked.count("\n", 0, i)
             current = mlines[line_no].rstrip()
+            if not current:  # blank or comment-only (blanked by masking): the line before it decided
+                i += 1
+                continue
             following = next((l.strip() for l in mlines[line_no + 1:] if l.strip()), "")
             if not current.endswith(cont_end) and not following.startswith(cont_start):
                 return line_no

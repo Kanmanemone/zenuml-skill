@@ -136,6 +136,26 @@ fun <T> List<T>.second(): T = this[1]
         self.assertEqual(s.find_declaration(text, ['second'])[0], (7, 7))
         self.assertIsNone(s.find_declaration(text, ['DrawScope'])[0])
 
+    def test_expression_bodies_continue_past_comment_and_blank_lines(self):
+        text = '''fun Modifier.a(): Modifier =
+    // comment
+    zIndex(1f)
+        // comment
+        .graphicsLayer { translationY = 0f }
+
+fun <T> List<T>.b(): List<T> =
+    /* block
+       comment */
+    toMutableList()
+
+val c =
+
+    42
+'''
+        self.assertEqual(s.find_declaration(text, ['a'])[0], (1, 5))
+        self.assertEqual(s.find_declaration(text, ['b'])[0], (7, 10))
+        self.assertEqual(s.find_declaration(text, ['c'])[0], (12, 14))
+
 
 RAW = '''object Key : EntryKey {
     override val title = "t"
