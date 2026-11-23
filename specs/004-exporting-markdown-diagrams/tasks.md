@@ -230,7 +230,11 @@ Task: "scripts/lib/inline-svg.js 작성"
 
 **Independent Test**: quickstart.md 시나리오 15를 실행한다.
 
-- [ ] T054 `.agents/skills/exporting-markdown-diagrams/scripts/export-diagrams.js`가 원본의 `<style>` 블록(펜스 코드 블록 밖)을 모아 각 SVG 루트 바로 다음에 넣게 한다 per FR-024
-- [ ] T055 quickstart.md 시나리오 15를 실행해 결과를 기록한다 per SC-015
+- [X] T054 `.agents/skills/exporting-markdown-diagrams/scripts/export-diagrams.js`가 원본의 `<style>` 블록(펜스 코드 블록 밖)을 모아 각 SVG 루트 바로 다음에 넣게 한다 per FR-024
+- [X] T055 quickstart.md 시나리오 15를 실행해 결과를 기록한다 per SC-015
 
 **Dependencies**: T054 → T055.
+
+## Phase 13: Convergence
+
+- [X] T056 `specs/004-exporting-markdown-diagrams/contracts/skill-interface.md`에 다이어그램만 내보낼 때 문서 `<style>`을 SVG에 넣는다는 계약을 더한다 per FR-024 (partial)

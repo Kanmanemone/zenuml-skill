@@ -36,6 +36,15 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** CSS of every <style> block in the Markdown, outside fenced code blocks. */
+function documentStyles(markdown) {
+  const prose = markdown.replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[ \t]*$/gm, "");
+  return [...prose.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)]
+    .map((m) => m[1].replaceAll("]]>", "]]]]><![CDATA[>"))
+    .join("\n")
+    .trim();
+}
+
 async function main() {
   const [targetFile, format, outputBaseArg] = withoutThemeFlag(process.argv.slice(2));
 
@@ -105,6 +114,17 @@ async function main() {
     fail(
       `mermaid-cli reported success but no SVG was produced for ${targetFile}:\n${combinedOutput}`,
     );
+  }
+
+  // The document's own <style> blocks style its diagrams in the preview (e.g. file names on
+  // architecture-view node borders); embed them in each SVG so this export shows them too.
+  const documentCss = documentStyles(fs.readFileSync(targetFile, "utf-8"));
+  if (documentCss) {
+    for (const svgName of svgFiles) {
+      const svgPath = path.join(workDir, svgName);
+      const svg = fs.readFileSync(svgPath, "utf-8");
+      fs.writeFileSync(svgPath, svg.replace(/<svg\b[^>]*>/i, (root) => `${root}<style><![CDATA[${documentCss}]]></style>`));
+    }
   }
 
   // --- Stage 2: fit each SVG's viewBox to its content, then emit the requested format ---
