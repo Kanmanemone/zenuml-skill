@@ -581,3 +581,25 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 
 **Dependencies**: T102 → T103 → T104 → T105.
   - 표준 라이브러리 테스트 40개가 통과했다(새 테스트 1개, 상자 구조에 기대던 테스트 두 곳 개정). 단계가 하나도 없는 노드는 이전과 같은 빈 상자를 낸다. 다시 만든 기대 결과 네 개는 이전과 fence 내용·색칠 층·단계 제목이 모두 같고, 상자 구조와 CSS만 다르다. swemo `5ee6b90 → 26035c6` 샘플을 실제 구현으로 다시 만들었다(스크롤 상자 3개, 판 31개, 0단계 3개). 미리보기의 스크롤 유지는 사용자가 확인한다.
+
+## Phase 26: -1단계 (FR-034, SC-023)
+
+**Goal**: 0단계가 있는 달라진 노드에 변경 전 원본 범위를 색 없이 그대로 보이는 -1단계를 0단계 앞에 둔다(plan "2026-11-24 -1단계 계획", research R20).
+
+**Independent Test**: `python specs/010-stepwise-code-convergence/test_learning_stages.py`와 [quickstart.md](quickstart.md)의 "2026-11-24 -1단계 확인"
+
+- [ ] T106 [US4] `specs/010-stepwise-code-convergence/test_learning_stages.py`를 고친다. 구현 전에 실패하는지 확인한다 per FR-034, SC-023, contracts/stages-contract.md "2026-11-24 -1단계 계약"
+  - `test_change_stage_is_optional_and_not_toggled`: `변경 전` 별명이 설정·`--show`·`--hide`에서 무시되고 알림이 남는지 본다. `## 변화` 없이 `before` 단계만 둔 정의가 `InputError`인지 본다.
+  - `test_changed_node_gets_stage0_and_removed_node_uses_its_old_code`: `<div class="stage s-1">`가 문서에 정확히 1개인지 본다. `InventoryRepository`의 `pane p-1` fence가 `work/before/InventoryRepository.kt`와 같고 색칠 층이 없는지 본다. 0단계의 ←가 `InventoryRepository--1`을 가리키는지 본다. `OrderService`·`PaymentGateway`에 `--1` 라디오가 없는지 본다.
+- [ ] T107 [US4] `.agents/skills/revealing-code-step-by-step/stages.md`의 `## 변화` 다음에 `## 변경 전` 단계(`- 표현: before`)를 더한다. 0단계 설명 문단처럼, 비교 기준이 있을 때 0단계가 붙는 노드에만 0단계 앞에 붙고 끌 수 없다는 한 문단을 둔다 per FR-034, data-model.md "-1단계 장면"
+- [ ] T108 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`를 고친다 per FR-034, plan "scripts/stages.py"
+  - `BEFORE`를 두고 `parse_stage_definition`이 `KINDS + [change, before]` 순서를 받게 한다. 오류 문구에 before를 더한다.
+  - `plan_stages`가 `before` 단계를 `change`처럼 보이기 대상에서 빼고 알리게 한다.
+  - `render_box`에 `stage_minus1=None`을 더해 `k = -1` 항목으로 0단계 앞에 넣는다. 색칠 층은 없다.
+  - `build_documents`가 0단계를 만든 노드에만 `work/before/<id>.kt`로 `-1단계: <별명> (<base>)`를 만든다. -1단계가 있는 문서는 CSS 규칙을 -1부터 만든다.
+- [ ] T109 [P] [US4] `.agents/skills/revealing-code-step-by-step/SKILL.md` Prepare 절의 "stage 0 (what changed)"에 "and stage −1 (the code before)"를 더한다 per plan "SKILL.md"
+- [ ] T110 테스트 전체를 실행한다. `specs/010-stepwise-code-convergence/fixtures/expected/`가 바뀌지 않았는지 `git status`로 확인한다. swemo 샘플(`--base=5ee6b90 --head=26035c6`)을 scratchpad에 다시 만들어, 사용자가 미리보기에서 -1단계 넘기기를 확인할 수 있게 경로를 알린다 per SC-023
+
+**Dependencies**: T106 → T107 → T108 → T110. T109는 T108과 병렬로 할 수 있다.
+
+**MVP**: T106~T108이 SC-023을 채운다.
