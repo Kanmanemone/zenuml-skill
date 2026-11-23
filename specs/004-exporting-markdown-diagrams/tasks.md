@@ -223,3 +223,14 @@ Task: "scripts/lib/inline-svg.js 작성"
 - [X] T051 `specs/007-skill-output-settings/contracts/settings-contract.md` "exporting 스크립트 계약"에 `render.theme` 적용과 `--theme=` 우선·안내를 더한다 per 007 FR-014c (partial)
 - [X] T052 `specs/007-skill-output-settings/spec.md` Key Entities "설정 옵션" 현재 목록에 `render.theme`(FR-014c)과 빠져 있던 `dependency.faintNonUsageEdges`(FR-012f)를 더한다 per 007 FR-014c, FR-012f (partial)
 - [X] T053 Light+ 모양 PNG를 VS Code Light+ 미리보기 화면과 나란히 비교해 quickstart.md에 기록한다 per SC-014 (partial)
+
+## Phase 12: 다이어그램 내보내기에 문서 style 적용 (FR-024, SC-015)
+
+**Goal**: 다이어그램만 내보낼 때도 문서의 `<style>`이 미리보기처럼 다이어그램에 적용된다.
+
+**Independent Test**: quickstart.md 시나리오 15를 실행한다.
+
+- [ ] T054 `.agents/skills/exporting-markdown-diagrams/scripts/export-diagrams.js`가 원본의 `<style>` 블록(펜스 코드 블록 밖)을 모아 각 SVG 루트 바로 다음에 넣게 한다 per FR-024
+- [ ] T055 quickstart.md 시나리오 15를 실행해 결과를 기록한다 per SC-015
+
+**Dependencies**: T054 → T055.
