@@ -473,6 +473,26 @@ class Workflow(unittest.TestCase):
             (root / 'src/Order.kt').write_text((root / 'src/Order.kt').read_text(encoding='utf-8').replace('reserve(order.id)', 'reserve(order.key)'), encoding='utf-8')
             self.assertEqual(exit_code(['build', str(result)]), 3)
 
+    def test_stages_share_one_scroll_box_and_keep_their_code(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, _, _, result = self.prepare(Path(tmp), 'view.architecture.md', 'unfold')
+            built, _ = run(s.cmd_build, dir=str(result))
+            manifest = s.load_manifest(result)
+            parsed = parsed_outline(result, manifest)
+            doc = '\n'.join(Path(d).read_text(encoding='utf-8') for d in built['docs'])
+            for node in manifest['nodes']:
+                scenes = s.node_scenes(result, manifest, node, parsed)
+                box = doc[doc.index('<input type="radio" name="%s"' % node['id']):]
+                box = re.split(r'\n### |\n<details', box)[0]  # up to the next node or the style block
+                with self.subTest(node['id']):
+                    self.assertEqual(box.count('<div class="scroller">'), 1)
+                    self.assertEqual(box.count('<div class="pane p'), len(scenes))
+                    self.assertLess(box.rindex('<div class="stage s'), box.index('<div class="scroller">'))  # headings above
+                    fences = re.findall(r'\n(`{3,})[\w+.#-]*\n(.*?)\n\1\n', box[box.index('<div class="scroller">'):], re.S)
+                    self.assertEqual([code for _, code in fences], [c.rstrip('\n') for _, kind, c in scenes if kind == 'code'])
+            self.assertIn('.stages > .scroller { max-height: min(30lh, 70vh); overflow: auto;', doc)
+            self.assertNotIn('.stages .code { max-height', doc)
+
     def test_source_less_node_shows_only_the_situation(self):
         with tempfile.TemporaryDirectory() as tmp:
             _, _, _, result = self.prepare(Path(tmp), 'view.architecture.md', 'unfold')
@@ -925,7 +945,7 @@ def git(root, *argv):
 def stage0_rows(doc, node_id):
     """(line, class) rows of a node's stage 0, read back from its diff layer."""
     box = doc[doc.index('id="%s-0"' % node_id):]
-    slide = box[box.index('<div class="stage s0">'):box.index('<div class="stage s1">')]
+    slide = box[box.index('<div class="pane p0">'):box.index('<div class="pane p1">')]
     layer = slide[slide.index('<pre class="diff"'):slide.index('</pre>')]
     return [(html.unescape(text), cls or None) for cls, text in re.findall(r'<span(?: class="([a-z]+)")?>(.*?)</span>\n', layer)]
 
@@ -1042,7 +1062,7 @@ class Render(unittest.TestCase):
 
     def test_prose_is_escaped_not_syntax_highlighted(self):
         box = s.render_box('A', [('Situation', '', '<script>x</script> & text'), ('Code', '', 'class A')], [None, None], ['prose', 'code'])
-        first, second = box.split('<div class="stage s2">')
+        first, second = box.split('<div class="pane p2">')
         self.assertNotIn('```', first)
         self.assertIn('&lt;script&gt;', first)
         self.assertIn('```kotlin', second)

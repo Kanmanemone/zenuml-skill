@@ -570,13 +570,14 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 
 **Independent Test**: `python specs/010-stepwise-code-convergence/test_learning_stages.py`와 [quickstart.md](quickstart.md)의 "2026-11-23 공유 스크롤 상자 확인"
 
-- [ ] T102 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`를 고친다. 먼저 상자 구조에 기대던 세 곳(`Render` 테스트의 상자 나누기, `stage0_rows`, 0단계 개수 확인)을 `pane` 기준으로 바꾼다. 그다음 테스트를 하나 더한다. fixture 문서의 상자마다 `scroller`가 하나이고, 단계마다 `pane`이 하나이며, 문서의 fence 내용이 `node_scenes`의 코드 장면과 차례대로 같은지 확인한다. 구현 전에 실패하는지 확인한다 per FR-033, SC-022
-- [ ] T103 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`를 고친다 per FR-033, contracts/stages-contract.md "2026-11-23 공유 스크롤 상자 계약"
+- [X] T102 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`를 고친다. 먼저 상자 구조에 기대던 세 곳(`Render` 테스트의 상자 나누기, `stage0_rows`, 0단계 개수 확인)을 `pane` 기준으로 바꾼다. 그다음 테스트를 하나 더한다. fixture 문서의 상자마다 `scroller`가 하나이고, 단계마다 `pane`이 하나이며, 문서의 fence 내용이 `node_scenes`의 코드 장면과 차례대로 같은지 확인한다. 구현 전에 실패하는지 확인한다 per FR-033, SC-022
+- [X] T103 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`를 고친다 per FR-033, contracts/stages-contract.md "2026-11-23 공유 스크롤 상자 계약"
   - `render_box`가 단계 제목들과 `scroller` 하나, 단계별 `pane`으로 그린다. 0단계도 같다.
   - `build_documents`가 제목 규칙과 같은 범위의 `pane` 규칙을 만든다.
   - `BASE_CSS`는 높이 상한과 `overflow: auto`를 `.code`에서 `.scroller`로 옮기고 `.pane`을 숨긴다.
   - `extract_last_stage`가 마지막 `pane`의 fence를 읽는다.
-- [ ] T104 [US2] `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 결과를 다시 만든다. `git diff`로 차이가 상자 구조와 CSS뿐이고 fence 안 글자는 같은지 확인한다 per SC-022
-- [ ] T105 테스트 전체를 실행한다. swemo 샘플(`--base=5ee6b90 --head=26035c6`)을 scratchpad에 다시 만들어, 사용자가 미리보기에서 스크롤 유지를 확인할 수 있게 경로를 알린다 per SC-022
+- [X] T104 [US2] `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 결과를 다시 만든다. `git diff`로 차이가 상자 구조와 CSS뿐이고 fence 안 글자는 같은지 확인한다 per SC-022
+- [X] T105 테스트 전체를 실행한다. swemo 샘플(`--base=5ee6b90 --head=26035c6`)을 scratchpad에 다시 만들어, 사용자가 미리보기에서 스크롤 유지를 확인할 수 있게 경로를 알린다 per SC-022
 
 **Dependencies**: T102 → T103 → T104 → T105.
+  - 표준 라이브러리 테스트 40개가 통과했다(새 테스트 1개, 상자 구조에 기대던 테스트 두 곳 개정). 단계가 하나도 없는 노드는 이전과 같은 빈 상자를 낸다. 다시 만든 기대 결과 네 개는 이전과 fence 내용·색칠 층·단계 제목이 모두 같고, 상자 구조와 CSS만 다르다. swemo `5ee6b90 → 26035c6` 샘플을 실제 구현으로 다시 만들었다(스크롤 상자 3개, 판 31개, 0단계 3개). 미리보기의 스크롤 유지는 사용자가 확인한다.

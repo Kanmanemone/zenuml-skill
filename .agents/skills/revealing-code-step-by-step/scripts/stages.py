@@ -1799,7 +1799,8 @@ BASE_CSS = """.zenuml-stepwise-style { display: none; }
 .stages span.nav { opacity: .3; cursor: default; }
 .stages .note { padding: 0 0 .5em; opacity: .8; }
 .stages .scene { padding: .5em 0 1em; max-width: 65ch; }
-.stages .code { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
+.stages > .scroller { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
+.stages > .scroller > .pane { display: none; }
 .stages .code pre { margin: 0; overflow: visible; width: max-content; min-width: 100%; box-sizing: border-box; }
 .stages .code pre, .stages .code pre code { white-space: pre; word-break: normal; }"""
 
@@ -1824,36 +1825,36 @@ def note_for(changed):
 
 def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin", stage0=None):
     """Base box. slides: [(title, note, code)]; diff_layers: [markup or None] (added after the code).
-    stage0: optional (title, code, layer) reached by stepping back from stage 1 (spec FR-031)."""
+    stage0: optional (title, code, layer) reached by stepping back from stage 1 (spec FR-031).
+    Headings come first; every stage's scene sits in one shared scroll box, so stepping keeps the
+    position (spec FR-033, research R19)."""
     n = len(slides)
     kinds = kinds or ["code"] * n
-    out = ['<div class="stages">', ""]
+    items = [(k, title, note, kinds[k - 1], code, diff_layers[k - 1]) for k, (title, note, code) in enumerate(slides, start=1)]
     if stage0:
-        out.append('<input type="radio" name="%s" id="%s-0" class="s0">' % (node_id, node_id))
-    for k in range(1, n + 1):
+        items.insert(0, (0, stage0[0], "", "code", stage0[1], stage0[2]))
+    out = ['<div class="stages">', ""]
+    if not items:  # nothing to show (hidden situation, no source): an empty box as before
+        return "\n".join(out + ["", "</div>"])
+    first = items[0][0]
+    for k, *_ in items:
         out.append('<input type="radio" name="%s" id="%s-%d" class="s%d"%s>' % (node_id, node_id, k, k, " checked" if k == 1 else ""))
     out.append("")
-    if stage0:
-        title, code, layer = stage0
-        out += ['<div class="stage s0">', "",
-                '<div class="head"><span class="name">%s</span><span class="nav">←</span><label class="nav" for="%s-1">→</label></div>'
-                % (html.escape(title, quote=False), node_id), "",
-                '<div class="code">', "", fence(code, lang), "", *([layer, ""] if layer else []), "</div>", "", "</div>", ""]
-    for k, (title, note, code) in enumerate(slides, start=1):
-        prev = ('<label class="nav" for="%s-%d">←</label>' % (node_id, k - 1) if k > 1 or stage0
-                else '<span class="nav">←</span>')
+    for k, title, note, *_ in items:
+        prev = '<label class="nav" for="%s-%d">←</label>' % (node_id, k - 1) if k > first else '<span class="nav">←</span>'
         nxt = '<label class="nav" for="%s-%d">→</label>' % (node_id, k + 1) if k < n else '<span class="nav">→</span>'
         out += ['<div class="stage s%d">' % k, "",
                 '<div class="head"><span class="name">%s</span>%s%s</div>' % (html.escape(title, quote=False), prev, nxt),
-                *(['<div class="note">%s</div>' % html.escape(note, quote=False)] if note else []), ""]
-        if kinds[k - 1] == "prose":
-            out += ['<div class="scene"><p>%s</p></div>' % html.escape(code.strip(), quote=False).replace("\n", "<br>"), "", "</div>", ""]
-            continue
-        out += ['<div class="code">', "", fence(code, lang), ""]
-        if diff_layers[k - 1]:
-            out += [diff_layers[k - 1], ""]
-        out += ["</div>", "", "</div>", ""]
-    out.append("</div>")
+                *(['<div class="note">%s</div>' % html.escape(note, quote=False)] if note else []), "", "</div>", ""]
+    out += ['<div class="scroller">', ""]
+    for k, _, _, kind, code, layer in items:
+        out += ['<div class="pane p%d">' % k, ""]
+        if kind == "prose":
+            out += ['<div class="scene"><p>%s</p></div>' % html.escape(code.strip(), quote=False).replace("\n", "<br>"), ""]
+        else:
+            out += ['<div class="code">', "", fence(code, lang), "", *([layer, ""] if layer else []), "</div>", ""]
+        out += ["</div>", ""]
+    out += ["</div>", "", "</div>"]
     return "\n".join(out)
 
 
@@ -1968,8 +1969,9 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
                 stage0 = change_scene(result_dir, node, compare, change_stage["nickname"], with_diff)
                 has_stage0 = True
             parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin", stage0), ""]
-        rules = "\n".join(".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k)
-                          for k in range(0 if has_stage0 else 1, max_slides + 1))
+        shown = range(0 if has_stage0 else 1, max_slides + 1)
+        rules = "\n".join([".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k) for k in shown]
+                          + [".stages > input.s%d:checked ~ .scroller > .pane.p%d { display: block; }" % (k, k) for k in shown])
         parts += ['<details class="zenuml-stepwise-style">', "<summary>" + STYLE_SUMMARY + "</summary>", "",
                   "<style>", BASE_CSS.replace("{STAGE_RULES}", rules), "</style>", ""]
         if with_diff:
@@ -1997,7 +1999,7 @@ def extract_last_stage(doc_text, node_id, last):
     m = re.search(r'<input type="radio" name="%s" id="%s-1"' % (re.escape(node_id), re.escape(node_id)), doc_text)
     if not m:
         return None
-    m2 = re.compile(r'<div class="stage s%d">.*?<div class="code">\n\n(`{3,})[\w+.#-]*\n(.*?)\n\1\n' % last, re.S).search(doc_text, m.end())
+    m2 = re.compile(r'<div class="pane p%d">\n\n<div class="code">\n\n(`{3,})[\w+.#-]*\n(.*?)\n\1\n' % last, re.S).search(doc_text, m.end())
     return m2.group(2) if m2 else None
 
 

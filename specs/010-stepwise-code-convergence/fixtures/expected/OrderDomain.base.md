@@ -17,13 +17,47 @@
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/6)</span><span class="nav">←</span><label class="nav" for="OrderService-2">→</label></div>
 
-<div class="scene"><p>고객이 장바구니를 확정해 결제 버튼을 누를 때 쓰인다.</p></div>
-
 </div>
 
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 윤곽 (2/6)</span><label class="nav" for="OrderService-1">←</label><label class="nav" for="OrderService-3">→</label></div>
+
+</div>
+
+<div class="stage s3">
+
+<div class="head"><span class="name">3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)</span><label class="nav" for="OrderService-2">←</label><label class="nav" for="OrderService-4">→</label></div>
+
+</div>
+
+<div class="stage s4">
+
+<div class="head"><span class="name">4단계: 펼치기 2/4 — 재고를 잡은 다음 결제를 청구한다. (4/6)</span><label class="nav" for="OrderService-3">←</label><label class="nav" for="OrderService-5">→</label></div>
+
+</div>
+
+<div class="stage s5">
+
+<div class="head"><span class="name">5단계: 펼치기 3/4 — 처리한 주문을 감사 기록에 남긴다. (5/6)</span><label class="nav" for="OrderService-4">←</label><label class="nav" for="OrderService-6">→</label></div>
+
+</div>
+
+<div class="stage s6">
+
+<div class="head"><span class="name">6단계: 펼치기 4/4 — 주문 줄의 가격이 올바른지 따로 확인한다. (6/6)</span><label class="nav" for="OrderService-5">←</label><span class="nav">→</span></div>
+
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
+<div class="scene"><p>고객이 장바구니를 확정해 결제 버튼을 누를 때 쓰인다.</p></div>
+
+</div>
+
+<div class="pane p2">
 
 <div class="code">
 
@@ -47,9 +81,7 @@ class OrderService(
 
 </div>
 
-<div class="stage s3">
-
-<div class="head"><span class="name">3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)</span><label class="nav" for="OrderService-2">←</label><label class="nav" for="OrderService-4">→</label></div>
+<div class="pane p3">
 
 <div class="code">
 
@@ -77,9 +109,7 @@ class OrderService(
 
 </div>
 
-<div class="stage s4">
-
-<div class="head"><span class="name">4단계: 펼치기 2/4 — 재고를 잡은 다음 결제를 청구한다. (4/6)</span><label class="nav" for="OrderService-3">←</label><label class="nav" for="OrderService-5">→</label></div>
+<div class="pane p4">
 
 <div class="code">
 
@@ -109,9 +139,7 @@ class OrderService(
 
 </div>
 
-<div class="stage s5">
-
-<div class="head"><span class="name">5단계: 펼치기 3/4 — 처리한 주문을 감사 기록에 남긴다. (5/6)</span><label class="nav" for="OrderService-4">←</label><label class="nav" for="OrderService-6">→</label></div>
+<div class="pane p5">
 
 <div class="code">
 
@@ -141,9 +169,7 @@ class OrderService(
 
 </div>
 
-<div class="stage s6">
-
-<div class="head"><span class="name">6단계: 펼치기 4/4 — 주문 줄의 가격이 올바른지 따로 확인한다. (6/6)</span><label class="nav" for="OrderService-5">←</label><span class="nav">→</span></div>
+<div class="pane p6">
 
 <div class="code">
 
@@ -178,6 +204,8 @@ class OrderService(
 
 </div>
 
+</div>
+
 ### Validator
 
 <div class="resp"><span class="label">책임</span> 주문이 올바른지 본다.</div>
@@ -191,13 +219,23 @@ class OrderService(
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="Validator-2">→</label></div>
 
-<div class="scene"><p>주문을 접수하기 전에 쓰인다.</p></div>
-
 </div>
 
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="Validator-1">←</label><span class="nav">→</span></div>
+
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
+<div class="scene"><p>주문을 접수하기 전에 쓰인다.</p></div>
+
+</div>
+
+<div class="pane p2">
 
 <div class="code">
 
@@ -207,6 +245,8 @@ class OrderService(
         fun check(order: Order): Boolean = order.lines.all { it.price > BigDecimal.ZERO }
     }
 ```
+
+</div>
 
 </div>
 
@@ -229,13 +269,35 @@ class OrderService(
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/4)</span><span class="nav">←</span><label class="nav" for="InventoryRepository-2">→</label></div>
 
-<div class="scene"><p>주문이 확정되어 물건을 따로 떼어 둬야 할 때 쓰인다.</p></div>
-
 </div>
 
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 윤곽 (2/4)</span><label class="nav" for="InventoryRepository-1">←</label><label class="nav" for="InventoryRepository-3">→</label></div>
+
+</div>
+
+<div class="stage s3">
+
+<div class="head"><span class="name">3단계: 펼치기 1/2 — 잘못된 주문 번호를 오류로 알린다. (3/4)</span><label class="nav" for="InventoryRepository-2">←</label><label class="nav" for="InventoryRepository-4">→</label></div>
+
+</div>
+
+<div class="stage s4">
+
+<div class="head"><span class="name">4단계: 펼치기 2/2 — 주문 번호를 예약 목록에 남긴다. (4/4)</span><label class="nav" for="InventoryRepository-3">←</label><span class="nav">→</span></div>
+
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
+<div class="scene"><p>주문이 확정되어 물건을 따로 떼어 둬야 할 때 쓰인다.</p></div>
+
+</div>
+
+<div class="pane p2">
 
 <div class="code">
 
@@ -252,9 +314,7 @@ class InventoryRepository {
 
 </div>
 
-<div class="stage s3">
-
-<div class="head"><span class="name">3단계: 펼치기 1/2 — 잘못된 주문 번호를 오류로 알린다. (3/4)</span><label class="nav" for="InventoryRepository-2">←</label><label class="nav" for="InventoryRepository-4">→</label></div>
+<div class="pane p3">
 
 <div class="code">
 
@@ -274,9 +334,7 @@ class InventoryRepository {
 
 </div>
 
-<div class="stage s4">
-
-<div class="head"><span class="name">4단계: 펼치기 2/2 — 주문 번호를 예약 목록에 남긴다. (4/4)</span><label class="nav" for="InventoryRepository-3">←</label><span class="nav">→</span></div>
+<div class="pane p4">
 
 <div class="code">
 
@@ -300,6 +358,8 @@ class InventoryRepository {
 
 </div>
 
+</div>
+
 <details class="zenuml-stepwise-style">
 <summary>이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href="https://github.github.com/gfm/#disallowed-raw-html-extension-">관련 GFM 공식 문서</a>)</summary>
 
@@ -316,13 +376,20 @@ class InventoryRepository {
 .stages > input.s4:checked ~ .stage.s4 { display: block; }
 .stages > input.s5:checked ~ .stage.s5 { display: block; }
 .stages > input.s6:checked ~ .stage.s6 { display: block; }
+.stages > input.s1:checked ~ .scroller > .pane.p1 { display: block; }
+.stages > input.s2:checked ~ .scroller > .pane.p2 { display: block; }
+.stages > input.s3:checked ~ .scroller > .pane.p3 { display: block; }
+.stages > input.s4:checked ~ .scroller > .pane.p4 { display: block; }
+.stages > input.s5:checked ~ .scroller > .pane.p5 { display: block; }
+.stages > input.s6:checked ~ .scroller > .pane.p6 { display: block; }
 .stages .head { display: flex; align-items: center; gap: .4em; padding: .5em 0 .2em; font-weight: 600; }
 .stages .head .name { flex: 1; }
 .stages .nav { display: inline-block; width: 2.2em; height: 1.8em; line-height: 1.8em; text-align: center; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; font-weight: 400; cursor: pointer; user-select: none; }
 .stages span.nav { opacity: .3; cursor: default; }
 .stages .note { padding: 0 0 .5em; opacity: .8; }
 .stages .scene { padding: .5em 0 1em; max-width: 65ch; }
-.stages .code { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
+.stages > .scroller { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
+.stages > .scroller > .pane { display: none; }
 .stages .code pre { margin: 0; overflow: visible; width: max-content; min-width: 100%; box-sizing: border-box; }
 .stages .code pre, .stages .code pre code { white-space: pre; word-break: normal; }
 </style>

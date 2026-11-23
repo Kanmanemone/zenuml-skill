@@ -16,7 +16,15 @@
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
 
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
 <div class="scene"><p>주문 금액을 실제로 받아야 할 때 쓰인다.</p></div>
+
+</div>
 
 </div>
 
@@ -33,13 +41,23 @@
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="LegacyBridge-2">→</label></div>
 
-<div class="scene"><p>구조 뷰에 사용 상황이 명시되지 않음</p></div>
-
 </div>
 
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="LegacyBridge-1">←</label><span class="nav">→</span></div>
+
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
+<div class="scene"><p>구조 뷰에 사용 상황이 명시되지 않음</p></div>
+
+</div>
+
+<div class="pane p2">
 
 <div class="code">
 
@@ -48,6 +66,8 @@ class LegacyBridge {
     void send(String id) {}
 }
 ```
+
+</div>
 
 </div>
 
@@ -68,13 +88,23 @@ class LegacyBridge {
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="formatTotal-2">→</label></div>
 
-<div class="scene"><p>영수증이나 기록에 금액을 &lt;원&gt; 단위 글로 남길 때 쓰인다.</p></div>
-
 </div>
 
 <div class="stage s2">
 
 <div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="formatTotal-1">←</label><span class="nav">→</span></div>
+
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
+<div class="scene"><p>영수증이나 기록에 금액을 &lt;원&gt; 단위 글로 남길 때 쓰인다.</p></div>
+
+</div>
+
+<div class="pane p2">
 
 <div class="code">
 
@@ -83,6 +113,8 @@ class LegacyBridge {
 fun formatTotal(total: BigDecimal): String =
     "합계: " + total.setScale(2).toPlainString() + " {원}"
 ```
+
+</div>
 
 </div>
 
@@ -104,7 +136,15 @@ fun formatTotal(total: BigDecimal): String =
 
 <div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
 
+</div>
+
+<div class="scroller">
+
+<div class="pane p1">
+
 <div class="scene"><p>주문 처리가 끝난 뒤 나중에 확인할 기록이 필요할 때 쓰인다.</p></div>
+
+</div>
 
 </div>
 
@@ -126,13 +166,20 @@ fun formatTotal(total: BigDecimal): String =
 .stages > input.s4:checked ~ .stage.s4 { display: block; }
 .stages > input.s5:checked ~ .stage.s5 { display: block; }
 .stages > input.s6:checked ~ .stage.s6 { display: block; }
+.stages > input.s1:checked ~ .scroller > .pane.p1 { display: block; }
+.stages > input.s2:checked ~ .scroller > .pane.p2 { display: block; }
+.stages > input.s3:checked ~ .scroller > .pane.p3 { display: block; }
+.stages > input.s4:checked ~ .scroller > .pane.p4 { display: block; }
+.stages > input.s5:checked ~ .scroller > .pane.p5 { display: block; }
+.stages > input.s6:checked ~ .scroller > .pane.p6 { display: block; }
 .stages .head { display: flex; align-items: center; gap: .4em; padding: .5em 0 .2em; font-weight: 600; }
 .stages .head .name { flex: 1; }
 .stages .nav { display: inline-block; width: 2.2em; height: 1.8em; line-height: 1.8em; text-align: center; border: 1px solid rgba(128,128,128,.5); border-radius: 4px; font-weight: 400; cursor: pointer; user-select: none; }
 .stages span.nav { opacity: .3; cursor: default; }
 .stages .note { padding: 0 0 .5em; opacity: .8; }
 .stages .scene { padding: .5em 0 1em; max-width: 65ch; }
-.stages .code { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
+.stages > .scroller { max-height: min(30lh, 70vh); overflow: auto; margin-bottom: 1em; }
+.stages > .scroller > .pane { display: none; }
 .stages .code pre { margin: 0; overflow: visible; width: max-content; min-width: 100%; box-sizing: border-box; }
 .stages .code pre, .stages .code pre code { white-space: pre; word-break: normal; }
 </style>
