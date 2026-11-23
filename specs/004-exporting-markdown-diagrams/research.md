@@ -73,3 +73,20 @@
 - **Alternatives considered**:
   - 한글·영문·코드용 글꼴을 프로젝트가 직접 골라 나열(이전 버전의 접근) — 기각 — "VS Code에서 보이는 모습 그대로"라는 요구를 만족하려면 VS Code 자신이 실제로 쓰는 값과 일치해야 하는데, 직접 고른 글꼴은 근거 없이 비슷해 보이는 값일 뿐 VS Code의 실제 렌더링과 다를 수 있다.
   - 웹폰트를 파일로 번들해 `@font-face`로 삽입 — 기각(오버엔지니어링) — VS Code 자신도 시스템 글꼴에 의존할 뿐 폰트 파일을 번들하지 않으므로, "VS Code와 일치"라는 목표에 오히려 불필요한 장치다.
+
+## Decision: VS Code 미리보기 모양 (FR-023, 2026-11-23)
+
+- **Decision**: VS Code 1.147 내장 `mermaid-markdown-features`가 쓰는 설정을 그대로 옮긴다. 확장은 `look: "classic"`, `flowchart.subGraphTitleMargin {top: 8, bottom: 8}`, 그리고 기본 테마 값 `vscode`일 때 `theme: "base"`에 VS Code CSS 변수에서 읽은 `themeVariables`를 넘긴다. 변수 대응(앞선 변수가 없으면 다음 변수)에 Light+ 값(테마 파일 `light_plus.json` → `light_vs.json`과 VS Code 색 기본값)을 넣으면 다음과 같다.
+  - `background`·`clusterBkg`·`edgeLabelBackground`·`secondaryColor`: `#FFFFFF`(editor.background, input.background)
+  - `primaryColor`·`mainBkg`: `#F3F3F3`(editorWidget.background)
+  - `textColor`·`primaryTextColor`·`secondaryTextColor`·`tertiaryTextColor`·`noteTextColor`·`titleColor`: `#616161`(charts.foreground = foreground)
+  - `lineColor`·`primaryBorderColor`·`nodeBorder`: `#236B8E`(chart.line)
+  - `clusterBorder`: `#00000033`(chart.guide, 검정 20%)
+  - `secondaryBorderColor`: `#61616133`(input.border 없음 → editorWidget.border = foreground 20%)
+  - `tertiaryColor`·`noteBkgColor`: `#F2F2F2`(textBlockQuote.background), `tertiaryBorderColor`·`noteBorderColor`: `#007ACC80`(textBlockQuote.border)
+  - `errorBkgColor`: `#F2DEDE`(inputValidation.errorBackground), `errorTextColor`: `#E51400`(editorError.foreground), `darkMode`: false
+- **Rationale**: subgraph 노랑·노드 연보라는 mmdc가 테마를 받지 않아 Mermaid `default` 테마가 칠한 것이다. 같은 설정을 넘기면 같은 렌더러(Mermaid 12)가 같은 색을 낸다. 사용자가 고른 기준이 Light+ 하나이므로 값을 고정한다.
+- **Alternatives considered**: 사용 중인 VS Code 테마를 읽어 따라가기(테마 파일 상속·기본값 해석이 커서 기각, 원칙 I). 다이어그램에 `style`·`classDef`로 subgraph 색 넣기(원본과 GitHub 모양이 바뀌어 기각). mmdc `-t neutral`(VS Code와 색이 달라 기각).
+- **Decision — subgraph 제목 여백은 옮기지 않음**: 확장의 `flowchart.subGraphTitleMargin {top: 8, bottom: 8}`은 넣지 않는다.
+- **Rationale**: 같은 다이어그램을 설정 하나씩 바꿔 렌더링해 라벨 중심과 선의 세로 거리를 재니, 이 여백이 있으면 간선 라벨이 선보다 약 2.4px(배율 1 기준) 아래로 내려가고 없으면 0이었다. 테마 색·`classic`·`base`는 영향이 없었다. VS Code 미리보기의 라벨 내려옴도 같은 원인이고, 사용자는 이 결함 없는 출력을 원한다. 대가로 subgraph 제목 위아래 여백이 미리보기보다 조금 좁다.
+

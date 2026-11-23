@@ -85,6 +85,17 @@ specs/004-exporting-markdown-diagrams/
 때만 읽는다. 변환 스크립트와 설정 계약은 바꾸지 않는다. description은 실제
 변환과 생성의 경계만 남긴다.
 
+## 2026-11-23 VS Code 미리보기 모양 계획 (FR-023, SC-014, 007 FR-014c)
+
+- `scripts/vscode-light-plus.json`(새 파일): Mermaid 설정 하나. `theme: "base"`, `look: "classic"`, 그리고 VS Code 내장 확장의 `vscode` 테마가 쓰는 `themeVariables`(research "VS Code 미리보기 모양")를 Light+ 값으로 고정한 것. mmdc `-c`로 넘긴다. 다이어그램 frontmatter `config`는 mmdc가 이 위에 덮으므로 다이어그램 자체 지정이 이긴다.
+- `scripts/lib/run-mmdc.js`: `render.theme`이 `vscode-light-plus`이면 모든 mmdc 호출에 `-c <위 파일>`을 더한다. `mermaid-default`이면 지금 인자 그대로. 값은 명령줄 `--theme=<값>`이 있으면 그것을, 없으면 `loadSettings`를 따른다. 허용되지 않는 명령줄 값은 설정 값을 쓰고 `⚙️ 설정 안내` 한 줄을 낸다. `export-diagrams.js`(다이어그램)와 `lib/document-pdf.js`(문서 전체 PDF·PNG)가 모두 `runMmdc`를 거치므로 한 곳만 고친다.
+- `scripts/export-diagrams.js`, `export-document-pdf.js`, `export-document-png.js`: 위치 인자를 읽기 전에 `--theme=` 인자를 걸러 낸다.
+- `settings.schema.json`·`settings.jsonc`: enum `render.theme`(`vscode-light-plus`, `mermaid-default`, tokenImpact 모두 `[0]`)와 한국어 주석. 기본값은 schema `default`에만(헌법 IV).
+- `SKILL.md`: 요청이 모양을 밝힐 때만 `--theme=<값>`을 붙인다는 한 줄.
+- 검증: quickstart 시나리오 14. 자동 테스트 체계가 없는 스킬이라 새 테스트 파일은 만들지 않는다.
+
+**Constitution Check (2026-11-23)**: I — 새 파일은 Mermaid 설정 JSON 하나뿐이고, 분기는 mmdc 호출 한 곳에 둔다. 다른 VS Code 테마나 사용자 테마 자동 추적은 넣지 않는다. II — 004·007 개정. III — 요구사항 변경. IV — 기본값은 schema와 배포 설정에만. 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*

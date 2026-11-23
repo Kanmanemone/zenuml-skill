@@ -113,6 +113,17 @@
 
 **검증**: PDF 페이지를 이미지로 렌더링해(예: PyMuPDF `page.get_pixmap()`) VS Code Markdown 미리보기 스크린샷과 나란히 비교한다.
 
+## 시나리오 14 — VS Code 미리보기 모양 (SC-014, FR-023)
+
+**입력 예시**: subgraph와 노드 색 지정이 있는 구조 뷰(`.zenuml/*.architecture.md`)를 다이어그램 PNG와 문서 전체 PNG로 내보낸다. `render.theme`을 `vscode-light-plus`, `mermaid-default`로 바꿔 가며, 그리고 `--theme=mermaid-default`로 한 번 더.
+
+**기대 결과**:
+- `vscode-light-plus`: subgraph 배경이 흰색, 노드 배경 `#F3F3F3`, 노드 모양 classic, 다이어그램이 지정한 테두리·간선 색은 그대로. VS Code Light+ 미리보기와 나란히 보면 같다.
+- `mermaid-default`와 `--theme=mermaid-default`: 도입 전과 같은 연노랑 subgraph·연보라 노드.
+- 허용되지 않는 `--theme=` 값: 설정 값으로 내보내고 `⚙️ 설정 안내` 한 줄.
+
+**검증**: 생성된 PNG를 VS Code Light+ 미리보기 화면과 비교한다.
+
 ## 결과 기록
 
 각 시나리오의 통과/실패와 구체적 이슈를 표로 기록해 두면, 구현을 반복 개선할 때 회귀 확인 기준으로 재사용할 수 있다.
