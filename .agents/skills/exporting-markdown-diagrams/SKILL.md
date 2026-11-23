@@ -20,8 +20,11 @@ the diagram/document with model reasoning.
 4. Run exactly one matching export script and report its output path(s), not raw
    script output or rendered contents.
 
-Never edit `settings.jsonc`. Conversion scripts read output directory and PNG
-scale themselves, so do not pass those setting values manually.
+Never edit `settings.jsonc`. Conversion scripts read output directory, PNG
+scale, and `render.theme` themselves, so do not pass those setting values
+manually. Only when the request itself states the look, append
+`--theme=vscode-light-plus` (as in the VS Code Light+ preview) or
+`--theme=mermaid-default` (plain Mermaid rendering) to the script command.
 
 ## Request fields
 

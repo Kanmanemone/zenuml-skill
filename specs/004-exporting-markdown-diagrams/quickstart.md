@@ -156,3 +156,19 @@
 | 문서 전체 PNG single / paginated | PASS | 1장 / 11장 |
 | 렌더러 지정 보존 | PASS | 원본 `layout: elk`를 수정 없이 넘김 |
 
+
+## Validation Results (T049, 2026-11-23)
+
+- swemo `drag-reorder-iteration-11-4.architecture.md`를 다이어그램 PNG로 내보냄.
+  - 설정 `vscode-light-plus`: subgraph 배경 흰색·테두리 옅은 회색, 노드 배경 `#F3F3F3`, classic 모양. 다이어그램이 지정한 노드·간선 색과 `ReorderableItem.kt` 그룹의 주황 테두리는 그대로.
+  - `--theme=mermaid-default`: `-c` 없이 도입 전과 같은 인자로 실행되어 Mermaid 기본(neo, 색 채운 subgraph) 결과.
+  - `--theme=dark`: `⚙️ 설정 안내` 한 줄과 함께 설정 값(`vscode-light-plus`)으로 내보냄.
+- 문서 전체 PNG(single)도 같은 Light+ 모양으로 나옴(흰 subgraph, 회색 노드, 파일 이름 표시 유지).
+- 확인하지 않음: VS Code Light+ 미리보기 화면과의 나란한 비교(사용자 확인 필요).
+
+## Validation Results (T053, 2026-11-23)
+
+- 사용자가 Light+ PNG를 VS Code Light+ 미리보기와 나란히 비교: 색과 노드 모양은 같음.
+- 간선 라벨이 선 아래로 내려오는 결함(미리보기에도 있음)은 `subGraphTitleMargin`을 빼서 없앴다(라벨 중심 오프셋 약 2.4px → -0.4px).
+- 긴 간선 라벨 "길게 누르기·드래그 감지를 맡김"의 마지막 글자가 PNG에서만 둘째 줄로 넘어감: 한글 대체 글꼴 차이로 줄바꿈 폭 경계에 걸린 것. 사용자 결정으로 그대로 둔다(글꼴·폭을 따로 맞추지 않음).
+- 테두리 위 파일 이름이 다이어그램만 내보낸 PNG에 없음: 이번 변경 전부터 그랬다(문서 안 style 블록이 다이어그램 내보내기에 적용되지 않음). 별도 작업으로 다룬다.

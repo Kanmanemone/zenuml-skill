@@ -79,6 +79,20 @@
       "tokenImpact": {
         "*": "[0]"
       }
+    },
+    {
+      "key": "render.theme",
+      "type": "enum",
+      "values": [
+        "vscode-light-plus",
+        "mermaid-default"
+      ],
+      "default": "vscode-light-plus",
+      "description": "다이어그램을 그리는 모양 (VS Code Light+ 미리보기와 같게, 또는 아무것도 더하지 않은 Mermaid 기본 렌더링)",
+      "tokenImpact": {
+        "vscode-light-plus": "[0]",
+        "mermaid-default": "[0]"
+      }
     }
   ]
 }

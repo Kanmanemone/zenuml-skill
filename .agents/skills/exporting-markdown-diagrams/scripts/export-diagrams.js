@@ -14,7 +14,7 @@ import path from "node:path";
 import fs from "node:fs";
 import os from "node:os";
 import puppeteer from "puppeteer";
-import { runMmdc } from "./lib/run-mmdc.js";
+import { runMmdc, withoutThemeFlag } from "./lib/run-mmdc.js";
 import { BROWSER_LAUNCH_OPTIONS } from "./lib/browser-config.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 import { loadSettings, SKILL_DIR } from "./lib/settings.js";
@@ -37,7 +37,7 @@ function escapeRegExp(value) {
 }
 
 async function main() {
-  const [, , targetFile, format, outputBaseArg] = process.argv;
+  const [targetFile, format, outputBaseArg] = withoutThemeFlag(process.argv.slice(2));
 
   if (!targetFile || !format) {
     fail(

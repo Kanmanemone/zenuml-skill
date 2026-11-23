@@ -36,5 +36,11 @@
     // 변환 결과를 저장할 위치 (초기 기본값: ./exports)
     //   허용 [0] 원본 마크다운 파일 폴더 기준 상대 경로(예: ./exports), 절대 경로는 안 됨
     "directory": "./exports"
+  },
+  "render": {
+    // 다이어그램을 어떤 모양으로 그릴지 (초기 기본값: vscode-light-plus)
+    //   vscode-light-plus [0] VS Code 기본 밝은 테마(Light+)의 Markdown 미리보기와 같은 색·모양
+    //   mermaid-default   [0] 아무것도 더하지 않은 Mermaid 기본 렌더링(subgraph 연노랑, 노드 연보라)
+    "theme": "vscode-light-plus"
   }
 }

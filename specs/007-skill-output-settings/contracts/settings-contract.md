@@ -55,6 +55,7 @@
 - `node scripts/read-settings.js` → 표준 출력에 `{"values": {...}, "notices": ["..."]}` 한 줄 JSON. 종료 코드 0(설정 문제로 실패하지 않음).
 - `export-diagrams.js`, `export-document-pdf.js`는 시작할 때 같은 로더로 설정을 읽어 `png.scale`, `output.directory`를 적용한다. 명시적 출력 경로 인자가 있으면 그 경로가 `output.directory`보다 우선한다. 안내 문구는 출력하지 않는다(SKILL.md가 `read-settings.js`로 이미 전달).
 - `export-document-pdf.js`는 HTML 단계에서 모든 `<details>`에 `open`을 붙여 인쇄한다(FR-015).
+- 모든 mermaid-cli 호출은 `render.theme`을 따른다(FR-014c). `vscode-light-plus`이면 `scripts/vscode-light-plus.json`을 함께 넘기고, `mermaid-default`이면 아무것도 더하지 않는다. 명령줄 끝의 `--theme=<값>`이 설정보다 우선하며, 허용되지 않는 값이면 설정 값을 쓰고 `⚙️ 설정 안내` 한 줄을 출력한다.
 
 ## exporting 대화 계약
 

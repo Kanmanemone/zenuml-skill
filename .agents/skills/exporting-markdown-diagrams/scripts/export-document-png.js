@@ -14,6 +14,7 @@ import puppeteer from "puppeteer";
 import { BROWSER_LAUNCH_OPTIONS } from "./lib/browser-config.js";
 import { ensureExportDir } from "./lib/export-dir.js";
 import { loadSettings, SKILL_DIR } from "./lib/settings.js";
+import { withoutThemeFlag } from "./lib/run-mmdc.js";
 import { renderDocumentPdf, SUPPORTED_LAYOUTS } from "./lib/document-pdf.js";
 import { rasterizePdf } from "./lib/rasterize-pdf.js";
 
@@ -23,7 +24,7 @@ function fail(message, code = 1) {
 }
 
 async function main() {
-  const args = process.argv.slice(2);
+  const args = withoutThemeFlag(process.argv.slice(2));
   const layoutFlagIndex = args.indexOf("--layout");
   let layout = "paginated";
   if (layoutFlagIndex !== -1) {

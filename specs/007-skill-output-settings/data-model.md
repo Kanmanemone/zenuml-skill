@@ -62,6 +62,7 @@
 | exporting | `defaults.pdfLayout` | enum | `none`/`single`/`paginated` |
 | exporting | `png.scale` | number(min 0) | — |
 | exporting | `output.directory` | relativePath(sourceFileDir) | — |
+| exporting | `render.theme` | enum | `vscode-light-plus`/`mermaid-default` |
 
 기본값은 이 표에 두지 않는다. 각 스킬 `settings.schema.json`의 `default`가 유일한 기준이고, 배포 `settings.jsonc` 값은 그와 같다(FR-003).
 

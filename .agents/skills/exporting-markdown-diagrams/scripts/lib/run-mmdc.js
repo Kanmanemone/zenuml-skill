@@ -10,8 +10,35 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "node:fs";
 import { PUPPETEER_CONFIG_FILE } from "./browser-config.js";
+import { loadSettings, SKILL_DIR } from "./settings.js";
 
 const scriptsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+// render.theme (007 FR-014c): the Mermaid config VS Code's built-in preview uses under Light+,
+// or nothing for Mermaid's own default rendering. A diagram's own config still wins over it.
+const THEME_FLAG = "--theme=";
+const THEME_CONFIGS = {
+  "vscode-light-plus": path.join(scriptsDir, "vscode-light-plus.json"),
+  "mermaid-default": null,
+};
+
+/** Entry scripts read their positional arguments from this, so `--theme=` is never one. */
+export function withoutThemeFlag(args) {
+  return args.filter((arg) => !arg.startsWith(THEME_FLAG));
+}
+
+function themeArgs() {
+  let theme = loadSettings(SKILL_DIR).values["render.theme"];
+  const requested = process.argv.find((arg) => arg.startsWith(THEME_FLAG))?.slice(THEME_FLAG.length);
+  if (requested !== undefined) {
+    if (Object.hasOwn(THEME_CONFIGS, requested)) {
+      theme = requested;
+    } else {
+      console.log(`⚙️ 설정 안내: 명령줄 \`render.theme\` 값 \`${requested}\`이 허용되지 않아 설정 값 \`${theme}\` 사용`);
+    }
+  }
+  return THEME_CONFIGS[theme] ? ["-c", THEME_CONFIGS[theme]] : [];
+}
 
 function resolveMmdc() {
   const cliEntry = path.join(
@@ -42,7 +69,7 @@ function resolveMmdc() {
  */
 export function runMmdc(args) {
   const { command, baseArgs, shell } = resolveMmdc();
-  const result = spawnSync(command, [...baseArgs, "-p", PUPPETEER_CONFIG_FILE, ...args], {
+  const result = spawnSync(command, [...baseArgs, "-p", PUPPETEER_CONFIG_FILE, ...themeArgs(), ...args], {
     encoding: "utf-8",
     shell,
     windowsHide: true,

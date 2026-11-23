@@ -209,10 +209,17 @@ Task: "scripts/lib/inline-svg.js 작성"
 
 **Independent Test**: quickstart.md 시나리오 14를 실행한다.
 
-- [ ] T045 `.agents/skills/exporting-markdown-diagrams/settings.schema.json`과 `settings.jsonc`에 enum `render.theme`(`vscode-light-plus`, `mermaid-default`, 한국어 주석)을 더한다 per 007 FR-014c
-- [ ] T046 `.agents/skills/exporting-markdown-diagrams/scripts/vscode-light-plus.json`을 research.md "VS Code 미리보기 모양"의 값으로 만든다 per FR-023
-- [ ] T047 `.agents/skills/exporting-markdown-diagrams/scripts/lib/run-mmdc.js`가 `--theme=` 또는 `render.theme`에 따라 `-c`를 더하고, `export-diagrams.js`·`export-document-pdf.js`·`export-document-png.js`가 위치 인자에서 `--theme=`를 걸러 내게 한다 per FR-023, 007 FR-014c
-- [ ] T048 `.agents/skills/exporting-markdown-diagrams/SKILL.md`에 요청이 모양을 밝힐 때만 `--theme=<값>`을 붙인다는 한 줄을 넣는다 per 007 FR-014c
-- [ ] T049 quickstart.md 시나리오 14를 실행해 결과를 기록한다 per SC-014
+- [X] T045 `.agents/skills/exporting-markdown-diagrams/settings.schema.json`과 `settings.jsonc`에 enum `render.theme`(`vscode-light-plus`, `mermaid-default`, 한국어 주석)을 더한다 per 007 FR-014c
+- [X] T046 `.agents/skills/exporting-markdown-diagrams/scripts/vscode-light-plus.json`을 research.md "VS Code 미리보기 모양"의 값으로 만든다 per FR-023
+- [X] T047 `.agents/skills/exporting-markdown-diagrams/scripts/lib/run-mmdc.js`가 `--theme=` 또는 `render.theme`에 따라 `-c`를 더하고, `export-diagrams.js`·`export-document-pdf.js`·`export-document-png.js`가 위치 인자에서 `--theme=`를 걸러 내게 한다 per FR-023, 007 FR-014c
+- [X] T048 `.agents/skills/exporting-markdown-diagrams/SKILL.md`에 요청이 모양을 밝힐 때만 `--theme=<값>`을 붙인다는 한 줄을 넣는다 per 007 FR-014c
+- [X] T049 quickstart.md 시나리오 14를 실행해 결과를 기록한다 per SC-014
 
 **Dependencies**: T045, T046 → T047 → T048 → T049.
+
+## Phase 11: Convergence
+
+- [X] T050 `specs/007-skill-output-settings/data-model.md` 옵션 표에 `render.theme`(enum `vscode-light-plus`/`mermaid-default`)을 더한다 per 007 FR-014c (partial)
+- [X] T051 `specs/007-skill-output-settings/contracts/settings-contract.md` "exporting 스크립트 계약"에 `render.theme` 적용과 `--theme=` 우선·안내를 더한다 per 007 FR-014c (partial)
+- [X] T052 `specs/007-skill-output-settings/spec.md` Key Entities "설정 옵션" 현재 목록에 `render.theme`(FR-014c)과 빠져 있던 `dependency.faintNonUsageEdges`(FR-012f)를 더한다 per 007 FR-014c, FR-012f (partial)
+- [X] T053 Light+ 모양 PNG를 VS Code Light+ 미리보기 화면과 나란히 비교해 quickstart.md에 기록한다 per SC-014 (partial)
