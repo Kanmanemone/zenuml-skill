@@ -90,3 +90,9 @@
 - **Decision — subgraph 제목 여백은 옮기지 않음**: 확장의 `flowchart.subGraphTitleMargin {top: 8, bottom: 8}`은 넣지 않는다.
 - **Rationale**: 같은 다이어그램을 설정 하나씩 바꿔 렌더링해 라벨 중심과 선의 세로 거리를 재니, 이 여백이 있으면 간선 라벨이 선보다 약 2.4px(배율 1 기준) 아래로 내려가고 없으면 0이었다. 테마 색·`classic`·`base`는 영향이 없었다. VS Code 미리보기의 라벨 내려옴도 같은 원인이고, 사용자는 이 결함 없는 출력을 원한다. 대가로 subgraph 제목 위아래 여백이 미리보기보다 조금 좁다.
 
+## Decision: 다이어그램 내보내기의 문서 style (FR-024, 2026-11-23)
+
+- **Decision**: mmdc가 만든 SVG에 문서의 `<style>` 내용을 넣는다.
+- **Rationale**: VS Code 미리보기는 문서의 `<style>`이 인라인 SVG에도 적용되어 파일 이름 같은 표시가 보인다. SVG 안에 같은 CSS를 넣으면 맞춤·PNG·PDF 단계가 모두 같은 모양을 본다. 노드 맨 위의 파일 이름도 Mermaid의 기본 여백 안에 들어와 잘리지 않았다.
+- **Alternatives considered**: mmdc `-C/--cssFile`(전역 `themeCSS`를 바꾸는데, 구조 뷰처럼 다이어그램 frontmatter에 `themeCSS`가 있으면 그것에 덮여 적용되지 않아 기각). 구조 뷰 파일 이름만 따로 그리기(다른 문서의 style에는 쓸 수 없어 기각).
+

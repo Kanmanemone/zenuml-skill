@@ -96,6 +96,14 @@ specs/004-exporting-markdown-diagrams/
 
 **Constitution Check (2026-11-23)**: I — 새 파일은 Mermaid 설정 JSON 하나뿐이고, 분기는 mmdc 호출 한 곳에 둔다. 다른 VS Code 테마나 사용자 테마 자동 추적은 넣지 않는다. II — 004·007 개정. III — 요구사항 변경. IV — 기본값은 schema와 배포 설정에만. 위반 없음.
 
+## 2026-11-23 다이어그램 내보내기에 문서 style 적용 계획 (FR-024, SC-015)
+
+- `scripts/export-diagrams.js`만 고친다. mmdc가 만든 각 SVG에, 원본 Markdown의 `<style>` 블록(펜스 코드 블록 안 제외) 내용을 루트 `<svg>` 바로 다음 `<style><![CDATA[…]]></style>`로 넣은 뒤 지금처럼 맞춤과 변환을 한다. `<style>`이 없으면 SVG를 건드리지 않는다.
+- 문서 전체 내보내기는 이미 HTML 단계에서 문서 style이 적용되므로 바꾸지 않는다.
+- 검증: quickstart 시나리오 15.
+
+**Constitution Check (2026-11-23)**: I — 한 파일, 함수 하나와 반복문 하나. 구조 뷰 전용 처리 없이 문서 style을 그대로 옮긴다. II — 004 개정. III — 요구사항 변경. IV — 해당 없음. 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*
