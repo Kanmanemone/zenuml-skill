@@ -67,3 +67,33 @@
 ## Remaining Unknowns
 
 없음 — Technical Context의 모든 항목이 위 결정들로 해소되었다.
+
+## Decision: 읽기 쉬운 시퀀스 다이어그램 (FR-015, FR-016, 2026-11-23)
+
+- **Decision — 작성 규칙**: 상태 변경은 호출 위 주석, 상태만 바꾸는 조건 가지는 블록 위 `// → 결과`와 빈 블록.
+- **Rationale**: ZenUML 주석은 다음 문장에 붙어 그 위에 그려진다. 빈 블록 안의 주석은 그려지지 않았다(Mermaid 12.3 + `@zenuml/core` 3.50.1에서 시험). 자기 메시지로 쓴 상태 변경은 라벨이 길어 상자 밖으로 넘쳤고, 독자가 자기 호출과 구분하지 못했다.
+
+- **Decision — 스타일 블록**: 산출 파일 끝에 다음을 붙인다.
+
+  ```html
+  <details class="zenuml-style">
+  <summary>이 문서에 적용되지 못한 &lt;style&gt; 코드</summary>
+
+  <style>
+  .zenuml-style { display: none; }
+  .participant-label { font-size: 14px !important; }
+  .message-label { fill: #000000 !important; font-weight: 600; }
+  .fragment-label { fill: #AF00DB !important; }
+  .fragment-condition { fill: #001080 !important; opacity: 1 !important; transform: translateX(6px); }
+  .comment-text { fill: #008000 !important; opacity: 1 !important; }
+  .seq-number { fill: #237893 !important; font-weight: 400 !important; }
+  .message-label, .fragment-label, .fragment-condition, .comment-text, .seq-number, .return-label {
+    paint-order: stroke; stroke: var(--vscode-editor-background, #ffffff); stroke-width: 4px; stroke-linejoin: round;
+  }
+  </style>
+
+  </details>
+  ```
+- **Rationale**: 색은 VS Code Light+ 토큰 색의 같은 의미(본문 `#000000`, 제어 키워드 `#AF00DB`, 변수 `#001080`, 주석 `#008000`, 줄 번호 `#237893`)라 독자가 코드에서 익힌 연상을 그대로 쓴다. 모두 흰 바탕 대비 4.5:1 이상이다. ZenUML 기본 CSS는 주석에 `opacity: 0.5`, 조건 일부에 `opacity: 0.65`를 걸어 흐렸다. ZenUML은 글자 폭을 CSS와 상관없이 고정 크기(참여자 16px, 메시지 14px)로 재고 참여자 상자를 250px에서 자르므로, 글자를 키우거나 굵게(조건) 하면 넘친다. 참여자 이름만 14px로 줄여 넘침을 줄인다. SVG 글자에는 CSS 배경이 없으므로 `paint-order: stroke` 테두리로 뒤의 선을 가린다. 구분선 라벨은 노란 상자가 이미 있어 제외한다. 접힌 상자는 구조 뷰의 hover style 블록과 같은 방식이라 VS Code와 내보내기(004 FR-024)에는 적용되고 GitHub에서는 접힌 코드로 남는다.
+- **Alternatives considered**: 스테레오타입 글자(`<<제어>>`)로 기호 대체(ZenUML 관례를 바꿔 기각). 반투명 테두리(가독성이 떨어져 사용자 기각). Mermaid `sequenceDiagram`으로 전환(작성법의 간결함을 잃어 기각). 모델이 블록을 직접 씀(고정 출력이라 스크립트가 맡음).
+

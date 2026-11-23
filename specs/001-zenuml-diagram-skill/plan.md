@@ -77,6 +77,17 @@ specs/001-zenuml-diagram-skill/
 자기검증, 출력 계약은 정확성 경계이므로 유지한다. 새 스크립트나 의존성은
 추가하지 않으며 피드백 로그 자동화는 002에서 다룬다.
 
+## 2026-11-23 읽기 쉬운 시퀀스 다이어그램 계획 (FR-012, FR-015, FR-016, 007 FR-015d)
+
+- `SKILL.md` "Generation rules": FR-015 작성 규칙 bullet(상태 변경은 호출 위 주석, 상태만 바꾸는 조건 가지는 블록 위 `// → 결과`와 빈 블록, 라벨은 함수와 인자, 자기 메시지는 실제 자기 호출만). "Self-check"의 출력 파일 항목과 "Output and logging"에 `apply_style.py` 실행(저장 직후, 로그 전)을 넣는다.
+- `references/syntax.md` "Comments & styling": 빈 블록 안 주석은 그려지지 않는다는 사실 한 줄.
+- `scripts/apply_style.py`(새 파일, 표준 라이브러리): `apply_style.py <output> [--style=readable|zenuml-default]`. 같은 폴더의 `read_settings.load_settings`로 `diagram.style`을 읽고, 명령줄 값이 허용되면 우선한다(아니면 `⚙️ 설정 안내`). 파일에서 기존 `<details class="zenuml-style">…</details>`를 지우고, `readable`이면 고정 블록을 끝에 붙인다. 다이어그램 코드펜스는 건드리지 않는다. 블록 CSS는 research "스타일 블록"의 값.
+- `settings.schema.json`·`settings.jsonc`: enum `diagram.style`(`readable`, `zenuml-default`, tokenImpact `[0]`)과 한국어 주석.
+- 테스트: `specs/001-zenuml-diagram-skill/test_apply_style.py`(블록 추가·교체·제거, 코드펜스 불변, 배포 설정과 schema 기본값 일치).
+- 007 문서: data-model 옵션 표와 settings-contract에 `diagram.style`.
+
+**Constitution Check (2026-11-23)**: I — 새 파일은 스크립트 하나와 테스트 하나. 블록은 고정 문자열이고 분기는 두 값뿐이다. 스크립트로 둔 이유는 규칙만으로 정해지는 출력을 모델이 매번 쓰지 않게 하기 위함이다(토큰·변동성). II — 001·007 개정. III — 요구사항 변경. IV — 기본값은 schema와 배포 설정에만, 테스트는 schema와 비교. 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*
