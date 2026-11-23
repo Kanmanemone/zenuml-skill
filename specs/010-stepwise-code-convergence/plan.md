@@ -254,6 +254,26 @@ III — 판단이 갈린 경우와 불필요한 작업자 실행을 요구사항
 
 **Constitution Check (2026-11-23 변화 0단계)**: I — 명령은 늘리지 않고 `prepare`에 선택 인자 두 개, `render_box`에 선택 인자 하나만 더한다. diff는 기존 `difflib` 흐름을 재사용한다. git은 `--base`가 있을 때만 부르는 외부 명령으로, 새 설치 단계가 아니다. 없으면 알리고 지금처럼 만든다. II — 010을 개정한다. III — 새 동작을 요구사항으로 정한 변경이다. IV — 새 설정 기본값이 없다. 위반 없음. Phase 1 설계 뒤 다시 확인했고 달라진 것이 없다.
 
+## 2026-11-23 공유 스크롤 상자 계획 (FR-033, SC-022)
+
+설계 근거는 [research.md](research.md) R19, 문서 형식은 [contracts/stages-contract.md](contracts/stages-contract.md)의 마지막 절에 있다. 샘플 `tools/shared_scroll.py`(scratchpad)가 같은 구조를 `render_box` 바꿔 끼우기로 만들었고, 사용자가 미리보기에서 확인했다.
+
+- **`scripts/stages.py`**:
+  - `render_box`가 위에 단계 제목들을, 아래에 `scroller` 하나와 단계별 `pane`을 그린다. 0단계도 같은 자리 규칙을 따른다.
+  - `build_documents`가 제목 규칙과 같은 범위의 `pane` 규칙을 만든다.
+  - `BASE_CSS`는 높이 상한과 스크롤을 `.code`에서 `.scroller`로 옮기고, `.pane`을 숨긴다.
+  - `extract_last_stage`가 마지막 `pane`의 fence를 읽는다.
+  - 장면 내용, 색칠 층, `DIFF_CSS`, `strip_diff_layer`는 바꾸지 않는다.
+- **테스트**:
+  - `Render` 테스트와 0단계 테스트가 쓰는 상자 나누기를 `pane` 기준으로 고친다.
+  - 상자마다 `scroller` 하나와 단계별 `pane`, 그리고 fence 내용이 장면과 같은지 확인하는 테스트를 더한다(SC-022).
+  - 기대 결과는 다시 만든다.
+- **지침**: SKILL.md와 `stages.md`는 바뀌지 않는다. 상자 구조는 지침에 적혀 있지 않다.
+
+하지 않는 것: 단계별 위치 기억, 탭 전환 뒤 복원, 넘겨 보기를 지원하지 않는 곳의 배치, 새 설정.
+
+**Constitution Check (2026-11-23 공유 스크롤 상자)**: I — 기존 함수 네 곳의 출력 모양과 CSS 몇 줄만 바꾸고, 새 함수·설정·의존성은 없다. II — 010을 개정한다. III — 사용자가 고른 새 동작을 요구사항으로 정한 변경이다. IV — 새 기본값이 없다. 위반 없음. 설계 뒤 다시 확인했고 달라진 것이 없다.
+
 ## Complexity Tracking
 
 | 더하는 복잡도 | 필요한 이유 | 더 단순한 방법을 고르지 않은 이유 |

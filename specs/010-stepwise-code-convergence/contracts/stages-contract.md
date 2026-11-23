@@ -310,3 +310,9 @@
 - 문서: `compare`가 있으면 `# <제목> — 정제 단계` 다음에 빈 줄과 `비교 기준: \`<base>\` → \`<head>\``(head가 null이면 `작업 트리`)를 둔다. `removed` 노드의 제목은 `### 🗑️ <이름>`이다. 0단계가 있는 상자는 `<input ... id="<id>-0" class="s0">`를 `-1` 라디오 앞에 두고, 슬라이드 `<div class="stage s0">`를 `s1` 슬라이드 앞에 둔다. 제목은 `0단계: <change 별명> (<base> → <head>)`이다. 색칠 층의 줄 클래스는 `add`·`mod`·`del`이다.
 - `stages.md`: `source` 다음에 `- 표현: change`인 단계 하나를 선택으로 둘 수 있다. 그 단계는 `settings.jsonc`의 `stages`에 나오지 않고, `--show`/`--hide`에서는 무시하며 알린다.
 - 일반 단계의 색칠 층은 `add`·`mod`만 쓴다.
+
+# 2026-11-23 공유 스크롤 상자 계약 (위 문서 형식에 더함)
+
+- 노드 상자: `<div class="stages">` 안에 라디오(0단계가 있으면 `-0`부터), 그다음 단계마다 `<div class="stage sK">`(제목 줄과 note만), 그다음 `<div class="scroller">` 하나가 온다. `scroller` 안에는 단계마다 `<div class="pane pK">`가 있고, 그 안에 지금과 같은 장면(`<div class="scene">` 또는 `<div class="code">` + fence + 색칠 층)이 든다.
+- 기본 CSS: `.stages > .scroller`가 높이 상한 `min(30lh, 70vh)`와 `overflow: auto`를 갖는다. `.stages > .scroller > .pane`은 숨기고, 문서에 나오는 단계 번호마다 `.stages > input.sK:checked ~ .scroller > .pane.pK { display: block; }` 한 줄을 둔다(제목 규칙과 같은 범위). `.code`는 높이 상한과 스크롤을 갖지 않는다.
+- `extract_last_stage`는 마지막 단계의 `pane` 안 fence를 읽는다.
