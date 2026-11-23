@@ -526,7 +526,7 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 
 **Independent Test**: `python specs/010-stepwise-code-convergence/test_learning_stages.py` (git이 없으면 SC-020·SC-021 테스트는 skip)
 
-- [ ] T092 [US4] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 다음 테스트를 더하고, 구현 전에 실패하는지 확인한다 per SC-019, SC-020, SC-021, FR-031
+- [X] T092 [US4] `specs/010-stepwise-code-convergence/test_learning_stages.py`에 다음 테스트를 더하고, 구현 전에 실패하는지 확인한다 per SC-019, SC-020, SC-021, FR-031
   - 일반 단계의 색칠 층에 `del`·`del-after`가 없고 `DIFF_CSS`에 삼각형 규칙이 없다(SC-019).
   - 임시 git 저장소를 만들어 커밋 두 개로 노드 하나를 고치고 하나를 지운 뒤 `prepare --base --head` → `build`를 돌린다. 확인할 것:
     - `data-model.md`의 비교 기준(`manifest.compare`)과 노드 변화(`node.change`)가 맞게 기록된다.
@@ -535,25 +535,31 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
     - 다른 노드의 1단계 이후는 `--base` 없는 결과와 같다(SC-020).
     - 스코프 목록에 고친 노드의 변경 전 줄이 없다(SC-021).
   - `stages.md`에서 `source` 뒤의 `change` 단계를 받아들이고, `--show`/`--hide`에서 무시하며 알린다(FR-031).
-- [ ] T093 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `diff_lines`가 `add`·`mod`만 내게 하고, `DIFF_CSS`에서 삼각형 규칙 세 줄을 빼고 `.del`을 research R18의 빨간 배경·막대 한 줄로 바꾼다 per FR-031, SC-019
-- [ ] T094 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `parse_stage_definition`이 네 표현 뒤의 `change` 단계 하나를 선택으로 받게 하고, `plan_stages`의 마지막 단계 규칙이 `source`를 가리키며 `change`를 보이기 대상에서 빼게 한다 per FR-031, contracts/stages-contract.md "2026-11-23 변화 0단계 계약"
-- [ ] T095 [P] [US4] `.agents/skills/revealing-code-step-by-step/stages.md`의 `원본` 다음에 `## 변화` 단계를 둔다. `- 표현: change`와 필수 두 항목을 적고, 설정에 나오지 않고 비교 기준이 있을 때만 1단계 앞에 붙는다는 설명 한 줄을 넣는다 per FR-031
-- [ ] T096 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `cmd_prepare`와 인자 파서에 `--base`/`--head`를 더한다 per FR-028, FR-029, FR-030, FR-032, research R15·R16, contracts/stages-contract.md
+- [X] T093 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `diff_lines`가 `add`·`mod`만 내게 하고, `DIFF_CSS`에서 삼각형 규칙 세 줄을 빼고 `.del`을 research R18의 빨간 배경·막대 한 줄로 바꾼다 per FR-031, SC-019
+- [X] T094 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `parse_stage_definition`이 네 표현 뒤의 `change` 단계 하나를 선택으로 받게 하고, `plan_stages`의 마지막 단계 규칙이 `source`를 가리키며 `change`를 보이기 대상에서 빼게 한다 per FR-031, contracts/stages-contract.md "2026-11-23 변화 0단계 계약"
+- [X] T095 [P] [US4] `.agents/skills/revealing-code-step-by-step/stages.md`의 `원본` 다음에 `## 변화` 단계를 둔다. `- 표현: change`와 필수 두 항목을 적고, 설정에 나오지 않고 비교 기준이 있을 때만 1단계 앞에 붙는다는 설명 한 줄을 넣는다 per FR-031
+- [X] T096 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `cmd_prepare`와 인자 파서에 `--base`/`--head`를 더한다 per FR-028, FR-029, FR-030, FR-032, research R15·R16, contracts/stages-contract.md
   - 로컬 링크 파일마다 저장소를 찾아 `git show`로 변경 전(그리고 `--head`가 있으면 변경 후) 원본을 읽는다.
   - 기존 `locate_range`와 `--pick`으로 두 범위를 찾는다.
   - `data-model.md`의 `node.change`와 `manifest.compare`를 기록한다.
   - changed는 `work/before/<id>.kt`에 두고, removed는 변경 전 범위를 `work/original/<id>.kt`와 스코프 목록에 넣는다.
   - 읽지 못하면 `notices`에 `🕘 0단계를 붙이지 못함: <이유>`를 남기고 계속한다.
   - `--base`가 없으면 출력이 지금과 같다.
-- [ ] T097 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `render_box`·`build_documents`·`node_scenes`를 고친다 per FR-029, FR-030, FR-031, research R17, `data-model.md` 0단계 줄
+- [X] T097 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `render_box`·`build_documents`·`node_scenes`를 고친다 per FR-029, FR-030, FR-031, research R17, `data-model.md` 0단계 줄
   - changed 노드에 `s0` 라디오·슬라이드를 `s1` 앞에 두고, checked는 `s1`에 둔다. 0단계의 ←는 비활성, →는 `s1`이고, `s1`의 ←는 `s0`이다.
   - 0단계 코드와 `add`·`mod`·`del` 색칠 층을 `difflib` opcode로 만든다. 두 복원이 다르면 `SourceMismatch`를 낸다.
   - 0단계가 있는 문서에만 `s0` 규칙을 더한다.
   - `compare`가 있으면 비교 기준 줄을, removed 노드에는 `🗑️` 제목을 쓴다.
-- [ ] T098 [US4] `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 결과를 다시 만들고, 이전과의 차이가 사라진 자리 표시 클래스와 그 CSS뿐인지 `git diff`로 확인한다 per SC-019
-- [ ] T099 [P] [US4] `.agents/skills/revealing-code-step-by-step/SKILL.md`의 Prepare 절에 비교 기준이 있을 때만 붙이는 `--base`/`--head` 지침을 넣는다. 커밋 X → `--base=X~1 --head=X`, 브랜치 B → `--base=<merge-base> --head=B`, 커밋 안 된 변경 → `--base=HEAD`이고, 정할 수 없으면 묻지 않고 붙이지 않는다 per FR-028, plan "SKILL.md"
-- [ ] T100 테스트 전체를 실행하고, [quickstart.md](quickstart.md)의 "2026-11-23 변화 0단계 확인"대로 swemo(`--base=5ee6b90 --head=26035c6`) 문서를 만들어 VS Code 미리보기에서 0단계 넘기기와 색을 확인한다. 결과는 swemo가 아니라 scratchpad에 둔다 per SC-019, SC-020, SC-021
+- [X] T098 [US4] `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 결과를 다시 만들고, 이전과의 차이가 사라진 자리 표시 클래스와 그 CSS뿐인지 `git diff`로 확인한다 per SC-019
+- [X] T099 [P] [US4] `.agents/skills/revealing-code-step-by-step/SKILL.md`의 Prepare 절에 비교 기준이 있을 때만 붙이는 `--base`/`--head` 지침을 넣는다. 커밋 X → `--base=X~1 --head=X`, 브랜치 B → `--base=<merge-base> --head=B`, 커밋 안 된 변경 → `--base=HEAD`이고, 정할 수 없으면 묻지 않고 붙이지 않는다 per FR-028, plan "SKILL.md"
+- [X] T100 테스트 전체를 실행하고, [quickstart.md](quickstart.md)의 "2026-11-23 변화 0단계 확인"대로 swemo(`--base=5ee6b90 --head=26035c6`) 문서를 만들어 VS Code 미리보기에서 0단계 넘기기와 색을 확인한다. 결과는 swemo가 아니라 scratchpad에 둔다 per SC-019, SC-020, SC-021
+  - 표준 라이브러리 테스트 38개가 통과했다(새 테스트 4개: 0단계·없어진 노드·읽지 못한 비교 기준·사라진 자리 표시 없음, 단계 정의 테스트 2개 개정). 기존 기대 결과의 차이는 diff CSS의 삼각형 규칙 세 줄이 빨간 배경 한 줄로 바뀐 것뿐이다. swemo `5ee6b90 → 26035c6` 실행에서 세 노드가 `changed`이고 0단계가 3개, 줄 분류(추가 2/0/0, 17/8/8, 20/7/7)가 사용자가 확인한 샘플과 같으며, 스코프 목록은 `--base` 없는 실행과 글자까지 같았다. 미리보기의 넘기기와 색은 사용자가 확인한다.
 
 **Dependencies**: T092 → T093 → T094 → T096 → T097 → T098 → T100. T095는 T094와, T099는 T096과 병렬로 할 수 있다. 모두 T100 전에 끝나야 한다.
 
 **MVP**: T092~T098이 SC-019·SC-020을 채운다. T099는 모델이 실제 요청에서 `--base`를 붙이게 하는 지침이다.
+
+## Phase 24: Convergence
+
+- [X] T101 `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `cmd_prepare`가 비교 기준이 있을 때 변경 전 원본 범위에도 같은 이름의 후보가 여럿이면 그 후보를 `pick`에 내보내고(`--pick`은 두 시점에 같이 적용), `specs/010-stepwise-code-convergence/test_learning_stages.py`에 변경 전에만 오버로드가 있는 없어진 노드·달라진 노드가 고른 뒤 `removed`·`changed`로 분류되는 테스트를 더한다 per FR-030, FR-029 (partial)
+  - 고치기 전 코드에서 새 테스트의 두 경우(변경 전에만 오버로드가 있는 달라진 노드·없어진 노드)가 실패하고, 고친 뒤 테스트 39개가 통과했다. 같은 `--pick`이 두 시점에 같이 적용된다.

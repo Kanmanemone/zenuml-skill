@@ -17,6 +17,7 @@ import html
 import json
 import re
 import shutil
+import subprocess
 import sys
 import urllib.request
 from pathlib import Path
@@ -176,6 +177,7 @@ BECOMES = "- 원본과 같아지는 것:"
 UNREVEALED = "- 아직 드러나지 않은 것:"
 KIND = "- 표현:"
 KINDS = ("prose", "outline", "unfold", "source")
+CHANGE = "change"  # optional stage 0, after the four; shown only with a comparison point (spec FR-031)
 
 
 def parse_stage_definition(path=STAGES_FILE):
@@ -197,24 +199,28 @@ def parse_stage_definition(path=STAGES_FILE):
         if names.count(name) > 1:
             raise InputError("stages.md에 별명 `" + name + "`이 겹침")
     for s in stages:
-        if s["kind"] not in KINDS:
-            raise InputError("단계 표현은 %s 중 하나여야 함: %s" % (", ".join(KINDS), s["nickname"]))
+        if s["kind"] not in KINDS + (CHANGE,):
+            raise InputError("단계 표현은 %s 중 하나여야 함: %s" % (", ".join(KINDS + (CHANGE,)), s["nickname"]))
         for head, field in ((BECOMES, "becomes"), (UNREVEALED, "unrevealed")):
             if not s[field]:
                 raise InputError("stages.md의 `" + s["nickname"] + "` 단계에 `" + head + "` 항목이 없음")
-    if [s["kind"] for s in stages] != list(KINDS):
-        raise InputError("stages.md의 단계 표현은 prose, outline, unfold, source 순서로 하나씩이어야 함")
+    if [s["kind"] for s in stages] not in (list(KINDS), list(KINDS) + [CHANGE]):
+        raise InputError("stages.md의 단계 표현은 prose, outline, unfold, source 순서로 하나씩이고, 그 뒤에 change 하나를 둘 수 있음")
     return stages
 
 
 def plan_stages(stages, toggles, show, hide):
-    """Which stages are shown (FR-009a). The last stage (source) is always shown."""
+    """Which stages are shown (FR-009a). The last stage (source) is always shown; the change stage is not
+    toggled at all (spec FR-031)."""
     notices = []
     names = [s["nickname"] for s in stages]
-    last = names[-1]
+    last = next(s["nickname"] for s in stages if s["kind"] == "source")
+    change = next((s["nickname"] for s in stages if s["kind"] == CHANGE), None)
     visible = {name: True for name in names}
     for name, value in toggles.items():
-        if name == last:
+        if name == change:
+            notices.append(settings_notice("`" + name + "` 단계는 비교 기준이 있을 때만 붙으므로 무시"))
+        elif name == last:
             notices.append(settings_notice("마지막 단계 `" + name + "`는 항상 보이므로 무시"))
         elif name not in visible:
             notices.append(settings_notice("단계 정의에 없는 별명 `" + name + "` 무시"))
@@ -224,7 +230,9 @@ def plan_stages(stages, toggles, show, hide):
             visible[name] = value
     for names_in_request, value in ((show, True), (hide, False)):
         for name in names_in_request:
-            if name == last:
+            if name == change:
+                notices.append("⚙️ 요청 안내: `" + name + "` 단계는 비교 기준이 있을 때만 붙으므로 무시")
+            elif name == last:
                 if not value:
                     notices.append("⚙️ 요청 안내: 마지막 단계 `" + name + "`는 항상 보이므로 무시")
             elif name not in visible:
@@ -371,6 +379,65 @@ def assign_documents(nodes, slug):
 # ---- reading sources (research R8) -----------------------------------------------
 
 GITHUB_BLOB = re.compile(r"^https://github\.com/([^/]+)/([^/]+)/blob/(.+)$")
+
+
+def git(cwd, *argv):
+    """(stdout bytes, ok) of one git command; no console window on Windows (feature 006)."""
+    try:
+        r = subprocess.run(["git", "-C", str(cwd), *argv], capture_output=True,
+                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    except OSError:
+        return b"", False
+    return r.stdout, r.returncode == 0
+
+
+class Revisions:
+    """Reads a local link file at a git revision (research R15). One repository lookup per folder."""
+
+    def __init__(self, view_dir, base, head):
+        self.view_dir, self.base, self.head, self.tops, self.shorts = view_dir, base, head, {}, {}
+
+    def repo(self, link):
+        """(repository root, path inside it) or (None, reason)."""
+        if not link or re.match(r"https?://", link):
+            return None, "로컬 파일이 아닌 링크는 변경 전 원본을 읽지 않음"
+        path = (self.view_dir / link.split("#")[0].split("?")[0]).resolve()
+        if path.parent not in self.tops:
+            out, ok = git(path.parent if path.parent.is_dir() else self.view_dir, "rev-parse", "--show-toplevel")
+            self.tops[path.parent] = Path(out.decode("utf-8").strip()).resolve() if ok else None
+        top = self.tops[path.parent]
+        if top is None:
+            return None, "git 저장소가 아님"
+        for rev in (self.base, self.head):
+            if rev and (top, rev) not in self.shorts:
+                out, ok = git(top, "rev-parse", "--short", "--verify", "--quiet", rev + "^{commit}")
+                self.shorts[(top, rev)] = out.decode("utf-8").strip() if ok else None
+            if rev and not self.shorts[(top, rev)]:
+                return None, "리비전 `%s`이 없음" % rev
+        try:
+            return top, path.relative_to(top).as_posix()
+        except ValueError:
+            return None, "저장소 밖의 파일"
+
+    def read(self, top, inner, rev):
+        """Text at `rev`, or None when the file is not there."""
+        out, ok = git(top, "show", "%s:%s" % (rev, inner))
+        try:
+            text = out.decode("utf-8") if ok else None
+        except UnicodeDecodeError:
+            return None
+        return text and text.lstrip("﻿").replace("\r\n", "\n")
+
+
+def source_text(node, view_dir):
+    """The node's source as prepare read it: the working file, or the file at `node["revision"]`."""
+    rev = node.get("revision")
+    if not rev:
+        return read_source(node["link"], view_dir)
+    revs = Revisions(view_dir, rev, None)
+    top, inner = revs.repo(node["link"])
+    text = revs.read(top, inner, rev) if top else None
+    return (text, None) if text is not None else (None, "원본을 읽을 수 없어 구체화하지 않음 (%s의 %s)" % (rev, inner))
 
 
 def read_source(link, view_dir):
@@ -1600,6 +1667,8 @@ def cmd_prepare(args):
         if not _valid({"type": "relativePath"}, args.output_dir):
             raise InputError("--output-dir는 구조 뷰 폴더 기준 상대 경로여야 함: " + args.output_dir)
         output_dir = args.output_dir
+    if getattr(args, "head", None) and not getattr(args, "base", None):
+        raise InputError("--head는 --base와 함께 써야 함")
     planned, stage_notices = plan_stages(stages, values["stages"], split_list(args.show), split_list(args.hide))
     picks = {}
     for item in split_list(args.pick):
@@ -1619,36 +1688,75 @@ def cmd_prepare(args):
 
     docs = assign_documents(nodes, slug)
     view_dir = view.parent.resolve()
+    revs = Revisions(view_dir, args.base, args.head) if getattr(args, "base", None) else None
+    compare, unreadable = None, {}
     listing = []
     for node in nodes:
         node["stage1"] = rel(result_dir / "work" / "01" / (node["id"] + ".kt"))
         node["original"] = node["range"] = node["skip_reason"] = None
         node["candidates"], node["tree"] = [], None
         node["pick"] = picks.get(node["id"])
-        text, reason = read_source(node["link"], view_dir)
+        before = top = None
+        if revs:
+            node["change"] = None
+        if revs and node["link"]:
+            top, inner = revs.repo(node["link"])
+            if top is None:
+                unreadable.setdefault(inner, []).append(node["id"])
+            else:
+                base_short = revs.shorts[(top, revs.base)]
+                head_short = revs.shorts[(top, revs.head)] if revs.head else None
+                compare = compare or {"base": base_short, "head": head_short}
+                node["revision"] = head_short
+                before = revs.read(top, inner, base_short)
+        text, reason = source_text(node, view_dir)
+        span = whole = None
         if text is not None:
             span, reason, node["candidates"], whole = locate_range(text, node, node["pick"])
-            if span:
-                code = "\n".join(text.split("\n")[span[0] - 1: span[1]])
-                original = result_dir / "work" / "original" / (node["id"] + ".kt")
-                write_text(original, code)
-                node["original"] = rel(original)
-                node["range"] = {"source": node["link"], "start_line": span[0], "end_line": span[1]}
-                if whole:
-                    node["range"]["whole_file"] = True
-                node["tree"] = node_tree(node, code)
-                if node["tree"] and node["tree"]["root_children"]:
-                    listing.append(scope_listing(node, code, node["tree"]))
+        if top is not None:
+            node["change"] = None
+            old, _, old_candidates, old_whole = locate_range(before, node, node["pick"]) if before is not None else (None, None, [], None)
+            if not old and old_candidates:
+                node["before_candidates"] = old_candidates  # the old code names several: pick first (spec FR-002)
+            elif span and old:
+                same = text.split("\n")[span[0] - 1: span[1]] == before.split("\n")[old[0] - 1: old[1]]
+                node["change"] = "same" if same else "changed"
+            elif span:
+                node["change"] = "added"
+            elif old and not node["candidates"]:
+                # Gone after the change: the node walks the same stages with its old code (spec FR-030).
+                node["change"], node["revision"], text, span, whole, reason = "removed", base_short, before, old, old_whole, None
+            if node["change"] == "changed":
+                write_text(result_dir / "work" / "before" / (node["id"] + ".kt"),
+                           "\n".join(before.split("\n")[old[0] - 1: old[1]]))
+        if span:
+            code = "\n".join(text.split("\n")[span[0] - 1: span[1]])
+            original = result_dir / "work" / "original" / (node["id"] + ".kt")
+            write_text(original, code)
+            node["original"] = rel(original)
+            node["range"] = {"source": node["link"], "start_line": span[0], "end_line": span[1]}
+            if whole:
+                node["range"]["whole_file"] = True
+            node["tree"] = node_tree(node, code)
+            if node["tree"] and node["tree"]["root_children"]:
+                listing.append(scope_listing(node, code, node["tree"]))
         node["skip_reason"] = reason
+    if revs:
+        notices += ["🕘 0단계를 붙이지 못함: %s (%s)" % (why, ", ".join(ids)) for why, ids in unreadable.items()]
 
     manifest = {"view": rel(view), "slug": slug, "dir": rel(result_dir), "docs": docs,
                 "stages": planned, "notices": notices, "nodes": nodes}
+    if compare:
+        manifest["compare"] = compare
     write_text(manifest_path(result_dir), json.dumps(manifest, ensure_ascii=False, indent=1))
     # A hidden first stage is never shown and nothing builds on it, so no isolated worker is needed (spec FR-009a).
     prompt = write_stage1_prompt(result_dir, view_text, planned[0], nodes) if planned[0]["visible"] else None
-    pick = [{"id": n["id"], "source": n["link"] if re.match(r"https?://", n["link"]) else rel(view_dir / n["link"].split("#")[0]),
-             "candidates": n["candidates"]}
+    source_of = lambda n: n["link"] if re.match(r"https?://", n["link"]) else rel(view_dir / n["link"].split("#")[0])
+    pick = [{"id": n["id"], "source": source_of(n), "candidates": n["candidates"]}
             for n in nodes if n["candidates"] and n["skip_reason"]]
+    # The same --pick applies to both points, so the old code's candidates are asked for too (research R16).
+    pick += [{"id": n["id"], "source": source_of(n), "revision": compare["base"], "candidates": n["before_candidates"]}
+             for n in nodes if n.get("before_candidates") and not (n["candidates"] and n["skip_reason"])]
     emit({"dir": rel(result_dir), "stage1_prompt": prompt and prompt.as_posix(),
           "outline": rel(result_dir / "work" / OUTLINE_FILE), "pick": pick,
           "stages": [{"nickname": s["nickname"], "kind": s["kind"], "visible": s["visible"]} for s in planned]})
@@ -1701,9 +1809,7 @@ DIFF_CSS = """.stages .code { position: relative; }
 .stages pre.diff span { display: inline-block; width: 100%; min-height: 1lh; vertical-align: top; position: relative; margin-left: -.6em; padding-left: .6em; }
 .stages pre.diff .add { background: oklch(0.7 0.13 150 / 10%); box-shadow: inset 4px 0 0 oklch(0.74 0.13 152); }
 .stages pre.diff .mod { background: oklch(0.7 0.13 245 / 10%); box-shadow: inset 4px 0 0 oklch(0.52 0.19 260); }
-.stages pre.diff .del::before, .stages pre.diff .del-after::after { content: ""; position: absolute; left: 0; border: 5px solid transparent; border-left-color: oklch(0.65 0.19 25); }
-.stages pre.diff .del::before { top: -5px; }
-.stages pre.diff .del-after::after { bottom: -5px; }"""
+.stages pre.diff .del { background: oklch(0.7 0.15 25 / 10%); box-shadow: inset 4px 0 0 oklch(0.62 0.17 18); }"""
 
 
 def fence(code, lang="kotlin"):
@@ -1716,16 +1822,26 @@ def note_for(changed):
     return "" if changed else "이 단계에서는 달라진 것이 없음"
 
 
-def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin"):
-    """Base box. slides: [(title, note, code)]; diff_layers: [markup or None] (added after the code)."""
+def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin", stage0=None):
+    """Base box. slides: [(title, note, code)]; diff_layers: [markup or None] (added after the code).
+    stage0: optional (title, code, layer) reached by stepping back from stage 1 (spec FR-031)."""
     n = len(slides)
     kinds = kinds or ["code"] * n
     out = ['<div class="stages">', ""]
+    if stage0:
+        out.append('<input type="radio" name="%s" id="%s-0" class="s0">' % (node_id, node_id))
     for k in range(1, n + 1):
         out.append('<input type="radio" name="%s" id="%s-%d" class="s%d"%s>' % (node_id, node_id, k, k, " checked" if k == 1 else ""))
     out.append("")
+    if stage0:
+        title, code, layer = stage0
+        out += ['<div class="stage s0">', "",
+                '<div class="head"><span class="name">%s</span><span class="nav">←</span><label class="nav" for="%s-1">→</label></div>'
+                % (html.escape(title, quote=False), node_id), "",
+                '<div class="code">', "", fence(code, lang), "", *([layer, ""] if layer else []), "</div>", "", "</div>", ""]
     for k, (title, note, code) in enumerate(slides, start=1):
-        prev = '<label class="nav" for="%s-%d">←</label>' % (node_id, k - 1) if k > 1 else '<span class="nav">←</span>'
+        prev = ('<label class="nav" for="%s-%d">←</label>' % (node_id, k - 1) if k > 1 or stage0
+                else '<span class="nav">←</span>')
         nxt = '<label class="nav" for="%s-%d">→</label>' % (node_id, k + 1) if k < n else '<span class="nav">→</span>'
         out += ['<div class="stage s%d">' % k, "",
                 '<div class="head"><span class="name">%s</span>%s%s</div>' % (html.escape(title, quote=False), prev, nxt),
@@ -1744,27 +1860,24 @@ def render_box(node_id, slides, diff_layers, kinds=None, lang="kotlin"):
 # ---- build: diff layer (research R7) — knows nothing about the base box ----------
 
 def diff_lines(prev, cur):
-    """Per line of `cur`: a set of add / mod / del / del-after (VS Code git gutter rules)."""
-    a, b = prev.rstrip("\n").split("\n"), cur.rstrip("\n").split("\n")
-    kinds = [set() for _ in b]
+    """Per line of `cur`: {"add"}, {"mod"} or empty. What disappears between ordinary stages is only
+    placeholders, so it is not marked (spec FR-031)."""
+    return [{k} if k else set() for _, k in change_rows(prev, cur) if k != "del"]
+
+
+def change_rows(old, new):
+    """[(line, None|"add"|"mod"|"del")]: `new` with the lines of `old` it lost put back in place. A replaced
+    run pairs old and new lines as "mod"; extra new lines are "add" (VS Code git gutter rules)."""
+    a, b = old.rstrip("\n").split("\n"), new.rstrip("\n").split("\n")
+    rows = []
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(a=a, b=b, autojunk=False).get_opcodes():
         if tag == "equal":
-            continue
-        if tag == "insert":
-            for j in range(j1, j2):
-                kinds[j].add("add")
+            rows += [(line, None) for line in b[j1:j2]]
             continue
         paired = min(i2 - i1, j2 - j1) if tag == "replace" else 0
-        for j in range(j1, j1 + paired):
-            kinds[j].add("mod")
-        for j in range(j1 + paired, j2):
-            kinds[j].add("add")
-        if (i2 - i1) > paired:
-            if j2 < len(b):
-                kinds[j2].add("del")
-            else:
-                kinds[-1].add("del-after")
-    return kinds
+        rows += [(line, "del") for line in a[i1:i2]]
+        rows += [(line, "mod") for line in b[j1:j1 + paired]] + [(line, "add") for line in b[j1 + paired:j2]]
+    return rows
 
 
 def render_diff_layer(code, kinds):
@@ -1820,13 +1933,19 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
     max_slides = 1
     for doc, title in manifest["docs"]:
         parts = ["# %s — 정제 단계" % title, ""]
+        compare = manifest.get("compare")
+        if compare:
+            parts += ["비교 기준: `%s` → `%s`" % (compare["base"], compare["head"]) if compare["head"]
+                      else "비교 기준: `%s` → 작업 트리" % compare["base"], ""]
+        change_stage = next((s for s in manifest["stages"] if s["kind"] == CHANGE), None)
+        has_stage0 = False
         current_path = None
         for node in [n for n in manifest["nodes"] if n["doc"] == doc]:
             group_path = [g[1] for g in node["group_path"][node["doc_depth"]:]]
             if group_path and group_path != current_path:
                 parts += ["## " + " / ".join(group_path), ""]
             current_path = group_path
-            parts += ["### " + node["name"], ""]
+            parts += ["### " + ("🗑️ " if node.get("change") == "removed" else "") + node["name"], ""]
             if node.get("responsibility"):
                 parts += ['<div class="resp"><span class="label">책임</span> %s</div>' % html.escape(node["responsibility"], quote=False), ""]
             if node["skip_reason"]:
@@ -1844,8 +1963,13 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
                 prev = content if kind == "code" else prev
             counts[node["id"]] = len(scenes)
             max_slides = max(max_slides, len(slides))
-            parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin"), ""]
-        rules = "\n".join(".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k) for k in range(1, max_slides + 1))
+            stage0 = None
+            if change_stage and node.get("change") == "changed" and slides:
+                stage0 = change_scene(result_dir, node, compare, change_stage["nickname"], with_diff)
+                has_stage0 = True
+            parts += [render_box(node["id"], slides, layers, kinds, source_lang(node["link"]) if node["link"] else "kotlin", stage0), ""]
+        rules = "\n".join(".stages > input.s%d:checked ~ .stage.s%d { display: block; }" % (k, k)
+                          for k in range(0 if has_stage0 else 1, max_slides + 1))
         parts += ['<details class="zenuml-stepwise-style">', "<summary>" + STYLE_SUMMARY + "</summary>", "",
                   "<style>", BASE_CSS.replace("{STAGE_RULES}", rules), "</style>", ""]
         if with_diff:
@@ -1853,6 +1977,20 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
         parts += ["</details>", ""]
         docs_text[doc] = "\n".join(parts)
     return docs_text, unchanged, counts
+
+
+def change_scene(result_dir, node, compare, nickname, with_diff):
+    """(title, code, layer) of a changed node's stage 0, checked both ways (spec FR-029, research R17)."""
+    work = Path(result_dir) / "work"
+    after = read_text(work / "original" / (node["id"] + ".kt")).rstrip("\n")
+    before = read_text(work / "before" / (node["id"] + ".kt")).rstrip("\n")
+    rows = change_rows(before, after)
+    if ("\n".join(l for l, k in rows if k != "del") != after
+            or "\n".join(l for l, k in rows if k not in ("add", "mod")) != before):
+        raise SourceMismatch("%s: 0단계에서 변경 전·후 원본 범위를 되살릴 수 없음" % node["id"])
+    code = "\n".join(l for l, _ in rows)
+    title = "0단계: %s (%s → %s)" % (nickname, compare["base"], compare["head"] or "작업 트리")
+    return title, code, render_diff_layer(code, [{k} if k else set() for _, k in rows]) if with_diff else None
 
 
 def extract_last_stage(doc_text, node_id, last):
@@ -1916,7 +2054,7 @@ def cmd_build(args):
         if node["skip_reason"]:
             continue
         written = extract_last_stage(read_text(result_dir / node["doc"]), node["id"], counts[node["id"]])
-        text, reason = read_source(node["link"], view_dir)
+        text, reason = source_text(node, view_dir)
         expected = None
         if text is not None:
             span, reason, _, _ = locate_range(text, node, node.get("pick"))
@@ -1950,6 +2088,8 @@ def main(argv=None):
     p.add_argument("--hide")
     p.add_argument("--output-dir", dest="output_dir")
     p.add_argument("--pick")
+    p.add_argument("--base")
+    p.add_argument("--head")
     bd = sub.add_parser("build")
     bd.add_argument("dir")
     args = parser.parse_args(argv)

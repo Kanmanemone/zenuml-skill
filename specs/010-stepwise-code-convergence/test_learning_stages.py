@@ -3,6 +3,7 @@
 Set REGENERATE=1 to rewrite fixtures/expected/*.md from the current output (then review the diff).
 """
 import contextlib
+import html
 import importlib.util
 import io
 import json
@@ -90,13 +91,24 @@ def exit_code(argv):
 class Definition(unittest.TestCase):
     def test_kinds_in_order_and_notes_section_is_not_a_stage(self):
         stages = s.parse_stage_definition()
-        self.assertEqual([x['kind'] for x in stages], list(s.KINDS))
-        self.assertEqual([x['nickname'] for x in stages], ['사용 상황', '윤곽', '펼치기', '원본'])
+        self.assertEqual([x['kind'] for x in stages], list(s.KINDS) + [s.CHANGE])
+        self.assertEqual([x['nickname'] for x in stages], ['사용 상황', '윤곽', '펼치기', '원본', '변화'])
 
     def test_hiding_and_unknown_names(self):
         planned, notices = s.plan_stages(s.parse_stage_definition(), {'윤곽': False, '없는 단계': True}, [], ['펼치기', '원본'])
-        self.assertEqual([x['visible'] for x in planned], [True, False, False, True])
+        self.assertEqual([x['visible'] for x in planned], [True, False, False, True, True])
         self.assertEqual(len(notices), 2)
+
+    def test_change_stage_is_optional_and_not_toggled(self):
+        planned, notices = s.plan_stages(s.parse_stage_definition(), {'변화': False}, ['변화'], ['변화'])
+        self.assertEqual(planned[-1]['kind'], 'change')
+        self.assertTrue(planned[-1]['visible'])
+        self.assertEqual(len(notices), 3)  # settings, --show, --hide: each ignored with one line
+        with tempfile.TemporaryDirectory() as tmp:
+            four = Path(tmp) / 'stages.md'
+            text = s.read_text(s.STAGES_FILE)
+            four.write_text(text[:text.index('## 변화')], encoding='utf-8')
+            self.assertEqual([x['kind'] for x in s.parse_stage_definition(four)], list(s.KINDS))
 
     def test_node_display_marks_are_not_part_of_the_source_name(self):
         cases = {
@@ -891,7 +903,143 @@ class OtherLanguages(unittest.TestCase):
         self.assertEqual(s.find_declaration(text + 'class X { void f() { place(o); } }\n', ['place'], None, lang)[0], (13, 17))
 
 
+BEFORE_MISSING = '''package com.shop.pay
+
+class PaymentGateway {
+    fun charge(id: String) {
+        log(id)
+        send(id)
+    }
+}
+
+class SomethingElse
+'''
+
+
+def git(root, *argv):
+    import subprocess
+    subprocess.run(['git', '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'core.autocrlf=false', *argv],
+                   cwd=root, check=True, capture_output=True)
+
+
+def stage0_rows(doc, node_id):
+    """(line, class) rows of a node's stage 0, read back from its diff layer."""
+    box = doc[doc.index('id="%s-0"' % node_id):]
+    slide = box[box.index('<div class="stage s0">'):box.index('<div class="stage s1">')]
+    layer = slide[slide.index('<pre class="diff"'):slide.index('</pre>')]
+    return [(html.unescape(text), cls or None) for cls, text in re.findall(r'<span(?: class="([a-z]+)")?>(.*?)</span>\n', layer)]
+
+
+@unittest.skipUnless(shutil.which('git'), 'git이 없음')
+class ChangeStage(unittest.TestCase):
+    """Stage 0 when the request names a comparison point (spec FR-028~032, SC-020, SC-021)."""
+
+    def build(self, root, **extra):
+        meta, listing = run(s.cmd_prepare, view=str(root / 'view.architecture.md'), show=None, hide=None,
+                            output_dir=None, pick=None, base=extra.get('base'), head=extra.get('head'))
+        result = Path(meta['dir'])
+        shutil.copytree(FIXTURE / 'unfold/01', result / 'work/01')
+        outline = json.loads((FIXTURE / 'unfold/outline.json').read_text(encoding='utf-8'))
+        manifest = s.load_manifest(result)
+        for node in manifest['nodes']:
+            if node['id'] not in outline and node.get('tree') and node['tree']['root_children']:
+                outline[node['id']] = auto_entry(node['tree'])
+        (result / 'work/outline.json').write_text(json.dumps(outline, ensure_ascii=False), encoding='utf-8')
+        built, _ = run(s.cmd_build, dir=str(result))
+        return meta, listing, result, built
+
+    def test_changed_node_gets_stage0_and_removed_node_uses_its_old_code(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            shutil.copytree(FIXTURE / 'src', root / 'src')
+            shutil.copyfile(FIXTURE / 'view.architecture.md', root / 'view.architecture.md')
+            order = (root / 'src/Order.kt').read_text(encoding='utf-8')
+            (root / 'src/Order.kt').write_text(order.replace('        reserved += id\n', '        log(id)\n        reserved.add(id)\n'), encoding='utf-8')
+            (root / 'src/Missing.kt').write_text(BEFORE_MISSING, encoding='utf-8')
+            git(root, 'init', '-q')
+            git(root, 'add', '.')
+            git(root, 'commit', '-q', '-m', 'before')
+            shutil.copyfile(FIXTURE / 'src/Order.kt', root / 'src/Order.kt')
+            shutil.copyfile(FIXTURE / 'src/Missing.kt', root / 'src/Missing.kt')
+            git(root, 'commit', '-q', '-am', 'after')
+
+            meta, listing, result, built = self.build(root, base='HEAD~1', head='HEAD')
+            manifest = s.load_manifest(result)
+            change = {n['id']: n['change'] for n in manifest['nodes']}
+            self.assertEqual(change['InventoryRepository'], 'changed')
+            self.assertEqual(change['PaymentGateway'], 'removed')
+            self.assertEqual(change['OrderService'], 'same')
+            self.assertEqual(set(manifest['compare']), {'base', 'head'})
+            self.assertNotIn('reserved.add(id)', listing)  # the changed node's old code never reaches the model (SC-021)
+            self.assertIn('===== PaymentGateway', listing)
+
+            doc = '\n'.join(Path(d).read_text(encoding='utf-8') for d in built['docs'])
+            self.assertEqual(doc.count('<div class="stage s0">'), 1)
+            self.assertIn('비교 기준: `%s` → `%s`' % (manifest['compare']['base'], manifest['compare']['head']), doc)
+            self.assertIn('### 🗑️ PaymentGateway', doc)
+            rows = stage0_rows(doc, 'InventoryRepository')
+            after = (result / 'work/original/InventoryRepository.kt').read_text(encoding='utf-8')
+            before = (result / 'work/before/InventoryRepository.kt').read_text(encoding='utf-8')
+            self.assertEqual('\n'.join(t for t, c in rows if c != 'del'), after.rstrip('\n'))
+            self.assertEqual('\n'.join(t for t, c in rows if c not in ('add', 'mod')), before.rstrip('\n'))
+            self.assertEqual({c for _, c in rows} - {None}, {'del', 'mod'})
+            removed = (result / 'work/original/PaymentGateway.kt').read_text(encoding='utf-8')
+            self.assertIn('class PaymentGateway', removed)
+            self.assertNotIn('<label class="nav" for="OrderService-0">', doc)
+
+            with_base = s.load_manifest(result)
+            parsed = parsed_outline(result, with_base)
+            scenes = {n['id']: s.node_scenes(result, with_base, n, parsed) for n in with_base['nodes'] if n['id'] != 'PaymentGateway'}
+            _, _, plain, _ = self.build(root)
+            without = s.load_manifest(plain)
+            self.assertNotIn('compare', without)
+            parsed = parsed_outline(plain, without)
+            self.assertEqual({n['id']: s.node_scenes(plain, without, n, parsed) for n in without['nodes'] if n['id'] != 'PaymentGateway'}, scenes)
+
+    def test_overloads_only_in_the_old_code_are_picked_too(self):
+        screen = (FIXTURE / 'src/Screen.kt').read_text(encoding='utf-8')
+        public_only = screen[:screen.index('\n@Composable\nprivate')].replace('vm::refresh)', 'vm::refresh, animate = true)') + '\n'
+        for after, expected in ((public_only, 'changed'), (None, 'removed')):
+            with self.subTest(expected), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                shutil.copytree(FIXTURE / 'src', root / 'src')
+                view = root / 'overload.architecture.md'
+                shutil.copyfile(FIXTURE / 'overload.architecture.md', view)
+                git(root, 'init', '-q')
+                git(root, 'add', '.')
+                git(root, 'commit', '-q', '-m', 'before')
+                if after is None:
+                    (root / 'src/Screen.kt').unlink()
+                else:
+                    (root / 'src/Screen.kt').write_text(after, encoding='utf-8')
+                git(root, 'commit', '-q', '-am', 'after')
+                prepare = dict(view=str(view), show=None, hide=None, output_dir=None, base='HEAD~1', head='HEAD')
+                meta, listing = run(s.cmd_prepare, pick=None, **prepare)
+                self.assertEqual([(p['id'], len(p['candidates']), 'revision' in p) for p in meta['pick']], [('Screen', 2, True)])
+                self.assertEqual(listing, '')  # nothing to write before the pick
+                meta, _ = run(s.cmd_prepare, pick='Screen:1', **prepare)
+                self.assertEqual(meta['pick'], [])
+                node = next(n for n in s.load_manifest(Path(meta['dir']))['nodes'] if n['id'] == 'Screen')
+                self.assertEqual(node['change'], expected)
+                self.assertEqual(node['range']['start_line'], 3)
+
+    def test_unreadable_comparison_point_builds_without_stage0(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            shutil.copytree(FIXTURE / 'src', root / 'src')
+            shutil.copyfile(FIXTURE / 'view.architecture.md', root / 'view.architecture.md')
+            meta, _, result, built = self.build(root, base='HEAD~1')  # not a git repository
+            self.assertTrue(any(n.startswith('🕘 0단계를 붙이지 못함') for n in s.load_manifest(result)['notices']))
+            self.assertNotIn('class="s0"', '\n'.join(Path(d).read_text(encoding='utf-8') for d in built['docs']))
+
+
 class Render(unittest.TestCase):
+    def test_removed_lines_are_not_marked_in_ordinary_stages(self):
+        self.assertEqual(s.diff_lines('a\nb\nc\n', 'a\nc\n'), [set(), set()])
+        self.assertEqual(s.diff_lines('a\nb\n', 'a\nx\ny\n'), [set(), {'mod'}, {'add'}])
+        self.assertNotIn('border-left-color', s.DIFF_CSS)
+        self.assertIn('.stages pre.diff .del { background: oklch(0.7 0.15 25 / 10%); box-shadow: inset 4px 0 0 oklch(0.62 0.17 18); }', s.DIFF_CSS)
+
     def test_prose_is_escaped_not_syntax_highlighted(self):
         box = s.render_box('A', [('Situation', '', '<script>x</script> & text'), ('Code', '', 'class A')], [None, None], ['prose', 'code'])
         first, second = box.split('<div class="stage s2">')
