@@ -647,8 +647,9 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 **Independent Test**: `python specs/003-architecture-view-skill/test_build_diagram.py`
 
-- [ ] T181 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`의 `FAINT_LINE`을 새 문구로 바꾸고 실패하는지 본다 per FR-045
-- [ ] T182 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`의 `FAINT_LEGEND`와 `settings.jsonc`의 `faintNonUsageEdges` 주석을 새 문구로 바꾼다 per FR-045
-- [ ] T183 [US1] 테스트를 실행하고, 옅은 선이 있는 구조 뷰를 Mermaid로 렌더링해 범례 높이가 바꾸기 전과 같은지(줄바꿈 없음) 확인한다 per SC-019
+- [X] T181 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`의 `FAINT_LINE`을 새 문구로 바꾸고 실패하는지 본다 per FR-045
+- [X] T182 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`의 `FAINT_LEGEND`와 `settings.jsonc`의 `faintNonUsageEdges` 주석을 새 문구로 바꾼다 per FR-045
+- [X] T183 [US1] 테스트를 실행하고, 옅은 선이 있는 구조 뷰를 Mermaid로 렌더링해 범례 높이가 바꾸기 전과 같은지(줄바꿈 없음) 확인한다 per SC-019
+  - 003 테스트 18개가 통과했다(문구만 바꾼 테스트는 고치기 전에 실패). 변화 표시와 옅은 간선이 함께 있는 다이어그램을 mermaid-cli로 그려 보니 범례 높이가 옛 문구·새 문구 모두 84px(네 줄)이고, 폭은 197px → 227px로 `wrappingWidth` 400px 안이다.
 
 **Dependencies**: T181 → T182 → T183.

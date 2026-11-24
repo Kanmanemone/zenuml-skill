@@ -68,7 +68,7 @@ FLAGS = {"--file-extensions=": FILE_EXTENSIONS, "--faint-edges=": FAINT_EDGES, "
 # any other; the hover underline (009) sits on the outer .nodeLabel and still shows (003 FR-046)
 LINK_RULE = " .node a, .node a:hover { color: inherit !important; text-decoration: none !important; }"
 FAINT_LABELS = {"생성", "전달", "타입 참조"}
-FAINT_LEGEND = "옅은 선: 사용 외 의존 (생성·전달)"
+FAINT_LEGEND = "옅은 간선: 사용 외 의존 (생성·전달 등)"
 STRUCTURE = re.compile(r"^\s*(subgraph\b|end\s*$|direction\b|flowchart\b|%%)")
 
 

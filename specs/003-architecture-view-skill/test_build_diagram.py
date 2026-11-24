@@ -36,7 +36,7 @@ class CrudLegendTest(unittest.TestCase):
 
 FAINT = ["flowchart LR", "  A", "  B", "  C", "", "  A -->|호출| B", "  A -->|생성| C",
          "  B -->|생성·호출| C", "  C -->|타입 참조| B"]
-FAINT_LINE = "옅은 선: 사용 외 의존 (생성·전달)"
+FAINT_LINE = "옅은 간선: 사용 외 의존 (생성·전달 등)"
 
 
 class FaintEdgeTest(unittest.TestCase):
