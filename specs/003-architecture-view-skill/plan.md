@@ -174,6 +174,13 @@ III — 판단이 갈린 경우를 규칙으로 정하는 요구사항 변경이
 
 **Constitution Check (2026-11-24)**: I — 새 파일·의존성 없이 기존 config 문자열에 조건부 규칙 하나와 명령줄 표 한 줄을 더한다. II — 003·007을 개정한다. III — 새 요구사항이다. IV — 기본값은 schema에만 둔다. 위반 없음. 설계 뒤 다시 확인했고 달라진 것이 없다.
 
+## 2026-11-24 옅은 선 범례 문구 계획 (FR-045 개정, SC-019)
+
+- `scripts/build_diagram.py`: `FAINT_LEGEND`를 `옅은 간선: 사용 외 의존 (생성·전달 등)`으로 바꾼다. 범례 줄을 한 줄로 두는 `wrappingWidth: 400`은 그대로 둔다 — 두 글자가 늘어도 줄 폭이 400px보다 한참 작다. 확인은 Mermaid로 렌더링한 범례 높이가 바꾸기 전과 같은지로 한다.
+- `settings.jsonc`의 `faintNonUsageEdges` 주석, 007 `contracts/settings-contract.md`의 옅은 선 계약, `test_build_diagram.py`의 `FAINT_LINE`을 같은 문구로 맞춘다. 지난 계획·검증 기록과 `.specify/assessments/` 샘플은 그 시점의 기록이라 그대로 둔다.
+
+**Constitution Check (2026-11-24 범례 문구)**: I~IV 모두 해당 없음(문구 하나). 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify. This section is intentionally empty.*
