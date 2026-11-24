@@ -245,8 +245,9 @@ Task: "scripts/lib/inline-svg.js 작성"
 
 **Independent Test**: quickstart.md 시나리오 16
 
-- [ ] T057 [P] `.agents/skills/exporting-markdown-diagrams/SKILL.md` "Workflow" 첫 단계에 `scripts/node_modules`가 없으면 `scripts/`에서 `npm ci --no-audit --no-fund`를 묻지 않고 실행하고, 스크립트가 `ERR_MODULE_NOT_FOUND`로 실패하면 한 번 설치 후 다시 시도한다는 지침을, "Failures"에 `⚙️ 의존성 설치 실패: <이유>`를 더한다 per FR-025
-- [ ] T058 [P] `README.md`와 `README.ko.md`의 설치 명령 1·4(macOS/Linux, PowerShell)에 npm이 있을 때만 이 스킬의 `scripts/`에 `npm ci`를 실행하는 줄을 더하고, `npm install` 안내 두 곳을 자동 설치를 말하는 문장으로 바꾼다 per FR-026
-- [ ] T059 quickstart.md 시나리오 16의 1·2를 실행해 결과를 기록한다 per SC-016
+- [X] T057 [P] `.agents/skills/exporting-markdown-diagrams/SKILL.md` "Workflow" 첫 단계에 `scripts/node_modules`가 없으면 `scripts/`에서 `npm ci --no-audit --no-fund`를 묻지 않고 실행하고, 스크립트가 `ERR_MODULE_NOT_FOUND`로 실패하면 한 번 설치 후 다시 시도한다는 지침을, "Failures"에 `⚙️ 의존성 설치 실패: <이유>`를 더한다 per FR-025
+- [X] T058 [P] `README.md`와 `README.ko.md`의 설치 명령 1·4(macOS/Linux, PowerShell)에 npm이 있을 때만 이 스킬의 `scripts/`에 `npm ci`를 실행하는 줄을 더하고, `npm install` 안내 두 곳을 자동 설치를 말하는 문장으로 바꾼다 per FR-026
+- [X] T059 quickstart.md 시나리오 16의 1·2를 실행해 결과를 기록한다 per SC-016
+  - 커밋된 파일만 `node_modules` 없이 임시 프로젝트에 풀고 README의 bash 줄과 PowerShell 줄을 그대로 실행했다. npm이 있으면 둘 다 202개 패키지를 약 1분에 설치했고, 그 복사본에서 `export-document-png.js`로 PNG가 만들어졌다. npm을 PATH에서 뺀 실행은 둘 다 출력 없이 건너뛰었다. 시나리오 16의 3(다른 저장소의 에이전트가 질문 없이 설치하는지)은 실행하지 않았다.
 
 **Dependencies**: T057, T058 → T059.

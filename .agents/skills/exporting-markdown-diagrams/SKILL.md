@@ -10,14 +10,19 @@ the diagram/document with model reasoning.
 
 ## Workflow
 
-1. Run `node scripts/read-settings.js` from this skill directory and use its
+1. If `scripts/node_modules` does not exist, run `npm ci --no-audit --no-fund`
+   inside `scripts/` without asking: it installs the locked versions there (and
+   the headless browser into the user cache). Never install globally or
+   elsewhere. If an export script later fails with `ERR_MODULE_NOT_FOUND`, run
+   the same command once and retry.
+2. Run `node scripts/read-settings.js` from this skill directory and use its
    resolved `values`. Add returned notices unchanged to the final response.
-2. Identify the Markdown target, format, scope, and document layout from the
+3. Identify the Markdown target, format, scope, and document layout from the
    request. A current-request value overrides settings.
-3. Apply configured defaults. If anything remains unresolved, read
+4. Apply configured defaults. If anything remains unresolved, read
    [references/questions.md](references/questions.md) and ask all missing choices
    together.
-4. Run exactly one matching export script and report its output path(s), not raw
+5. Run exactly one matching export script and report its output path(s), not raw
    script output or rendered contents.
 
 Never edit `settings.jsonc`. Conversion scripts read output directory, PNG
@@ -74,4 +79,5 @@ document without diagrams remains valid.
 If the target is missing/not Markdown, diagram scope finds no diagram, the format
 and scope conflict, or a tool/renderer fails, report the actual reason plainly.
 Never switch format/layout, fabricate an approximation, or fall back to model
-reasoning.
+reasoning. If the dependency install fails, stop and report one line:
+`⚙️ 의존성 설치 실패: <reason>`.
