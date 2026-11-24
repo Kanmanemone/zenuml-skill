@@ -51,6 +51,10 @@
 - (사용자 결정) `exporting-markdown-diagrams`의 렌더링 모양(004 FR-023)을 `vscode-light-plus`와 `mermaid-default` 중에서 고르는 설정을 둔다. 처음 값은 `vscode-light-plus`다(FR-014c).
 - (사용자 결정) 사용 외 의존 간선을 옅은 선으로 그리는 동작(003 FR-044·FR-045)을 켜고 끄는 boolean 설정을 둔다. 처음 값은 켬이다(FR-012f).
 
+### Session 2026-11-24
+
+- (사용자 결정) 구조 뷰에서 링크가 있는 노드 이름의 모양(003 FR-046)을 `plain`(원래 글자색, 밑줄 없음)과 `link`(보는 곳의 링크 색과 밑줄) 중에서 고르는 설정 `dependency.linkStyle`를 둔다. 처음 값은 `plain`이다. 이름은 on/off 대신 값 이름만 보고 결과를 알 수 있게 정했다(FR-012g).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - 구조 뷰의 표시 방식 고르기 (Priority: P1)
@@ -148,6 +152,7 @@
 - **FR-012e** (003 개정): 설정은 003 FR-037의 파일 이름 표시를 `dependency.sourceFile.enabled`(boolean)로 켜고 끄고, `dependency.sourceFile.position`(위쪽 테두리 선 위의 `left` 왼쪽, `center` 중간, `right` 오른쪽)으로 위치를 고를 수 있어야 한다. 표시는 번들 스크립트가 채우므로 토큰 소모 영향은 모든 값이 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
 - **FR-012f** (003 개정): 설정은 003 FR-044·FR-045의 옅은 선과 그 범례 줄을 boolean 하나로 켜고 끌 수 있어야 한다. 이 값은 번들 스크립트만 읽으며 스킬이 쓰는 라벨(003 FR-043)은 값과 상관없이 같다. 토큰 소모 영향은 두 값 모두 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
 - **FR-012**: 피드백 로그의 Response에는 산출 파일에 실제로 쓴 내용(상자 포함, `hidden` 섹션 제외)이 그대로 기록돼야 한다.
+- **FR-012g** (003 개정): 설정은 003 FR-046의 링크 노드 글자색과 밑줄을 `dependency.linkStyle`(`plain`·`link`)로 고를 수 있어야 한다. 이 값은 번들 스크립트만 읽으며 스킬이 쓰는 다이어그램은 값과 상관없이 같다. 토큰 소모 영향은 두 값 모두 `[0]`다. 요청 문장이 값을 직접 밝히면 FR-006을 따른다.
 - **FR-012b**: 설정은 피드백 로그 저장 위치(`log.directory`)를 프로젝트 루트 기준 상대 경로로 정할 수 있어야 한다. 로그 파일 이름 규칙(`<slug>.architecture.md`)과 append-only 동작은 그대로이며, 위치가 없으면 새로 만든다. 위치를 바꿔도 이전 위치의 기존 로그는 옮기거나 지우지 않는다. 절대 경로나 경로로 해석할 수 없는 값은 FR-005를 따른다. 구조 뷰 산출 파일의 위치는 설정 대상이 아니다.
 
 **exporting-markdown-diagrams 옵션과 동작**
@@ -177,7 +182,7 @@
 
 - **스킬 설정 파일**: 스킬마다 하나씩 그 스킬 디렉터리 안에 있는, 주석을 허용하는 JSON 문서. 섹션·기능 단위 묶음 아래 옵션 키를 둔다. 사용자가 직접 편집하며, 처음부터 모든 옵션이 기본값으로 적혀 있다. 키와 값은 영어, 각 옵션 위의 설명 주석은 한국어다(FR-020).
 - **옵션 정의**: 스킬마다 하나씩 있는, 그 스킬 옵션 전체의 유일한 기준. 옵션마다 키(소속 묶음 포함), 허용 값, 기본값, 한 줄 설명, 값별 토큰 소모 영향을 담는다(FR-016). 설정 읽기·검증·안내는 이 정의만 보고 동작한다.
-- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008), `collaboration.questions`(FR-012c), `dependency.renderer`(FR-011b), `dependency.nodeNameFormat.declarationMarkers`·`fileExtensions`·`functionParentheses`(FR-012d), `dependency.sourceFile.enabled`·`position`(FR-012e), `dependency.faintNonUsageEdges`(FR-012f), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), 렌더링 모양 `render.theme`(FR-014c), `generating-zenuml-diagrams`의 다이어그램 스타일 `diagram.style`(FR-015d)과 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
+- **설정 옵션**: 옵션 정의의 항목 하나. 현재 목록은 `generating-architecture-views`의 `responsibility.display`·`collaboration.display`(FR-008), `collaboration.questions`(FR-012c), `dependency.renderer`(FR-011b), `dependency.nodeNameFormat.declarationMarkers`·`fileExtensions`·`functionParentheses`(FR-012d), `dependency.sourceFile.enabled`·`position`(FR-012e), `dependency.faintNonUsageEdges`(FR-012f), `dependency.linkStyle`(FR-012g), 피드백 로그 저장 위치(FR-012b), `exporting-markdown-diagrams`의 `questions.enabled`, `defaults.format`·`defaults.scope`·`defaults.pdfLayout`, PNG 배율, 산출물 저장 위치(FR-013, FR-013b, FR-014), 렌더링 모양 `render.theme`(FR-014c), `generating-zenuml-diagrams`의 다이어그램 스타일 `diagram.style`(FR-015d)과 피드백 로그 저장 위치(FR-015c)다. 이후 FR-018 절차로 늘어날 수 있다.
 - **설정 안내**: 설정 파일을 읽지 못했거나 일부 값을 기본값으로 대체·무시했을 때 채팅 응답에만 붙는 한 줄. 대상 파일과 키를 밝힌다.
 - **접은 글 상자**: 마크다운 미리보기에서 클릭해 접고 펼 수 있는 블록. 요약 줄(고정 문구 `Details`)과 내용으로 이뤄지며, 처음 열었을 때의 상태(접힘/펼침)가 파일 안에 적혀 있다. 클릭으로 바꾼 상태는 파일에 저장되지 않으므로 다시 열면 적힌 초기 상태로 돌아간다.
 
@@ -196,6 +201,7 @@
 - **SC-009**: `questions.enabled`가 `true`일 때, " (기본값)"이 설정된 기본값과 같은 선택지에만 정확히 하나 붙고(기본값이 `none`이면 하나도 없음) 설정 값을 바꾸면 붙는 위치도 따라 바뀌는 비율이 100%이며, `false`일 때 기본값이 있는 항목에 대해 질문이 뜨는 비율이 0%다.
 - **SC-010**: 대표 선언·함수·파일 노드에서 `dependency.nodeNameFormat`의 세 boolean 8개 조합이 FR-012d의 이름 형태와 일치하는 비율이 100%이고, 어느 조합에서도 한 옵션이 다른 종류의 표기를 바꾸거나 노드 ID·본문 이름·링크·hover 연결이 달라지는 비율은 0%다.
 - **SC-011**: FR-012f 설정을 끄면 대표 구조 뷰에서 옅은 선과 범례의 옅은 선 줄이 나타나는 비율이 0%이고, 켜고 끈 두 산출물에서 라벨·노드·간선 ID가 달라지는 비율도 0%다.
+- **SC-012**: FR-012g 설정의 두 값으로 만든 대표 구조 뷰에서 라벨·노드·간선 ID·링크 대상이 달라지는 비율이 0%이고, `link`의 산출물은 이 설정 도입 전과 같다.
 
 ## Assumptions
 

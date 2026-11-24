@@ -34,3 +34,4 @@
 - "JSON 설정 파일"은 사용자가 요청에서 직접 지정한 형식이라 요구사항으로 남겼다. 접은 글 박스의 정확한 마크업과 키 이름은 `/speckit-plan`에서 정한다.
 - 1차 검증에서 [NEEDS CLARIFICATION] 후보였던 "접은 박스가 PDF에서 내용을 가리는 문제"는, exporting-markdown-diagrams에 펼침 옵션(FR-021, 기본 켬)을 두는 것으로 해소했다.
 - zenuml·exporting 옵션 목록은 사용자의 "적당한 거 있을까" 요청에 따른 제안이므로, 빼거나 더할 옵션이 있으면 `/speckit-clarify`에서 조정한다.
+- 2026-11-24 링크 노드의 글자색(003 FR-046·SC-021, 007 FR-012g·SC-012)을 다시 검증했다. 모든 항목을 통과했고 [NEEDS CLARIFICATION]은 없다. 이름과 선택지는 사용자가 `linkStyle: "plain" | "link"`로 정했다.
