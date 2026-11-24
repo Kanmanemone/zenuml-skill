@@ -238,3 +238,15 @@ Task: "scripts/lib/inline-svg.js 작성"
 ## Phase 13: Convergence
 
 - [X] T056 `specs/004-exporting-markdown-diagrams/contracts/skill-interface.md`에 다이어그램만 내보낼 때 문서 `<style>`을 SVG에 넣는다는 계약을 더한다 per FR-024 (partial)
+
+## Phase 14: 의존성 자동 설치 (FR-025·026, SC-016)
+
+**Goal**: 받은 직후 내보내기를 요청해도 질문 없이 의존성을 스킬 폴더에 설치하고 이어서 내보낸다(plan "2026-11-24 의존성 설치 계획").
+
+**Independent Test**: quickstart.md 시나리오 16
+
+- [ ] T057 [P] `.agents/skills/exporting-markdown-diagrams/SKILL.md` "Workflow" 첫 단계에 `scripts/node_modules`가 없으면 `scripts/`에서 `npm ci --no-audit --no-fund`를 묻지 않고 실행하고, 스크립트가 `ERR_MODULE_NOT_FOUND`로 실패하면 한 번 설치 후 다시 시도한다는 지침을, "Failures"에 `⚙️ 의존성 설치 실패: <이유>`를 더한다 per FR-025
+- [ ] T058 [P] `README.md`와 `README.ko.md`의 설치 명령 1·4(macOS/Linux, PowerShell)에 npm이 있을 때만 이 스킬의 `scripts/`에 `npm ci`를 실행하는 줄을 더하고, `npm install` 안내 두 곳을 자동 설치를 말하는 문장으로 바꾼다 per FR-026
+- [ ] T059 quickstart.md 시나리오 16의 1·2를 실행해 결과를 기록한다 per SC-016
+
+**Dependencies**: T057, T058 → T059.
