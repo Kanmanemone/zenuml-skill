@@ -366,6 +366,16 @@
 
 동적 케이스에서 hover 결함이 따로 드러났다. 본문 이름을 FR-036대로 기본 이름(`SearchViewModel`)으로 쓰면 `apply_hover.py`가 노드 ID나 확장자가 붙은 라벨(`SearchViewModel.kt`)과만 맞춰 보므로, 아무 패널도 넣지 못한 채 exit 0과 "변경 없음"으로 끝난다. 이번 지침 변경과 무관한 기존 결함이므로 버그 흐름으로 따로 다룬다.
 
+## 시나리오 30 — 링크 노드 글자색 (FR-046, SC-021, 007 SC-012)
+
+```
+python specs/003-architecture-view-skill/test_build_diagram.py
+```
+
+- `linkStyle: plain`: config의 `themeCSS`에 `.node a, .node a:hover { color: inherit !important; text-decoration: none !important; }`가 한 번 있다.
+- `linkStyle: link`: 출력이 도입 전과 같다. 두 출력은 config 줄 밖이 같다.
+- **수동 확인**: 링크가 있는 노드와 없는 노드가 함께 있는 구조 뷰를 VS Code 미리보기로 열어, 두 노드 이름이 같은 글자색이고 평소 밑줄이 없으며, 마우스를 올리면 밑줄이 생기고 링크 노드를 누르면 열리는지 본다.
+
 ## Validation Results (T170, 2026-11-23)
 
 - `python -m unittest specs/003-architecture-view-skill/test_build_diagram.py` 16 OK, 010 `test_learning_stages.py` 40 OK, 002 `test_append_feedback.py` 2 OK.

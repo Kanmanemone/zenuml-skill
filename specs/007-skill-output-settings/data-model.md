@@ -54,6 +54,7 @@
 | architecture | `dependency.sourceFile.enabled` | boolean | — |
 | architecture | `dependency.sourceFile.position` | enum | `left`/`center`/`right` |
 | architecture | `dependency.faintNonUsageEdges` | boolean | — |
+| architecture | `dependency.linkStyle` | enum (`plain`·`link`) | — |
 | architecture | `log.directory` | relativePath(projectRoot) | — |
 | zenuml | `log.directory` | relativePath(projectRoot) | — |
 | zenuml | `diagram.style` | enum | `readable`/`zenuml-default` |

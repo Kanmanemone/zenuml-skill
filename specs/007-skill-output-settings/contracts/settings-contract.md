@@ -67,3 +67,8 @@
 - `questions.enabled = true`: 기존 질문 규칙 그대로. 각 질문의 선택지 중 `defaults.*` 값(`settings.jsonc`에 사용자가 설정한 값이며, 초기 기본값이 아님)과 같은 것의 `label` 끝에 ` (기본값)`을 붙인다. 기본값이 `none`이면 붙이지 않는다.
 - `questions.enabled = false`: 빠진 형식·범위·레이아웃을 `defaults.*`로 채운다. `none`이라 채울 수 없는 항목만 기존 규칙대로 묻는다(이때 " (기본값)"은 붙지 않음).
 - 문서 전체 범위의 형식 고정(PDF), 형식·범위 한 번에 묻기, 레이아웃 후속 질문 규칙은 바뀌지 않는다.
+
+### architecture 링크 노드 글자색 계약 (FR-012g)
+
+- `dependency.linkStyle = plain`: Dependency 다이어그램에서 링크가 있는 노드 이름을 링크 없는 노드와 같은 글자색으로, 평소에는 밑줄 없이 보인다(003 FR-046). `link`: 보는 곳의 링크 색과 밑줄을 그대로 둔다.
+- 이 값은 `build_diagram.py`만 읽는다. 스킬이 쓰는 다이어그램은 값과 상관없이 같다. 요청이 값을 직접 밝히면 `--link-style=<plain|link>`로 그 요청에서만 우선한다.

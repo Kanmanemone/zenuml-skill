@@ -142,3 +142,10 @@
 - **Decision — 암묵적 의존과 판단 순서(2026-11-23 보강)**: 간선 판단을 질문 네 개의 순서로 적고, 코드에 이름이 없지만 동작에 기대는 관계는 근거가 밝힐 때만 진한 선으로 그린다.
 - **Rationale**: swemo `TouchOverlay → MemoCard`는 코드에 `MemoCard`가 나오지 않는 형제 관계지만, 카드가 터치를 소비한다는 가정 때문에 존재한다. 옅은 선은 "코드에 보이지만 영향이 작은 관계"이고, 이 관계는 "코드에 안 보이지만 깨지기 쉬운 관계"라 반대다. 질문 순서로 쓰면 기존 섞인 문장보다 판단이 갈리지 않는다.
 - **Alternatives considered**: `덮음`·`배치`를 옅은 라벨에 추가(코드에 숨은 관계를 흐리게 해 기각). 코드 참조가 없으면 간선을 그리지 않음(변경 영향 정의와 어긋나 기각).
+
+## Decision: 링크 노드 글자색 (FR-046, 2026-11-24)
+
+- **Decision**: 설정이 `plain`이면 `build_diagram.py`가 config `themeCSS`에 `.node a, .node a:hover { color: inherit !important; text-decoration: none !important; }`를 더한다.
+- **Rationale (밑줄)**: 평소 밑줄은 라벨 안 `<a>`에 붙은 기본 링크 스타일이라 같은 규칙에서 없앤다. 마우스를 올렸을 때의 밑줄(009)은 바깥 `.nodeLabel`에 걸린 장식이라 안쪽 `<a>`의 `none`으로 지워지지 않고 그대로 남는다.
+- **Rationale**: 노드 라벨의 `<a>`는 보는 곳의 링크 색(VS Code `--vscode-textLink-foreground` 등)을 받는다. `inherit`는 그 노드 글자에 이미 정해진 색(삭제 표시의 회색 포함)을 따르므로 색 값을 새로 고를 필요가 없다. `themeCSS`는 Mermaid가 다이어그램 안에만 적용하므로 문서의 다른 링크에는 영향이 없고, 이미 다른 규칙이 `!important`로 들어 있는 자리다.
+- **Alternatives considered**: (a) 라벨에서 `<a>`를 빼고 `click`만 남기기 — 노드 글자를 눌러 여는 동작이 바뀌고 hover·단계별 코드 공개(010)가 라벨 링크를 읽는다. (b) 색 값을 직접 지정 — 밝은·어두운 테마와 삭제 표시 색을 따로 맞춰야 한다.

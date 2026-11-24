@@ -159,6 +159,21 @@ III — 판단이 갈린 경우를 규칙으로 정하는 요구사항 변경이
 
 **Constitution Check (2026-11-23)**: I — 새 파일·의존성 없이 기존 스크립트에 라벨 집합 하나와 조건 분기만 더한다. 설정은 007 FR-012f가 요구한 하나뿐이다. II — 기존 003·007을 개정한다. III — 요구사항 변경이다. IV — 기본값은 schema `default`와 배포 `settings.jsonc`에만 두고, 테스트는 schema와 비교한다. 위반 없음.
 
+## 2026-11-24 링크 노드 글자색 계획 (FR-046, SC-021, 007 FR-012g·SC-012)
+
+에이전트가 쓰는 다이어그램은 바뀌지 않고, `build_diagram.py`가 설정으로 config의 `themeCSS`에 규칙 하나를 더하거나 뺀다(research "링크 노드 글자색").
+
+- `scripts/build_diagram.py`:
+  - `LINK_STYLE = "dependency.linkStyle"`를 두고 `FLAGS`에 `"--link-style=": LINK_STYLE`를 더한다. 값 검증은 기존 표 처리(`is_valid`)를 그대로 쓴다.
+  - `build(..., link_style="link")`: `"plain"`이면 `themeCSS` 문자열 끝(닫는 `"` 앞)에 ` .node a, .node a:hover { color: inherit !important; text-decoration: none !important; }`를 붙인다. `"link"`면 출력이 지금과 바이트 단위로 같다. 함수 인자 기본값 `"link"`는 "규칙 없음"이라는 뜻이며 설정 기본값이 아니다. `main`은 설정 값을 넘긴다.
+- `settings.schema.json`: enum `dependency.linkStyle`(`plain`·`link`, tokenImpact 두 값 `[0]`). `settings.jsonc`: `faintNonUsageEdges` 다음에 같은 키와 한국어 주석. 기본값은 schema `default`에만 둔다(헌법 IV).
+- `SKILL.md` "Saving" 2단계: 요청이 값을 밝힐 때만 붙이는 명령줄 목록에 `--link-style=<plain|link>`를 더한다.
+- `test_build_diagram.py`: `plain`이면 규칙이 config에 한 번 있고, `link`면 지금 출력과 같으며, 두 출력에서 config 줄 밖이 같은지 본다. 명령줄 값 검증은 기존 테스트 방식으로 본다.
+- `quickstart.md`: 시나리오 30(SC-021, VS Code 미리보기 육안 확인).
+- 바뀌지 않는 것: `hover/`(config 줄을 읽지 않음), `apply_hover.py`, 단계별 코드 공개(010), 기존 산출물(다시 만들 때만 반영).
+
+**Constitution Check (2026-11-24)**: I — 새 파일·의존성 없이 기존 config 문자열에 조건부 규칙 하나와 명령줄 표 한 줄을 더한다. II — 003·007을 개정한다. III — 새 요구사항이다. IV — 기본값은 schema에만 둔다. 위반 없음. 설계 뒤 다시 확인했고 달라진 것이 없다.
+
 ## Complexity Tracking
 
 *No constitution violations to justify. This section is intentionally empty.*
