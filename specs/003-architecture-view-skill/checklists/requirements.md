@@ -47,3 +47,4 @@
 - 2026-11-23 사용 외 의존을 옅은 선으로: Clarifications 세션, FR-042~045, SC-019·SC-020, 가정 두 항목(열린 어휘의 예외, 옅은 선의 표현 범위)을 더했다. 설정은 007 FR-012f·SC-011로 둔다. 기본값은 FR이 아니라 날짜 붙은 결정 기록에만 적었다(헌법 IV). 표현 수단(번들 스크립트, VS Code·GitHub, ELK)은 기존 FR-008d·가정과 같은 수준으로만 언급했다. [NEEDS CLARIFICATION] 없음. 모든 항목이 여전히 통과 상태다(16/16, 변경 없음).
 - 2026-11-23 암묵적 의존 보강: Clarifications 한 줄, FR-042에 암묵적 의존과 판단 순서, Edge Case 한 줄. [NEEDS CLARIFICATION] 없음, 16/16 유지.
 - 2026-11-24 링크 노드의 글자색(003 FR-046·SC-021, 007 FR-012g·SC-012)을 다시 검증했다. 모든 항목을 통과했고 [NEEDS CLARIFICATION]은 없다. 이름과 선택지는 사용자가 `linkStyle: "plain" | "link"`로 정했다.
+- 2026-11-24 옅은 선 범례 문구(Clarifications, FR-045 개정)를 다시 검증했다. 모든 항목을 통과했고 [NEEDS CLARIFICATION]은 없다. 한 줄 조건(SC-019)은 그대로다.
