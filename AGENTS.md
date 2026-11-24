@@ -359,3 +359,20 @@ default branch) and rewrite:
   `git reset --hard $BEFORE` and report.
 - On a non-trivial conflict, run `git rebase --abort` and report.
 - If unsure whether commits are related, keep them separate.)
+
+## 응답 (Replies)
+
+- 사용자가 직접 확인해야 하는 것(미리보기, 산출물, 검토할 파일 등)은 경로만
+  적지 말고 클릭하면 바로 열리는 하이퍼링크로 준다. 예:
+  `[spec.md](C:/prj/myapp/specs/001-login/spec.md)`.
+- 이런 링크는 응답 중간에 흩어 놓지 말고 응답 맨 끝에 모아 둔다. 사용자가
+  스크롤하며 찾지 않아도 되게 한다.
+
+(English:
+
+- Give anything the user must check for themselves (previews, outputs, files
+  to review) as a clickable hyperlink that opens it directly, not as a bare
+  path. E.g.
+  `[spec.md](C:/prj/myapp/specs/001-login/spec.md)`.
+- Collect these links at the very end of the reply instead of scattering
+  them through it, so the user does not have to scroll to find them.)
