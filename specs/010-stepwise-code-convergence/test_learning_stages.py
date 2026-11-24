@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 import shutil
 import tempfile
+import urllib.parse
 from types import SimpleNamespace as Args
 import unittest
 
@@ -492,8 +493,8 @@ class Workflow(unittest.TestCase):
             self.assertIn('<div class="resp"><span class="label">책임</span> 주문을 받아 처리한다.</div>', text)
             self.assertIn('3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)', text)
             self.assertIn('⟨3. 처리한 주문을 감사 기록에 남긴다.⟩', text)
-            self.assertNotIn('단계: 원본', text.split('### Validator')[0])  # OrderService: the last unfold is the source
-            self.assertIn('2단계: 원본 (2/2)', text.split('### Validator')[1])  # nothing to unfold: situation, then source
+            self.assertNotIn('단계: 원본', text.split('**Validator**')[0])  # OrderService: the last unfold is the source
+            self.assertIn('2단계: 원본 (2/2)', text.split('**Validator**')[1])  # nothing to unfold: situation, then source
             self.assertEqual({p: p.read_bytes() for p in before}, before)
             (root / 'src/Order.kt').write_text((root / 'src/Order.kt').read_text(encoding='utf-8').replace('reserve(order.id)', 'reserve(order.key)'), encoding='utf-8')
             self.assertEqual(exit_code(['build', str(result)]), 3)
@@ -658,7 +659,7 @@ class Languages(unittest.TestCase):
             self.assertNotIn('⚠️', doc)
             self.assertIn('```java\nclass Circle {\n}\n```', doc)
 
-            box = doc.split('### colors.xml')[1].split('### ')[0]
+            box = doc.split('**colors.xml**')[1].split('### ')[0]
             self.assertIn('2단계: 원본 (2/2)', box)
             self.assertIn('```xml\n' + LANG_SOURCES['res/colors.xml'], box)
 
@@ -993,6 +994,30 @@ class ChangeStage(unittest.TestCase):
         built, _ = run(s.cmd_build, dir=str(result))
         return meta, listing, result, built
 
+    def assert_title_links(self, manifest, result, doc):
+        """Every node title is its bold name, linked to the view's link as seen from the result folder (FR-037)."""
+        view_dir = Path(manifest['view']).parent.resolve()
+        for node in manifest['nodes']:
+            with self.subTest(title=node['id']):
+                m = re.search(r'^### (?:\S+ )?(\[)?\*\*%s\*\*(?:\]\(([^)]*)\))?$' % re.escape(node['name']), doc, re.M)
+                self.assertIsNotNone(m)
+                if not node['link']:
+                    self.assertIsNone(m.group(1))
+                    continue
+                href = urllib.parse.unquote(m.group(2)).split('#')[0]
+                self.assertEqual((result / href).resolve(), (view_dir / node['link'].split('#')[0]).resolve())
+
+    def test_node_title_escapes_the_name_and_keeps_urls(self):
+        url = 'https://example.com/repo/blob/main/a.kt#L3'
+        self.assertEqual(s.node_title({'name': '__init__', 'link': None, 'change': 'added'}, Path('.'), Path('.')),
+                         r'### ✨ **\_\_init\_\_**')
+        self.assertEqual(s.node_title({'name': 'A[1]', 'link': url, 'change': 'same'}, Path('.'), Path('.')),
+                         r'### [**A\[1\]**](%s)' % url)
+        with tempfile.TemporaryDirectory() as tmp:
+            view_dir, result = Path(tmp), Path(tmp) / 'x.stages'
+            self.assertEqual(s.node_title({'name': 'B', 'link': '../src/My File(1).kt#L2', 'change': None}, view_dir, result),
+                             '### [**B**](../../src/My%20File%281%29.kt#L2)')
+
     def test_changed_node_gets_stage0_and_removed_node_uses_its_old_code(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -1020,8 +1045,15 @@ class ChangeStage(unittest.TestCase):
 
             doc = '\n'.join(Path(d).read_text(encoding='utf-8') for d in built['docs'])
             self.assertEqual(doc.count('<div class="stage s0">'), 1)
-            self.assertIn('비교 기준: `%s` → `%s`' % (manifest['compare']['base'], manifest['compare']['head']), doc)
-            self.assertIn('### 🗑️ PaymentGateway', doc)
+            # node titles and the legend box (FR-035~037, SC-024)
+            self.assertIn('<div class="legend">✨: 추가<br>♻️: 변경<br>🗑️: 삭제<br>비교 기준: <code>%s</code> → <code>%s</code></div>'
+                          % (manifest['compare']['base'], manifest['compare']['head']), doc)
+            self.assertEqual(doc.count('<div class="legend">'), len(built['docs']))
+            heads = {m.group(2): m.group(1) for m in re.finditer(r'^### (\S+ )?\[?\*\*(.+?)\*\*', doc, re.M)}
+            self.assertEqual(heads['InventoryRepository'], '♻️ ')
+            self.assertEqual(heads['PaymentGateway'], '🗑️ ')
+            self.assertIsNone(heads['OrderService'])
+            self.assert_title_links(manifest, result, doc)
             rows = stage0_rows(doc, 'InventoryRepository')
             after = (result / 'work/original/InventoryRepository.kt').read_text(encoding='utf-8')
             before = (result / 'work/before/InventoryRepository.kt').read_text(encoding='utf-8')
@@ -1046,9 +1078,13 @@ class ChangeStage(unittest.TestCase):
             with_base = s.load_manifest(result)
             parsed = parsed_outline(result, with_base)
             scenes = {n['id']: s.node_scenes(result, with_base, n, parsed) for n in with_base['nodes'] if n['id'] != 'PaymentGateway'}
-            _, _, plain, _ = self.build(root)
+            _, _, plain, plain_built = self.build(root)
             without = s.load_manifest(plain)
             self.assertNotIn('compare', without)
+            plain_doc = '\n'.join(Path(d).read_text(encoding='utf-8') for d in plain_built['docs'])
+            self.assertNotIn('<div class="legend">', plain_doc)
+            self.assertNotRegex(plain_doc, r'(?m)^### (✨|♻️|🗑️)')
+            self.assert_title_links(without, plain, plain_doc)
             parsed = parsed_outline(plain, without)
             self.assertEqual({n['id']: s.node_scenes(plain, without, n, parsed) for n in without['nodes'] if n['id'] != 'PaymentGateway'}, scenes)
 

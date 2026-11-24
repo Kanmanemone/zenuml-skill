@@ -613,18 +613,19 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 
 **Independent Test**: `python specs/010-stepwise-code-convergence/test_learning_stages.py`와 [quickstart.md](quickstart.md)의 "2026-11-24 노드 제목의 변화 표시와 링크 확인"
 
-- [ ] T111 [US4] `specs/010-stepwise-code-convergence/test_learning_stages.py`를 고친다. 구현 전에 새 확인이 실패하는지 본다 per FR-035~037, SC-024, contracts/stages-contract.md "2026-11-24 노드 제목의 변화 표시와 링크 계약"
+- [X] T111 [US4] `specs/010-stepwise-code-convergence/test_learning_stages.py`를 고친다. 구현 전에 새 확인이 실패하는지 본다 per FR-035~037, SC-024, contracts/stages-contract.md "2026-11-24 노드 제목의 변화 표시와 링크 계약"
   - 제목 글자로 문서를 나누는 곳(`'### Validator'`, `'### colors.xml'`, `'### '` 다음 노드로 자르기)을 새 제목에서도 같은 노드를 자르도록 바꾼다.
   - `test_changed_node_gets_stage0_and_removed_node_uses_its_old_code`: 비교 기준 줄 확인을 `.legend` 상자(범례 세 줄 + `<code>` 해시) 확인으로 바꾼다. `### 🗑️ PaymentGateway` 확인을 새 제목으로 바꾸고, `InventoryRepository` 제목에 ♻️, 바뀌지 않은 노드 제목에 이모지가 없는지 본다. 링크가 있는 모든 제목의 href를 결과 폴더에서 풀면 구조 뷰 폴더 기준 링크와 같은 파일인지 본다.
   - 비교 기준 없는 실행: `.legend` 상자와 이모지가 없고, 노드 이름은 굵은 링크(링크 없는 노드는 링크 없는 굵은 이름)인지 본다.
   - 이름의 마크다운 특수 문자 이스케이프와 URL 링크가 그대로 쓰이는지 작은 단위 테스트로 본다.
-- [ ] T112 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `build_documents`와 `BASE_CSS`를 고친다 per FR-035~038, plan "scripts/stages.py"
+- [X] T112 [US4] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`의 `build_documents`와 `BASE_CSS`를 고친다 per FR-035~038, plan "scripts/stages.py"
   - `compare`가 있으면 비교 기준 줄 대신 `<div class="legend">…</div>` 한 줄을 쓴다.
   - 노드 제목을 `"### " + 이모지 + 이름 부분`으로 만든다. 이모지는 `change` 표(`changed`·`added`·`removed`)로 정하고, 지금의 🗑️ 분기를 대신한다.
   - 이름 부분은 이스케이프한 이름을 `**…**`로 감싸고, `link`가 있으면 href로 링크한다. href는 URL이면 그대로, 로컬이면 구조 뷰 폴더 기준 경로를 결과 폴더 기준 상대 경로로 바꿔 퍼센트 인코딩하고 `#` 조각을 붙인다. 드라이브가 달라 상대 경로가 안 되면 절대 경로를 쓴다.
   - `BASE_CSS`에 `.legend` 규칙 한 줄을 더한다.
-- [ ] T113 [US4] `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 결과를 `REGENERATE=1`로 다시 만든다. `git diff`로 차이가 노드 제목과 `.legend` CSS 줄뿐인지 확인한다 per SC-024
-- [ ] T114 테스트 전체를 실행한다. swemo 결과 `C:\prj\swemo\.zenuml\drag-reorder-commit-change.stages`를 새 스크립트로 다시 만들고(`--base=5ee6b90 --head=26035c6`, 기존 `work/outline.json`과 첫 단계 문단을 다시 써서 작업자를 부르지 않음), 앞서 만든 `memo.preview.md`를 지운다. 사용자가 미리보기에서 확인할 수 있게 문서 링크를 알린다 per SC-024, FR-038
+- [X] T113 [US4] `specs/010-stepwise-code-convergence/fixtures/expected/`의 기대 결과를 `REGENERATE=1`로 다시 만든다. `git diff`로 차이가 노드 제목과 `.legend` CSS 줄뿐인지 확인한다 per SC-024
+- [X] T114 테스트 전체를 실행한다. swemo 결과 `C:\prj\swemo\.zenuml\drag-reorder-commit-change.stages`를 새 스크립트로 다시 만들고(`--base=5ee6b90 --head=26035c6`, 기존 `work/outline.json`과 첫 단계 문단을 다시 써서 작업자를 부르지 않음), 앞서 만든 `memo.preview.md`를 지운다. 사용자가 미리보기에서 확인할 수 있게 문서 링크를 알린다 per SC-024, FR-038
+  - 표준 라이브러리 테스트 42개가 통과했다(새 단위 테스트 1개, 개정 3개). 고치기 전에는 새 확인 3개가 실패했다. 기대 결과의 diff는 노드 제목 7곳과 `.legend` CSS 줄뿐이다. swemo는 manifest 형식이 그대로라 `build`만 다시 돌렸다(작업자 호출 0, `verified: 9`, notices 없음). 노드 제목과 범례 상자 밖의 줄은 이전 결과와 같다. 미리보기 확인은 사용자가 한다.
 
 **Dependencies**: T111 → T112 → T113 → T114.
 

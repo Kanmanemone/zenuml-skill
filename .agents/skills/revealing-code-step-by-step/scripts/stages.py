@@ -15,10 +15,12 @@ import argparse
 import difflib
 import html
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -1794,6 +1796,7 @@ STYLE_SUMMARY = '이 문서에 적용되지 못한 &lt;style&gt; 코드 (<a href
 BASE_CSS = """.zenuml-stepwise-style { display: none; }
 .resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
 .resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
+.legend { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: .4em .8em; margin-bottom: 1em; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
 .stages > .stage { display: none; }
@@ -1937,15 +1940,35 @@ class SourceMismatch(Exception):
     """The scenes cannot reach the source: exit code 3."""
 
 
+CHANGE_MARK = {"changed": "♻️ ", "added": "✨ ", "removed": "🗑️ "}
+
+
+def node_title(node, view_dir, result_dir):
+    """`### <change emoji><bold name, linked to the view's link>` (spec FR-035, FR-037)."""
+    name = "**%s**" % re.sub(r"([\\`*_\[\]<])", r"\\\1", node["name"])
+    link = node["link"]
+    if link and not re.match(r"https?://", link):
+        path, _, fragment = link.partition("#")
+        target = (Path(view_dir) / path).resolve()
+        try:  # the view's links are relative to the view; the documents live in the result folder
+            path = os.path.relpath(target, Path(result_dir).resolve()).replace(os.sep, "/")
+        except ValueError:  # another drive: no relative path exists
+            path = target.as_posix()
+        link = urllib.parse.quote(path, safe="/:") + ("#" + fragment if fragment else "")
+    return "### " + CHANGE_MARK.get(node.get("change"), "") + ("[%s](%s)" % (name, link) if link else name)
+
+
 def build_documents(result_dir, manifest, parsed, with_diff=True):
     unchanged, docs_text, counts = {}, {}, {}
+    view_dir = Path(manifest["view"]).parent
     max_slides = 1
     for doc, title in manifest["docs"]:
         parts = ["# %s — 정제 단계" % title, ""]
         compare = manifest.get("compare")
         if compare:
-            parts += ["비교 기준: `%s` → `%s`" % (compare["base"], compare["head"]) if compare["head"]
-                      else "비교 기준: `%s` → 작업 트리" % compare["base"], ""]
+            head = "<code>%s</code>" % compare["head"] if compare["head"] else "작업 트리"
+            parts += ['<div class="legend">✨: 추가<br>♻️: 변경<br>🗑️: 삭제<br>비교 기준: <code>%s</code> → %s</div>'
+                      % (compare["base"], head), ""]
         change_stage = next((s for s in manifest["stages"] if s["kind"] == CHANGE), None)
         before_stage = next((s for s in manifest["stages"] if s["kind"] == BEFORE), None)
         has_stage0 = has_minus1 = False
@@ -1955,7 +1978,7 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
             if group_path and group_path != current_path:
                 parts += ["## " + " / ".join(group_path), ""]
             current_path = group_path
-            parts += ["### " + ("🗑️ " if node.get("change") == "removed" else "") + node["name"], ""]
+            parts += [node_title(node, view_dir, result_dir), ""]
             if node.get("responsibility"):
                 parts += ['<div class="resp"><span class="label">책임</span> %s</div>' % html.escape(node["responsibility"], quote=False), ""]
             if node["skip_reason"]:

@@ -1,6 +1,6 @@
 # 주문 도메인 — 정제 단계
 
-### OrderService
+### [**OrderService**](../src/Order.kt)
 
 <div class="resp"><span class="label">책임</span> 주문을 받아 처리한다.</div>
 
@@ -206,7 +206,7 @@ class OrderService(
 
 </div>
 
-### Validator
+### [**Validator**](../src/Order.kt)
 
 <div class="resp"><span class="label">책임</span> 주문이 올바른지 본다.</div>
 
@@ -254,7 +254,7 @@ class OrderService(
 
 </div>
 
-### InventoryRepository
+### [**InventoryRepository**](../src/Order.kt)
 
 <div class="resp"><span class="label">책임</span> 재고를 예약한다.</div>
 
@@ -367,6 +367,7 @@ class InventoryRepository {
 .zenuml-stepwise-style { display: none; }
 .resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
 .resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
+.legend { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: .4em .8em; margin-bottom: 1em; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
 .stages > .stage { display: none; }

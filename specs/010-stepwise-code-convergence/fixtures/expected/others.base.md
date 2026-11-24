@@ -2,7 +2,7 @@
 
 ## 인프라
 
-### PaymentGateway
+### [**PaymentGateway**](../src/Missing.kt)
 
 <div class="resp"><span class="label">책임</span> 결제를 요청한다.</div>
 
@@ -30,7 +30,7 @@
 
 </div>
 
-### LegacyBridge(java)
+### [**LegacyBridge(java)**](../src/Legacy.java)
 
 <div class="stages">
 
@@ -75,7 +75,7 @@ class LegacyBridge {
 
 </div>
 
-### formatTotal
+### [**formatTotal**](../src/Util.kt)
 
 <div class="resp"><span class="label">책임</span> 합계를 글로 바꾼다.</div>
 
@@ -122,7 +122,7 @@ fun formatTotal(total: BigDecimal): String =
 
 </div>
 
-### AuditLog
+### **AuditLog**
 
 <div class="resp"><span class="label">책임</span> 주문 기록을 남긴다.</div>
 
@@ -157,6 +157,7 @@ fun formatTotal(total: BigDecimal): String =
 .zenuml-stepwise-style { display: none; }
 .resp { margin: 0 0 .6em; padding: .4em .8em; border-left: 3px solid rgba(128,128,128,.5); background: rgba(128,128,128,.08); border-radius: 0 4px 4px 0; }
 .resp .label { font-weight: 600; margin-right: .4em; opacity: .75; }
+.legend { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: .4em .8em; margin-bottom: 1em; }
 .stages { border: 1px solid rgba(128,128,128,.4); border-radius: 6px; padding: 0 1em; margin-bottom: 1em; }
 .stages > input { position: absolute; opacity: 0; pointer-events: none; }
 .stages > .stage { display: none; }
