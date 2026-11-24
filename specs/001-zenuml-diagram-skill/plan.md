@@ -88,6 +88,13 @@ specs/001-zenuml-diagram-skill/
 
 **Constitution Check (2026-11-23)**: I — 새 파일은 스크립트 하나와 테스트 하나. 블록은 고정 문자열이고 분기는 두 값뿐이다. 스크립트로 둔 이유는 규칙만으로 정해지는 출력을 모델이 매번 쓰지 않게 하기 위함이다(토큰·변동성). II — 001·007 개정. III — 요구사항 변경. IV — 기본값은 schema와 배포 설정에만, 테스트는 schema와 비교. 위반 없음.
 
+## 2026-11-24 주석 왼쪽 여백 계획 (FR-016)
+
+- `scripts/apply_style.py`의 `BLOCK`에서 `.comment-text` 규칙에 조건식과 같은 `transform: translateX(6px)`를 더한다. ZenUML은 주석을 다음 문장의 x에 그대로 그리므로 조건 블록 밖 주석도 같이 6px 옮겨지지만, 주석이 놓이는 자리에서 6px는 겹침을 만들지 않는다. 블록 밖만 남기는 선택자는 ZenUML SVG에 주석이 블록 안인지 밝히는 표시가 없어 쓸 수 없다.
+- research.md의 스타일 블록을 같게 맞춘다. 테스트는 `BLOCK`과 비교하므로 바꿀 것이 없다.
+
+**Constitution Check (2026-11-24 주석 여백)**: I~IV 모두 해당 없음(CSS 선언 하나). 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*
