@@ -321,3 +321,9 @@
 
 - `stages.md`: `change` 다음에 `- 표현: before`인 단계 하나를 선택으로 둘 수 있다. `change` 없이는 둘 수 없다(exit 2). `change`처럼 `stages` 설정과 `--show`/`--hide`에서는 무시하고 알린다.
 - 문서: 0단계가 있고 `before` 단계가 정의된 상자는 라디오 `<input ... id="<id>--1" class="s-1">`를 `-0` 앞에 둔다. `<div class="stage s-1">`를 `s0` 앞에, `<div class="pane p-1">`를 `p0` 앞에 둔다. 제목은 `-1단계: <before 별명> (<base>)`이다. 0단계의 ←는 `<id>--1`을 가리키고, -1단계의 ←는 비활성이다. pane에는 `work/before/<id>.kt`의 fence만 있고 색칠 층은 없다. `prepare`·`build`의 명령줄과 출력 JSON은 그대로다.
+
+# 2026-11-24 노드 제목의 변화 표시와 링크 계약 (위 계약에 더함)
+
+- 머리말: `compare`가 있으면 `비교 기준: …` 줄 대신 `<div class="legend">✨: 추가<br>♻️: 변경<br>🗑️: 삭제<br>비교 기준: <code><base></code> → <code><head></code></div>`이다. 작업 트리면 `→ 작업 트리`. 없으면 머리말 줄이 없다.
+- 노드 제목: `### <이모지 ><이름 부분>`. 이모지는 `changed` ♻️, `added` ✨, `removed` 🗑️, 그 밖에는 없음. 이름 부분은 링크가 있으면 `[**<이스케이프한 이름>**](<href>)`, 없으면 `**<이스케이프한 이름>**`이다. href는 URL이면 그대로, 로컬이면 결과 폴더 기준 상대 경로를 퍼센트 인코딩하고 `#` 조각을 붙인다.
+- 기본 CSS에 `.legend` 규칙 한 줄이 더해진다. `prepare`·`build`의 명령줄과 출력 JSON, manifest는 그대로다.

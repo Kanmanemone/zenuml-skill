@@ -115,3 +115,7 @@ prepare ─▶ (서브에이전트) work/01 ─▶ begin 2 ─▶ apply 2 ─▶
 ## 2026-11-24 -1단계
 
 - **-1단계 장면** (`changed` 노드이고 `stages.md`에 `before` 단계가 있을 때, build 때만, 저장하지 않음): 코드는 `work/before/<id>.kt`와 글자까지 같고 줄 클래스가 없다. 0단계가 없는 노드에는 없다.
+
+## 2026-11-24 노드 제목의 변화 표시와 링크
+
+- 새 필드는 없다. 노드 제목은 manifest의 `change`(이모지)와 `link`(href)로, 머리말은 `compare`로 build 때 정해진다.
