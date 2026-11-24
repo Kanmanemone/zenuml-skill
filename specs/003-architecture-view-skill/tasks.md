@@ -640,3 +640,15 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
   - 001·002·003·010 테스트가 통과했다(007·009는 따로 된 테스트 파일이 없고 003 테스트가 설정 파일을 검사한다). 새 테스트 2개는 고치기 전에 실패했다. swemo 구조 뷰는 config 블록이 이미 있어 `build_diagram.py`를 다시 돌릴 수 없으므로, 그 `themeCSS` 줄이 스크립트의 `link` 출력과 같음을 확인한 뒤 `text` 출력으로 바꿨다. 미리보기 확인은 사용자가 한다. 바꾼 swemo 구조 뷰를 PNG로 렌더링해 링크 노드에 평소 밑줄이 없고 다른 노드와 글자색이 같음을 확인했다.
 
 **Dependencies**: T177 → T178 → T179 → T180.
+
+## Phase 52: 옅은 선 범례 문구 (FR-045 개정)
+
+**Goal**: 범례의 옅은 선 줄을 `옅은 간선: 사용 외 의존 (생성·전달 등)`으로 바꾸고 한 줄로 유지한다(plan "2026-11-24 옅은 선 범례 문구 계획").
+
+**Independent Test**: `python specs/003-architecture-view-skill/test_build_diagram.py`
+
+- [ ] T181 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`의 `FAINT_LINE`을 새 문구로 바꾸고 실패하는지 본다 per FR-045
+- [ ] T182 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`의 `FAINT_LEGEND`와 `settings.jsonc`의 `faintNonUsageEdges` 주석을 새 문구로 바꾼다 per FR-045
+- [ ] T183 [US1] 테스트를 실행하고, 옅은 선이 있는 구조 뷰를 Mermaid로 렌더링해 범례 높이가 바꾸기 전과 같은지(줄바꿈 없음) 확인한다 per SC-019
+
+**Dependencies**: T181 → T182 → T183.
