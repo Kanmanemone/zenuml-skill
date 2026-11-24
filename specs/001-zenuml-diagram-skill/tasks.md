@@ -223,7 +223,7 @@ Task: "SKILL.md 뼈대(frontmatter + 섹션 헤딩) 작성"
 
 **Independent Test**: swemo `[11-5] reorder-expected-index-scenario.md`에 스타일을 다시 붙여 VS Code 미리보기에서 주석과 조건식의 왼쪽 간격이 같은지 본다.
 
-- [ ] T031 `.agents/skills/generating-zenuml-diagrams/scripts/apply_style.py`의 `BLOCK` `.comment-text` 규칙에 `transform: translateX(6px)`를 더한다 per FR-016
-- [ ] T032 `test_apply_style.py`를 실행하고 swemo 파일에 스타일을 다시 붙여 Independent Test대로 확인한다 per FR-016
+- [X] T031 `.agents/skills/generating-zenuml-diagrams/scripts/apply_style.py`의 `BLOCK` `.comment-text` 규칙에 `transform: translateX(6px)`를 더한다 per FR-016
+- [X] T032 `test_apply_style.py`를 실행하고 swemo 파일에 스타일을 다시 붙여 Independent Test대로 확인한다 per FR-016
 
 **Dependencies**: T031 → T032.

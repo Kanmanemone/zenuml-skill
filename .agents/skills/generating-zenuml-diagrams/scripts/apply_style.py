@@ -26,7 +26,7 @@ BLOCK = """<details class="zenuml-style">
 .message-label { fill: #000000 !important; font-weight: 600; }
 .fragment-label { fill: #AF00DB !important; }
 .fragment-condition { fill: #001080 !important; opacity: 1 !important; transform: translateX(6px); }
-.comment-text { fill: #008000 !important; opacity: 1 !important; }
+.comment-text { fill: #008000 !important; opacity: 1 !important; transform: translateX(6px); }
 .seq-number { fill: #237893 !important; font-weight: 400 !important; }
 .message-label, .fragment-label, .fragment-condition, .comment-text, .seq-number, .return-label {
   paint-order: stroke; stroke: var(--vscode-editor-background, #ffffff); stroke-width: 4px; stroke-linejoin: round;
