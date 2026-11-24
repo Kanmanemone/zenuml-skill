@@ -272,3 +272,13 @@ python specs/010-stepwise-code-convergence/test_learning_stages.py
 - 비교 기준 없는 기대 결과 파일의 diff는 노드 제목과 `.legend` CSS 줄뿐이다.
 
 **수동 확인**: swemo `5ee6b90 → 26035c6` 결과를 VS Code 미리보기로 연다. 맨 위 상자에 범례와 비교 기준이 있고, 노드 제목의 이모지가 구조 뷰와 맞으며, 굵은 노드 이름을 누르면 원본 파일이 열린다.
+
+## 2026-11-24 단계 제목의 번호 확인
+
+```
+python specs/010-stepwise-code-convergence/test_learning_stages.py
+```
+
+- fixture 문서의 단계 제목이 `3/6단계: 펼치기 — 1. …`처럼 시작하고 끝에 `(k/n)`이 없다(SC-025).
+
+**수동 확인**: swemo 문서의 제목이 `07/22단계: 펼치기 — 5. …`이고, 0단계·-1단계 제목은 전과 같다.
