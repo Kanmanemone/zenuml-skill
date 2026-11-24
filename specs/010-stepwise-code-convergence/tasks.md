@@ -630,3 +630,20 @@ Kotlin만 받던 제한을 없애고, 노드 이름이 파일 자체를 가리�
 **Dependencies**: T111 → T112 → T113 → T114.
 
 **MVP**: T111~T113이 SC-024를 채운다.
+
+---
+
+## Phase 28: 단계 제목의 번호 (FR-039, FR-040, SC-025)
+
+**Goal**: 단계 번호를 0을 채운 "<k>/<전체>단계"로 제목 앞에 두고, 펼치기 제목은 순번 대신 자리표시자와 같은 묶음 번호를 쓴다(plan "2026-11-24 단계 제목의 번호 계획").
+
+**Independent Test**: `python specs/010-stepwise-code-convergence/test_learning_stages.py`와 [quickstart.md](quickstart.md)의 "2026-11-24 단계 제목의 번호 확인"
+
+- [ ] T115 [US2] `specs/010-stepwise-code-convergence/test_learning_stages.py`를 고친다. 구현 전에 새 확인이 실패하는지 본다 per FR-039, FR-040, SC-025
+  - 단계 제목 확인 세 곳(`3단계: 펼치기 1/4 — …`, `2단계: 원본 (2/2)` 두 곳)을 `3/6단계: 펼치기 — 1. …`, `2/2단계: 원본`으로 바꾼다.
+  - fixture 문서의 펼치기 제목마다 `⟨<번호>. <문장>⟩`이 문서에 있는지 본다.
+  - `s.counter`의 0 채우기(9 → `6/9`, 12 → `06/12`, 100 → `004/100`)를 단위 테스트로 본다.
+- [ ] T116 [US2] `.agents/skills/revealing-code-step-by-step/scripts/stages.py`에 `counter`를 두고 `build_documents`의 일반 단계 제목에 쓴다. `node_scenes`의 펼치기 제목을 `"%s — %d. %s"`로 바꾼다 per FR-039, FR-040, plan "scripts/stages.py"
+- [ ] T117 [US2] `specs/010-stepwise-code-convergence/fixtures/expected/`를 `REGENERATE=1`로 다시 만들고 diff가 단계 제목 줄뿐인지 확인한다. 테스트 전체를 실행하고, swemo 결과를 `build`로 다시 만든다 per SC-025
+
+**Dependencies**: T115 → T116 → T117.
