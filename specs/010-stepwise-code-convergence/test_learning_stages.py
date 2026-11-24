@@ -491,10 +491,14 @@ class Workflow(unittest.TestCase):
             self.assertIn('관련 GFM 공식 문서</a>)</summary>', text)
             self.assertIn('.zenuml-stepwise-style { display: none; }', text)
             self.assertIn('<div class="resp"><span class="label">책임</span> 주문을 받아 처리한다.</div>', text)
-            self.assertIn('3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)', text)
+            self.assertIn('3/6단계: 펼치기 — 1. 주문 하나를 처리해 영수증을 돌려준다.</span>', text)
+            unfolds = re.findall(r'단계: 펼치기 — (\d+)\. (.+?)</span>', text)
+            self.assertTrue(unfolds)
+            for number, title in unfolds:  # the title carries its placeholder's number (FR-039)
+                self.assertIn('⟨%s. %s⟩' % (number, title), text)
             self.assertIn('⟨3. 처리한 주문을 감사 기록에 남긴다.⟩', text)
             self.assertNotIn('단계: 원본', text.split('**Validator**')[0])  # OrderService: the last unfold is the source
-            self.assertIn('2단계: 원본 (2/2)', text.split('**Validator**')[1])  # nothing to unfold: situation, then source
+            self.assertIn('2/2단계: 원본</span>', text.split('**Validator**')[1])  # nothing to unfold: situation, then source
             self.assertEqual({p: p.read_bytes() for p in before}, before)
             (root / 'src/Order.kt').write_text((root / 'src/Order.kt').read_text(encoding='utf-8').replace('reserve(order.id)', 'reserve(order.key)'), encoding='utf-8')
             self.assertEqual(exit_code(['build', str(result)]), 3)
@@ -660,7 +664,7 @@ class Languages(unittest.TestCase):
             self.assertIn('```java\nclass Circle {\n}\n```', doc)
 
             box = doc.split('**colors.xml**')[1].split('### ')[0]
-            self.assertIn('2단계: 원본 (2/2)', box)
+            self.assertIn('2/2단계: 원본</span>', box)
             self.assertIn('```xml\n' + LANG_SOURCES['res/colors.xml'], box)
 
             scenes = s.node_scenes(result, manifest, color, parsed_outline(result, manifest))
@@ -1006,6 +1010,9 @@ class ChangeStage(unittest.TestCase):
                     continue
                 href = urllib.parse.unquote(m.group(2)).split('#')[0]
                 self.assertEqual((result / href).resolve(), (view_dir / node['link'].split('#')[0]).resolve())
+
+    def test_counter_pads_to_the_total_digit_count(self):
+        self.assertEqual([s.counter(6, 9), s.counter(6, 12), s.counter(4, 100)], ['6/9', '06/12', '004/100'])
 
     def test_node_title_escapes_the_name_and_keeps_urls(self):
         url = 'https://example.com/repo/blob/main/a.kt#L3'

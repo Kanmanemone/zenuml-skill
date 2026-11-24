@@ -1928,7 +1928,8 @@ def node_scenes(result_dir, manifest, node, parsed):
                 scenes.append((stages["outline"]["nickname"], "code", render_steps_scene(tree, lines, steps, at, 0)))
             if stages["unfold"]["visible"]:
                 for k in range(1, len(steps) + 1):
-                    title = "%s %d/%d — %s" % (stages["unfold"]["nickname"], k, len(steps), steps[k - 1]["title"])
+                    # the same number as the placeholder ⟨k. …⟩ (spec FR-039)
+                    title = "%s — %d. %s" % (stages["unfold"]["nickname"], k, steps[k - 1]["title"])
                     scenes.append((title, "code", render_steps_scene(tree, lines, steps, at, k)))
         last_code = next((c for _, kind, c in reversed(scenes) if kind == "code"), None)
         if last_code is None or last_code.rstrip("\n") != original.rstrip("\n"):
@@ -1938,6 +1939,11 @@ def node_scenes(result_dir, manifest, node, parsed):
 
 class SourceMismatch(Exception):
     """The scenes cannot reach the source: exit code 3."""
+
+
+def counter(k, total):
+    """`k/total` with k zero-padded to total's digit count, e.g. 06/12 (spec FR-040)."""
+    return "%0*d/%d" % (len(str(total)), k, total)
 
 
 CHANGE_MARK = {"changed": "♻️ ", "added": "✨ ", "removed": "🗑️ "}
@@ -1989,7 +1995,7 @@ def build_documents(result_dir, manifest, parsed, with_diff=True):
                 changed = kind != "code" or prev is None or content != prev
                 if not changed:
                     unchanged.setdefault(name, []).append(node["id"])
-                slides.append(("%d단계: %s (%d/%d)" % (number, name, number, len(scenes)), note_for(changed), content))
+                slides.append(("%s단계: %s" % (counter(number, len(scenes)), name), note_for(changed), content))
                 layers.append(render_diff_layer(content, diff_lines(prev, content))
                               if with_diff and kind == "code" and prev is not None and changed else None)
                 kinds.append(kind)

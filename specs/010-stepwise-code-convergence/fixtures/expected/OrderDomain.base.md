@@ -15,37 +15,37 @@
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/6)</span><span class="nav">←</span><label class="nav" for="OrderService-2">→</label></div>
+<div class="head"><span class="name">1/6단계: 사용 상황</span><span class="nav">←</span><label class="nav" for="OrderService-2">→</label></div>
 
 </div>
 
 <div class="stage s2">
 
-<div class="head"><span class="name">2단계: 윤곽 (2/6)</span><label class="nav" for="OrderService-1">←</label><label class="nav" for="OrderService-3">→</label></div>
+<div class="head"><span class="name">2/6단계: 윤곽</span><label class="nav" for="OrderService-1">←</label><label class="nav" for="OrderService-3">→</label></div>
 
 </div>
 
 <div class="stage s3">
 
-<div class="head"><span class="name">3단계: 펼치기 1/4 — 주문 하나를 처리해 영수증을 돌려준다. (3/6)</span><label class="nav" for="OrderService-2">←</label><label class="nav" for="OrderService-4">→</label></div>
+<div class="head"><span class="name">3/6단계: 펼치기 — 1. 주문 하나를 처리해 영수증을 돌려준다.</span><label class="nav" for="OrderService-2">←</label><label class="nav" for="OrderService-4">→</label></div>
 
 </div>
 
 <div class="stage s4">
 
-<div class="head"><span class="name">4단계: 펼치기 2/4 — 재고를 잡은 다음 결제를 청구한다. (4/6)</span><label class="nav" for="OrderService-3">←</label><label class="nav" for="OrderService-5">→</label></div>
+<div class="head"><span class="name">4/6단계: 펼치기 — 2. 재고를 잡은 다음 결제를 청구한다.</span><label class="nav" for="OrderService-3">←</label><label class="nav" for="OrderService-5">→</label></div>
 
 </div>
 
 <div class="stage s5">
 
-<div class="head"><span class="name">5단계: 펼치기 3/4 — 처리한 주문을 감사 기록에 남긴다. (5/6)</span><label class="nav" for="OrderService-4">←</label><label class="nav" for="OrderService-6">→</label></div>
+<div class="head"><span class="name">5/6단계: 펼치기 — 3. 처리한 주문을 감사 기록에 남긴다.</span><label class="nav" for="OrderService-4">←</label><label class="nav" for="OrderService-6">→</label></div>
 
 </div>
 
 <div class="stage s6">
 
-<div class="head"><span class="name">6단계: 펼치기 4/4 — 주문 줄의 가격이 올바른지 따로 확인한다. (6/6)</span><label class="nav" for="OrderService-5">←</label><span class="nav">→</span></div>
+<div class="head"><span class="name">6/6단계: 펼치기 — 4. 주문 줄의 가격이 올바른지 따로 확인한다.</span><label class="nav" for="OrderService-5">←</label><span class="nav">→</span></div>
 
 </div>
 
@@ -217,13 +217,13 @@ class OrderService(
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="Validator-2">→</label></div>
+<div class="head"><span class="name">1/2단계: 사용 상황</span><span class="nav">←</span><label class="nav" for="Validator-2">→</label></div>
 
 </div>
 
 <div class="stage s2">
 
-<div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="Validator-1">←</label><span class="nav">→</span></div>
+<div class="head"><span class="name">2/2단계: 원본</span><label class="nav" for="Validator-1">←</label><span class="nav">→</span></div>
 
 </div>
 
@@ -267,25 +267,25 @@ class OrderService(
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/4)</span><span class="nav">←</span><label class="nav" for="InventoryRepository-2">→</label></div>
+<div class="head"><span class="name">1/4단계: 사용 상황</span><span class="nav">←</span><label class="nav" for="InventoryRepository-2">→</label></div>
 
 </div>
 
 <div class="stage s2">
 
-<div class="head"><span class="name">2단계: 윤곽 (2/4)</span><label class="nav" for="InventoryRepository-1">←</label><label class="nav" for="InventoryRepository-3">→</label></div>
+<div class="head"><span class="name">2/4단계: 윤곽</span><label class="nav" for="InventoryRepository-1">←</label><label class="nav" for="InventoryRepository-3">→</label></div>
 
 </div>
 
 <div class="stage s3">
 
-<div class="head"><span class="name">3단계: 펼치기 1/2 — 잘못된 주문 번호를 오류로 알린다. (3/4)</span><label class="nav" for="InventoryRepository-2">←</label><label class="nav" for="InventoryRepository-4">→</label></div>
+<div class="head"><span class="name">3/4단계: 펼치기 — 1. 잘못된 주문 번호를 오류로 알린다.</span><label class="nav" for="InventoryRepository-2">←</label><label class="nav" for="InventoryRepository-4">→</label></div>
 
 </div>
 
 <div class="stage s4">
 
-<div class="head"><span class="name">4단계: 펼치기 2/2 — 주문 번호를 예약 목록에 남긴다. (4/4)</span><label class="nav" for="InventoryRepository-3">←</label><span class="nav">→</span></div>
+<div class="head"><span class="name">4/4단계: 펼치기 — 2. 주문 번호를 예약 목록에 남긴다.</span><label class="nav" for="InventoryRepository-3">←</label><span class="nav">→</span></div>
 
 </div>
 

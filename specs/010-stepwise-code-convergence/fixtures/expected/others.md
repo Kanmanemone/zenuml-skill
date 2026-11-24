@@ -14,7 +14,7 @@
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
+<div class="head"><span class="name">1/1단계: 사용 상황</span><span class="nav">←</span><span class="nav">→</span></div>
 
 </div>
 
@@ -39,13 +39,13 @@
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="LegacyBridge-2">→</label></div>
+<div class="head"><span class="name">1/2단계: 사용 상황</span><span class="nav">←</span><label class="nav" for="LegacyBridge-2">→</label></div>
 
 </div>
 
 <div class="stage s2">
 
-<div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="LegacyBridge-1">←</label><span class="nav">→</span></div>
+<div class="head"><span class="name">2/2단계: 원본</span><label class="nav" for="LegacyBridge-1">←</label><span class="nav">→</span></div>
 
 </div>
 
@@ -86,13 +86,13 @@ class LegacyBridge {
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/2)</span><span class="nav">←</span><label class="nav" for="formatTotal-2">→</label></div>
+<div class="head"><span class="name">1/2단계: 사용 상황</span><span class="nav">←</span><label class="nav" for="formatTotal-2">→</label></div>
 
 </div>
 
 <div class="stage s2">
 
-<div class="head"><span class="name">2단계: 원본 (2/2)</span><label class="nav" for="formatTotal-1">←</label><span class="nav">→</span></div>
+<div class="head"><span class="name">2/2단계: 원본</span><label class="nav" for="formatTotal-1">←</label><span class="nav">→</span></div>
 
 </div>
 
@@ -134,7 +134,7 @@ fun formatTotal(total: BigDecimal): String =
 
 <div class="stage s1">
 
-<div class="head"><span class="name">1단계: 사용 상황 (1/1)</span><span class="nav">←</span><span class="nav">→</span></div>
+<div class="head"><span class="name">1/1단계: 사용 상황</span><span class="nav">←</span><span class="nav">→</span></div>
 
 </div>
 
