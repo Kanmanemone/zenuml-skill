@@ -633,9 +633,10 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 
 **Independent Test**: `python specs/003-architecture-view-skill/test_build_diagram.py`와 quickstart.md 시나리오 30
 
-- [ ] T177 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`에 링크 글자색 테스트를 더한다: `link_style="plain"`이면 config의 `themeCSS`에 규칙이 한 번 있고, `"link"`면 지금 출력과 같으며, 두 출력의 config 줄 밖이 같다. 구현 전에 실패하는지 본다 per FR-046, SC-021
-- [ ] T178 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`에 enum `dependency.linkStyle`(`plain`·`link`, tokenImpact 두 값 `[0]`, 한국어 주석)를 `faintNonUsageEdges` 다음에 더한다. 설정 파일 전체를 검사하는 기존 테스트가 있으면 함께 맞춘다 per 007 FR-012g, Constitution IV
-- [ ] T179 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`에 `LINK_STYLE`, `--link-style=` 처리, `build`의 `link_style` 인자를 plan대로 더한다. `SKILL.md` "Saving" 2단계의 명령줄 목록에 `--link-style=<plain|link>`를 더한다 per FR-046, 007 FR-012g
-- [ ] T180 [US1] 003·007·009·010 테스트를 실행한다. swemo `C:\prj\swemo\.zenuml\drag-reorder-commit-change.architecture.md`의 config를 `linkStyle: plain`의 출력과 같게 맞추고, 사용자가 미리보기에서 확인할 수 있게 링크를 알린다 per SC-021
+- [X] T177 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`에 링크 글자색 테스트를 더한다: `link_style="plain"`이면 config의 `themeCSS`에 규칙이 한 번 있고, `"link"`면 지금 출력과 같으며, 두 출력의 config 줄 밖이 같다. 구현 전에 실패하는지 본다 per FR-046, SC-021
+- [X] T178 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`에 enum `dependency.linkStyle`(`plain`·`link`, tokenImpact 두 값 `[0]`, 한국어 주석)를 `faintNonUsageEdges` 다음에 더한다. 설정 파일 전체를 검사하는 기존 테스트가 있으면 함께 맞춘다 per 007 FR-012g, Constitution IV
+- [X] T179 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`에 `LINK_STYLE`, `--link-style=` 처리, `build`의 `link_style` 인자를 plan대로 더한다. `SKILL.md` "Saving" 2단계의 명령줄 목록에 `--link-style=<plain|link>`를 더한다 per FR-046, 007 FR-012g
+- [X] T180 [US1] 003·007·009·010 테스트를 실행한다. swemo `C:\prj\swemo\.zenuml\drag-reorder-commit-change.architecture.md`의 config를 `linkStyle: plain`의 출력과 같게 맞추고, 사용자가 미리보기에서 확인할 수 있게 링크를 알린다 per SC-021
+  - 001·002·003·010 테스트가 통과했다(007·009는 따로 된 테스트 파일이 없고 003 테스트가 설정 파일을 검사한다). 새 테스트 2개는 고치기 전에 실패했다. swemo 구조 뷰는 config 블록이 이미 있어 `build_diagram.py`를 다시 돌릴 수 없으므로, 그 `themeCSS` 줄이 스크립트의 `link` 출력과 같음을 확인한 뒤 `text` 출력으로 바꿨다. 미리보기 확인은 사용자가 한다. 바꾼 swemo 구조 뷰를 PNG로 렌더링해 링크 노드에 평소 밑줄이 없고 다른 노드와 글자색이 같음을 확인했다.
 
 **Dependencies**: T177 → T178 → T179 → T180.

@@ -127,6 +127,20 @@
       }
     },
     {
+      "key": "dependency.linkStyle",
+      "type": "enum",
+      "values": [
+        "plain",
+        "link"
+      ],
+      "default": "plain",
+      "description": "Dependency에서 링크가 있는 노드 이름의 모양 (글자색·밑줄, 눌러서 여는 동작은 그대로)",
+      "tokenImpact": {
+        "plain": "[0]",
+        "link": "[0]"
+      }
+    },
+    {
       "key": "log.directory",
       "type": "relativePath",
       "base": "projectRoot",

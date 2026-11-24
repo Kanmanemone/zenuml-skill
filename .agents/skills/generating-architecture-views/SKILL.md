@@ -186,8 +186,9 @@ For a completed view, in this order:
 
 1. Write `.zenuml/<slug>.architecture.md`.
 2. Run `build_diagram.py <view>`; add `--layout=<value>` only when this request
-   names a renderer, and `--file-extensions=<true|false>` or
-   `--faint-edges=<true|false>` only for a value this request states. On failure, keep the basic view and report the prescribed
+   names a renderer, and `--file-extensions=<true|false>`,
+   `--faint-edges=<true|false>`, or `--link-style=<plain|link>` only for a value
+   this request states. On failure, keep the basic view and report the prescribed
    `⚙️ 다이어그램 서식 건너뜀: <reason>` line.
 3. Write the relevant request turns, lightly edited, to a temporary UTF-8 text
    file. Resolve the log as `<log.directory>/<slug>.architecture.md`

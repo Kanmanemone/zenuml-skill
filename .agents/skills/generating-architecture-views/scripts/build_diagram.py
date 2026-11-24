@@ -13,12 +13,13 @@ their file name) and, for a node that is the file itself, drops the extension wh
 dependency.nodeNameFormat.fileExtensions is false. When dependency.faintNonUsageEdges is on, an edge
 whose label is exactly 생성, 전달, or 타입 참조 (a non-usage dependency) gets a faint edge class in its
 source color, is written before the solid edges so it is drawn beneath them, and adds one legend line.
+When dependency.linkStyle is plain, the config's themeCSS makes linked node names keep the text color, without the resting underline.
 
 Usage: python3 build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<renderer>]
-       [--file-extensions=true|false] [--faint-edges=true|false]
+       [--file-extensions=true|false] [--faint-edges=true|false] [--link-style=plain|link]
 --layout is a renderer the request itself names; otherwise the dependency.renderer setting
-decides (`elk` -> layout: elk, `default` -> no layout line). --file-extensions and --faint-edges
-are values the request itself states; otherwise settings.jsonc decides.
+decides (`elk` -> layout: elk, `default` -> no layout line). --file-extensions, --faint-edges, and
+--link-style are values the request itself states; otherwise settings.jsonc decides.
 Requires Python 3.9+, standard library only. Exits non-zero (file untouched) on any problem.
 """
 
@@ -61,7 +62,11 @@ NODE = re.compile(r"^\s*([A-Za-z_]\w*)")
 DECL = re.compile(r'^(\s*)(\w+)(?:@\{\s*label:\s*"(.*)"\s*\}|\["(.*)"\])?\s*$')
 FILE_EXTENSIONS = "dependency.nodeNameFormat.fileExtensions"
 FAINT_EDGES = "dependency.faintNonUsageEdges"
-FLAGS = {"--file-extensions=": FILE_EXTENSIONS, "--faint-edges=": FAINT_EDGES}
+LINK_STYLE = "dependency.linkStyle"
+FLAGS = {"--file-extensions=": FILE_EXTENSIONS, "--faint-edges=": FAINT_EDGES, "--link-style=": LINK_STYLE}
+# link text inherits the node text color and drops the link underline, so a linked name looks like
+# any other; the hover underline (009) sits on the outer .nodeLabel and still shows (003 FR-046)
+LINK_RULE = " .node a, .node a:hover { color: inherit !important; text-decoration: none !important; }"
 FAINT_LABELS = {"생성", "전달", "타입 참조"}
 FAINT_LEGEND = "옅은 선: 사용 외 의존 (생성·전달)"
 STRUCTURE = re.compile(r"^\s*(subgraph\b|end\s*$|direction\b|flowchart\b|%%)")
@@ -105,7 +110,7 @@ def label_sources(declarations, clicks, file_extensions):
     return out, marked
 
 
-def build(fence_lines, layout, file_extensions=True, faint_edges=False):
+def build(fence_lines, layout, file_extensions=True, faint_edges=False, link_style="link"):
     """fence_lines: the lines between ```mermaid and ```. Returns the completed lines."""
     if any(re.search(r"\be\d+@-->", line) for line in fence_lines):
         raise BuildError("다이어그램에 이미 엣지 ID가 있음")
@@ -140,6 +145,8 @@ def build(fence_lines, layout, file_extensions=True, faint_edges=False):
 
     faint = {i for i, edge in enumerate(edges) if faint_edges and edge[2].strip() in FAINT_LABELS}
     out = [("  layout: " + layout if c == "{layout}" else c) for c in CONFIG if c != "{layout}" or layout]
+    if link_style == "plain":
+        out = [c[:-1] + LINK_RULE + '"' if c.startswith("  themeCSS:") else c for c in out]
     if faint:  # keeps the legend line on one line (text nodes wrap at about 200px)
         out.insert(out.index("    curve: basis") + 1, "    wrappingWidth: 400")
     out += declarations + ["", "  %% ---- 엣지 ----"]
@@ -198,7 +205,7 @@ def main():
                 args.remove(arg)
     if len(args) != 1:
         print("usage: build_diagram.py <.zenuml/<slug>.architecture.md> [--layout=<renderer>]"
-              " [--file-extensions=true|false] [--faint-edges=true|false]", file=sys.stderr)
+              " [--file-extensions=true|false] [--faint-edges=true|false] [--link-style=plain|link]", file=sys.stderr)
         return 2
     path = Path(args[0])
     if layout is None:
@@ -210,7 +217,7 @@ def main():
         start = lines.index("### Dependency")
         open_i = next(i for i in range(start, len(lines)) if lines[i].strip() == "```mermaid")
         close_i = next(i for i in range(open_i + 1, len(lines)) if lines[i].strip() == "```")
-        built = build(lines[open_i + 1:close_i], layout, values[FILE_EXTENSIONS], values[FAINT_EDGES])
+        built = build(lines[open_i + 1:close_i], layout, values[FILE_EXTENSIONS], values[FAINT_EDGES], values[LINK_STYLE])
     except (OSError, ValueError, StopIteration, BuildError) as e:
         print("다이어그램 서식 실패: " + str(e), file=sys.stderr)
         return 1

@@ -78,6 +78,29 @@ class FaintEdgeTest(unittest.TestCase):
                          dependency["faintNonUsageEdges"])
 
 
+LINK_RULE = " .node a, .node a:hover { color: inherit !important; text-decoration: none !important; }"
+
+
+class LinkColorTest(unittest.TestCase):
+    def test_text_adds_one_inherit_rule_and_link_keeps_previous_output(self):
+        previous = build(BASE, "")
+        self.assertEqual(previous, build(BASE, "", link_style="link"))
+        self.assertFalse(any(LINK_RULE in line for line in previous))
+        text = build(BASE, "", link_style="plain")
+        self.assertEqual(1, sum(line.count(LINK_RULE) for line in text))
+        theme = next(line for line in text if line.startswith("  themeCSS:"))
+        self.assertTrue(theme.endswith(LINK_RULE + '"'))  # inside the quoted CSS string
+        self.assertEqual([l for l in previous if not l.startswith("  themeCSS:")],
+                         [l for l in text if not l.startswith("  themeCSS:")])
+
+    def test_shipped_setting_matches_schema_default(self):
+        skill_dir = SCRIPT_DIR.parent
+        dependency = json.loads(strip_json_comments(
+            (skill_dir / "settings.jsonc").read_text(encoding="utf-8")
+        ))["dependency"]
+        self.assertEqual(schema_defaults(skill_dir)["dependency.linkStyle"], dependency["linkStyle"])
+
+
 class NodeNameFormatSettingsTest(unittest.TestCase):
     def test_shipped_settings_and_defaults_use_one_format_family(self):
         skill_dir = SCRIPT_DIR.parent
