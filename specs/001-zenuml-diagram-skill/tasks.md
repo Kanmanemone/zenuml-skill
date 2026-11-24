@@ -216,3 +216,14 @@ Task: "SKILL.md 뼈대(frontmatter + 섹션 헤딩) 작성"
 ## Phase 12: Convergence
 
 - [X] T030 `specs/001-zenuml-diagram-skill/contracts/skill-interface.md`의 파일 내용 계약과 `data-model.md` AP-6에 FR-016 스타일 블록을 더한다 per FR-012 (contradicts)
+
+## Phase 13: 주석 왼쪽 여백 (FR-016, 2026-11-24)
+
+**Goal**: 조건 블록 안 주석을 조건식과 같은 간격만큼 왼쪽 테두리에서 띄운다.
+
+**Independent Test**: swemo `[11-5] reorder-expected-index-scenario.md`에 스타일을 다시 붙여 VS Code 미리보기에서 주석과 조건식의 왼쪽 간격이 같은지 본다.
+
+- [ ] T031 `.agents/skills/generating-zenuml-diagrams/scripts/apply_style.py`의 `BLOCK` `.comment-text` 규칙에 `transform: translateX(6px)`를 더한다 per FR-016
+- [ ] T032 `test_apply_style.py`를 실행하고 swemo 파일에 스타일을 다시 붙여 Independent Test대로 확인한다 per FR-016
+
+**Dependencies**: T031 → T032.
