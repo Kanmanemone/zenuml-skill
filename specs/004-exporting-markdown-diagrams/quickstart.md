@@ -165,6 +165,12 @@
 | 렌더러 지정 보존 | PASS | 원본 `layout: elk`를 수정 없이 넘김 |
 
 
+## 시나리오 16 — 의존성 자동 설치 (FR-025·026, SC-016)
+
+1. 스킬 폴더를 `node_modules` 없이 임시 폴더에 복사하고, README 설치 명령에 더한 `npm ci … --prefix <scripts>` 줄을 그대로 실행한다. 설치가 끝나면 `export-document-png.js`로 대표 Markdown을 PNG로 내보낸다.
+2. npm이 없는 PATH로 같은 줄을 실행하면 아무 출력 없이 건너뛴다.
+3. 에이전트 흐름: `node_modules`가 없는 복사본에서 PNG 내보내기를 요청하면 질문 없이 설치·내보내기가 끝난다(SC-016).
+
 ## Validation Results (T049, 2026-11-23)
 
 - swemo `drag-reorder-iteration-11-4.architecture.md`를 다이어그램 PNG로 내보냄.

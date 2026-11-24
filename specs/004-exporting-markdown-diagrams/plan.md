@@ -104,6 +104,15 @@ specs/004-exporting-markdown-diagrams/
 
 **Constitution Check (2026-11-23)**: I — 한 파일, 함수 하나와 반복문 하나. 구조 뷰 전용 처리 없이 문서 style을 그대로 옮긴다. II — 004 개정. III — 요구사항 변경. IV — 해당 없음. 위반 없음.
 
+## 2026-11-24 의존성 설치 계획 (FR-025·026, SC-016)
+
+- **`SKILL.md` "Workflow"**: 설정을 읽기 전 첫 단계로, `scripts/node_modules`가 없으면 `scripts/`에서 `npm ci --no-audit --no-fund`를 묻지 않고 실행한다. 내보내기 스크립트가 `ERR_MODULE_NOT_FOUND`로 실패하면(설치가 중간에 끊긴 경우) 같은 명령을 한 번 실행하고 다시 시도한다. 전역 설치(`-g`)나 다른 폴더 설치는 하지 않는다.
+- **`SKILL.md` "Failures"**: 설치가 실패하면 내보내기를 멈추고 `⚙️ 의존성 설치 실패: <이유>` 한 줄로 알린다.
+- **README(영어·한국어) 설치 명령 1(전체)·4(이 스킬)**: macOS/Linux와 PowerShell 둘 다, 설치 반복문 뒤에 "이 스킬 폴더가 있고 npm이 있으면 `npm ci --no-audit --no-fund --prefix .agents/skills/exporting-markdown-diagrams/scripts`" 한 줄을 더한다. npm이 없으면 조용히 건너뛴다. "추가 기능"의 `npm install` 안내와 "업데이트 뒤 다시 `npm install`" 안내는 자동 설치를 말하는 문장으로 바꾼다.
+- 스크립트(`*.js`)와 `package.json`·`package-lock.json`은 바꾸지 않는다. `npm ci`는 lock 파일 그대로 설치하므로 FR-017이 유지된다. `mmdc`의 `npx` 대체 경로도 그대로 둔다.
+
+**Constitution Check (2026-11-24)**: I — 새 코드 없이 지침 두 줄과 설치 명령 한 줄이다. 의존성 감지를 스크립트로 만들지 않은 것은 폴더 존재 확인과 실패 시 한 번 재시도로 충분해서다. II — 004를 개정한다. III — 새 요구사항이다. IV — 설정이 없다. 위반 없음.
+
 ## Complexity Tracking
 
 *No constitution violations to justify — Constitution Check is N/A (no ratified constitution). This section is intentionally empty.*
