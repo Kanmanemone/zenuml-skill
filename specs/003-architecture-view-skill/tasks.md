@@ -626,3 +626,16 @@ Task: "references/templates.md에 Components & Dependencies, Responsibility 템�
 ## Phase 50: Convergence
 
 - [X] T176 `.agents/skills/generating-architecture-views/SKILL.md` 판단 질문 ②에 사용 의존 간선이 세 라벨 중 하나만으로 된 라벨을 쓰지 않는다는 구절을 되살린다 per FR-043 (partial)
+
+## Phase 51: 링크 노드 글자색 (FR-046, SC-021, 007 FR-012g·SC-012)
+
+**Goal**: 링크가 있는 노드 이름을 기본으로 원래 글자색에 평소 밑줄 없이 보이고, `dependency.linkStyle`로 링크 모양을 고를 수 있게 한다(plan "2026-11-24 링크 노드 글자색 계획").
+
+**Independent Test**: `python specs/003-architecture-view-skill/test_build_diagram.py`와 quickstart.md 시나리오 30
+
+- [ ] T177 [US1] `specs/003-architecture-view-skill/test_build_diagram.py`에 링크 글자색 테스트를 더한다: `link_style="plain"`이면 config의 `themeCSS`에 규칙이 한 번 있고, `"link"`면 지금 출력과 같으며, 두 출력의 config 줄 밖이 같다. 구현 전에 실패하는지 본다 per FR-046, SC-021
+- [ ] T178 [US1] `.agents/skills/generating-architecture-views/settings.schema.json`과 `settings.jsonc`에 enum `dependency.linkStyle`(`plain`·`link`, tokenImpact 두 값 `[0]`, 한국어 주석)를 `faintNonUsageEdges` 다음에 더한다. 설정 파일 전체를 검사하는 기존 테스트가 있으면 함께 맞춘다 per 007 FR-012g, Constitution IV
+- [ ] T179 [US1] `.agents/skills/generating-architecture-views/scripts/build_diagram.py`에 `LINK_STYLE`, `--link-style=` 처리, `build`의 `link_style` 인자를 plan대로 더한다. `SKILL.md` "Saving" 2단계의 명령줄 목록에 `--link-style=<plain|link>`를 더한다 per FR-046, 007 FR-012g
+- [ ] T180 [US1] 003·007·009·010 테스트를 실행한다. swemo `C:\prj\swemo\.zenuml\drag-reorder-commit-change.architecture.md`의 config를 `linkStyle: plain`의 출력과 같게 맞추고, 사용자가 미리보기에서 확인할 수 있게 링크를 알린다 per SC-021
+
+**Dependencies**: T177 → T178 → T179 → T180.
