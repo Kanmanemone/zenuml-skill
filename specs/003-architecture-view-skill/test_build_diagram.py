@@ -266,5 +266,9 @@ class SourceFileTagTest(unittest.TestCase):
         self.assertIn("Memo 책임", memo)
         self.assertNotIn("Memo 책임", file_node)
 
+    def test_body_name_with_parentheses_matches_function_node(self):
+        out = self._panels(['  drag@{ label: "drag()" }', "  Repo", "", "  drag -->|호출| Repo"], ["drag()", "Repo"])
+        self.assertIn("drag() 책임", next(l for l in out.splitlines() if l.strip().startswith("click drag ")))
+
 if __name__ == "__main__":
     unittest.main()

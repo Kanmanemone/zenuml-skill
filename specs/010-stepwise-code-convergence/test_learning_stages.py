@@ -126,6 +126,11 @@ class Definition(unittest.TestCase):
         }
         self.assertEqual({label: s.clean_name(label) for label in cases}, cases)
 
+    def test_body_name_written_like_the_node_label_still_gets_its_sentence(self):
+        lines = ['#### 요소의 책임', '- <strong>[drag()](../a/Item.kt)</strong>, <strong>reorder()</strong>',
+                 '  - <strong>책임 (추상)</strong>: 끌기를 처리한다']
+        self.assertEqual({'drag': '끌기를 처리한다', 'reorder': '끌기를 처리한다'}, s.parse_responsibilities(lines))
+
 
 class Declarations(unittest.TestCase):
     def test_extension_declarations_are_found_by_name_not_receiver(self):

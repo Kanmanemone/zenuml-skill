@@ -9,6 +9,8 @@ Format (spec FR-011, FR-012; data-model.md "NodePanel"):
 
 import re
 
+from .view_parser import clean_name
+
 RESPONSIBILITY_LABELS = {"abstract": "책임 (추상)", "concrete": "역할 (구체)"}
 DETAIL_LABELS = {
     "boundary": "책임의 경계",
@@ -62,7 +64,8 @@ class PanelBuilder:
                 self.by_name.setdefault(stem, node.id)
 
     def node_id(self, name):
-        return self.by_name.get(name)
+        # body names follow the node-label rule too, so `drag()` finds the `drag()` node
+        return self.by_name.get(clean_name(name))
 
     # -- Responsibility ------------------------------------------------------------
 

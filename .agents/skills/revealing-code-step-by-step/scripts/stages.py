@@ -348,7 +348,7 @@ def parse_responsibilities(lines):
         m = re.match(r"\s+- <strong>책임 \(추상\)</strong>:\s*(.*)", line)
         if m and m.group(1) and not m.group(1).startswith("설명에 명시되지 않음"):
             for name in names:
-                found[name] = m.group(1).strip()
+                found[clean_name(name)] = m.group(1).strip()  # same rule as node names, so `drag()` finds `drag`
     return found
 
 
