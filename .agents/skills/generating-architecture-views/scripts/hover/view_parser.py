@@ -136,7 +136,7 @@ def _parse_fence(lines, start, end):
         if m:
             label = m.group(2).strip()
             if len(label) >= 2 and label[0] == label[-1] == '"':
-                label = label[1:-1]  # build_diagram quotes a label that starts with `@`
+                label = label[1:-1].replace("#quot;", '"')  # build_diagram quotes every label
             edges.append(Edge(m.group(1), m.group(3), label))
             continue
         m = _CLASS.match(raw)

@@ -4,8 +4,9 @@
 The skill writes only the basic diagram: `flowchart LR`, node/group declarations, edges as
 `Source -->|관계| Target`, `class <Id> crud*` lines for change marks, and `click` lines. This
 script adds what follows from rules alone (references/templates.md, "Dependency template"):
-the YAML config block (with `layout`), edge IDs `eN@`, one color class per node and one edge
-class per source node (six Okabe-Ito colors in node declaration order, cycling), the four
+the YAML config block (with `layout`), edge IDs `eN@`, double quotes around every edge label,
+one color class per node and one edge class per source node (six Okabe-Ito colors in node
+declaration order, cycling), the four
 section comments, the label-convention comment, the three `classDef crud*` lines, and the
 three-line change-mark explanation when any CRUD class is used. From each `click` target it
 marks linked nodes that are not the file itself with `class … srcFile` (apply_hover.py draws
@@ -120,7 +121,11 @@ def build(fence_lines, layout, file_extensions=True, faint_edges=False, link_sty
         stripped = line.strip()
         match = EDGE.match(line)
         if match:
-            edges.append(match.groups())
+            indent, source, label, target = match.groups()
+            label = label.strip()
+            if len(label) >= 2 and label[0] == label[-1] == '"':
+                label = label[1:-1]  # the skill quoted it itself; build() quotes every label once
+            edges.append((indent, source, label, target))
             edge_nodes += [match.group(2), match.group(4)]
         elif CRUD_CLASS.match(line):
             crud.append(line)
@@ -154,8 +159,8 @@ def build(fence_lines, layout, file_extensions=True, faint_edges=False, link_sty
     # faint edges first: SVG draws later elements on top, so they lie beneath the solid ones
     for i in sorted(range(len(edges)), key=lambda i: i not in faint):
         indent, source, label, target = edges[i]
-        if label.strip().startswith("@"):
-            label = '"' + label.strip() + '"'  # mermaid 12.2 cannot parse an edge text that starts with `@`
+        # always quoted: unquoted, mermaid fails on `@` `(` `[` `{` `"` and maybe more; quoted, on none
+        label = '"' + label.replace('"', "#quot;") + '"'
         out.append("  " + source + " e" + str(i) + "@-->|" + label + "| " + target)
         by_source.setdefault(source, []).append(i)
     out += ["", "  %% ---- 노드 스타일 ----"]

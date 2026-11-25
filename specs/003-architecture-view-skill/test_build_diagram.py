@@ -39,12 +39,21 @@ FAINT = ["flowchart LR", "  A", "  B", "  C", "", "  A -->|호출| B", "  A -->|
 FAINT_LINE = "옅은 간선: 사용 외 의존 (생성·전달 등)"
 
 
+class EdgeLabelTest(unittest.TestCase):
+    def test_every_label_is_quoted_once_with_inner_quotes_as_entities(self):
+        lines = ["flowchart LR", "  A", "  B", "", "  A -->|reorder()보다 먼저| B", '  A -->| "생성" | B',
+                 '  B -->|"a" 값| A']
+        edges = [line for line in build(lines, "", faint_edges=True) if "@-->" in line]
+        self.assertEqual(['  A e1@-->|"생성"| B', '  A e0@-->|"reorder()보다 먼저"| B',
+                          '  B e2@-->|"#quot;a#quot; 값"| A'], edges)
+
+
 class FaintEdgeTest(unittest.TestCase):
     def test_only_exact_non_usage_labels_are_faint_and_drawn_first(self):
         out = build(FAINT, "", faint_edges=True)
         edges = [line for line in out if "@-->" in line]
-        self.assertEqual(["  A e1@-->|생성| C", "  C e3@-->|타입 참조| B",
-                          "  A e0@-->|호출| B", "  B e2@-->|생성·호출| C"], edges)
+        self.assertEqual(['  A e1@-->|"생성"| C', '  C e3@-->|"타입 참조"| B',
+                          '  A e0@-->|"호출"| B', '  B e2@-->|"생성·호출"| C'], edges)
         self.assertIn("  classDef aFaint stroke:#E69F004D,stroke-width:3px,color:#E69F0080", out)
         self.assertEqual(out.index("  classDef aEdge stroke:#E69F00,stroke-width:3.5px") + 1,
                          out.index("  classDef aFaint stroke:#E69F004D,stroke-width:3px,color:#E69F0080"))
@@ -265,6 +274,13 @@ class SourceFileTagTest(unittest.TestCase):
         file_node = next(l for l in out.splitlines() if l.strip().startswith("click Memo_kt "))
         self.assertIn("Memo 책임", memo)
         self.assertNotIn("Memo 책임", file_node)
+
+    def test_hover_relation_shows_the_label_as_written(self):
+        diagram = build(["flowchart LR", "  A", "  B", "", '  A -->|"x" 반환| B'], "")
+        text = ("### Dependency\n\n```mermaid\n" + "\n".join(diagram) + "\n```\n\n### Collaboration\n\n"
+                "#### 요소 간 비교\n\n- <strong>A</strong>는 <strong>B</strong>에 의존한다.\n")
+        out = self._hover(text, **{"hover.enabled": True})
+        self.assertIn("B에 의존한다 (&quot;x&quot; 반환)", out)  # quotes come back, not `#quot;`
 
     def test_body_name_with_parentheses_matches_function_node(self):
         out = self._panels(['  drag@{ label: "drag()" }', "  Repo", "", "  drag -->|호출| Repo"], ["drag()", "Repo"])
