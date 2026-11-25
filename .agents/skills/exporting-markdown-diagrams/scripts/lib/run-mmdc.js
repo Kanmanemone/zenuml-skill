@@ -22,9 +22,14 @@ const THEME_CONFIGS = {
   "mermaid-default": null,
 };
 
-/** Entry scripts read their positional arguments from this, so `--theme=` is never one. */
+/**
+ * Entry scripts read their positional arguments from this, so `--theme=` is never one.
+ * On Windows a Git Bash path `/c/x` becomes `c:/x`: Git Bash leaves an argument holding `[` unconverted.
+ */
 export function withoutThemeFlag(args) {
-  return args.filter((arg) => !arg.startsWith(THEME_FLAG));
+  return args
+    .filter((arg) => !arg.startsWith(THEME_FLAG))
+    .map((arg) => (process.platform === "win32" ? arg.replace(/^\/([a-zA-Z])\//, "$1:/") : arg));
 }
 
 function themeArgs() {
